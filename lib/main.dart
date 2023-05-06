@@ -13,7 +13,20 @@ class GoalKeeper extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.indigo,
+        canvasColor: Colors.indigo[50],
+        inputDecorationTheme: const InputDecorationTheme(
+          fillColor: Colors.white,
+          filled: true,
+          border: OutlineInputBorder(),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.indigo,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.grey,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+        ),
       ),
       home: const LandingPage(title: 'GoalKeeper'),
     );
