@@ -22,12 +22,12 @@ class _GameSetupState extends State<GameSetup> {
   String? ground;
   String? division;
 
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey _formKey = GlobalKey<FormState>();
   final TextEditingController _homeTeamController = TextEditingController();
   final TextEditingController _awayTeamController = TextEditingController();
   final TextEditingController _groundController = TextEditingController();
   final TextEditingController _divisionController = TextEditingController();
-  final dateController = TextEditingController(
+  final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
 
@@ -35,7 +35,6 @@ class _GameSetupState extends State<GameSetup> {
     setState(() {
       homeTeam = teamName;
     });
-    // Update the text field's controller with the selected team name
     _homeTeamController.text = teamName;
   }
 
@@ -43,7 +42,6 @@ class _GameSetupState extends State<GameSetup> {
     setState(() {
       awayTeam = teamName;
     });
-    // Update the text field's controller with the selected team name
     _awayTeamController.text = teamName;
   }
 
@@ -51,7 +49,6 @@ class _GameSetupState extends State<GameSetup> {
     setState(() {
       ground = groundName;
     });
-    // Update the text field's controller with the selected team name
     _groundController.text = groundName;
   }
 
@@ -59,7 +56,6 @@ class _GameSetupState extends State<GameSetup> {
     setState(() {
       division = divisionName;
     });
-    // Update the text field's controller with the selected team name
     _divisionController.text = divisionName;
   }
 
@@ -71,7 +67,7 @@ class _GameSetupState extends State<GameSetup> {
 
   @override
   void dispose() {
-    dateController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -95,7 +91,7 @@ class _GameSetupState extends State<GameSetup> {
               const Spacer(flex: 1),
               TextField(
                 readOnly: true,
-                controller: dateController,
+                controller: _dateController,
                 decoration: const InputDecoration(
                   labelText: 'Game Date',
                 ),
@@ -112,12 +108,30 @@ class _GameSetupState extends State<GameSetup> {
                   if (pickedDate != null) {
                     // Update text field value when date is picked
                     setState(() {
-                      dateController.text =
+                      _dateController.text =
                           DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
                     });
                   }
                 },
               ),
+              const Spacer(flex: 1),
+              TextField(
+                  readOnly: true,
+                  controller: _divisionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Division',
+                  ),
+                  onTap: () async {
+                    ground = await Navigator.push<String>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DivisionList(
+                          title: 'Select Devision',
+                          onDivisionSelected: onDivisionSelected,
+                        ),
+                      ),
+                    );
+                  }),
               const Spacer(flex: 1),
               TextField(
                 readOnly: true,
@@ -165,24 +179,6 @@ class _GameSetupState extends State<GameSetup> {
                           builder: (context) => GroundList(
                               title: 'Select Ground',
                               onGroundSelected: onGroundSelected)),
-                    );
-                  }),
-              const Spacer(flex: 1),
-              TextField(
-                  readOnly: true,
-                  controller: _divisionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Division',
-                  ),
-                  onTap: () async {
-                    ground = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DivisionList(
-                          title: 'Select Devision',
-                          onDivisionSelected: onDivisionSelected,
-                        ),
-                      ),
                     );
                   }),
               const Spacer(flex: 1),
