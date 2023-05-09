@@ -4,6 +4,7 @@ import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
 import 'ground_list.dart';
 import 'division_list.dart';
+import 'scoring.dart';
 
 class GameSetup extends StatefulWidget {
   const GameSetup({Key? key, required this.title}) : super(key: key);
@@ -23,13 +24,13 @@ class _GameSetupState extends State<GameSetup> {
   String? division;
 
   final GlobalKey _formKey = GlobalKey<FormState>();
-  final TextEditingController _homeTeamController = TextEditingController();
-  final TextEditingController _awayTeamController = TextEditingController();
-  final TextEditingController _groundController = TextEditingController();
-  final TextEditingController _divisionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
+  final TextEditingController _divisionController = TextEditingController();
+  final TextEditingController _homeTeamController = TextEditingController();
+  final TextEditingController _awayTeamController = TextEditingController();
+  final TextEditingController _groundController = TextEditingController();
 
   void onHomeTeamSelected(String teamName) {
     setState(() {
@@ -68,6 +69,10 @@ class _GameSetupState extends State<GameSetup> {
   @override
   void dispose() {
     _dateController.dispose();
+    _homeTeamController.dispose();
+    _awayTeamController.dispose();
+    _groundController.dispose();
+    _divisionController.dispose();
     super.dispose();
   }
 
@@ -126,7 +131,7 @@ class _GameSetupState extends State<GameSetup> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DivisionList(
-                          title: 'Select Devision',
+                          title: 'Select Division',
                           onDivisionSelected: onDivisionSelected,
                         ),
                       ),
@@ -202,6 +207,7 @@ class _GameSetupState extends State<GameSetup> {
                     decrementIcon: const Icon(
                       Icons.remove,
                     ),
+                    showButtonText: false,
                     onCountChange: (count) {},
                     onIncrement: (count) {},
                     onDecrement: (count) {},
@@ -241,10 +247,15 @@ class _GameSetupState extends State<GameSetup> {
                     width: MediaQuery.of(context).size.width * 0.47,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle save button press
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Scoring(title: 'Scoring'),
+                          ),
+                        );
                       },
                       style: primaryButtonStyle,
-                      child: const Text('Save'),
+                      child: const Text('Start Scoring'),
                     ),
                   ),
                 ],
