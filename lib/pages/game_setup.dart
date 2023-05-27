@@ -23,7 +23,7 @@ class _GameSetupState extends State<GameSetup> {
   String? ground;
   String? division;
 
-  final GlobalKey _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
@@ -94,7 +94,7 @@ class _GameSetupState extends State<GameSetup> {
           child: Column(
             children: [
               const Spacer(flex: 1),
-              TextField(
+              TextFormField(
                 readOnly: true,
                 controller: _dateController,
                 decoration: const InputDecoration(
@@ -120,12 +120,18 @@ class _GameSetupState extends State<GameSetup> {
                 },
               ),
               const Spacer(flex: 1),
-              TextField(
+              TextFormField(
                   readOnly: true,
                   controller: _divisionController,
                   decoration: const InputDecoration(
                     labelText: 'Division',
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please select Division';
+                    }
+                    return null;
+                  },
                   onTap: () async {
                     ground = await Navigator.push<String>(
                       context,
@@ -138,12 +144,18 @@ class _GameSetupState extends State<GameSetup> {
                     );
                   }),
               const Spacer(flex: 1),
-              TextField(
+              TextFormField(
                 readOnly: true,
                 controller: _homeTeamController,
                 decoration: const InputDecoration(
                   labelText: 'Home Team',
                 ),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please select Home Team';
+                  }
+                  return null;
+                },
                 onTap: () async {
                   homeTeam = await Navigator.push<String>(
                     context,
@@ -155,12 +167,18 @@ class _GameSetupState extends State<GameSetup> {
                 },
               ),
               const Spacer(flex: 1),
-              TextField(
+              TextFormField(
                   readOnly: true,
                   controller: _awayTeamController,
                   decoration: const InputDecoration(
                     labelText: 'Away Team',
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please select Away Team';
+                    }
+                    return null;
+                  },
                   onTap: () async {
                     homeTeam = await Navigator.push<String>(
                       context,
@@ -171,12 +189,18 @@ class _GameSetupState extends State<GameSetup> {
                     );
                   }),
               const Spacer(flex: 1),
-              TextField(
+              TextFormField(
                   readOnly: true,
                   controller: _groundController,
                   decoration: const InputDecoration(
                     labelText: 'Ground',
                   ),
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please select Ground';
+                    }
+                    return null;
+                  },
                   onTap: () async {
                     ground = await Navigator.push<String>(
                       context,
@@ -247,12 +271,15 @@ class _GameSetupState extends State<GameSetup> {
                     width: MediaQuery.of(context).size.width * 0.47,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const Scoring(title: 'Scoring'),
-                          ),
-                        );
+                        if (_formKey.currentState!.validate()) {
+                          // Validation successful, navigate to scoring page
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const Scoring(title: 'Scoring'),
+                            ),
+                          );
+                        }
                       },
                       style: primaryButtonStyle,
                       child: const Text('Start Scoring'),

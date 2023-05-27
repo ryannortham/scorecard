@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'landing_page.dart';
+import 'pages/landing_page.dart';
 
 void main() {
   runApp(const GoalKeeper());
@@ -11,7 +11,7 @@ class GoalKeeper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'GoalKeeper',
       theme: ThemeData(
         primarySwatch: Colors.indigo,
         canvasColor: Colors.indigo[50],
