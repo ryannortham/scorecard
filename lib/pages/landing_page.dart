@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'game_setup.dart';
-import 'score_panel.dart';
+import 'scoring.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key, required this.title}) : super(key: key);
@@ -58,9 +58,7 @@ class _LandingPageState extends State<LandingPage> {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const ScorePanel(
-                        teamName: "testing",
-                      ),
+                      builder: (context) => const Scoring(title: 'Scoring'),
                     ),
                   );
                 },
