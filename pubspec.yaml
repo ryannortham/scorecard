@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   intl: ^0.17.0
   customizable_counter: ^1.0.4
+  provider: ^6.0.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
