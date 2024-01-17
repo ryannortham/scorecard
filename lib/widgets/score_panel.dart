@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/score_panel_state.dart';
 import 'score_counter.dart';
 
-class ScorePanel extends StatefulWidget {
+class ScorePanel extends StatelessWidget {
   final String teamName;
   final bool isHomeTeam;
 
@@ -13,55 +13,51 @@ class ScorePanel extends StatefulWidget {
     required this.isHomeTeam,
   }) : super(key: key);
 
-  @override
-  State<ScorePanel> createState() => _ScorePanelState();
-}
+  Widget _buildScoreCounter(
+      String label, bool isGoal, ScorePanelState scorePanelState) {
+    return ScoreCounter(
+      label: label,
+      isHomeTeam: isHomeTeam,
+      isGoal: isGoal,
+      scorePanelState: scorePanelState,
+    );
+  }
 
-class _ScorePanelState extends State<ScorePanel> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ScorePanelState>(
       builder: (context, scorePanelState, _) {
-        return Scaffold(
-          body: Column(
-            children: [
-              Container(
-                alignment: Alignment.center,
-                width: double.infinity,
-                height: 48,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                ),
+        return Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              height: 48,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+              ),
+              child: FittedBox(
                 child: Text(
-                  widget.teamName,
+                  teamName,
                   style: Theme.of(context).textTheme.headlineSmall,
                   overflow: TextOverflow.visible,
                 ),
               ),
-              Text(
-                "0",
-                style: Theme.of(context).textTheme.displayMedium,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ScoreCounter(
-                    label: 'Goals',
-                    isHomeTeam: widget.isHomeTeam,
-                    isGoal: true,
-                  ),
-                  ScoreCounter(
-                    label: 'Behinds',
-                    isHomeTeam: widget.isHomeTeam,
-                    isGoal: false,
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-            ],
-          ),
+            ),
+            Text(
+              isHomeTeam
+                  ? scorePanelState.homePoints.toString()
+                  : scorePanelState.awayPoints.toString(),
+              style: Theme.of(context).textTheme.displayMedium,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildScoreCounter('Goals', true, scorePanelState),
+                _buildScoreCounter('Behinds', false, scorePanelState),
+              ],
+            ),
+          ],
         );
       },
     );

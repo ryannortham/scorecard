@@ -14,23 +14,36 @@ class ScorePanelState extends ChangeNotifier {
   int get homePoints => _homeGoals * 6 + _homeBehinds;
   int get awayPoints => _awayGoals * 6 + _awayBehinds;
 
-  void setHomeGoals(int value) {
-    _homeGoals = value;
+  void setCount(bool isHomeTeam, bool isGoal, int count) {
+    if (isHomeTeam) {
+      if (isGoal) {
+        _homeGoals = count;
+      } else {
+        _homeBehinds = count;
+      }
+    } else {
+      if (isGoal) {
+        _awayGoals = count;
+      } else {
+        _awayBehinds = count;
+      }
+    }
     notifyListeners();
   }
 
-  void setHomeBehinds(int value) {
-    _homeBehinds = value;
-    notifyListeners();
-  }
-
-  void setAwayGoals(int value) {
-    _awayGoals = value;
-    notifyListeners();
-  }
-
-  void setAwayBehinds(int value) {
-    _awayBehinds = value;
-    notifyListeners();
+  int getCount(bool isHomeTeam, bool isGoal) {
+    if (isHomeTeam) {
+      if (isGoal) {
+        return _homeGoals;
+      } else {
+        return _homeBehinds;
+      }
+    } else {
+      if (isGoal) {
+        return _awayGoals;
+      } else {
+        return _awayBehinds;
+      }
+    }
   }
 }

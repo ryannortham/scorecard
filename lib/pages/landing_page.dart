@@ -11,13 +11,18 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
+  Widget _buildButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.75,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(text),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final primaryButtonStyle = ElevatedButton.styleFrom(
-      backgroundColor: Theme.of(context).primaryColor,
-      elevation: 0,
-    );
-
     return Scaffold(
       appBar: AppBar(),
       body: Center(
@@ -35,34 +40,21 @@ class _LandingPageState extends State<LandingPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const Spacer(flex: 1),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.75,
-              child: ElevatedButton(
-                style: primaryButtonStyle,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const GameSetup(title: 'Game Setup'),
-                    ),
-                  );
-                },
-                child: const Text("Score Keeping"),
+            _buildButton(
+              "Score a Game",
+              () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const GameSetup(title: 'Game Setup'),
+                ),
               ),
             ),
             const Spacer(flex: 1),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.75,
-              child: ElevatedButton(
-                style: primaryButtonStyle,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const Scoring(title: 'Scoring'),
-                    ),
-                  );
-                },
-                child: const Text("View Game Results"),
+            _buildButton(
+              "View Game Results",
+              () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const Scoring(title: 'Scoring'),
+                ),
               ),
             ),
             const Spacer(flex: 8),

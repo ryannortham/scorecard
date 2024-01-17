@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
-import 'ground_list.dart';
-import 'division_list.dart';
 import 'scoring.dart';
 
 class GameSetup extends StatefulWidget {
@@ -20,17 +18,13 @@ class _GameSetupState extends State<GameSetup> {
   int _selectedIndex = 0;
   String? homeTeam;
   String? awayTeam;
-  String? ground;
-  String? division;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
-  final TextEditingController _divisionController = TextEditingController();
   final TextEditingController _homeTeamController = TextEditingController();
   final TextEditingController _awayTeamController = TextEditingController();
-  final TextEditingController _groundController = TextEditingController();
 
   void onHomeTeamSelected(String teamName) {
     setState(() {
@@ -46,24 +40,42 @@ class _GameSetupState extends State<GameSetup> {
     _awayTeamController.text = teamName;
   }
 
-  void onGroundSelected(String groundName) {
-    setState(() {
-      ground = groundName;
-    });
-    _groundController.text = groundName;
-  }
-
-  void onDivisionSelected(String divisionName) {
-    setState(() {
-      division = divisionName;
-    });
-    _divisionController.text = divisionName;
-  }
-
   void _onNavTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Widget _buildButton(String text, VoidCallback onPressed) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.40,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(text),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required String emptyValueError,
+    required Future<String?> Function() onTap,
+  }) {
+    return TextFormField(
+      readOnly: true,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+      ),
+      validator: (value) {
+        if (value!.isEmpty) {
+          return emptyValueError;
+        }
+        return null;
+      },
+      onTap: onTap,
+    );
   }
 
   @override
@@ -71,18 +83,11 @@ class _GameSetupState extends State<GameSetup> {
     _dateController.dispose();
     _homeTeamController.dispose();
     _awayTeamController.dispose();
-    _groundController.dispose();
-    _divisionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final primaryButtonStyle = ElevatedButton.styleFrom(
-      backgroundColor: Theme.of(context).primaryColor,
-      elevation: 0,
-    );
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -90,16 +95,14 @@ class _GameSetupState extends State<GameSetup> {
       body: Form(
         key: _formKey,
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const Spacer(flex: 1),
-              TextFormField(
-                readOnly: true,
+              const Spacer(flex: 2),
+              _buildTextField(
                 controller: _dateController,
-                decoration: const InputDecoration(
-                  labelText: 'Game Date',
-                ),
+                labelText: 'Game Date',
+                emptyValueError: 'Please select Game Date',
                 onTap: () async {
                   // Show date picker dialog
                   final DateTime? pickedDate = await showDatePicker(
@@ -117,45 +120,14 @@ class _GameSetupState extends State<GameSetup> {
                           DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
                     });
                   }
+                  return null;
                 },
               ),
               const Spacer(flex: 1),
-              TextFormField(
-                  readOnly: true,
-                  controller: _divisionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Division',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please select Division';
-                    }
-                    return null;
-                  },
-                  onTap: () async {
-                    ground = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DivisionList(
-                          title: 'Select Division',
-                          onDivisionSelected: onDivisionSelected,
-                        ),
-                      ),
-                    );
-                  }),
-              const Spacer(flex: 1),
-              TextFormField(
-                readOnly: true,
+              _buildTextField(
                 controller: _homeTeamController,
-                decoration: const InputDecoration(
-                  labelText: 'Home Team',
-                ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please select Home Team';
-                  }
-                  return null;
-                },
+                labelText: 'Home Team',
+                emptyValueError: 'Please select Home Team',
                 onTap: () async {
                   homeTeam = await Navigator.push<String>(
                     context,
@@ -164,21 +136,14 @@ class _GameSetupState extends State<GameSetup> {
                             title: 'Select Home Team',
                             onTeamSelected: onHomeTeamSelected)),
                   );
+                  return null;
                 },
               ),
               const Spacer(flex: 1),
-              TextFormField(
-                  readOnly: true,
+              _buildTextField(
                   controller: _awayTeamController,
-                  decoration: const InputDecoration(
-                    labelText: 'Away Team',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please select Away Team';
-                    }
-                    return null;
-                  },
+                  labelText: 'Away Team',
+                  emptyValueError: 'Please select Away Team',
                   onTap: () async {
                     homeTeam = await Navigator.push<String>(
                       context,
@@ -187,28 +152,7 @@ class _GameSetupState extends State<GameSetup> {
                               title: 'Select Away Team',
                               onTeamSelected: onAwayTeamSelected)),
                     );
-                  }),
-              const Spacer(flex: 1),
-              TextFormField(
-                  readOnly: true,
-                  controller: _groundController,
-                  decoration: const InputDecoration(
-                    labelText: 'Ground',
-                  ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return 'Please select Ground';
-                    }
                     return null;
-                  },
-                  onTap: () async {
-                    ground = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => GroundList(
-                              title: 'Select Ground',
-                              onGroundSelected: onGroundSelected)),
-                    );
                   }),
               const Spacer(flex: 1),
               Row(
@@ -225,16 +169,8 @@ class _GameSetupState extends State<GameSetup> {
                     step: 1,
                     minCount: 1,
                     maxCount: 60,
-                    incrementIcon: const Icon(
-                      Icons.add,
-                    ),
-                    decrementIcon: const Icon(
-                      Icons.remove,
-                    ),
                     showButtonText: false,
                     onCountChange: (count) {},
-                    onIncrement: (count) {},
-                    onDecrement: (count) {},
                   ),
                 ],
               ),
@@ -255,38 +191,24 @@ class _GameSetupState extends State<GameSetup> {
               ),
               const Spacer(flex: 1),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.47,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      style: primaryButtonStyle,
-                      child: const Text('Cancel'),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.47,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          // Validation successful, navigate to scoring page
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const Scoring(title: 'Scoring'),
-                            ),
-                          );
-                        }
-                      },
-                      style: primaryButtonStyle,
-                      child: const Text('Start Scoring'),
-                    ),
-                  ),
+                  _buildButton('Cancel', () {
+                    Navigator.pop(context);
+                  }),
+                  _buildButton('Start Scoring', () {
+                    if (_formKey.currentState!.validate()) {
+                      // Validation successful, navigate to scoring page
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const Scoring(title: 'Scoring'),
+                        ),
+                      );
+                    }
+                  }),
                 ],
               ),
+              const Spacer(flex: 2),
             ],
           ),
         ),

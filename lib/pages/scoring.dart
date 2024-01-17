@@ -28,60 +28,52 @@ class _ScoringState extends State<Scoring> {
           appBar: AppBar(
             title: Text(widget.title),
           ),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ScorePanel(
-                teamName: 'Home Team',
-                isHomeTeam: true,
-              ),
-              const SizedBox(height: 16),
-              ScorePanel(
-                teamName: 'Away Team',
-                isHomeTeam: false,
-              ),
-              const SizedBox(height: 16),
-              const SizedBox(
-                width: double.infinity,
-                child: LinearProgressIndicator(
-                  value: 0.5,
-                  minHeight: 8,
+          body: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const ScorePanel(
+                  teamName: 'Home Team',
+                  isHomeTeam: true,
                 ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ToggleButtons(
-                    isSelected: const [true, false, false, false],
-                    selectedColor: Colors.white,
-                    fillColor: Theme.of(context).primaryColor,
-                    onPressed: (int index) {
-                      // Handle toggle buttons press
-                    },
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('Quarter 1'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('Quarter 2'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('Quarter 3'),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text('Quarter 4'),
-                      ),
-                    ],
+                const SizedBox(height: 16),
+                const ScorePanel(
+                  teamName: 'Away Team',
+                  isHomeTeam: false,
+                ),
+                const SizedBox(height: 16),
+                const SizedBox(
+                  width: double.infinity,
+                  child: LinearProgressIndicator(
+                    value: 0.5,
+                    minHeight: 8,
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 16),
+                ToggleButtons(
+                  isSelected: const [true, false, false, false],
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Quarter 1'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Quarter 2'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Quarter 3'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Quarter 4'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: _selectedIndex,
