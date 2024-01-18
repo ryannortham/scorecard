@@ -1,26 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:customizable_counter/customizable_counter.dart';
-import '../providers/score_panel_state.dart';
+import '../providers/score_panel_provider.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
   final bool isGoal;
   final bool isHomeTeam;
-  final ScorePanelState scorePanelState;
+  final ScorePanelProvider scorePanelProvider;
 
   const ScoreCounter({
     Key? key,
     required this.label,
     required this.isGoal,
     required this.isHomeTeam,
-    required this.scorePanelState,
+    required this.scorePanelProvider,
   }) : super(key: key);
 
   @override
-  _ScoreCounterState createState() => _ScoreCounterState();
+  ScoreCounterState createState() => ScoreCounterState();
 }
 
-class _ScoreCounterState extends State<ScoreCounter> {
+class ScoreCounterState extends State<ScoreCounter> {
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -37,7 +37,7 @@ class _ScoreCounterState extends State<ScoreCounter> {
           borderWidth: 2,
           borderRadius: 100,
           textSize: 22,
-          count: widget.scorePanelState
+          count: widget.scorePanelProvider
               .getCount(
                 widget.isHomeTeam,
                 widget.isGoal,
@@ -51,7 +51,7 @@ class _ScoreCounterState extends State<ScoreCounter> {
           ),
           onCountChange: (newCount) {
             // Update the ScoreCounterProvider
-            widget.scorePanelState.setCount(
+            widget.scorePanelProvider.setCount(
               widget.isHomeTeam,
               widget.isGoal,
               newCount.toInt(),

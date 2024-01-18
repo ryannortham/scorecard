@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/providers/score_panel_state.dart';
+import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'score_counter.dart';
 
 class ScorePanel extends StatelessWidget {
@@ -14,19 +14,19 @@ class ScorePanel extends StatelessWidget {
   }) : super(key: key);
 
   Widget _buildScoreCounter(
-      String label, bool isGoal, ScorePanelState scorePanelState) {
+      String label, bool isGoal, ScorePanelProvider scorePanelProvider) {
     return ScoreCounter(
       label: label,
       isHomeTeam: isHomeTeam,
       isGoal: isGoal,
-      scorePanelState: scorePanelState,
+      scorePanelProvider: scorePanelProvider,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ScorePanelState>(
-      builder: (context, scorePanelState, _) {
+    return Consumer<ScorePanelProvider>(
+      builder: (context, scorePanelProvider, _) {
         return Column(
           children: [
             Container(
@@ -46,15 +46,15 @@ class ScorePanel extends StatelessWidget {
             ),
             Text(
               isHomeTeam
-                  ? scorePanelState.homePoints.toString()
-                  : scorePanelState.awayPoints.toString(),
+                  ? scorePanelProvider.homePoints.toString()
+                  : scorePanelProvider.awayPoints.toString(),
               style: Theme.of(context).textTheme.displayMedium,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildScoreCounter('Goals', true, scorePanelState),
-                _buildScoreCounter('Behinds', false, scorePanelState),
+                _buildScoreCounter('Goals', true, scorePanelProvider),
+                _buildScoreCounter('Behinds', false, scorePanelProvider),
               ],
             ),
           ],

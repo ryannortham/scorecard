@@ -7,10 +7,10 @@ class LandingPage extends StatefulWidget {
   final String title;
 
   @override
-  _LandingPageState createState() => _LandingPageState();
+  LandingPageState createState() => LandingPageState();
 }
 
-class _LandingPageState extends State<LandingPage> {
+class LandingPageState extends State<LandingPage> {
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.75,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/providers/game_setup_state.dart';
+import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
@@ -15,30 +15,16 @@ class GameSetup extends StatefulWidget {
 }
 
 class _GameSetupState extends State<GameSetup> {
-  bool isTimerEnabled = true;
-  int quarterMinutes = 15;
   int _selectedIndex = 0;
   String? homeTeam;
   String? awayTeam;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _homeTeamController = TextEditingController();
+  final TextEditingController _awayTeamController = TextEditingController();
   final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
-  final TextEditingController _homeTeamController = TextEditingController();
-  final TextEditingController _awayTeamController = TextEditingController();
-
-  void onHomeTeamSelected(String teamName) {
-    Provider.of<GameSetupState>(context, listen: false)
-        .updateHomeTeam(teamName);
-    _homeTeamController.text = teamName;
-  }
-
-  void onAwayTeamSelected(String teamName) {
-    Provider.of<GameSetupState>(context, listen: false)
-        .updateAwayTeam(teamName);
-    _awayTeamController.text = teamName;
-  }
 
   void _onNavTapped(int index) {
     setState(() {
@@ -88,6 +74,8 @@ class _GameSetupState extends State<GameSetup> {
 
   @override
   Widget build(BuildContext context) {
+    final gameSetupProvider = Provider.of<GameSetupProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -104,7 +92,6 @@ class _GameSetupState extends State<GameSetup> {
                 labelText: 'Game Date',
                 emptyValueError: 'Please select Game Date',
                 onTap: () async {
-                  // Show date picker dialog
                   final DateTime? pickedDate = await showDatePicker(
                     context: context,
                     initialDate: DateTime.now(),
@@ -114,12 +101,11 @@ class _GameSetupState extends State<GameSetup> {
                   );
 
                   if (pickedDate != null) {
-                    // Update text field value when date is picked
-                    setState(() {
-                      _dateController.text =
-                          DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
-                    });
+                    gameSetupProvider.setGameDate(pickedDate);
+                    _dateController.text =
+                        DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
                   }
+
                   return null;
                 },
               ),
@@ -134,7 +120,10 @@ class _GameSetupState extends State<GameSetup> {
                     MaterialPageRoute(
                         builder: (context) => TeamList(
                             title: 'Select Home Team',
-                            onTeamSelected: onHomeTeamSelected)),
+                            onTeamSelected: (teamName) {
+                              gameSetupProvider.setHomeTeam(teamName);
+                              _homeTeamController.text = teamName;
+                            })),
                   );
                   return null;
                 },
@@ -145,12 +134,15 @@ class _GameSetupState extends State<GameSetup> {
                   labelText: 'Away Team',
                   emptyValueError: 'Please select Away Team',
                   onTap: () async {
-                    homeTeam = await Navigator.push<String>(
+                    awayTeam = await Navigator.push<String>(
                       context,
                       MaterialPageRoute(
                           builder: (context) => TeamList(
                               title: 'Select Away Team',
-                              onTeamSelected: onAwayTeamSelected)),
+                              onTeamSelected: (teamName) {
+                                gameSetupProvider.setAwayTeam(teamName);
+                                _awayTeamController.text = teamName;
+                              })),
                     );
                     return null;
                   }),
@@ -165,12 +157,14 @@ class _GameSetupState extends State<GameSetup> {
                     borderWidth: 2,
                     borderRadius: 100,
                     textSize: 22,
-                    count: 15,
+                    count: gameSetupProvider.quarterMinutes.toDouble(),
                     step: 1,
                     minCount: 1,
                     maxCount: 60,
                     showButtonText: false,
-                    onCountChange: (count) {},
+                    onCountChange: (count) {
+                      gameSetupProvider.setQuarterMinutes(count.toInt());
+                    },
                   ),
                 ],
               ),
@@ -180,11 +174,9 @@ class _GameSetupState extends State<GameSetup> {
                 children: [
                   const Text('Countdown Timer'),
                   Switch(
-                    value: isTimerEnabled,
+                    value: gameSetupProvider.isCountdownTimer,
                     onChanged: (bool value) {
-                      setState(() {
-                        isTimerEnabled = value;
-                      });
+                      gameSetupProvider.setIsCountdownTimer(value);
                     },
                   ),
                 ],
@@ -198,7 +190,6 @@ class _GameSetupState extends State<GameSetup> {
                   }),
                   _buildButton('Start Scoring', () {
                     if (_formKey.currentState!.validate()) {
-                      // Validation successful, navigate to scoring page
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const Scoring(title: 'Scoring'),

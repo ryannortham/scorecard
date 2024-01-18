@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/providers/game_setup_state.dart';
+import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:provider/provider.dart';
-import '../providers/score_panel_state.dart';
 import '../widgets/score_panel.dart';
 
 class Scoring extends StatefulWidget {
@@ -9,12 +8,11 @@ class Scoring extends StatefulWidget {
   final String title;
 
   @override
-  _ScoringState createState() => _ScoringState();
+  ScoringState createState() => ScoringState();
 }
 
-class _ScoringState extends State<Scoring> {
+class ScoringState extends State<Scoring> {
   int _selectedIndex = 1;
-
   void _onNavTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -23,10 +21,11 @@ class _ScoringState extends State<Scoring> {
 
   @override
   Widget build(BuildContext context) {
-    String homeTeamName = Provider.of<GameSetupState>(context).homeTeam;
-    String awayTeamName = Provider.of<GameSetupState>(context).awayTeam;
+    final gameSetupProvider = Provider.of<GameSetupProvider>(context);
+    String homeTeamName = gameSetupProvider.homeTeam;
+    String awayTeamName = gameSetupProvider.awayTeam;
 
-    return Consumer<ScorePanelState>(
+    return Consumer<GameSetupProvider>(
       builder: (context, scorePanelState, _) {
         return Scaffold(
           appBar: AppBar(
