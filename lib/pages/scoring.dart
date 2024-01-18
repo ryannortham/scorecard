@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goalkeeper/providers/game_setup_state.dart';
 import 'package:provider/provider.dart';
 import '../providers/score_panel_state.dart';
 import '../widgets/score_panel.dart';
@@ -22,6 +23,9 @@ class _ScoringState extends State<Scoring> {
 
   @override
   Widget build(BuildContext context) {
+    String homeTeamName = Provider.of<GameSetupState>(context).homeTeam;
+    String awayTeamName = Provider.of<GameSetupState>(context).awayTeam;
+
     return Consumer<ScorePanelState>(
       builder: (context, scorePanelState, _) {
         return Scaffold(
@@ -33,13 +37,13 @@ class _ScoringState extends State<Scoring> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const ScorePanel(
-                  teamName: 'Home Team',
+                ScorePanel(
+                  teamName: homeTeamName,
                   isHomeTeam: true,
                 ),
                 const SizedBox(height: 16),
-                const ScorePanel(
-                  teamName: 'Away Team',
+                ScorePanel(
+                  teamName: awayTeamName,
                   isHomeTeam: false,
                 ),
                 const SizedBox(height: 16),

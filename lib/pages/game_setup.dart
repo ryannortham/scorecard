@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:goalkeeper/providers/game_setup_state.dart';
 import 'package:intl/intl.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
@@ -27,16 +29,14 @@ class _GameSetupState extends State<GameSetup> {
   final TextEditingController _awayTeamController = TextEditingController();
 
   void onHomeTeamSelected(String teamName) {
-    setState(() {
-      homeTeam = teamName;
-    });
+    Provider.of<GameSetupState>(context, listen: false)
+        .updateHomeTeam(teamName);
     _homeTeamController.text = teamName;
   }
 
   void onAwayTeamSelected(String teamName) {
-    setState(() {
-      awayTeam = teamName;
-    });
+    Provider.of<GameSetupState>(context, listen: false)
+        .updateAwayTeam(teamName);
     _awayTeamController.text = teamName;
   }
 

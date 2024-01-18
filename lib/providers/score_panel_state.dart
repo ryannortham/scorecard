@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class ScorePanelState extends ChangeNotifier {
   int _homeGoals = 0;
