@@ -11,6 +11,7 @@ class GameSetupProvider extends ChangeNotifier {
   String get homeTeam => _homeTeam;
   String get awayTeam => _awayTeam;
   int get quarterMinutes => _quarterMinutes;
+  int get quarterMSec => _quarterMinutes * 60 * 1000;
   bool get isCountdownTimer => _isCountdownTimer;
 
   void setGameDate(DateTime date) {

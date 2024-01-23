@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'score_counter.dart';
+import 'package:goalkeeper/widgets/score_counter.dart';
 
 class ScorePanel extends StatelessWidget {
   final String teamName;
@@ -44,12 +44,14 @@ class ScorePanel extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              isHomeTeam
-                  ? scorePanelProvider.homePoints.toString()
-                  : scorePanelProvider.awayPoints.toString(),
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
+            Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  isHomeTeam
+                      ? scorePanelProvider.homePoints.toString()
+                      : scorePanelProvider.awayPoints.toString(),
+                  style: Theme.of(context).textTheme.displayMedium,
+                )),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [

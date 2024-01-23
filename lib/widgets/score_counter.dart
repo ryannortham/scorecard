@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:customizable_counter/customizable_counter.dart';
-import '../providers/score_panel_provider.dart';
+import 'package:goalkeeper/providers/score_panel_provider.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
@@ -33,22 +33,18 @@ class ScoreCounterState extends State<ScoreCounter> {
         ),
         const SizedBox(width: 8),
         CustomizableCounter(
-          backgroundColor: Theme.of(context).inputDecorationTheme.fillColor,
           borderWidth: 2,
-          borderRadius: 100,
-          textSize: 22,
+          borderRadius: 36,
+          textSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 22,
           count: widget.scorePanelProvider
               .getCount(
                 widget.isHomeTeam,
                 widget.isGoal,
               )
               .toDouble(),
-          step: 1,
           minCount: 0,
-          maxCount: 100,
-          incrementIcon: const Icon(
-            Icons.add,
-          ),
+          maxCount: 99,
+          showButtonText: false,
           onCountChange: (newCount) {
             // Update the ScoreCounterProvider
             widget.scorePanelProvider.setCount(

@@ -6,9 +6,9 @@ class TeamList extends StatelessWidget {
   final String title;
   final void Function(String) onTeamSelected;
   final List<String> teamNames = [
-    'Team 1',
-    'Team 2',
-    'Team 3',
+    'Chelsea Seagulls',
+    'Bonbeach Sharks',
+    'Carrum Patterson Lakes Kangaroos',
     'Team 4',
     'Team 5',
     'Team 6',

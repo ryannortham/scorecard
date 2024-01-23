@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'game_setup.dart';
-import 'scoring.dart';
+import 'debug.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key, required this.title}) : super(key: key);
@@ -53,7 +53,7 @@ class LandingPageState extends State<LandingPage> {
               "View Game Results",
               () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const Scoring(title: 'Scoring'),
+                  builder: (context) => DebugPage(),
                 ),
               ),
             ),

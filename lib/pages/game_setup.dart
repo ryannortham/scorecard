@@ -20,6 +20,10 @@ class _GameSetupState extends State<GameSetup> {
   String? awayTeam;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final dateKey = GlobalKey<FormState>();
+  final homeTeamKey = GlobalKey<FormState>();
+  final awayTeamKey = GlobalKey<FormState>();
+
   final TextEditingController _homeTeamController = TextEditingController();
   final TextEditingController _awayTeamController = TextEditingController();
   final TextEditingController _dateController = TextEditingController(
@@ -43,25 +47,37 @@ class _GameSetupState extends State<GameSetup> {
   }
 
   Widget _buildTextField({
+    required GlobalKey<FormState> formKey,
     required TextEditingController controller,
     required String labelText,
     required String emptyValueError,
     required Future<String?> Function() onTap,
   }) {
-    return TextFormField(
-      readOnly: true,
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: labelText,
+    return Form(
+      key: formKey,
+      child: TextFormField(
+        readOnly: true,
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+        ),
+        validator: (value) {
+          if (value!.isEmpty) {
+            return emptyValueError;
+          }
+          return null;
+        },
+        onTap: onTap,
       ),
-      validator: (value) {
-        if (value!.isEmpty) {
-          return emptyValueError;
-        }
-        return null;
-      },
-      onTap: onTap,
     );
+  }
+
+  bool isValidSetup() {
+    bool dateValid = dateKey.currentState!.validate();
+    bool homeTeamValid = homeTeamKey.currentState!.validate();
+    bool awayTeamValid = awayTeamKey.currentState!.validate();
+
+    return dateValid && homeTeamValid && awayTeamValid;
   }
 
   @override
@@ -88,6 +104,7 @@ class _GameSetupState extends State<GameSetup> {
             children: [
               const Spacer(flex: 2),
               _buildTextField(
+                formKey: dateKey,
                 controller: _dateController,
                 labelText: 'Game Date',
                 emptyValueError: 'Please select Game Date',
@@ -105,12 +122,13 @@ class _GameSetupState extends State<GameSetup> {
                     _dateController.text =
                         DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
                   }
-
+                  dateKey.currentState!.validate();
                   return null;
                 },
               ),
               const Spacer(flex: 1),
               _buildTextField(
+                formKey: homeTeamKey,
                 controller: _homeTeamController,
                 labelText: 'Home Team',
                 emptyValueError: 'Please select Home Team',
@@ -125,11 +143,13 @@ class _GameSetupState extends State<GameSetup> {
                               _homeTeamController.text = teamName;
                             })),
                   );
+                  homeTeamKey.currentState!.validate();
                   return null;
                 },
               ),
               const Spacer(flex: 1),
               _buildTextField(
+                  formKey: awayTeamKey,
                   controller: _awayTeamController,
                   labelText: 'Away Team',
                   emptyValueError: 'Please select Away Team',
@@ -144,6 +164,7 @@ class _GameSetupState extends State<GameSetup> {
                                 _awayTeamController.text = teamName;
                               })),
                     );
+                    awayTeamKey.currentState!.validate();
                     return null;
                   }),
               const Spacer(flex: 1),
@@ -152,13 +173,11 @@ class _GameSetupState extends State<GameSetup> {
                 children: [
                   const Text('Quarter Minutes'),
                   CustomizableCounter(
-                    backgroundColor:
-                        Theme.of(context).inputDecorationTheme.fillColor,
                     borderWidth: 2,
-                    borderRadius: 100,
-                    textSize: 22,
+                    borderRadius: 36,
+                    textSize:
+                        Theme.of(context).textTheme.titleLarge?.fontSize ?? 22,
                     count: gameSetupProvider.quarterMinutes.toDouble(),
-                    step: 1,
                     minCount: 1,
                     maxCount: 60,
                     showButtonText: false,
@@ -189,7 +208,7 @@ class _GameSetupState extends State<GameSetup> {
                     Navigator.pop(context);
                   }),
                   _buildButton('Start Scoring', () {
-                    if (_formKey.currentState!.validate()) {
+                    if (isValidSetup()) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const Scoring(title: 'Scoring'),
