@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'score_counter.dart';
+import 'package:goalkeeper/widgets/score_counter.dart';
 
 class ScorePanel extends StatelessWidget {
   final String teamName;
