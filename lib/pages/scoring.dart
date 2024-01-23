@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:provider/provider.dart';
-import '../widgets/score_panel.dart';
+import 'package:goalkeeper/widgets/score_panel.dart';
+import 'package:goalkeeper/widgets/timer.dart';
 
 class Scoring extends StatefulWidget {
   const Scoring({Key? key, required this.title}) : super(key: key);
@@ -13,6 +14,8 @@ class Scoring extends StatefulWidget {
 
 class ScoringState extends State<Scoring> {
   int _selectedIndex = 1;
+  List<bool> isSelected = [true, false, false, false];
+
   void _onNavTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -55,7 +58,20 @@ class ScoringState extends State<Scoring> {
                 ),
                 const SizedBox(height: 16),
                 ToggleButtons(
-                  isSelected: const [true, false, false, false],
+                  isSelected: isSelected,
+                  onPressed: (index) {
+                    setState(() {
+                      for (int buttonIndex = 0;
+                          buttonIndex < isSelected.length;
+                          buttonIndex++) {
+                        if (buttonIndex == index) {
+                          isSelected[buttonIndex] = true;
+                        } else {
+                          isSelected[buttonIndex] = false;
+                        }
+                      }
+                    });
+                  },
                   children: const [
                     Padding(
                       padding: EdgeInsets.all(16.0),
@@ -75,6 +91,7 @@ class ScoringState extends State<Scoring> {
                     ),
                   ],
                 ),
+                const TimerWidget(),
               ],
             ),
           ),

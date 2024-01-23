@@ -44,12 +44,14 @@ class ScorePanel extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              isHomeTeam
-                  ? scorePanelProvider.homePoints.toString()
-                  : scorePanelProvider.awayPoints.toString(),
-              style: Theme.of(context).textTheme.displayMedium,
-            ),
+            Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  isHomeTeam
+                      ? scorePanelProvider.homePoints.toString()
+                      : scorePanelProvider.awayPoints.toString(),
+                  style: Theme.of(context).textTheme.displayMedium,
+                )),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
