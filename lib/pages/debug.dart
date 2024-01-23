@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/widgets/timer.dart';
+import 'package:goalkeeper/widgets/score_table.dart';
 
 class DebugPage extends StatelessWidget {
   @override
@@ -8,9 +8,7 @@ class DebugPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Debug Page'),
       ),
-      body: const Center(
-        child: TimerWidget(),
-      ),
+      body: ScoreTable(),
     );
   }
 }

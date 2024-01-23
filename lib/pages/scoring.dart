@@ -3,6 +3,7 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/score_panel.dart';
+import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/timer.dart';
 
 class Scoring extends StatefulWidget {
@@ -104,6 +105,11 @@ class ScoringState extends State<Scoring> {
                 ScorePanel(
                   teamName: awayTeamName,
                   isHomeTeam: false,
+                ),
+                const SizedBox(height: 8),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: ScoreTable(),
                 ),
               ],
             ),
