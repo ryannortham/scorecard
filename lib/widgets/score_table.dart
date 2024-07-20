@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:goalkeeper/providers/score_panel_provider.dart';
 
 class ScoreTable extends StatelessWidget {
   final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
@@ -14,8 +16,13 @@ class ScoreTable extends StatelessWidget {
     );
   }
 
-  TableRow createRow(BuildContext context, List<String> values) {
+  TableRow createRow(BuildContext context, int rowIndex, List<String> values) {
+    final selectedQuarter = Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+
     return TableRow(
+      decoration: BoxDecoration(
+        color: (rowIndex == selectedQuarter) ? Theme.of(context).colorScheme.secondaryContainer : Colors.transparent,
+      ),
       children: [
         createCell(context, values[0]),
         createNestedCell(context, values.sublist(1, 3)),
@@ -86,10 +93,10 @@ class ScoreTable extends StatelessWidget {
             'Behinds',
             'Points',
           ]),
-          createRow(context, ['1st', '1', '1', '2', '2', '8', '8']),
-          createRow(context, ['2nd', '2', '3', '1', '3', '13', '21']),
-          createRow(context, ['3rd', '1', '4', '2', '5', '8', '29']),
-          createRow(context, ['4th', '0', '4', '1', '6', '1', '30']),
+          createRow(context, 1, ['1st', '1', '1', '2', '2', '8', '8']),
+          createRow(context, 2, ['2nd', '2', '3', '1', '3', '13', '21']),
+          createRow(context, 3, ['3rd', '1', '4', '2', '5', '8', '29']),
+          createRow(context, 4, ['4th', '0', '4', '1', '6', '1', '30']),
         ],
       ),
     );

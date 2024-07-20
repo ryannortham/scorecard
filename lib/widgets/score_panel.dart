@@ -34,6 +34,14 @@ class ScorePanel extends StatelessWidget {
               height: 40,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer,
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                  bottom: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                  ),
+                ),
               ),
               child: FittedBox(
                 child: Text(
