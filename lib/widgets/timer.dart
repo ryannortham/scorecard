@@ -51,6 +51,8 @@ class TimerWidgetState extends State<TimerWidget> {
     _secondSubscription = secondStream.listen((_) {
       scorePanelProvider.setTimerRawTime(_stopWatchTimer.rawTime.value);
     });
+
+    isRunning.value = false;
   }
 
   @override
@@ -137,11 +139,23 @@ class TimerWidgetState extends State<TimerWidget> {
           ),
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.30,
-            child: ElevatedButton(
-              onPressed: () {
-                resetTimer();
+            child: ValueListenableBuilder<bool>(
+              valueListenable: isRunning,
+              builder: (context, isRunning, _) {
+                return ElevatedButton(
+                  onPressed: isRunning
+                      ? null
+                      : () {
+                          resetTimer();
+                        },
+                  child: Icon(
+                    Icons.restart_alt,
+                    color: isRunning
+                        ? Colors.grey
+                        : null, // null defaults to the icon theme color
+                  ),
+                );
               },
-              child: const Icon(Icons.restart_alt),
             ),
           )
         ],

@@ -3,88 +3,95 @@ import 'package:flutter/material.dart';
 class ScoreTable extends StatelessWidget {
   final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
 
-  const ScoreTable({super.key});
+  const ScoreTable({Key? key}) : super(key: key);
 
-  Widget borderedText(BuildContext context, String text,
-      {bool right = false,
-      bool left = false,
-      bool top = false,
-      bool bottom = false,
-      bool isBold = false}) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: top
-              ? BorderSide(width: 2, color: Theme.of(context).dividerColor)
-              : BorderSide.none,
-          bottom: bottom
-              ? BorderSide(width: 2, color: Theme.of(context).dividerColor)
-              : BorderSide.none,
-          right: right
-              ? BorderSide(width: 2, color: Theme.of(context).dividerColor)
-              : BorderSide.none,
-          left: left
-              ? BorderSide(width: 2, color: Theme.of(context).dividerColor)
-              : BorderSide.none,
-        ),
+  Widget createCell(BuildContext context, String text, {bool isBold = false}) {
+    return SizedBox(
+      height: 24,
+      child: Center(
+        child: Text(text, style: isBold ? boldStyle : null),
       ),
-      child: Center(child: Text(text, style: isBold ? boldStyle : null)),
     );
   }
 
-  TableRow createRow(BuildContext context, List<String> values,
-      {bool isBold = false}) {
+  TableRow createRow(BuildContext context, List<String> values) {
     return TableRow(
-      children: values
-          .map((value) => borderedText(context, value, isBold: isBold))
-          .toList(),
+      children: [
+        createCell(context, values[0]),
+        createNestedCell(context, values.sublist(1, 3)),
+        createNestedCell(context, values.sublist(3, 5)),
+        createNestedCell(context, values.sublist(5, 7)),
+      ],
+    );
+  }
+
+  Widget createNestedCell(BuildContext context, List<String> values) {
+    return Table(
+      border: TableBorder(
+        verticalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
+      ),
+      columnWidths: const {
+        0: FlexColumnWidth(0.7),
+        1: FlexColumnWidth(0.3),
+      },
+      children: [
+        TableRow(
+          children: [
+            createCell(context, values[0]),
+            createCell(context, values[1], isBold: true),
+          ],
+        ),
+      ],
+    );
+  }
+
+  TableRow createSpecialRow(BuildContext context, List<String> values) {
+    return TableRow(
+      children: [
+        createCell(context, values[0], isBold: true),
+        TableCell(
+          child: createCell(context, values[1], isBold: true),
+        ),
+        TableCell(
+          child: createCell(context, values[2], isBold: true),
+        ),
+        createCell(context, values[3], isBold: true),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final columnWidth =
-          constraints.maxWidth / 7; // Divide by the number of columns
-      final borderInside =
-          BorderSide(width: 1, color: Theme.of(context).dividerColor);
-      final borderOutside =
-          BorderSide(width: 2, color: Theme.of(context).dividerColor);
-
-      return Table(
-        columnWidths: {
-          for (var index in List.generate(7, (index) => index))
-            index: FixedColumnWidth(columnWidth)
-        },
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Table(
         border: TableBorder(
-          verticalInside: borderInside,
-          horizontalInside: borderInside,
-          top: borderOutside,
-          bottom: borderOutside,
-          left: borderOutside,
-          right: borderOutside,
+          verticalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
+          horizontalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
+          top: BorderSide(width: 2, color: Theme.of(context).dividerColor),
+          bottom: BorderSide(width: 2, color: Theme.of(context).dividerColor),
+          left: BorderSide(width: 2, color: Theme.of(context).dividerColor),
+          right: BorderSide(width: 2, color: Theme.of(context).dividerColor),
         ),
+        columnWidths: const {
+          0: FlexColumnWidth(0.1),
+          1: FlexColumnWidth(0.3),
+          2: FlexColumnWidth(0.3),
+          3: FlexColumnWidth(0.3),
+        },
         children: [
-          createRow(
-              context,
-              [
-                'Qtr',
-                'Goals',
-                'Behinds',
-                'Points',
-                'Goals',
-                'Behinds',
-                'Points'
-              ],
-              isBold: true),
-          createRow(context, ['1st', '0', '0', '0', '0', '0', '0']),
-          createRow(context, ['2nd', '0', '0', '0', '0', '0', '0']),
-          createRow(context, ['3rd', '0', '0', '0', '0', '0', '0']),
-          createRow(context, ['4th', '0', '0', '0', '0', '0', '0']),
-          createRow(context, ['Totals', '0', '0', '0', '0', '0', '0'],
-              isBold: true),
+          createSpecialRow(context, [
+            'Qtr',
+            'Goals',
+            'Behinds',
+            'Points',
+          ]),
+          createRow(context, ['1st', '1', '1', '2', '2', '8', '8']),
+          createRow(context, ['2nd', '2', '3', '1', '3', '13', '21']),
+          createRow(context, ['3rd', '1', '4', '2', '5', '8', '29']),
+          createRow(context, ['4th', '0', '4', '1', '6', '1', '30']),
         ],
-      );
-    });
+      ),
+    );
   }
 }

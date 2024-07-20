@@ -218,28 +218,10 @@ class _GameSetupState extends State<GameSetup> {
                   }),
                 ],
               ),
-              const Spacer(flex: 2),
+              const Spacer(flex: 1),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onNavTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Game Setup',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.flag_outlined),
-            label: 'Scoring',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events),
-            label: 'Results',
-          ),
-        ],
       ),
     );
   }
