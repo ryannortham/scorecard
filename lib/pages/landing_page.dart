@@ -53,7 +53,7 @@ class LandingPageState extends State<LandingPage> {
               "View Game Results",
               () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => DebugPage(),
+                  builder: (context) => const Debug(),
                 ),
               ),
             ),

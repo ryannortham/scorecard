@@ -3,6 +3,7 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/score_panel.dart';
+import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/timer.dart';
 
 class Scoring extends StatefulWidget {
@@ -33,13 +34,11 @@ class ScoringState extends State<Scoring> {
   }
 
   double getProgressValue() {
-    if (gameSetupProvider.quarterMSec <= 0 ||
-        scorePanelProvider.timerRawTime < 0) {
+    if (gameSetupProvider.quarterMSec <= 0 || scorePanelProvider.timerRawTime < 0) {
       return 0.0;
     }
 
-    double progress =
-        scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
+    double progress = scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
     return progress.clamp(0.0, 1.0);
   }
 
@@ -63,15 +62,12 @@ class ScoringState extends State<Scoring> {
                   width: double.infinity,
                   child: LinearProgressIndicator(
                     value: getProgressValue(),
-                    minHeight: 8,
+                    minHeight: 4,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 8.0),
                 ToggleButtons(
-                  isSelected: List.generate(
-                      4,
-                      (index) =>
-                          scorePanelProvider.selectedQuarter == index + 1),
+                  isSelected: List.generate(4, (index) => scorePanelProvider.selectedQuarter == index + 1),
                   onPressed: (index) {
                     scorePanelProvider.setSelectedQuarter(index + 1);
                   },
@@ -95,36 +91,19 @@ class ScoringState extends State<Scoring> {
                   ],
                 ),
                 const TimerWidget(),
-                const SizedBox(height: 8),
+                const SizedBox(height: 8.0),
                 ScorePanel(
                   teamName: homeTeamName,
                   isHomeTeam: true,
                 ),
-                const SizedBox(height: 8),
+                const ScoreTable(),
                 ScorePanel(
                   teamName: awayTeamName,
                   isHomeTeam: false,
                 ),
+                const ScoreTable(),
               ],
             ),
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: _onNavTapped,
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: 'Game Setup',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.flag_outlined),
-                label: 'Scoring',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.emoji_events),
-                label: 'Results',
-              ),
-            ],
           ),
         );
       },
