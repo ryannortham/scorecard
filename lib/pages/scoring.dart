@@ -17,6 +17,7 @@ class Scoring extends StatefulWidget {
 class ScoringState extends State<Scoring> {
   late ScorePanelProvider scorePanelProvider;
   late GameSetupProvider gameSetupProvider;
+  final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
   List<bool> isSelected = [true, false, false, false];
 
   @override
@@ -24,6 +25,12 @@ class ScoringState extends State<Scoring> {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
+  }
+
+  @override
+  void dispose() {
+    isTimerRunning.dispose();
+    super.dispose();
   }
 
   double getProgressValue() {
@@ -88,16 +95,24 @@ class ScoringState extends State<Scoring> {
                     ),
                   ],
                 ),
-                const TimerWidget(),
+                TimerWidget(isRunning: isTimerRunning),
                 const SizedBox(height: 8.0),
-                ScorePanel(
-                  teamName: homeTeamName,
-                  isHomeTeam: true,
+                ValueListenableBuilder<bool>(
+                  valueListenable: isTimerRunning,
+                  builder: (context, running, _) => ScorePanel(
+                    teamName: homeTeamName,
+                    isHomeTeam: true,
+                    enabled: running,
+                  ),
                 ),
                 const ScoreTable(),
-                ScorePanel(
-                  teamName: awayTeamName,
-                  isHomeTeam: false,
+                ValueListenableBuilder<bool>(
+                  valueListenable: isTimerRunning,
+                  builder: (context, running, _) => ScorePanel(
+                    teamName: awayTeamName,
+                    isHomeTeam: false,
+                    enabled: running,
+                  ),
                 ),
                 const ScoreTable(),
               ],

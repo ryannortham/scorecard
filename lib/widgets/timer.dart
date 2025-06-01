@@ -6,7 +6,8 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 
 class TimerWidget extends StatefulWidget {
-  const TimerWidget({super.key});
+  final ValueNotifier<bool>? isRunning;
+  const TimerWidget({super.key, this.isRunning});
 
   @override
   TimerWidgetState createState() => TimerWidgetState();
@@ -26,33 +27,29 @@ class TimerWidgetState extends State<TimerWidget> {
   void initState() {
     super.initState();
     gameSetupProvider = Provider.of<GameSetupProvider>(context, listen: false);
-
     scorePanelProvider =
         Provider.of<ScorePanelProvider>(context, listen: false);
-
     quarterMSec = 1000 * 60 * gameSetupProvider.quarterMinutes;
-
     _stopWatchTimer = StopWatchTimer(
       mode: gameSetupProvider.isCountdownTimer
           ? StopWatchMode.countDown
           : StopWatchMode.countUp,
     );
-
     if (gameSetupProvider.isCountdownTimer) {
       _stopWatchTimer.setPresetTime(mSec: quarterMSec);
     }
-
     tenthSecondStream = Stream.periodic(const Duration(milliseconds: 100))
         .asyncMap((_) => _stopWatchTimer.rawTime.value);
-
     secondStream = Stream.periodic(const Duration(seconds: 1))
         .asyncMap((_) => _stopWatchTimer.rawTime.value);
-
     _secondSubscription = secondStream.listen((_) {
       scorePanelProvider.setTimerRawTime(_stopWatchTimer.rawTime.value);
     });
-
-    isRunning.value = false;
+    if (widget.isRunning != null) {
+      widget.isRunning!.value = false;
+    } else {
+      isRunning.value = false;
+    }
   }
 
   @override
@@ -69,13 +66,21 @@ class TimerWidgetState extends State<TimerWidget> {
       } else {
         _stopWatchTimer.onStartTimer();
       }
-      isRunning.value = _stopWatchTimer.isRunning;
+      if (widget.isRunning != null) {
+        widget.isRunning!.value = _stopWatchTimer.isRunning;
+      } else {
+        isRunning.value = _stopWatchTimer.isRunning;
+      }
     });
   }
 
   void resetTimer() {
     _stopWatchTimer.onResetTimer();
-    isRunning.value = _stopWatchTimer.isRunning;
+    if (widget.isRunning != null) {
+      widget.isRunning!.value = _stopWatchTimer.isRunning;
+    } else {
+      isRunning.value = _stopWatchTimer.isRunning;
+    }
   }
 
   IconData getIcon() {

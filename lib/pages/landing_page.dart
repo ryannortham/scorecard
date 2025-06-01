@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'game_setup.dart';
 import 'debug.dart';
+import '../providers/game_setup_provider.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key, required this.title});
@@ -41,12 +43,18 @@ class LandingPageState extends State<LandingPage> {
             ),
             const Spacer(flex: 1),
             _buildButton(
-              "Score a Game",
-              () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const GameSetup(title: 'Game Setup'),
-                ),
-              ),
+              "Start New Game",
+              () {
+                // Reset GameSetupProvider before navigating
+                final gameSetupProvider =
+                    Provider.of<GameSetupProvider>(context, listen: false);
+                gameSetupProvider.reset();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GameSetup(title: 'Game Setup'),
+                  ),
+                );
+              },
             ),
             const Spacer(flex: 1),
             _buildButton(

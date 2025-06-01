@@ -16,6 +16,7 @@ class ScorePanelProvider extends ChangeNotifier {
   int get awayPoints => _awayGoals * 6 + _awayBehinds;
   int get timerRawTime => _timerRawTime;
   int get selectedQuarter => _selectedQuarter;
+  bool get isTimerRunning => _timerRawTime > 0 && _timerRawTime < 3599999;
 
   void setCount(bool isHomeTeam, bool isGoal, int count) {
     if (isGoal) {

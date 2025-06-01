@@ -7,6 +7,7 @@ class ScoreCounter extends StatefulWidget {
   final bool isGoal;
   final bool isHomeTeam;
   final ScorePanelProvider scorePanelProvider;
+  final bool enabled;
 
   const ScoreCounter({
     super.key,
@@ -14,6 +15,7 @@ class ScoreCounter extends StatefulWidget {
     required this.isGoal,
     required this.isHomeTeam,
     required this.scorePanelProvider,
+    this.enabled = true,
   });
 
   @override
@@ -29,30 +31,44 @@ class ScoreCounterState extends State<ScoreCounter> {
       children: [
         Text(
           widget.label,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: widget.enabled
+                    ? Theme.of(context).textTheme.titleLarge?.color
+                    : Theme.of(context).colorScheme.outline,
+              ),
         ),
         const SizedBox(width: 8),
-        CustomizableCounter(
-          borderWidth: 2,
-          borderRadius: 36,
-          textSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 22,
-          count: widget.scorePanelProvider
-              .getCount(
-                widget.isHomeTeam,
-                widget.isGoal,
-              )
-              .toDouble(),
-          minCount: 0,
-          maxCount: 99,
-          showButtonText: false,
-          onCountChange: (newCount) {
-            // Update the ScoreCounterProvider
-            widget.scorePanelProvider.setCount(
-              widget.isHomeTeam,
-              widget.isGoal,
-              newCount.toInt(),
-            );
-          },
+        AbsorbPointer(
+          absorbing: !widget.enabled,
+          child: CustomizableCounter(
+            borderWidth: 2,
+            borderRadius: 36,
+            textSize: Theme.of(context).textTheme.titleLarge?.fontSize ?? 22,
+            count: widget.scorePanelProvider
+                .getCount(
+                  widget.isHomeTeam,
+                  widget.isGoal,
+                )
+                .toDouble(),
+            minCount: 0,
+            maxCount: 99,
+            showButtonText: false,
+            borderColor: widget.enabled
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.outline,
+            textColor: widget.enabled
+                ? Theme.of(context).textTheme.titleLarge?.color
+                : Theme.of(context).colorScheme.outline,
+            onCountChange: widget.enabled
+                ? (newCount) {
+                    widget.scorePanelProvider.setCount(
+                      widget.isHomeTeam,
+                      widget.isGoal,
+                      newCount.toInt(),
+                    );
+                  }
+                : null,
+          ),
         ),
       ],
     );

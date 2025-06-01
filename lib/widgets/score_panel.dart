@@ -6,11 +6,13 @@ import 'package:goalkeeper/widgets/score_counter.dart';
 class ScorePanel extends StatelessWidget {
   final String teamName;
   final bool isHomeTeam;
+  final bool enabled;
 
   const ScorePanel({
     super.key,
     required this.teamName,
     required this.isHomeTeam,
+    this.enabled = true,
   });
 
   Widget _buildScoreCounter(
@@ -20,6 +22,7 @@ class ScorePanel extends StatelessWidget {
       isHomeTeam: isHomeTeam,
       isGoal: isGoal,
       scorePanelProvider: scorePanelProvider,
+      enabled: enabled,
     );
   }
 
