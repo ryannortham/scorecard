@@ -1,11 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/providers/game_record.dart';
 
 class ScoreTable extends StatelessWidget {
-  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
+  final List<GameEvent> events;
+  final String homeTeam;
+  final String awayTeam;
 
-  const ScoreTable({super.key});
+  const ScoreTable(
+      {super.key,
+      required this.events,
+      required this.homeTeam,
+      required this.awayTeam});
+
+  Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
+    final home = events
+        .where((e) => e.quarter == quarter && e.team == homeTeam)
+        .toList();
+    final away = events
+        .where((e) => e.quarter == quarter && e.team == awayTeam)
+        .toList();
+    return {'home': home, 'away': away};
+  }
+
+  static const List<String> _quarterLabels = ['1st', '2nd', '3rd', '4th'];
+
+  TableRow createRow(BuildContext context, int quarter) {
+    final byQuarter = _eventsByQuarter(quarter + 1);
+    final homeGoals = byQuarter['home']!.where((e) => e.type == 'goal').length;
+    final homeBehinds =
+        byQuarter['home']!.where((e) => e.type == 'behind').length;
+    final awayGoals = byQuarter['away']!.where((e) => e.type == 'goal').length;
+    final awayBehinds =
+        byQuarter['away']!.where((e) => e.type == 'behind').length;
+    final homePoints = homeGoals * 6 + homeBehinds;
+    final awayPoints = awayGoals * 6 + awayBehinds;
+    return TableRow(
+      decoration: BoxDecoration(
+        color: (quarter + 1 ==
+                Provider.of<ScorePanelProvider>(context, listen: true)
+                    .selectedQuarter)
+            ? Theme.of(context).colorScheme.secondaryContainer
+            : Colors.transparent,
+      ),
+      children: [
+        createCell(context, _quarterLabels[quarter]),
+        createNestedCell(
+            context, [homeGoals.toString(), homeBehinds.toString()]),
+        createNestedCell(
+            context, [awayGoals.toString(), awayBehinds.toString()]),
+        createNestedCell(
+            context, [homePoints.toString(), awayPoints.toString()]),
+      ],
+    );
+  }
+
+  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
 
   Widget createCell(BuildContext context, String text, {bool isBold = false}) {
     return SizedBox(
@@ -13,25 +64,6 @@ class ScoreTable extends StatelessWidget {
       child: Center(
         child: Text(text, style: isBold ? boldStyle : null),
       ),
-    );
-  }
-
-  TableRow createRow(BuildContext context, int rowIndex, List<String> values) {
-    final selectedQuarter =
-        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
-
-    return TableRow(
-      decoration: BoxDecoration(
-        color: (rowIndex == selectedQuarter)
-            ? Theme.of(context).colorScheme.secondaryContainer
-            : Colors.transparent,
-      ),
-      children: [
-        createCell(context, values[0]),
-        createNestedCell(context, values.sublist(1, 3)),
-        createNestedCell(context, values.sublist(3, 5)),
-        createNestedCell(context, values.sublist(5, 7)),
-      ],
     );
   }
 
@@ -99,10 +131,7 @@ class ScoreTable extends StatelessWidget {
             'Behinds',
             'Points',
           ]),
-          createRow(context, 1, ['1st', '1', '1', '2', '2', '8', '8']),
-          createRow(context, 2, ['2nd', '2', '3', '1', '3', '13', '21']),
-          createRow(context, 3, ['3rd', '1', '4', '2', '5', '8', '29']),
-          createRow(context, 4, ['4th', '0', '4', '1', '6', '1', '30']),
+          for (int i = 0; i < 4; i++) createRow(context, i),
         ],
       ),
     );

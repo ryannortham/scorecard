@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ class ScoringState extends State<Scoring> {
   late GameSetupProvider gameSetupProvider;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
   List<bool> isSelected = [true, false, false, false];
+  final List<GameEvent> gameEvents = [];
 
   @override
   void didChangeDependencies() {
@@ -105,7 +107,11 @@ class ScoringState extends State<Scoring> {
                     enabled: running,
                   ),
                 ),
-                const ScoreTable(),
+                ScoreTable(
+                  events: gameEvents,
+                  homeTeam: homeTeamName,
+                  awayTeam: awayTeamName,
+                ),
                 ValueListenableBuilder<bool>(
                   valueListenable: isTimerRunning,
                   builder: (context, running, _) => ScorePanel(
@@ -114,7 +120,11 @@ class ScoringState extends State<Scoring> {
                     enabled: running,
                   ),
                 ),
-                const ScoreTable(),
+                ScoreTable(
+                  events: gameEvents,
+                  homeTeam: homeTeamName,
+                  awayTeam: awayTeamName,
+                ),
               ],
             ),
           ),

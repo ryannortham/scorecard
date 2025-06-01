@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/results_panel.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
+import 'package:goalkeeper/providers/game_record.dart';
 import 'package:provider/provider.dart';
 
 class Results extends StatefulWidget {
@@ -14,6 +15,8 @@ class Results extends StatefulWidget {
 
 class ResultsState extends State<Results> {
   late GameSetupProvider gameSetupProvider;
+  // Temporary: Use an empty list for events until you implement persistence/sharing
+  final List<GameEvent> gameEvents = [];
 
   @override
   void didChangeDependencies() {
@@ -48,9 +51,13 @@ class ResultsState extends State<Results> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: ScoreTable(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ScoreTable(
+              events: gameEvents,
+              homeTeam: homeTeamName,
+              awayTeam: awayTeamName,
+            ),
           ),
           Container(
             alignment: Alignment.center,
@@ -67,9 +74,13 @@ class ResultsState extends State<Results> {
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: ScoreTable(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ScoreTable(
+              events: gameEvents,
+              homeTeam: homeTeamName,
+              awayTeam: awayTeamName,
+            ),
           ),
           Container(
             alignment: Alignment.center,

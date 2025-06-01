@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/providers/game_record.dart';
+import 'package:provider/provider.dart';
+import 'package:goalkeeper/providers/game_setup_provider.dart';
+import 'package:goalkeeper/pages/scoring.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
@@ -61,11 +65,54 @@ class ScoreCounterState extends State<ScoreCounter> {
                 : Theme.of(context).colorScheme.outline,
             onCountChange: widget.enabled
                 ? (newCount) {
+                    final oldCount = widget.scorePanelProvider.getCount(
+                      widget.isHomeTeam,
+                      widget.isGoal,
+                    );
                     widget.scorePanelProvider.setCount(
                       widget.isHomeTeam,
                       widget.isGoal,
                       newCount.toInt(),
                     );
+                    final now = DateTime.now();
+                    final quarter = widget.scorePanelProvider.selectedQuarter;
+                    final team = widget.isHomeTeam
+                        ? (Provider.of<GameSetupProvider>(context,
+                                listen: false)
+                            .homeTeam)
+                        : (Provider.of<GameSetupProvider>(context,
+                                listen: false)
+                            .awayTeam);
+                    final type = widget.isGoal ? 'goal' : 'behind';
+                    final state =
+                        context.findAncestorStateOfType<ScoringState>();
+                    if (newCount < oldCount) {
+                      // Remove the last matching event for this team/type/quarter
+                      state?.setState(() {
+                        final idx = state.gameEvents.lastIndexWhere((e) =>
+                            e.quarter == quarter &&
+                            e.team == team &&
+                            e.type == type);
+                        if (idx != -1) {
+                          state.gameEvents.removeAt(idx);
+                        }
+                      });
+                    } else if (newCount > oldCount) {
+                      // Add a new event
+                      final event = GameEvent(
+                        quarter: quarter,
+                        time: Duration(
+                          hours: now.hour,
+                          minutes: now.minute,
+                          seconds: now.second,
+                        ),
+                        team: team,
+                        type: type,
+                      );
+                      state?.setState(() {
+                        state.gameEvents.add(event);
+                      });
+                    }
                   }
                 : null,
           ),
