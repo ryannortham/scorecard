@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/pages/landing_page.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
+import 'package:goalkeeper/providers/teams_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -22,6 +23,7 @@ class GoalKeeper extends StatelessWidget {
         providers: [
           ChangeNotifierProvider(create: (context) => GameSetupProvider()),
           ChangeNotifierProvider(create: (context) => ScorePanelProvider()),
+          ChangeNotifierProvider(create: (context) => TeamsProvider()),
         ],
         child: MaterialApp(
             title: 'GoalKeeper',

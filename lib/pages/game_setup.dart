@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
 import 'scoring.dart';
+import '../providers/teams_provider.dart';
 
 class GameSetup extends StatefulWidget {
   const GameSetup({super.key, required this.title});
@@ -84,6 +85,7 @@ class _GameSetupState extends State<GameSetup> {
   @override
   Widget build(BuildContext context) {
     final gameSetupProvider = Provider.of<GameSetupProvider>(context);
+    final teamsProvider = Provider.of<TeamsProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -119,48 +121,127 @@ class _GameSetupState extends State<GameSetup> {
                   return null;
                 },
               ),
-              const Spacer(flex: 1),
-              _buildTextField(
-                formKey: homeTeamKey,
-                controller: _homeTeamController,
-                labelText: 'Home Team',
-                emptyValueError: 'Please select Home Team',
-                onTap: () async {
-                  homeTeam = await Navigator.push<String>(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TeamList(
-                            title: 'Select Home Team',
-                            onTeamSelected: (teamName) {
-                              gameSetupProvider.setHomeTeam(teamName);
-                              _homeTeamController.text = teamName;
-                            })),
-                  );
-                  homeTeamKey.currentState!.validate();
-                  return null;
-                },
+              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildTextField(
+                          formKey: homeTeamKey,
+                          controller: _homeTeamController,
+                          labelText: 'Home Team',
+                          emptyValueError: 'Please select Home Team',
+                          onTap: () async {
+                            final result = await Navigator.push<String>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TeamList(
+                                  title: 'Select Home Team',
+                                  onTeamSelected: (teamName) {
+                                    gameSetupProvider.setHomeTeam(teamName);
+                                    _homeTeamController.text = teamName;
+                                  },
+                                ),
+                                settings: RouteSettings(arguments: awayTeam),
+                              ),
+                            );
+                            // If a team was deleted and it matches the current selection, clear
+                            if (result != null && result == homeTeam) {
+                              // Only clear if the team was actually deleted (not reselected)
+                              if (!teamsProvider.teams.contains(result)) {
+                                homeTeam = null;
+                                _homeTeamController.text = '';
+                                gameSetupProvider.setHomeTeam('');
+                              } else {
+                                // Reselected the same team, keep selection
+                                homeTeam = result;
+                                _homeTeamController.text = result;
+                                gameSetupProvider.setHomeTeam(result);
+                              }
+                            } else if (result != null) {
+                              homeTeam = result;
+                              _homeTeamController.text = result;
+                              gameSetupProvider.setHomeTeam(result);
+                            }
+                            homeTeamKey.currentState!.validate();
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        _buildTextField(
+                          formKey: awayTeamKey,
+                          controller: _awayTeamController,
+                          labelText: 'Away Team',
+                          emptyValueError: 'Please select Away Team',
+                          onTap: () async {
+                            final result = await Navigator.push<String>(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TeamList(
+                                  title: 'Select Away Team',
+                                  onTeamSelected: (teamName) {
+                                    gameSetupProvider.setAwayTeam(teamName);
+                                    _awayTeamController.text = teamName;
+                                  },
+                                ),
+                                settings: RouteSettings(arguments: homeTeam),
+                              ),
+                            );
+                            if (result != null && result == awayTeam) {
+                              if (!teamsProvider.teams.contains(result)) {
+                                awayTeam = null;
+                                _awayTeamController.text = '';
+                                gameSetupProvider.setAwayTeam('');
+                              } else {
+                                awayTeam = result;
+                                _awayTeamController.text = result;
+                                gameSetupProvider.setAwayTeam(result);
+                              }
+                            } else if (result != null) {
+                              awayTeam = result;
+                              _awayTeamController.text = result;
+                              gameSetupProvider.setAwayTeam(result);
+                            }
+                            awayTeamKey.currentState!.validate();
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.swap_vert),
+                        label: Text('Swap'),
+                        onPressed: (homeTeam == null && awayTeam == null)
+                            ? null
+                            : () {
+                                final temp = homeTeam;
+                                homeTeam = awayTeam;
+                                awayTeam = temp;
+                                _homeTeamController.text = homeTeam ?? '';
+                                _awayTeamController.text = awayTeam ?? '';
+                                gameSetupProvider.setHomeTeam(homeTeam ?? '');
+                                gameSetupProvider.setAwayTeam(awayTeam ?? '');
+                                homeTeamKey.currentState?.validate();
+                                awayTeamKey.currentState?.validate();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const Spacer(flex: 1),
-              _buildTextField(
-                  formKey: awayTeamKey,
-                  controller: _awayTeamController,
-                  labelText: 'Away Team',
-                  emptyValueError: 'Please select Away Team',
-                  onTap: () async {
-                    awayTeam = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TeamList(
-                              title: 'Select Away Team',
-                              onTeamSelected: (teamName) {
-                                gameSetupProvider.setAwayTeam(teamName);
-                                _awayTeamController.text = teamName;
-                              })),
-                    );
-                    awayTeamKey.currentState!.validate();
-                    return null;
-                  }),
-              const Spacer(flex: 1),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -180,7 +261,7 @@ class _GameSetupState extends State<GameSetup> {
                   ),
                 ],
               ),
-              const Spacer(flex: 1),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -193,7 +274,7 @@ class _GameSetupState extends State<GameSetup> {
                   ),
                 ],
               ),
-              const Spacer(flex: 1),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
