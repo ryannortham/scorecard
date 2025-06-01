@@ -14,7 +14,7 @@ void main() async {
 class GoalKeeper extends StatelessWidget {
   final ThemeData? theme;
 
-  const GoalKeeper({Key? key, required this.theme}) : super(key: key);
+  const GoalKeeper({super.key, required this.theme});
 
   @override
   Widget build(BuildContext context) {

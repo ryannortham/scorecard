@@ -5,7 +5,7 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:provider/provider.dart';
 
 class Results extends StatefulWidget {
-  const Results({Key? key, required this.title}) : super(key: key);
+  const Results({super.key, required this.title});
   final String title;
 
   @override
@@ -14,18 +14,11 @@ class Results extends StatefulWidget {
 
 class ResultsState extends State<Results> {
   late GameSetupProvider gameSetupProvider;
-  int _selectedIndex = 2;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
-  }
-
-  void _onNavTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   @override

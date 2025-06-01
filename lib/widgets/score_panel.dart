@@ -8,12 +8,13 @@ class ScorePanel extends StatelessWidget {
   final bool isHomeTeam;
 
   const ScorePanel({
-    Key? key,
+    super.key,
     required this.teamName,
     required this.isHomeTeam,
-  }) : super(key: key);
+  });
 
-  Widget _buildScoreCounter(String label, bool isGoal, ScorePanelProvider scorePanelProvider) {
+  Widget _buildScoreCounter(
+      String label, bool isGoal, ScorePanelProvider scorePanelProvider) {
     return ScoreCounter(
       label: label,
       isHomeTeam: isHomeTeam,
@@ -54,7 +55,9 @@ class ScorePanel extends StatelessWidget {
             Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  isHomeTeam ? scorePanelProvider.homePoints.toString() : scorePanelProvider.awayPoints.toString(),
+                  isHomeTeam
+                      ? scorePanelProvider.homePoints.toString()
+                      : scorePanelProvider.awayPoints.toString(),
                   style: Theme.of(context).textTheme.displayMedium,
                 )),
             Row(

@@ -7,7 +7,7 @@ import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/timer.dart';
 
 class Scoring extends StatefulWidget {
-  const Scoring({Key? key, required this.title}) : super(key: key);
+  const Scoring({super.key, required this.title});
   final String title;
 
   @override
@@ -17,7 +17,6 @@ class Scoring extends StatefulWidget {
 class ScoringState extends State<Scoring> {
   late ScorePanelProvider scorePanelProvider;
   late GameSetupProvider gameSetupProvider;
-  int _selectedIndex = 1;
   List<bool> isSelected = [true, false, false, false];
 
   @override
@@ -27,18 +26,14 @@ class ScoringState extends State<Scoring> {
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
   }
 
-  void _onNavTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   double getProgressValue() {
-    if (gameSetupProvider.quarterMSec <= 0 || scorePanelProvider.timerRawTime < 0) {
+    if (gameSetupProvider.quarterMSec <= 0 ||
+        scorePanelProvider.timerRawTime < 0) {
       return 0.0;
     }
 
-    double progress = scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
+    double progress =
+        scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
     return progress.clamp(0.0, 1.0);
   }
 
@@ -67,7 +62,10 @@ class ScoringState extends State<Scoring> {
                 ),
                 const SizedBox(height: 8.0),
                 ToggleButtons(
-                  isSelected: List.generate(4, (index) => scorePanelProvider.selectedQuarter == index + 1),
+                  isSelected: List.generate(
+                      4,
+                      (index) =>
+                          scorePanelProvider.selectedQuarter == index + 1),
                   onPressed: (index) {
                     scorePanelProvider.setSelectedQuarter(index + 1);
                   },

@@ -6,7 +6,7 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 
 class TimerWidget extends StatefulWidget {
-  const TimerWidget({Key? key}) : super(key: key);
+  const TimerWidget({super.key});
 
   @override
   TimerWidgetState createState() => TimerWidgetState();
@@ -89,14 +89,14 @@ class TimerWidgetState extends State<TimerWidget> {
       }
     } else {
       if (!_stopWatchTimer.isRunning) {
-        return Theme.of(context).colorScheme.onBackground;
+        return Theme.of(context).colorScheme.onSurface;
       }
 
       if (_stopWatchTimer.rawTime.value > quarterMSec) {
         return Theme.of(context).colorScheme.error;
       }
     }
-    return Theme.of(context).colorScheme.onBackground;
+    return Theme.of(context).colorScheme.onSurface;
   }
 
   @override

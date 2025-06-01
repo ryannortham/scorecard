@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TeamList extends StatelessWidget {
-  TeamList({Key? key, required this.title, required this.onTeamSelected})
-      : super(key: key);
+  TeamList({super.key, required this.title, required this.onTeamSelected});
   final String title;
   final void Function(String) onTeamSelected;
   final List<String> teamNames = [

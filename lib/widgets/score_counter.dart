@@ -9,12 +9,12 @@ class ScoreCounter extends StatefulWidget {
   final ScorePanelProvider scorePanelProvider;
 
   const ScoreCounter({
-    Key? key,
+    super.key,
     required this.label,
     required this.isGoal,
     required this.isHomeTeam,
     required this.scorePanelProvider,
-  }) : super(key: key);
+  });
 
   @override
   ScoreCounterState createState() => ScoreCounterState();

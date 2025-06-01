@@ -5,7 +5,7 @@ import 'package:goalkeeper/providers/score_panel_provider.dart';
 class ScoreTable extends StatelessWidget {
   final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
 
-  const ScoreTable({Key? key}) : super(key: key);
+  const ScoreTable({super.key});
 
   Widget createCell(BuildContext context, String text, {bool isBold = false}) {
     return SizedBox(
@@ -17,11 +17,14 @@ class ScoreTable extends StatelessWidget {
   }
 
   TableRow createRow(BuildContext context, int rowIndex, List<String> values) {
-    final selectedQuarter = Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+    final selectedQuarter =
+        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
 
     return TableRow(
       decoration: BoxDecoration(
-        color: (rowIndex == selectedQuarter) ? Theme.of(context).colorScheme.secondaryContainer : Colors.transparent,
+        color: (rowIndex == selectedQuarter)
+            ? Theme.of(context).colorScheme.secondaryContainer
+            : Colors.transparent,
       ),
       children: [
         createCell(context, values[0]),
@@ -35,7 +38,8 @@ class ScoreTable extends StatelessWidget {
   Widget createNestedCell(BuildContext context, List<String> values) {
     return Table(
       border: TableBorder(
-        verticalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
+        verticalInside:
+            BorderSide(width: 1, color: Theme.of(context).dividerColor),
       ),
       columnWidths: const {
         0: FlexColumnWidth(0.7),
@@ -73,8 +77,10 @@ class ScoreTable extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Table(
         border: TableBorder(
-          verticalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
-          horizontalInside: BorderSide(width: 1, color: Theme.of(context).dividerColor),
+          verticalInside:
+              BorderSide(width: 1, color: Theme.of(context).dividerColor),
+          horizontalInside:
+              BorderSide(width: 1, color: Theme.of(context).dividerColor),
           top: BorderSide(width: 2, color: Theme.of(context).dividerColor),
           bottom: BorderSide(width: 2, color: Theme.of(context).dividerColor),
           left: BorderSide(width: 2, color: Theme.of(context).dividerColor),

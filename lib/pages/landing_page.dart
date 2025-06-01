@@ -3,7 +3,7 @@ import 'game_setup.dart';
 import 'debug.dart';
 
 class LandingPage extends StatefulWidget {
-  const LandingPage({Key? key, required this.title}) : super(key: key);
+  const LandingPage({super.key, required this.title});
   final String title;
 
   @override
@@ -50,7 +50,7 @@ class LandingPageState extends State<LandingPage> {
             ),
             const Spacer(flex: 1),
             _buildButton(
-              "View Game Results",
+              "Debug",
               () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const Debug(),

@@ -7,7 +7,7 @@ import 'team_list.dart';
 import 'scoring.dart';
 
 class GameSetup extends StatefulWidget {
-  const GameSetup({Key? key, required this.title}) : super(key: key);
+  const GameSetup({super.key, required this.title});
   final String title;
 
   @override
@@ -15,7 +15,6 @@ class GameSetup extends StatefulWidget {
 }
 
 class _GameSetupState extends State<GameSetup> {
-  int _selectedIndex = 0;
   String? homeTeam;
   String? awayTeam;
 
@@ -29,12 +28,6 @@ class _GameSetupState extends State<GameSetup> {
   final TextEditingController _dateController = TextEditingController(
     text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
   );
-
-  void _onNavTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
 
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
