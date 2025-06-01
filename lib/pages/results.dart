@@ -57,7 +57,9 @@ class ResultsState extends State<Results> {
           ),
           const Padding(
             padding: EdgeInsets.all(8.0),
-            child: ScoreTable(),
+            child: ScoreTable(
+              isHomeTeam: true,
+            ),
           ),
           Container(
             alignment: Alignment.center,
@@ -76,7 +78,9 @@ class ResultsState extends State<Results> {
           ),
           const Padding(
             padding: EdgeInsets.all(8.0),
-            child: ScoreTable(),
+            child: ScoreTable(
+              isHomeTeam: false,
+            ),
           ),
           Container(
             alignment: Alignment.center,

@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 
 class ScoreTable extends StatelessWidget {
+  final bool isHomeTeam;
   final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
 
-  const ScoreTable({Key? key}) : super(key: key);
+  const ScoreTable({Key? key, required this.isHomeTeam}) : super(key: key);
 
   Widget createCell(BuildContext context, String text, {bool isBold = false}) {
     return SizedBox(
@@ -93,10 +94,10 @@ class ScoreTable extends StatelessWidget {
             'Behinds',
             'Points',
           ]),
-          createRow(context, 1, ['1st', '1', '1', '2', '2', '8', '8']),
-          createRow(context, 2, ['2nd', '2', '3', '1', '3', '13', '21']),
-          createRow(context, 3, ['3rd', '1', '4', '2', '5', '8', '29']),
-          createRow(context, 4, ['4th', '0', '4', '1', '6', '1', '30']),
+          createRow(context, 1, Provider.of<ScorePanelProvider>(context).generateQuarterList(isHomeTeam, 1)),
+          createRow(context, 2, Provider.of<ScorePanelProvider>(context).generateQuarterList(isHomeTeam, 2)),
+          createRow(context, 3, Provider.of<ScorePanelProvider>(context).generateQuarterList(isHomeTeam, 3)),
+          createRow(context, 4, Provider.of<ScorePanelProvider>(context).generateQuarterList(isHomeTeam, 4))
         ],
       ),
     );
