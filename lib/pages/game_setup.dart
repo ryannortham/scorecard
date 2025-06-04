@@ -332,28 +332,29 @@ class _GameSetupState extends State<GameSetup> {
                 ),
               ),
               const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildButton('Cancel', () {
-                    Navigator.pop(context);
-                  }),
-                  _buildButton('Start Scoring', () {
-                    if (isValidSetup()) {
-                      // Reset the score state for a new game
-                      final scorePanelProvider =
-                          Provider.of<ScorePanelProvider>(context,
-                              listen: false);
-                      scorePanelProvider.resetGame();
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (isValidSetup()) {
+                        // Reset the score state for a new game
+                        final scorePanelProvider =
+                            Provider.of<ScorePanelProvider>(context,
+                                listen: false);
+                        scorePanelProvider.resetGame();
 
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const Scoring(title: 'Scoring'),
-                        ),
-                      );
-                    }
-                  }),
-                ],
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Scoring(title: 'Scoring'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Start Scoring'),
+                  ),
+                ),
               ),
               const Spacer(flex: 1),
             ],

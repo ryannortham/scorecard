@@ -4,7 +4,6 @@ import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
-import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/score_panel.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
@@ -90,92 +89,38 @@ class ScoringState extends State<Scoring> {
     return false;
   }
 
-  Future<String?> _showSaveGameDialog(
-      {String saveButtonText = 'Save & Exit'}) async {
-    return await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Save Game?'),
-          content: const Text('What would you like to do with this game?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('cancel'),
-              child: const Text('Continue'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('discard'),
-              child: const Text('Discard'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop('save'),
-              child: Text(saveButtonText),
-            ),
-          ],
-        );
-      },
-    );
+  Future<bool> _showExitConfirmation() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Leave Game?'),
+              content: const Text('Are you sure you want to exit the game?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Exit'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   Future<bool> _onWillPop() async {
     if (_hasGameStateChanged()) {
-      final action = await _showSaveGameDialog(saveButtonText: 'Save & Exit');
-
-      if (action == 'save') {
-        await _saveGame();
-        return true; // Allow exit after saving
-      } else if (action == 'discard') {
-        return true; // Allow exit without saving
-      } else {
-        return false; // Continue - don't exit
-      }
+      // Simple confirmation when the user has changed the game state
+      return await _showExitConfirmation();
     }
     return true; // Allow back navigation if no changes
   }
 
-  Future<void> _saveGame() async {
-    try {
-      final gameRecord = GameHistoryService.createGameRecord(
-        date: gameSetupProvider.gameDate,
-        homeTeam: gameSetupProvider.homeTeam,
-        awayTeam: gameSetupProvider.awayTeam,
-        quarterMinutes: gameSetupProvider.quarterMinutes,
-        isCountdownTimer: gameSetupProvider.isCountdownTimer,
-        events: gameEvents,
-        homeGoals: scorePanelProvider.homeGoals,
-        homeBehinds: scorePanelProvider.homeBehinds,
-        awayGoals: scorePanelProvider.awayGoals,
-        awayBehinds: scorePanelProvider.awayBehinds,
-      );
-
-      await GameHistoryService.saveGame(gameRecord);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Game saved successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving game: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _finishGame() async {
-    await _saveGame();
-    if (mounted && context.mounted) {
-      Navigator.of(context).pop();
-    }
-  }
+  // Removed _saveGame and _finishGame methods as they are no longer needed
 
   void _checkForQuarterEnd() {
     // Exit early if widget is not mounted
@@ -252,13 +197,18 @@ class ScoringState extends State<Scoring> {
           content:
               Text('Quarter $quarter has ended. What would you like to do?'),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('continue'),
-              child: const Text('Continue Playing'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('next'),
-              child: Text('Go to Quarter $nextQuarter'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop('continue'),
+                  child: const Text('Continue Playing'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop('next'),
+                  child: Text('Go to Quarter $nextQuarter'),
+                ),
+              ],
             ),
             // Remove Save & Exit option for quarters 1-3
           ],
@@ -299,13 +249,18 @@ class ScoringState extends State<Scoring> {
           content:
               const Text('The 4th quarter has ended. The game is complete!'),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('continue'),
-              child: const Text('Continue Playing'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop('finish'),
-              child: const Text('Finish Game'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop('continue'),
+                  child: const Text('Continue Playing'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop('exit'),
+                  child: const Text('Exit Game'),
+                ),
+              ],
             ),
           ],
         );
@@ -315,9 +270,11 @@ class ScoringState extends State<Scoring> {
     // Check mounted state before proceeding with actions
     if (!mounted) return;
 
-    if (action == 'finish') {
-      // Directly save and finish the game without additional prompts
-      await _finishGame();
+    if (action == 'exit') {
+      // Simply exit the game without saving
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
     } else if (action == 'continue') {
       // Reset the dialog flag so it can be shown again if game ends again in overtime
       _hasShownQuarterEndDialog = false;
@@ -348,8 +305,10 @@ class ScoringState extends State<Scoring> {
             appBar: AppBar(
               title: Text(widget.title),
               actions: [
+                // Settings button
                 IconButton(
                   icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
+                  tooltip: 'Menu',
                   onPressed: () async {
                     await Navigator.of(context).push(
                       MaterialPageRoute(
