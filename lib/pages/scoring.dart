@@ -94,16 +94,15 @@ class ScoringState extends State<Scoring> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text('Leave Game?'),
-              content: const Text('Are you sure you want to exit the game?'),
+              title: const Text('Exit Game?'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: const Text('Exit'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Continue'),
                 ),
               ],
             );
