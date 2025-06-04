@@ -295,24 +295,9 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                             ],
                           ),
                           isThreeLine: true,
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'details') {
-                                _showGameDetails(game);
-                              } else if (value == 'delete') {
-                                _deleteGame(game);
-                              }
-                            },
-                            itemBuilder: (BuildContext context) => [
-                              const PopupMenuItem<String>(
-                                value: 'details',
-                                child: Text('View Details'),
-                              ),
-                              const PopupMenuItem<String>(
-                                value: 'delete',
-                                child: Text('Delete'),
-                              ),
-                            ],
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _deleteGame(game),
                           ),
                           onTap: () => _showGameDetails(game),
                         ),
