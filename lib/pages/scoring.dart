@@ -98,7 +98,7 @@ class ScoringState extends State<Scoring> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('cancel'),
-              child: const Text('Cancel'),
+              child: const Text('Continue'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop('discard'),
@@ -124,7 +124,7 @@ class ScoringState extends State<Scoring> {
       } else if (action == 'discard') {
         return true; // Allow exit without saving
       } else {
-        return false; // Cancel - don't exit
+        return false; // Continue - don't exit
       }
     }
     return true; // Allow back navigation if no changes
@@ -355,7 +355,7 @@ class ScoringState extends State<Scoring> {
                       } else if (action == 'discard') {
                         if (context.mounted) Navigator.of(context).pop();
                       }
-                      // 'cancel' does nothing - stays on current screen
+                      // 'cancel' (Continue button) does nothing - stays on current screen
                     }
                   },
                   itemBuilder: (BuildContext context) =>
@@ -384,7 +384,8 @@ class ScoringState extends State<Scoring> {
                     ),
                   ),
                   ScoreTable(
-                    events: gameEvents,
+                    events: List<GameEvent>.from(
+                        gameEvents), // Create a defensive copy
                     homeTeam: homeTeamName,
                     awayTeam: awayTeamName,
                     displayTeam: homeTeamName,
@@ -398,7 +399,8 @@ class ScoringState extends State<Scoring> {
                     ),
                   ),
                   ScoreTable(
-                    events: gameEvents,
+                    events: List<GameEvent>.from(
+                        gameEvents), // Create a defensive copy
                     homeTeam: homeTeamName,
                     awayTeam: awayTeamName,
                     displayTeam: awayTeamName,
