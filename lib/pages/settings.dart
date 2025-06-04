@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import '../providers/settings_provider.dart';
@@ -110,7 +111,7 @@ class _SettingsState extends State<Settings> {
                               onPressed: () {
                                 settingsProvider.setFavoriteTeam('');
                               },
-                              icon: const Icon(Icons.clear),
+                              icon: const FaIcon(FontAwesomeIcons.xmark),
                               tooltip: 'Clear favorite team',
                             ),
                           ],

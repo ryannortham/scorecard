@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
@@ -205,7 +206,7 @@ class ScoringState extends State<Scoring> {
                 // Save Game button
                 IconButton(
                   onPressed: _hasGameStateChanged() ? _saveGame : null,
-                  icon: const Icon(Icons.save),
+                  icon: const FaIcon(FontAwesomeIcons.floppyDisk),
                   tooltip: 'Save Game',
                 ),
                 // Finish Game button
@@ -231,7 +232,7 @@ class ScoringState extends State<Scoring> {
                       value: 'finish',
                       child: Row(
                         children: [
-                          Icon(Icons.flag),
+                          FaIcon(FontAwesomeIcons.flag),
                           SizedBox(width: 8),
                           Text('Finish Game'),
                         ],

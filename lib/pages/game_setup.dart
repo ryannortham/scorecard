@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
@@ -112,7 +113,7 @@ class _GameSetupState extends State<GameSetup> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -266,7 +267,7 @@ class _GameSetupState extends State<GameSetup> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton.icon(
-                        icon: Icon(Icons.swap_vert),
+                        icon: FaIcon(FontAwesomeIcons.arrowsUpDown),
                         label: Text('Swap'),
                         onPressed: (homeTeam != null || awayTeam != null)
                             ? () {

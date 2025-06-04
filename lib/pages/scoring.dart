@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
@@ -348,7 +349,7 @@ class ScoringState extends State<Scoring> {
               title: Text(widget.title),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.more_vert),
+                  icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
                   onPressed: () async {
                     await Navigator.of(context).push(
                       MaterialPageRoute(

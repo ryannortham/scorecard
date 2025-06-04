@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/results_panel.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
@@ -35,7 +36,7 @@ class ResultsState extends State<Results> {
         title: const Text('Results'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Settings(title: 'Settings'),

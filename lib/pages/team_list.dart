@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../providers/teams_provider.dart';
 import 'settings.dart';
@@ -22,7 +23,7 @@ class TeamList extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Settings(title: 'Settings'),
@@ -50,7 +51,7 @@ class TeamList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit),
+                            icon: FaIcon(FontAwesomeIcons.pen),
                             tooltip: 'Edit',
                             onPressed: () {
                               _showEditTeamDialog(
@@ -58,7 +59,7 @@ class TeamList extends StatelessWidget {
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: FaIcon(FontAwesomeIcons.trash),
                             tooltip: 'Delete',
                             onPressed: () async {
                               final deletedTeam = teamNames[index];
@@ -79,7 +80,7 @@ class TeamList extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTeamDialog(context, teamsProvider),
         tooltip: 'Add Team',
-        child: Icon(Icons.add),
+        child: FaIcon(FontAwesomeIcons.plus),
       ),
     );
   }

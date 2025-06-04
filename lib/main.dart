@@ -97,7 +97,8 @@ class GoalKeeperApp extends StatelessWidget {
                   style: TextButton.styleFrom(
                     foregroundColor: darkColorScheme.primary,
                     // Add subtle background for better visibility in dark mode
-                    backgroundColor: darkColorScheme.primary.withOpacity(0.08),
+                    backgroundColor:
+                        darkColorScheme.primary.withValues(alpha: 0.08),
                   ),
                 ),
                 outlinedButtonTheme: OutlinedButtonThemeData(

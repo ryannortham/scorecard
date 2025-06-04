@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:intl/intl.dart';
@@ -170,7 +171,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         title: const Text('Game History'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Settings(title: 'Settings'),

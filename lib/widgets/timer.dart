@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
@@ -171,21 +172,21 @@ class TimerWidgetState extends State<TimerWidget> {
       if (_isCustomTimerRunning) {
         // If timer is running and in negative time (overtime), show stop icon
         if (_customTimerValue <= 0) {
-          return Icons.stop;
+          return FontAwesomeIcons.stop;
         }
-        return Icons.pause;
+        return FontAwesomeIcons.pause;
       } else {
-        return Icons.play_arrow;
+        return FontAwesomeIcons.play;
       }
     } else {
       if (_stopWatchTimer.isRunning) {
         // If timer is running and past quarter end (overtime), show stop icon
         if (_stopWatchTimer.rawTime.value > quarterMSec) {
-          return Icons.stop;
+          return FontAwesomeIcons.stop;
         }
-        return Icons.pause;
+        return FontAwesomeIcons.pause;
       } else {
-        return Icons.play_arrow;
+        return FontAwesomeIcons.play;
       }
     }
   }
@@ -255,7 +256,7 @@ class TimerWidgetState extends State<TimerWidget> {
               builder: (context, isTimerRunning, _) {
                 return ElevatedButton(
                   onPressed: toggleTimer,
-                  child: Icon(getIcon()),
+                  child: FaIcon(getIcon()),
                 );
               },
             ),
@@ -271,8 +272,8 @@ class TimerWidgetState extends State<TimerWidget> {
                       : () {
                           resetTimer();
                         },
-                  child: Icon(
-                    Icons.restart_alt,
+                  child: FaIcon(
+                    FontAwesomeIcons.arrowRotateLeft,
                     color: isTimerRunning
                         ? Theme.of(context)
                             .colorScheme
