@@ -57,6 +57,7 @@ class ResultsState extends State<Results> {
               events: gameEvents,
               homeTeam: homeTeamName,
               awayTeam: awayTeamName,
+              displayTeam: homeTeamName,
             ),
           ),
           Container(
@@ -80,6 +81,7 @@ class ResultsState extends State<Results> {
               events: gameEvents,
               homeTeam: homeTeamName,
               awayTeam: awayTeamName,
+              displayTeam: awayTeamName,
             ),
           ),
           Container(

@@ -1,3 +1,4 @@
+// Score table widget for displaying team scores by quarter
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
@@ -7,35 +8,31 @@ class ScoreTable extends StatelessWidget {
   final List<GameEvent> events;
   final String homeTeam;
   final String awayTeam;
+  final String displayTeam; // The team whose data this table should display
 
   const ScoreTable(
       {super.key,
       required this.events,
       required this.homeTeam,
-      required this.awayTeam});
+      required this.awayTeam,
+      required this.displayTeam});
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
-    final home = events
-        .where((e) => e.quarter == quarter && e.team == homeTeam)
+    final teamEvents = events
+        .where((e) => e.quarter == quarter && e.team == displayTeam)
         .toList();
-    final away = events
-        .where((e) => e.quarter == quarter && e.team == awayTeam)
-        .toList();
-    return {'home': home, 'away': away};
+    return {'team': teamEvents};
   }
 
   static const List<String> _quarterLabels = ['1st', '2nd', '3rd', '4th'];
 
   TableRow createRow(BuildContext context, int quarter) {
     final byQuarter = _eventsByQuarter(quarter + 1);
-    final homeGoals = byQuarter['home']!.where((e) => e.type == 'goal').length;
-    final homeBehinds =
-        byQuarter['home']!.where((e) => e.type == 'behind').length;
-    final awayGoals = byQuarter['away']!.where((e) => e.type == 'goal').length;
-    final awayBehinds =
-        byQuarter['away']!.where((e) => e.type == 'behind').length;
-    final homePoints = homeGoals * 6 + homeBehinds;
-    final awayPoints = awayGoals * 6 + awayBehinds;
+    final teamGoals = byQuarter['team']!.where((e) => e.type == 'goal').length;
+    final teamBehinds =
+        byQuarter['team']!.where((e) => e.type == 'behind').length;
+    final teamPoints = teamGoals * 6 + teamBehinds;
+
     return TableRow(
       decoration: BoxDecoration(
         color: (quarter + 1 ==
@@ -46,12 +43,9 @@ class ScoreTable extends StatelessWidget {
       ),
       children: [
         createCell(context, _quarterLabels[quarter]),
-        createNestedCell(
-            context, [homeGoals.toString(), homeBehinds.toString()]),
-        createNestedCell(
-            context, [awayGoals.toString(), awayBehinds.toString()]),
-        createNestedCell(
-            context, [homePoints.toString(), awayPoints.toString()]),
+        createCell(context, teamGoals.toString()),
+        createCell(context, teamBehinds.toString()),
+        createCell(context, teamPoints.toString(), isBold: true),
       ],
     );
   }
@@ -67,37 +61,12 @@ class ScoreTable extends StatelessWidget {
     );
   }
 
-  Widget createNestedCell(BuildContext context, List<String> values) {
-    return Table(
-      border: TableBorder(
-        verticalInside:
-            BorderSide(width: 1, color: Theme.of(context).dividerColor),
-      ),
-      columnWidths: const {
-        0: FlexColumnWidth(0.7),
-        1: FlexColumnWidth(0.3),
-      },
-      children: [
-        TableRow(
-          children: [
-            createCell(context, values[0]),
-            createCell(context, values[1], isBold: true),
-          ],
-        ),
-      ],
-    );
-  }
-
   TableRow createSpecialRow(BuildContext context, List<String> values) {
     return TableRow(
       children: [
         createCell(context, values[0], isBold: true),
-        TableCell(
-          child: createCell(context, values[1], isBold: true),
-        ),
-        TableCell(
-          child: createCell(context, values[2], isBold: true),
-        ),
+        createCell(context, values[1], isBold: true),
+        createCell(context, values[2], isBold: true),
         createCell(context, values[3], isBold: true),
       ],
     );
@@ -119,10 +88,10 @@ class ScoreTable extends StatelessWidget {
           right: BorderSide(width: 2, color: Theme.of(context).dividerColor),
         ),
         columnWidths: const {
-          0: FlexColumnWidth(0.1),
-          1: FlexColumnWidth(0.3),
-          2: FlexColumnWidth(0.3),
-          3: FlexColumnWidth(0.3),
+          0: FlexColumnWidth(0.25),
+          1: FlexColumnWidth(0.25),
+          2: FlexColumnWidth(0.25),
+          3: FlexColumnWidth(0.25),
         },
         children: [
           createSpecialRow(context, [

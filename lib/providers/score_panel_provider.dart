@@ -42,4 +42,14 @@ class ScorePanelProvider extends ChangeNotifier {
         ? (isGoal ? _homeGoals : _homeBehinds)
         : (isGoal ? _awayGoals : _awayBehinds);
   }
+
+  void resetGame() {
+    _homeGoals = 0;
+    _homeBehinds = 0;
+    _awayGoals = 0;
+    _awayBehinds = 0;
+    _timerRawTime = 0;
+    _selectedQuarter = 1;
+    notifyListeners();
+  }
 }

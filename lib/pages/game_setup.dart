@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
+import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
@@ -283,6 +284,12 @@ class _GameSetupState extends State<GameSetup> {
                   }),
                   _buildButton('Start Scoring', () {
                     if (isValidSetup()) {
+                      // Reset the score state for a new game
+                      final scorePanelProvider =
+                          Provider.of<ScorePanelProvider>(context,
+                              listen: false);
+                      scorePanelProvider.resetGame();
+
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => const Scoring(title: 'Scoring'),

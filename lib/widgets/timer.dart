@@ -83,6 +83,8 @@ class TimerWidgetState extends State<TimerWidget> {
     }
   }
 
+  bool get isTimerActuallyRunning => _stopWatchTimer.isRunning;
+
   IconData getIcon() {
     return _stopWatchTimer.isRunning ? Icons.pause : Icons.play_arrow;
   }
@@ -133,8 +135,8 @@ class TimerWidgetState extends State<TimerWidget> {
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.30,
             child: ValueListenableBuilder<bool>(
-              valueListenable: isRunning,
-              builder: (context, isRunning, _) {
+              valueListenable: widget.isRunning ?? isRunning,
+              builder: (context, isTimerRunning, _) {
                 return ElevatedButton(
                   onPressed: toggleTimer,
                   child: Icon(getIcon()),
@@ -145,18 +147,21 @@ class TimerWidgetState extends State<TimerWidget> {
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.30,
             child: ValueListenableBuilder<bool>(
-              valueListenable: isRunning,
-              builder: (context, isRunning, _) {
+              valueListenable: widget.isRunning ?? isRunning,
+              builder: (context, isTimerRunning, _) {
                 return ElevatedButton(
-                  onPressed: isRunning
+                  onPressed: isTimerRunning
                       ? null
                       : () {
                           resetTimer();
                         },
                   child: Icon(
                     Icons.restart_alt,
-                    color: isRunning
-                        ? Colors.grey
+                    color: isTimerRunning
+                        ? Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38)
                         : null, // null defaults to the icon theme color
                   ),
                 );

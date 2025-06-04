@@ -38,7 +38,10 @@ class ScoreCounterState extends State<ScoreCounter> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: widget.enabled
                     ? Theme.of(context).textTheme.titleLarge?.color
-                    : Theme.of(context).colorScheme.outline,
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.38),
               ),
         ),
         const SizedBox(width: 8),
@@ -59,10 +62,16 @@ class ScoreCounterState extends State<ScoreCounter> {
             showButtonText: false,
             borderColor: widget.enabled
                 ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.outline,
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.12),
             textColor: widget.enabled
                 ? Theme.of(context).textTheme.titleLarge?.color
-                : Theme.of(context).colorScheme.outline,
+                : Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.38),
             onCountChange: widget.enabled
                 ? (newCount) {
                     final oldCount = widget.scorePanelProvider.getCount(
@@ -74,16 +83,35 @@ class ScoreCounterState extends State<ScoreCounter> {
                       widget.isGoal,
                       newCount.toInt(),
                     );
-                    final now = DateTime.now();
+
                     final quarter = widget.scorePanelProvider.selectedQuarter;
+                    final gameSetupProvider =
+                        Provider.of<GameSetupProvider>(context, listen: false);
                     final team = widget.isHomeTeam
-                        ? (Provider.of<GameSetupProvider>(context,
-                                listen: false)
-                            .homeTeam)
-                        : (Provider.of<GameSetupProvider>(context,
-                                listen: false)
-                            .awayTeam);
+                        ? gameSetupProvider.homeTeam
+                        : gameSetupProvider.awayTeam;
                     final type = widget.isGoal ? 'goal' : 'behind';
+
+                    // Calculate quarter elapsed time regardless of timer mode
+                    final timerRawTime = widget.scorePanelProvider.timerRawTime;
+                    final quarterMSec = gameSetupProvider.quarterMSec;
+
+                    // Calculate elapsed time based on timer mode
+                    int elapsedMSec;
+                    if (gameSetupProvider.isCountdownTimer) {
+                      // For countdown: full time - remaining time
+                      elapsedMSec = quarterMSec - timerRawTime;
+                    } else {
+                      // For count-up: elapsed time directly
+                      elapsedMSec = timerRawTime;
+                    }
+
+                    // Cap elapsed time at quarter maximum to handle overtime scoring
+                    elapsedMSec = elapsedMSec.clamp(0, quarterMSec);
+
+                    final quarterElapsedTime =
+                        Duration(milliseconds: elapsedMSec);
+
                     final state =
                         context.findAncestorStateOfType<ScoringState>();
                     if (newCount < oldCount) {
@@ -101,11 +129,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                       // Add a new event
                       final event = GameEvent(
                         quarter: quarter,
-                        time: Duration(
-                          hours: now.hour,
-                          minutes: now.minute,
-                          seconds: now.second,
-                        ),
+                        time: quarterElapsedTime,
                         team: team,
                         type: type,
                       );
