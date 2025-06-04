@@ -4,6 +4,7 @@ import 'package:goalkeeper/widgets/results_panel.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:provider/provider.dart';
+import 'settings.dart';
 
 class Results extends StatefulWidget {
   const Results({super.key, required this.title});
@@ -32,6 +33,16 @@ class ResultsState extends State<Results> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Results'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [

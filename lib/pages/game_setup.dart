@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:customizable_counter/customizable_counter.dart';
 import 'team_list.dart';
 import 'scoring.dart';
+import 'settings.dart';
 import '../providers/teams_provider.dart';
 
 class GameSetup extends StatefulWidget {
@@ -27,9 +28,7 @@ class _GameSetupState extends State<GameSetup> {
 
   final TextEditingController _homeTeamController = TextEditingController();
   final TextEditingController _awayTeamController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController(
-    text: DateFormat('EEEE dd/MM/yyyy').format(DateTime.now()),
-  );
+  final TextEditingController _dateController = TextEditingController();
 
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
@@ -76,6 +75,26 @@ class _GameSetupState extends State<GameSetup> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Synchronize text controllers with provider values on initialization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final gameSetupProvider =
+          Provider.of<GameSetupProvider>(context, listen: false);
+      _homeTeamController.text = gameSetupProvider.homeTeam;
+      _awayTeamController.text = gameSetupProvider.awayTeam;
+      _dateController.text =
+          DateFormat('EEEE dd/MM/yyyy').format(gameSetupProvider.gameDate);
+      homeTeam = gameSetupProvider.homeTeam.isNotEmpty
+          ? gameSetupProvider.homeTeam
+          : null;
+      awayTeam = gameSetupProvider.awayTeam.isNotEmpty
+          ? gameSetupProvider.awayTeam
+          : null;
+    });
+  }
+
+  @override
   void dispose() {
     _dateController.dispose();
     _homeTeamController.dispose();
@@ -91,6 +110,35 @@ class _GameSetupState extends State<GameSetup> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const Settings(title: 'Settings'),
+                ),
+              );
+              // Update game setup with current settings when returning
+              if (context.mounted) {
+                final settingsProvider =
+                    Provider.of<SettingsProvider>(context, listen: false);
+                final gameSetupProvider =
+                    Provider.of<GameSetupProvider>(context, listen: false);
+                gameSetupProvider
+                    .setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
+                gameSetupProvider.setIsCountdownTimer(
+                    settingsProvider.defaultIsCountdownTimer);
+                // Set favorite team as home team if home team is currently empty
+                if (gameSetupProvider.homeTeam.isEmpty &&
+                    settingsProvider.favoriteTeam.isNotEmpty) {
+                  gameSetupProvider.setHomeTeam(settingsProvider.favoriteTeam);
+                  _homeTeamController.text = settingsProvider.favoriteTeam;
+                }
+              }
+            },
+          ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -243,37 +291,44 @@ class _GameSetupState extends State<GameSetup> {
                 ],
               ),
               const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  const Text('Quarter Minutes'),
-                  CustomizableCounter(
-                    borderWidth: 2,
-                    borderRadius: 36,
-                    textSize:
-                        Theme.of(context).textTheme.titleLarge?.fontSize ?? 22,
-                    count: gameSetupProvider.quarterMinutes.toDouble(),
-                    minCount: 1,
-                    maxCount: 60,
-                    showButtonText: false,
-                    onCountChange: (count) {
-                      gameSetupProvider.setQuarterMinutes(count.toInt());
-                    },
+              Card(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Game Settings',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Quarter Minutes:'),
+                          Text(
+                            '${gameSetupProvider.quarterMinutes}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Timer Type:'),
+                          Text(
+                            gameSetupProvider.isCountdownTimer
+                                ? 'Countdown'
+                                : 'Count Up',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  const Text('Countdown Timer'),
-                  Switch(
-                    value: gameSetupProvider.isCountdownTimer,
-                    onChanged: (bool value) {
-                      gameSetupProvider.setIsCountdownTimer(value);
-                    },
-                  ),
-                ],
+                ),
               ),
               const SizedBox(height: 32),
               Row(

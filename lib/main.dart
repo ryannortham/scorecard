@@ -4,12 +4,14 @@ import 'package:goalkeeper/pages/landing_page.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
+import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => GameSetupProvider()),
         ChangeNotifierProvider(create: (_) => ScorePanelProvider()),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),

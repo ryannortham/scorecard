@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:intl/intl.dart';
+import 'settings.dart';
 
 class GameHistoryScreen extends StatefulWidget {
   const GameHistoryScreen({super.key});
@@ -168,6 +169,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       appBar: AppBar(
         title: const Text('Game History'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
+          ),
           if (_games.isNotEmpty)
             PopupMenuButton<String>(
               onSelected: (value) async {

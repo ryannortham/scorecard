@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/score_panel.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/quarter_timer_panel.dart';
+import 'settings.dart';
 
 class Scoring extends StatefulWidget {
   const Scoring({super.key, required this.title});
@@ -345,26 +347,27 @@ class ScoringState extends State<Scoring> {
             appBar: AppBar(
               title: Text(widget.title),
               actions: [
-                PopupMenuButton<String>(
-                  onSelected: (String result) async {
-                    if (result == 'finish') {
-                      final action = await _showSaveGameDialog(
-                          saveButtonText: 'Save & Finish');
-                      if (action == 'save') {
-                        await _finishGame();
-                      } else if (action == 'discard') {
-                        if (context.mounted) Navigator.of(context).pop();
-                      }
-                      // 'cancel' (Continue button) does nothing - stays on current screen
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const Settings(title: 'Settings'),
+                      ),
+                    );
+                    // Update game setup with current settings when returning
+                    if (context.mounted) {
+                      final settingsProvider =
+                          Provider.of<SettingsProvider>(context, listen: false);
+                      final gameSetupProvider = Provider.of<GameSetupProvider>(
+                          context,
+                          listen: false);
+                      gameSetupProvider.setQuarterMinutes(
+                          settingsProvider.defaultQuarterMinutes);
+                      gameSetupProvider.setIsCountdownTimer(
+                          settingsProvider.defaultIsCountdownTimer);
                     }
                   },
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: 'finish',
-                      child: Text('Finish Game'),
-                    ),
-                  ],
                 ),
               ],
             ),

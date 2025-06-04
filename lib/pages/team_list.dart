@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/teams_provider.dart';
+import 'settings.dart';
 
 class TeamList extends StatelessWidget {
   const TeamList(
@@ -19,6 +20,16 @@ class TeamList extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
+          ),
+        ],
       ),
       body: teamsProvider.loaded
           ? Padding(

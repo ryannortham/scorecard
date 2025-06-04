@@ -39,13 +39,22 @@ class GameSetupProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void reset() {
-    setHomeTeam('');
+  void initializeWithDefaults(
+      {int? defaultQuarterMinutes, bool? defaultIsCountdownTimer}) {
+    _quarterMinutes = defaultQuarterMinutes ?? 15;
+    _isCountdownTimer = defaultIsCountdownTimer ?? true;
+    notifyListeners();
+  }
+
+  void reset(
+      {int? defaultQuarterMinutes,
+      bool? defaultIsCountdownTimer,
+      String? favoriteTeam}) {
+    setHomeTeam(favoriteTeam ?? '');
     setAwayTeam('');
     setGameDate(DateTime.now());
-    setQuarterMinutes(20); // or your default value
-    setIsCountdownTimer(true); // or your default value
-    // Add any other resets needed for scores, etc.
+    setQuarterMinutes(defaultQuarterMinutes ?? 15);
+    setIsCountdownTimer(defaultIsCountdownTimer ?? true);
     notifyListeners();
   }
 }

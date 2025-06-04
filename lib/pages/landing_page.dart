@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'game_setup.dart';
 import 'game_history.dart';
+import 'settings.dart';
 import '../providers/game_setup_provider.dart';
+import '../providers/settings_provider.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key, required this.title});
@@ -26,7 +28,18 @@ class LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -44,11 +57,24 @@ class LandingPageState extends State<LandingPage> {
             const Spacer(flex: 1),
             _buildButton(
               "Start New Game",
-              () {
-                // Reset GameSetupProvider before navigating
+              () async {
+                // Reset GameSetupProvider before navigating using settings defaults
                 final gameSetupProvider =
                     Provider.of<GameSetupProvider>(context, listen: false);
-                gameSetupProvider.reset();
+                final settingsProvider =
+                    Provider.of<SettingsProvider>(context, listen: false);
+
+                // Ensure settings are loaded before proceeding
+                if (!settingsProvider.loaded) {
+                  await settingsProvider.loadSettings();
+                }
+
+                gameSetupProvider.reset(
+                  defaultQuarterMinutes: settingsProvider.defaultQuarterMinutes,
+                  defaultIsCountdownTimer:
+                      settingsProvider.defaultIsCountdownTimer,
+                  favoriteTeam: settingsProvider.favoriteTeam,
+                );
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const GameSetup(title: 'Game Setup'),
