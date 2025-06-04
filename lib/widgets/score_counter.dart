@@ -61,11 +61,8 @@ class ScoreCounterState extends State<ScoreCounter> {
             maxCount: 99,
             showButtonText: false,
             borderColor: widget.enabled
-                ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.12),
+                ? Theme.of(context).colorScheme.outline
+                : Theme.of(context).colorScheme.outline.withValues(alpha: 0.38),
             textColor: widget.enabled
                 ? Theme.of(context).textTheme.titleLarge?.color
                 : Theme.of(context)

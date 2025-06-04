@@ -38,6 +38,73 @@ class ScoreTable extends StatelessWidget {
   static const List<String> _quarterLabels = ['1st', '2nd', '3rd', '4th'];
 
   TableRow createRow(BuildContext context, int quarter) {
+    final currentQuarter =
+        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+    final isCurrentQuarter = quarter + 1 == currentQuarter;
+    final isFutureQuarter = quarter + 1 > currentQuarter;
+
+    // For future quarters, show blank cells
+    if (isFutureQuarter) {
+      return TableRow(
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+        ),
+        children: [
+          // Quarter label
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            child: Text(_quarterLabels[quarter]),
+          ),
+          // Goals value - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            child: const Text(''),
+          ),
+          // Goals running total - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.grey.withAlpha(20),
+            ),
+            child: const Text(''),
+          ),
+          // Behinds value - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            child: const Text(''),
+          ),
+          // Behinds running total - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.grey.withAlpha(20),
+            ),
+            child: const Text(''),
+          ),
+          // Points value - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            child: const Text(''),
+          ),
+          // Points running total - blank
+          Container(
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.grey.withAlpha(20),
+            ),
+            child: const Text(''),
+          ),
+        ],
+      );
+    }
+
     final byQuarter = _eventsByQuarter(quarter + 1);
     final teamEvents = byQuarter['team'] ?? [];
     final teamGoals = teamEvents.where((e) => e.type == 'goal').length;
@@ -60,9 +127,6 @@ class ScoreTable extends StatelessWidget {
       runningBehinds = teamBehinds;
     }
     final runningPoints = runningGoals * 6 + runningBehinds;
-
-    final isCurrentQuarter = quarter + 1 ==
-        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
 
     return TableRow(
       decoration: BoxDecoration(

@@ -22,7 +22,7 @@ class TeamList extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.more_vert),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Settings(title: 'Settings'),

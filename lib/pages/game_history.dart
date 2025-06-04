@@ -170,7 +170,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         title: const Text('Game History'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.more_vert),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => const Settings(title: 'Settings'),

@@ -348,7 +348,7 @@ class ScoringState extends State<Scoring> {
               title: Text(widget.title),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.settings),
+                  icon: const Icon(Icons.more_vert),
                   onPressed: () async {
                     await Navigator.of(context).push(
                       MaterialPageRoute(

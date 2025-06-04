@@ -112,7 +112,7 @@ class _GameSetupState extends State<GameSetup> {
         title: Text(widget.title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.more_vert),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
@@ -268,9 +268,8 @@ class _GameSetupState extends State<GameSetup> {
                       ElevatedButton.icon(
                         icon: Icon(Icons.swap_vert),
                         label: Text('Swap'),
-                        onPressed: (homeTeam == null && awayTeam == null)
-                            ? null
-                            : () {
+                        onPressed: (homeTeam != null || awayTeam != null)
+                            ? () {
                                 final temp = homeTeam;
                                 homeTeam = awayTeam;
                                 awayTeam = temp;
@@ -280,7 +279,8 @@ class _GameSetupState extends State<GameSetup> {
                                 gameSetupProvider.setAwayTeam(awayTeam ?? '');
                                 homeTeamKey.currentState?.validate();
                                 awayTeamKey.currentState?.validate();
-                              },
+                              }
+                            : null,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 12),
