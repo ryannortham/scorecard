@@ -56,50 +56,71 @@ class ScoreTable extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(_quarterLabels[quarter]),
           ),
-          // Goals value - blank
+          // Goals column - blank
           Container(
             height: 24,
             alignment: Alignment.center,
-            child: const Text(''),
-          ),
-          // Goals running total - blank
-          Container(
-            height: 24,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.grey.withAlpha(20),
+            child: Row(
+              children: [
+                const Expanded(
+                  flex: 3,
+                  child: Center(child: Text('')),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withAlpha(20),
+                    ),
+                    child: const Center(child: Text('')),
+                  ),
+                ),
+              ],
             ),
-            child: const Text(''),
           ),
-          // Behinds value - blank
+          // Behinds column - blank
           Container(
             height: 24,
             alignment: Alignment.center,
-            child: const Text(''),
-          ),
-          // Behinds running total - blank
-          Container(
-            height: 24,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.grey.withAlpha(20),
+            child: Row(
+              children: [
+                const Expanded(
+                  flex: 3,
+                  child: Center(child: Text('')),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withAlpha(20),
+                    ),
+                    child: const Center(child: Text('')),
+                  ),
+                ),
+              ],
             ),
-            child: const Text(''),
           ),
-          // Points value - blank
+          // Points column - blank
           Container(
             height: 24,
             alignment: Alignment.center,
-            child: const Text(''),
-          ),
-          // Points running total - blank
-          Container(
-            height: 24,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.grey.withAlpha(20),
+            child: Row(
+              children: [
+                const Expanded(
+                  flex: 3,
+                  child: Center(child: Text('')),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withAlpha(20),
+                    ),
+                    child: const Center(child: Text('')),
+                  ),
+                ),
+              ],
             ),
-            child: const Text(''),
           ),
         ],
       );
@@ -141,86 +162,143 @@ class ScoreTable extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(_quarterLabels[quarter]),
         ),
-        // Goals value
-        Container(
-          height: 24,
-          alignment: Alignment.center,
-          child: Text(teamGoals.toString()),
-        ),
-        // Goals running total
+        // Goals column (value and total combined)
         Container(
           height: 24,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isCurrentQuarter
-                ? Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withAlpha(180)
-                : Colors.grey.withAlpha(20),
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Colors.transparent,
           ),
-          child: Text(
-            runningGoals.toString(),
-            style: TextStyle(
-              fontSize: 10,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-            ),
-          ),
-        ),
-        // Behinds value
-        Container(
-          height: 24,
-          alignment: Alignment.center,
-          child: Text(teamBehinds.toString()),
-        ),
-        // Behinds running total
-        Container(
-          height: 24,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isCurrentQuarter
-                ? Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withAlpha(180)
-                : Colors.grey.withAlpha(20),
-          ),
-          child: Text(
-            runningBehinds.toString(),
-            style: TextStyle(
-              fontSize: 10,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-            ),
-          ),
-        ),
-        // Points value
-        Container(
-          height: 24,
-          alignment: Alignment.center,
-          child: Text(
-            teamPoints.toString(),
-            style: boldStyle,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Center(
+                  child: Text(teamGoals.toString()),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isCurrentQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer
+                            .withAlpha(180)
+                        : Colors.grey.withAlpha(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      runningGoals.toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(179),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        // Points running total
+        // Behinds column (value and total combined)
         Container(
           height: 24,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isCurrentQuarter
-                ? Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withAlpha(180)
-                : Colors.grey.withAlpha(20),
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Colors.transparent,
           ),
-          child: Text(
-            runningPoints.toString(),
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(179),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Center(
+                  child: Text(teamBehinds.toString()),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isCurrentQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer
+                            .withAlpha(180)
+                        : Colors.grey.withAlpha(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      runningBehinds.toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(179),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Points column (value and total combined)
+        Container(
+          height: 24,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isCurrentQuarter
+                ? Theme.of(context).colorScheme.secondaryContainer
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Center(
+                  child: Text(
+                    teamPoints.toString(),
+                    style: boldStyle,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isCurrentQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .secondaryContainer
+                            .withAlpha(180)
+                        : Colors.grey.withAlpha(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      runningPoints.toString(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(179),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -308,15 +386,12 @@ class ScoreTable extends StatelessWidget {
         ),
         columnWidths: const {
           0: FlexColumnWidth(0.10), // Qtr
-          1: FlexColumnWidth(0.225), // Goals (75% of 30%)
-          2: FlexColumnWidth(0.075), // Goals total (25% of 30%)
-          3: FlexColumnWidth(0.225), // Behinds (75% of 30%)
-          4: FlexColumnWidth(0.075), // Behinds total (25% of 30%)
-          5: FlexColumnWidth(0.225), // Points (75% of 30%)
-          6: FlexColumnWidth(0.075), // Points total (25% of 30%)
+          1: FlexColumnWidth(0.30), // Goals (main + total)
+          2: FlexColumnWidth(0.30), // Behinds (main + total)
+          3: FlexColumnWidth(0.30), // Score (main + total)
         },
         children: [
-          // Custom header row with simple headers
+          // Custom header row with spanning headers
           TableRow(
             decoration: BoxDecoration(
               border: Border(
@@ -331,62 +406,35 @@ class ScoreTable extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text('Qtr', style: boldStyle),
               ),
-              // Goals header
+              // Goals header spanning both columns
               Container(
                 height: 28,
                 alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border(
+                    right: BorderSide(
+                        width: 1, color: Theme.of(context).dividerColor),
+                  ),
+                ),
                 child: Text('Goals', style: boldStyle),
               ),
-              // Goals total column
+              // Behinds header spanning both columns
               Container(
                 height: 28,
                 alignment: Alignment.center,
-                color: Colors.grey.withAlpha(10),
-                child: Text('Tot',
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(179))),
-              ),
-              // Behinds header
-              Container(
-                height: 28,
-                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  border: Border(
+                    right: BorderSide(
+                        width: 1, color: Theme.of(context).dividerColor),
+                  ),
+                ),
                 child: Text('Behinds', style: boldStyle),
               ),
-              // Behinds total column
+              // Points header spanning both columns
               Container(
                 height: 28,
                 alignment: Alignment.center,
-                color: Colors.grey.withAlpha(10),
-                child: Text('Tot',
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(179))),
-              ),
-              // Points header
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                child: Text('Points', style: boldStyle),
-              ),
-              // Points total column
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                color: Colors.grey.withAlpha(10),
-                child: Text('Tot',
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(179))),
+                child: Text('Score', style: boldStyle),
               ),
             ],
           ),
