@@ -13,11 +13,24 @@ class QuarterTimerPanel extends StatefulWidget {
   });
 
   @override
-  State<QuarterTimerPanel> createState() => _QuarterTimerPanelState();
+  State<QuarterTimerPanel> createState() => QuarterTimerPanelState();
 }
 
-class _QuarterTimerPanelState extends State<QuarterTimerPanel> {
+class QuarterTimerPanelState extends State<QuarterTimerPanel> {
   final GlobalKey<TimerWidgetState> _timerKey = GlobalKey<TimerWidgetState>();
+
+  // Expose method to reset timer from parent widgets
+  void resetTimer() {
+    _timerKey.currentState?.resetTimer();
+  }
+
+  // Expose method to start timer from parent widgets
+  void startTimer() {
+    final timerState = _timerKey.currentState;
+    if (timerState != null && !timerState.isTimerActuallyRunning) {
+      timerState.toggleTimer();
+    }
+  }
 
   double getProgressValue(GameSetupProvider gameSetupProvider,
       ScorePanelProvider scorePanelProvider) {

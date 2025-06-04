@@ -32,7 +32,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         _isLoading = false;
       });
       // Show error message
-      if (mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading games: $e')),
         );
@@ -67,13 +67,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       try {
         await GameHistoryService.deleteGame(game.id);
         await _loadGames(); // Refresh the list
-        if (mounted) {
+        if (mounted && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Game deleted successfully')),
           );
         }
       } catch (e) {
-        if (mounted) {
+        if (mounted && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error deleting game: $e')),
           );
@@ -195,18 +195,17 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   );
 
                   if (confirm == true) {
-                    final messenger = ScaffoldMessenger.of(context);
                     try {
                       await GameHistoryService.clearAllGames();
                       await _loadGames();
-                      if (mounted) {
-                        messenger.showSnackBar(
+                      if (mounted && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('All games cleared')),
                         );
                       }
                     } catch (e) {
-                      if (mounted) {
-                        messenger.showSnackBar(
+                      if (mounted && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Error clearing games: $e')),
                         );
                       }

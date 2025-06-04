@@ -84,7 +84,7 @@ class ScoringState extends State<Scoring> {
 
       await GameHistoryService.saveGame(gameRecord);
 
-      if (mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Game saved successfully!'),
@@ -93,7 +93,7 @@ class ScoringState extends State<Scoring> {
         );
       }
     } catch (e) {
-      if (mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error saving game: $e'),
@@ -106,7 +106,7 @@ class ScoringState extends State<Scoring> {
 
   Future<void> _finishGame() async {
     await _saveGame();
-    if (mounted) {
+    if (mounted && context.mounted) {
       Navigator.of(context).pop();
     }
   }
@@ -217,12 +217,12 @@ class ScoringState extends State<Scoring> {
                         if (result == 'save') {
                           await _finishGame();
                         } else if (result == 'discard') {
-                          Navigator.of(context).pop();
+                          if (context.mounted) Navigator.of(context).pop();
                         }
                         // 'continue' does nothing - keeps playing
                       } else {
                         // No changes - just exit
-                        Navigator.of(context).pop();
+                        if (context.mounted) Navigator.of(context).pop();
                       }
                     }
                   },

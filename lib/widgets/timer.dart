@@ -168,9 +168,25 @@ class TimerWidgetState extends State<TimerWidget> {
       _useCustomTimer ? _isCustomTimerRunning : _stopWatchTimer.isRunning;
   IconData getIcon() {
     if (_useCustomTimer) {
-      return _isCustomTimerRunning ? Icons.pause : Icons.play_arrow;
+      if (_isCustomTimerRunning) {
+        // If timer is running and in negative time (overtime), show stop icon
+        if (_customTimerValue <= 0) {
+          return Icons.stop;
+        }
+        return Icons.pause;
+      } else {
+        return Icons.play_arrow;
+      }
     } else {
-      return _stopWatchTimer.isRunning ? Icons.pause : Icons.play_arrow;
+      if (_stopWatchTimer.isRunning) {
+        // If timer is running and past quarter end (overtime), show stop icon
+        if (_stopWatchTimer.rawTime.value > quarterMSec) {
+          return Icons.stop;
+        }
+        return Icons.pause;
+      } else {
+        return Icons.play_arrow;
+      }
     }
   }
 

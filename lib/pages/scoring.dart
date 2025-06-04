@@ -22,17 +22,37 @@ class ScoringState extends State<Scoring> {
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
   List<bool> isSelected = [true, false, false, false];
   final List<GameEvent> gameEvents = [];
+  final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
+      GlobalKey<QuarterTimerPanelState>();
+
+  // Track previous timer state to detect quarter end
+  int _previousTimerValue = 0;
+  bool _hasShownQuarterEndDialog = false;
+  int _lastCheckedQuarter = 1;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
+
+    // Initialize previous timer value
+    _previousTimerValue =
+        gameSetupProvider.isCountdownTimer ? gameSetupProvider.quarterMSec : 0;
+
+    // Initialize last checked quarter
+    _lastCheckedQuarter = scorePanelProvider.selectedQuarter;
+
+    // Listen for timer changes to detect quarter end
+    // Remove any existing listener first to avoid duplicates
+    scorePanelProvider.removeListener(_checkForQuarterEnd);
+    scorePanelProvider.addListener(_checkForQuarterEnd);
   }
 
   @override
   void dispose() {
     isTimerRunning.dispose();
+    scorePanelProvider.removeListener(_checkForQuarterEnd);
     super.dispose();
   }
 
@@ -149,9 +169,159 @@ class ScoringState extends State<Scoring> {
 
   Future<void> _finishGame() async {
     await _saveGame();
-    if (mounted) {
+    if (mounted && context.mounted) {
       Navigator.of(context).pop();
     }
+  }
+
+  void _checkForQuarterEnd() {
+    // Exit early if widget is not mounted
+    if (!mounted) return;
+
+    final currentTimerValue = scorePanelProvider.timerRawTime;
+    final quarterMSec = gameSetupProvider.quarterMSec;
+    final currentQuarter = scorePanelProvider.selectedQuarter;
+    final isCountdown = gameSetupProvider.isCountdownTimer;
+
+    // Reset dialog flag if quarter has changed
+    if (currentQuarter != _lastCheckedQuarter) {
+      _hasShownQuarterEndDialog = false;
+      _lastCheckedQuarter = currentQuarter;
+      // Update previous timer value when quarter changes to prevent false quarter end detection
+      _previousTimerValue = isCountdown ? quarterMSec : 0;
+      return; // Exit early after quarter change to avoid false quarter end detection
+    }
+
+    // Reset dialog flag when timer is reset to initial values
+    if (currentTimerValue != _previousTimerValue) {
+      if ((isCountdown && currentTimerValue == quarterMSec) ||
+          (!isCountdown && currentTimerValue == 0)) {
+        _hasShownQuarterEndDialog = false;
+      }
+    }
+
+    // Check if quarter has just ended (timer reached limit)
+    bool quarterJustEnded = false;
+
+    if (isCountdown) {
+      // For countdown: quarter ends when timer reaches 0 or goes negative
+      quarterJustEnded = _previousTimerValue > 0 && currentTimerValue <= 0;
+    } else {
+      // For count-up: quarter ends when timer reaches quarter length
+      quarterJustEnded =
+          _previousTimerValue < quarterMSec && currentTimerValue >= quarterMSec;
+    }
+
+    // Only show dialog once per quarter end and if timer is not running
+    if (quarterJustEnded &&
+        !_hasShownQuarterEndDialog &&
+        !isTimerRunning.value) {
+      _hasShownQuarterEndDialog = true;
+
+      // Show appropriate dialog based on quarter
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Double-check mounted state before showing dialog
+        if (!mounted) return;
+
+        if (currentQuarter == 4) {
+          _showEndOfGameDialog();
+        } else {
+          _showEndOfQuarterDialog(currentQuarter);
+        }
+      });
+    }
+
+    _previousTimerValue = currentTimerValue;
+  }
+
+  Future<void> _showEndOfQuarterDialog(int quarter) async {
+    // Check if widget is still mounted before showing dialog
+    if (!mounted) return;
+
+    final nextQuarter = quarter + 1;
+
+    final action = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('End of Quarter $quarter'),
+          content:
+              Text('Quarter $quarter has ended. What would you like to do?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('continue'),
+              child: const Text('Continue Playing'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('next'),
+              child: Text('Go to Quarter $nextQuarter'),
+            ),
+            // Remove Save & Exit option for quarters 1-3
+          ],
+        );
+      },
+    );
+
+    // Check mounted state before proceeding with actions
+    if (!mounted) return;
+
+    if (action == 'next') {
+      // Move to next quarter
+      scorePanelProvider.setSelectedQuarter(nextQuarter);
+      // Reset timer for new quarter
+      _quarterTimerKey.currentState?.resetTimer();
+      // Reset the dialog flag for the new quarter
+      _hasShownQuarterEndDialog = false;
+      // Don't automatically start the timer - let user start it manually when ready
+    } else if (action == 'continue') {
+      // Reset the dialog flag so it can be shown again if quarter ends again
+      _hasShownQuarterEndDialog = false;
+      // Start the timer automatically when continuing
+      _quarterTimerKey.currentState?.startTimer();
+    }
+    // No save option for quarters 1-3
+  }
+
+  Future<void> _showEndOfGameDialog() async {
+    // Check if widget is still mounted before showing dialog
+    if (!mounted) return;
+
+    final action = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('End of Game'),
+          content:
+              const Text('The 4th quarter has ended. The game is complete!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('continue'),
+              child: const Text('Continue Playing'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop('finish'),
+              child: const Text('Finish Game'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // Check mounted state before proceeding with actions
+    if (!mounted) return;
+
+    if (action == 'finish') {
+      // Directly save and finish the game without additional prompts
+      await _finishGame();
+    } else if (action == 'continue') {
+      // Reset the dialog flag so it can be shown again if game ends again in overtime
+      _hasShownQuarterEndDialog = false;
+      // Start the timer automatically when continuing into overtime
+      _quarterTimerKey.currentState?.startTimer();
+    }
+    // 'continue' or null - do nothing, allow overtime play
   }
 
   @override
@@ -183,7 +353,7 @@ class ScoringState extends State<Scoring> {
                       if (action == 'save') {
                         await _finishGame();
                       } else if (action == 'discard') {
-                        Navigator.of(context).pop();
+                        if (context.mounted) Navigator.of(context).pop();
                       }
                       // 'cancel' does nothing - stays on current screen
                     }
@@ -203,7 +373,8 @@ class ScoringState extends State<Scoring> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  QuarterTimerPanel(isTimerRunning: isTimerRunning),
+                  QuarterTimerPanel(
+                      key: _quarterTimerKey, isTimerRunning: isTimerRunning),
                   ValueListenableBuilder<bool>(
                     valueListenable: isTimerRunning,
                     builder: (context, running, _) => ScorePanel(
@@ -234,20 +405,6 @@ class ScoringState extends State<Scoring> {
                   ),
                 ],
               ),
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () async {
-                final action =
-                    await _showSaveGameDialog(saveButtonText: 'Save & Finish');
-                if (action == 'save') {
-                  await _finishGame();
-                } else if (action == 'discard') {
-                  Navigator.of(context).pop();
-                }
-                // 'cancel' does nothing - stays on current screen
-              },
-              icon: const Icon(Icons.save_alt),
-              label: const Text('Finish Game'),
             ),
           ),
         );
