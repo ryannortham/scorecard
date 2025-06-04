@@ -23,6 +23,12 @@ class TimerWidgetState extends State<TimerWidget> {
   late StreamSubscription<int> _secondSubscription;
   final isRunning = ValueNotifier<bool>(false);
 
+  // Custom timer state for handling negative countdown
+  Timer? _customTimer;
+  int _customTimerValue = 0;
+  bool _isCustomTimerRunning = false;
+  bool _useCustomTimer = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,21 +36,19 @@ class TimerWidgetState extends State<TimerWidget> {
     scorePanelProvider =
         Provider.of<ScorePanelProvider>(context, listen: false);
     quarterMSec = 1000 * 60 * gameSetupProvider.quarterMinutes;
-    _stopWatchTimer = StopWatchTimer(
-      mode: gameSetupProvider.isCountdownTimer
-          ? StopWatchMode.countDown
-          : StopWatchMode.countUp,
-    );
+
     if (gameSetupProvider.isCountdownTimer) {
-      _stopWatchTimer.setPresetTime(mSec: quarterMSec);
+      // Use custom timer for countdown to handle negative values
+      _useCustomTimer = true;
+      _customTimerValue = quarterMSec;
+      _setupCustomTimer();
+    } else {
+      // Use the standard StopWatchTimer for count-up
+      _useCustomTimer = false;
+      _stopWatchTimer = StopWatchTimer(mode: StopWatchMode.countUp);
+      _setupStandardTimer();
     }
-    tenthSecondStream = Stream.periodic(const Duration(milliseconds: 100))
-        .asyncMap((_) => _stopWatchTimer.rawTime.value);
-    secondStream = Stream.periodic(const Duration(seconds: 1))
-        .asyncMap((_) => _stopWatchTimer.rawTime.value);
-    _secondSubscription = secondStream.listen((_) {
-      scorePanelProvider.setTimerRawTime(_stopWatchTimer.rawTime.value);
-    });
+
     if (widget.isRunning != null) {
       widget.isRunning!.value = false;
     } else {
@@ -52,53 +56,135 @@ class TimerWidgetState extends State<TimerWidget> {
     }
   }
 
+  void _setupCustomTimer() {
+    // Set up periodic updates for UI
+    tenthSecondStream = Stream.periodic(const Duration(milliseconds: 100))
+        .map((_) => _customTimerValue);
+    secondStream = Stream.periodic(const Duration(seconds: 1))
+        .map((_) => _customTimerValue);
+    _secondSubscription = secondStream.listen((_) {
+      // Use addPostFrameCallback to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scorePanelProvider.setTimerRawTime(_customTimerValue);
+      });
+    });
+
+    // Set initial timer value after build phase completes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scorePanelProvider.setTimerRawTime(_customTimerValue);
+    });
+  }
+
+  void _setupStandardTimer() {
+    _stopWatchTimer = StopWatchTimer(mode: StopWatchMode.countUp);
+    tenthSecondStream = Stream.periodic(const Duration(milliseconds: 100))
+        .asyncMap((_) => _stopWatchTimer.rawTime.value);
+    secondStream = Stream.periodic(const Duration(seconds: 1))
+        .asyncMap((_) => _stopWatchTimer.rawTime.value);
+    _secondSubscription = secondStream.listen((_) {
+      // Use addPostFrameCallback to avoid setState during build
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scorePanelProvider.setTimerRawTime(_stopWatchTimer.rawTime.value);
+      });
+    });
+  }
+
   @override
   void dispose() {
-    _stopWatchTimer.dispose();
+    _customTimer?.cancel();
+    if (!_useCustomTimer) {
+      _stopWatchTimer.dispose();
+    }
     _secondSubscription.cancel();
     super.dispose();
   }
 
   void toggleTimer() {
     setState(() {
-      if (_stopWatchTimer.isRunning) {
-        _stopWatchTimer.onStopTimer();
+      if (_useCustomTimer) {
+        if (_isCustomTimerRunning) {
+          _customTimer?.cancel();
+          _isCustomTimerRunning = false;
+        } else {
+          _startCustomTimer();
+          _isCustomTimerRunning = true;
+        }
+        if (widget.isRunning != null) {
+          widget.isRunning!.value = _isCustomTimerRunning;
+        } else {
+          isRunning.value = _isCustomTimerRunning;
+        }
       } else {
-        _stopWatchTimer.onStartTimer();
-      }
-      if (widget.isRunning != null) {
-        widget.isRunning!.value = _stopWatchTimer.isRunning;
-      } else {
-        isRunning.value = _stopWatchTimer.isRunning;
+        if (_stopWatchTimer.isRunning) {
+          _stopWatchTimer.onStopTimer();
+        } else {
+          _stopWatchTimer.onStartTimer();
+        }
+        if (widget.isRunning != null) {
+          widget.isRunning!.value = _stopWatchTimer.isRunning;
+        } else {
+          isRunning.value = _stopWatchTimer.isRunning;
+        }
       }
     });
   }
 
+  void _startCustomTimer() {
+    _customTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      _customTimerValue -= 100; // Countdown by 100ms each tick
+
+      // Update UI
+      setState(() {});
+
+      // Update provider after build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scorePanelProvider.setTimerRawTime(_customTimerValue);
+      });
+    });
+  }
+
   void resetTimer() {
-    _stopWatchTimer.onResetTimer();
-    if (widget.isRunning != null) {
-      widget.isRunning!.value = _stopWatchTimer.isRunning;
+    if (_useCustomTimer) {
+      _customTimer?.cancel();
+      _isCustomTimerRunning = false;
+      _customTimerValue = quarterMSec;
+
+      // Update provider after build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scorePanelProvider.setTimerRawTime(_customTimerValue);
+      });
     } else {
-      isRunning.value = _stopWatchTimer.isRunning;
+      _stopWatchTimer.onResetTimer();
+    }
+
+    if (widget.isRunning != null) {
+      widget.isRunning!.value = false;
+    } else {
+      isRunning.value = false;
     }
   }
 
-  bool get isTimerActuallyRunning => _stopWatchTimer.isRunning;
-
+  bool get isTimerActuallyRunning =>
+      _useCustomTimer ? _isCustomTimerRunning : _stopWatchTimer.isRunning;
   IconData getIcon() {
-    return _stopWatchTimer.isRunning ? Icons.pause : Icons.play_arrow;
+    if (_useCustomTimer) {
+      return _isCustomTimerRunning ? Icons.pause : Icons.play_arrow;
+    } else {
+      return _stopWatchTimer.isRunning ? Icons.pause : Icons.play_arrow;
+    }
   }
 
   Color getTimerColor() {
-    if (gameSetupProvider.isCountdownTimer) {
-      if (_stopWatchTimer.rawTime.value <= 0) {
+    if (_useCustomTimer) {
+      // Custom countdown timer - show error color when in negative time
+      if (_customTimerValue <= 0) {
         return Theme.of(context).colorScheme.error;
       }
     } else {
+      // Standard count-up timer
       if (!_stopWatchTimer.isRunning) {
         return Theme.of(context).colorScheme.onSurface;
       }
-
       if (_stopWatchTimer.rawTime.value > quarterMSec) {
         return Theme.of(context).colorScheme.error;
       }
@@ -113,15 +199,29 @@ class TimerWidgetState extends State<TimerWidget> {
         padding: const EdgeInsets.all(4),
         child: StreamBuilder<int>(
           stream: tenthSecondStream,
-          initialData: scorePanelProvider.timerRawTime,
+          initialData: _useCustomTimer
+              ? _customTimerValue
+              : scorePanelProvider.timerRawTime,
           builder: (context, snap) {
             final value = snap.data!;
-            final displayTime = StopWatchTimer.getDisplayTime(value,
-                hours: false, milliSecond: true);
-            final trimmedDisplayTime =
-                displayTime.substring(0, displayTime.length - 1);
+            String displayTime;
+
+            if (_useCustomTimer && value < 0) {
+              // Handle negative time display for custom countdown timer
+              final absValue = value.abs();
+              final timeStr = StopWatchTimer.getDisplayTime(absValue,
+                  hours: false, milliSecond: true);
+              final trimmedTimeStr = timeStr.substring(0, timeStr.length - 1);
+              displayTime = '-$trimmedTimeStr';
+            } else {
+              // Standard positive time display
+              final timeStr = StopWatchTimer.getDisplayTime(value,
+                  hours: false, milliSecond: true);
+              displayTime = timeStr.substring(0, timeStr.length - 1);
+            }
+
             return Text(
-              trimmedDisplayTime,
+              displayTime,
               style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     color: getTimerColor(),
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'game_setup.dart';
+import 'game_history.dart';
 import 'debug.dart';
 import '../providers/game_setup_provider.dart';
 
@@ -55,6 +56,15 @@ class LandingPageState extends State<LandingPage> {
                   ),
                 );
               },
+            ),
+            const Spacer(flex: 1),
+            _buildButton(
+              "Game History",
+              () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const GameHistoryScreen(),
+                ),
+              ),
             ),
             const Spacer(flex: 1),
             _buildButton(

@@ -67,49 +67,6 @@ class ScoringState extends State<Scoring> {
     return false;
   }
 
-  Future<String?> _showSaveGameDialog(
-      {String saveButtonText = 'Save & Exit'}) async {
-    return await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Save Game?'),
-          content: const Text('What would you like to do with this game?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('cancel'),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('discard'),
-              child: const Text('Discard'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop('save'),
-              child: Text(saveButtonText),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<bool> _onWillPop() async {
-    if (_hasGameStateChanged()) {
-      final action = await _showSaveGameDialog(saveButtonText: 'Save & Exit');
-
-      if (action == 'save') {
-        await _saveGame();
-        return true; // Allow exit after saving
-      } else if (action == 'discard') {
-        return true; // Allow exit without saving
-      } else {
-        return false; // Cancel - don't exit
-      }
-    }
-    return true; // Allow back navigation if no changes
-  }
-
   Future<void> _saveGame() async {
     try {
       final gameRecord = GameHistoryService.createGameRecord(
@@ -154,6 +111,76 @@ class ScoringState extends State<Scoring> {
     }
   }
 
+  Future<String?> _showGameEndDialog() async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Game Complete'),
+          content: const Text(
+            'What would you like to do with this game?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('continue'),
+              child: const Text('Continue Playing'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('discard'),
+              child: const Text('Discard Game'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop('save'),
+              child: const Text('Save & Finish'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<String?> _showExitConfirmation() async {
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Save Game?'),
+          content: const Text(
+            'You have unsaved changes. What would you like to do?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('discard'),
+              child: const Text('Discard'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop('save'),
+              child: const Text('Save & Exit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<bool> _onWillPop() async {
+    if (_hasGameStateChanged()) {
+      final result = await _showExitConfirmation();
+      if (result == 'save') {
+        await _saveGame();
+        return true;
+      } else if (result == 'discard') {
+        return true;
+      }
+      return false; // Cancel
+    }
+    return true; // Allow back navigation if no changes
+  }
+
   @override
   Widget build(BuildContext context) {
     String homeTeamName = gameSetupProvider.homeTeam;
@@ -163,7 +190,7 @@ class ScoringState extends State<Scoring> {
       builder: (context, scorePanelState, _) {
         return PopScope(
           canPop: false,
-          onPopInvokedWithResult: (bool didPop, dynamic result) async {
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
             if (didPop) return;
 
             final shouldPop = await _onWillPop();
@@ -175,24 +202,40 @@ class ScoringState extends State<Scoring> {
             appBar: AppBar(
               title: Text(widget.title),
               actions: [
+                // Save Game button
+                IconButton(
+                  onPressed: _hasGameStateChanged() ? _saveGame : null,
+                  icon: const Icon(Icons.save),
+                  tooltip: 'Save Game',
+                ),
+                // Finish Game button
                 PopupMenuButton<String>(
-                  onSelected: (String result) async {
-                    if (result == 'finish') {
-                      final action = await _showSaveGameDialog(
-                          saveButtonText: 'Save & Finish');
-                      if (action == 'save') {
-                        await _finishGame();
-                      } else if (action == 'discard') {
+                  onSelected: (value) async {
+                    if (value == 'finish') {
+                      if (_hasGameStateChanged()) {
+                        final result = await _showGameEndDialog();
+                        if (result == 'save') {
+                          await _finishGame();
+                        } else if (result == 'discard') {
+                          Navigator.of(context).pop();
+                        }
+                        // 'continue' does nothing - keeps playing
+                      } else {
+                        // No changes - just exit
                         Navigator.of(context).pop();
                       }
-                      // 'cancel' does nothing - stays on current screen
                     }
                   },
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
+                  itemBuilder: (BuildContext context) => [
                     const PopupMenuItem<String>(
                       value: 'finish',
-                      child: Text('Finish Game'),
+                      child: Row(
+                        children: [
+                          Icon(Icons.flag),
+                          SizedBox(width: 8),
+                          Text('Finish Game'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -234,20 +277,6 @@ class ScoringState extends State<Scoring> {
                   ),
                 ],
               ),
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () async {
-                final action =
-                    await _showSaveGameDialog(saveButtonText: 'Save & Finish');
-                if (action == 'save') {
-                  await _finishGame();
-                } else if (action == 'discard') {
-                  Navigator.of(context).pop();
-                }
-                // 'cancel' does nothing - stays on current screen
-              },
-              icon: const Icon(Icons.save_alt),
-              label: const Text('Finish Game'),
             ),
           ),
         );

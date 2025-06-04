@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/pages/game_setup.dart';
+import 'package:goalkeeper/pages/game_history.dart';
 import 'package:goalkeeper/pages/results.dart';
 import 'package:goalkeeper/pages/scoring.dart';
 
@@ -31,6 +32,7 @@ class DebugState extends State<Debug> {
       const Results(
         title: "Results",
       ),
+      const GameHistoryScreen(),
     ];
 
     return Scaffold(
@@ -50,6 +52,10 @@ class DebugState extends State<Debug> {
           BottomNavigationBarItem(
             icon: Icon(Icons.emoji_events),
             label: 'Results',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'History',
           ),
         ],
       ),
