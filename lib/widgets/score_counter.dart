@@ -50,17 +50,17 @@ class ScoreCounterState extends State<ScoreCounter> {
                 height: 1.2,
               ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
 
         // Unified Counter Widget
         Card(
           elevation: 0,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -69,13 +69,16 @@ class ScoreCounterState extends State<ScoreCounter> {
                   onPressed: widget.enabled && currentCount > 0
                       ? () => _updateCount(currentCount - 1)
                       : null,
-                  icon: const Icon(Icons.remove, size: 18),
+                  icon: const Icon(Icons.remove, size: 16),
+                  padding: const EdgeInsets.all(8.0),
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
                 ),
 
                 // Count Display
                 Container(
-                  constraints: const BoxConstraints(minWidth: 48),
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  constraints: const BoxConstraints(minWidth: 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Text(
                     currentCount.toString(),
                     textAlign: TextAlign.center,
@@ -96,7 +99,10 @@ class ScoreCounterState extends State<ScoreCounter> {
                   onPressed: widget.enabled && currentCount < 99
                       ? () => _updateCount(currentCount + 1)
                       : null,
-                  icon: const Icon(Icons.add, size: 18),
+                  icon: const Icon(Icons.add, size: 16),
+                  padding: const EdgeInsets.all(8.0),
+                  constraints:
+                      const BoxConstraints(minWidth: 36, minHeight: 36),
                 ),
               ],
             ),

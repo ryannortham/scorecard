@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
@@ -308,98 +307,127 @@ class ScoringState extends State<Scoring> {
             }
           },
           child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.title),
-              centerTitle: true,
-              elevation: 0,
-              surfaceTintColor: Theme.of(context).colorScheme.surface,
-              actions: [
-                // Settings button
-                IconButton(
-                  icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
-                  tooltip: 'Menu',
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const Settings(title: 'Settings'),
-                      ),
-                    );
-                    // Update game setup with current settings when returning
-                    if (context.mounted) {
-                      final settingsProvider =
-                          Provider.of<SettingsProvider>(context, listen: false);
-                      final gameSetupProvider = Provider.of<GameSetupProvider>(
-                          context,
-                          listen: false);
-                      gameSetupProvider.setQuarterMinutes(
-                          settingsProvider.defaultQuarterMinutes);
-                      gameSetupProvider.setIsCountdownTimer(
-                          settingsProvider.defaultIsCountdownTimer);
-                    }
-                  },
-                ),
-              ],
-            ),
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(12.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Timer Panel Card
-                    Card(
-                      elevation: 0,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primaryContainer
-                          .withValues(alpha: 0.3),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: QuarterTimerPanel(
-                            key: _quarterTimerKey,
-                            isTimerRunning: isTimerRunning),
+                    // Header with title and menu
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6.0),
+                      child: Row(
+                        children: [
+                          // Back button
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () async {
+                              final shouldPop = await _onWillPop();
+                              if (shouldPop && context.mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(36, 36),
+                              padding: const EdgeInsets.all(6),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Title
+                          Expanded(
+                            child: Text(
+                              widget.title,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                            ),
+                          ),
+                          // Settings button
+                          IconButton(
+                            icon: const Icon(Icons.more_vert),
+                            tooltip: 'Menu',
+                            onPressed: () async {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const Settings(title: 'Settings'),
+                                ),
+                              );
+                              // Update game setup with current settings when returning
+                              if (context.mounted) {
+                                final settingsProvider =
+                                    Provider.of<SettingsProvider>(context,
+                                        listen: false);
+                                final gameSetupProvider =
+                                    Provider.of<GameSetupProvider>(context,
+                                        listen: false);
+                                gameSetupProvider.setQuarterMinutes(
+                                    settingsProvider.defaultQuarterMinutes);
+                                gameSetupProvider.setIsCountdownTimer(
+                                    settingsProvider.defaultIsCountdownTimer);
+                              }
+                            },
+                            style: IconButton.styleFrom(
+                              minimumSize: const Size(36, 36),
+                              padding: const EdgeInsets.all(6),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 24),
 
                     // Home Team Score Table
-                    Card(
-                      elevation: 0,
-                      color: Theme.of(context).colorScheme.surfaceContainerLow,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, running, _) => ScoreTable(
-                          events: List<GameEvent>.from(
-                              gameEvents), // Create a defensive copy
-                          homeTeam: homeTeamName,
-                          awayTeam: awayTeamName,
-                          displayTeam: homeTeamName,
-                          isHomeTeam: true,
-                          enabled: running,
-                        ),
-                      ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return Card(
+                          elevation: 1,
+                          child: ScoreTable(
+                            events: List<GameEvent>.from(
+                                gameEvents), // Create a defensive copy
+                            homeTeam: homeTeamName,
+                            awayTeam: awayTeamName,
+                            displayTeam: homeTeamName,
+                            isHomeTeam: true,
+                            enabled: timerRunning,
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
                     // Away Team Score Table
-                    Card(
-                      elevation: 0,
-                      color: Theme.of(context).colorScheme.surfaceContainerLow,
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, running, _) => ScoreTable(
-                          events: List<GameEvent>.from(
-                              gameEvents), // Create a defensive copy
-                          homeTeam: homeTeamName,
-                          awayTeam: awayTeamName,
-                          displayTeam: awayTeamName,
-                          isHomeTeam: false,
-                          enabled: running,
-                        ),
-                      ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return Card(
+                          elevation: 1,
+                          child: ScoreTable(
+                            events: List<GameEvent>.from(
+                                gameEvents), // Create a defensive copy
+                            homeTeam: homeTeamName,
+                            awayTeam: awayTeamName,
+                            displayTeam: awayTeamName,
+                            isHomeTeam: false,
+                            enabled: timerRunning,
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
+
+                    // Timer Panel Card
+                    Card(
+                      elevation: 1,
+                      child: QuarterTimerPanel(
+                          key: _quarterTimerKey,
+                          isTimerRunning: isTimerRunning),
+                    ),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),

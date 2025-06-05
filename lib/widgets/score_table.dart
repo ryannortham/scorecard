@@ -75,7 +75,10 @@ class ScoreTable extends StatelessWidget {
                   flex: 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(20),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                     ),
                     child: const Center(child: Text('')),
                   ),
@@ -97,7 +100,10 @@ class ScoreTable extends StatelessWidget {
                   flex: 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(20),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                     ),
                     child: const Center(child: Text('')),
                   ),
@@ -119,7 +125,10 @@ class ScoreTable extends StatelessWidget {
                   flex: 1,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(20),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.3),
                     ),
                     child: const Center(child: Text('')),
                   ),
@@ -191,9 +200,12 @@ class ScoreTable extends StatelessWidget {
                     color: isCurrentQuarter
                         ? Theme.of(context)
                             .colorScheme
-                            .secondaryContainer
-                            .withAlpha(180)
-                        : Colors.grey.withAlpha(20),
+                            .primary
+                            .withValues(alpha: 0.15)
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHigh
+                            .withValues(alpha: 0.3),
                   ),
                   child: Center(
                     child: Text(
@@ -203,7 +215,7 @@ class ScoreTable extends StatelessWidget {
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withAlpha(179),
+                            .withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -236,9 +248,12 @@ class ScoreTable extends StatelessWidget {
                     color: isCurrentQuarter
                         ? Theme.of(context)
                             .colorScheme
-                            .secondaryContainer
-                            .withAlpha(180)
-                        : Colors.grey.withAlpha(20),
+                            .primary
+                            .withValues(alpha: 0.12)
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHigh
+                            .withValues(alpha: 0.3),
                   ),
                   child: Center(
                     child: Text(
@@ -248,7 +263,7 @@ class ScoreTable extends StatelessWidget {
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withAlpha(179),
+                            .withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -284,9 +299,12 @@ class ScoreTable extends StatelessWidget {
                     color: isCurrentQuarter
                         ? Theme.of(context)
                             .colorScheme
-                            .secondaryContainer
-                            .withAlpha(180)
-                        : Colors.grey.withAlpha(20),
+                            .primary
+                            .withValues(alpha: 0.18)
+                        : Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHigh
+                            .withValues(alpha: 0.3),
                   ),
                   child: Center(
                     child: Text(
@@ -297,7 +315,7 @@ class ScoreTable extends StatelessWidget {
                         color: Theme.of(context)
                             .colorScheme
                             .onSurface
-                            .withAlpha(179),
+                            .withValues(alpha: 0.7),
                       ),
                     ),
                   ),
@@ -377,86 +395,50 @@ class ScoreTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Team Header with Counter Controls
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Condensed Team Header
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Row(
               children: [
-                // Team Name
-                Row(
-                  children: [
-                    Icon(
-                      Icons.sports_outlined,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      displayTeam,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
+                Icon(
+                  Icons.sports_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 16,
                 ),
-                const SizedBox(height: 8),
-
-                // Points Display
-                Center(
-                  child: Consumer<ScorePanelProvider>(
-                    builder: (context, scorePanelProvider, _) {
-                      final goals =
-                          scorePanelProvider.getCount(isHomeTeam, true);
-                      final behinds =
-                          scorePanelProvider.getCount(isHomeTeam, false);
-                      final points = goals * 6 + behinds;
-
-                      return Text(
-                        points.toString(),
-                        style:
-                            Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                      );
-                    },
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    displayTeam,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
-                const SizedBox(height: 12),
-
-                // Counter Controls
                 Consumer<ScorePanelProvider>(
                   builder: (context, scorePanelProvider, _) {
-                    return Row(
-                      children: [
-                        // Goals Counter
-                        Expanded(
-                          child: ScoreCounter(
-                            label: 'Goals',
-                            isHomeTeam: isHomeTeam,
-                            isGoal: true,
-                            scorePanelProvider: scorePanelProvider,
-                            enabled: enabled,
+                    final goals = scorePanelProvider.getCount(isHomeTeam, true);
+                    final behinds =
+                        scorePanelProvider.getCount(isHomeTeam, false);
+                    final points = goals * 6 + behinds;
+
+                    return Text(
+                      points.toString(),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w800,
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        // Behinds Counter
-                        Expanded(
-                          child: ScoreCounter(
-                            label: 'Behinds',
-                            isHomeTeam: isHomeTeam,
-                            isGoal: false,
-                            scorePanelProvider: scorePanelProvider,
-                            enabled: enabled,
-                          ),
-                        ),
-                      ],
                     );
                   },
                 ),
@@ -464,64 +446,101 @@ class ScoreTable extends StatelessWidget {
             ),
           ),
 
-          // Quarter Breakdown
+          const SizedBox(height: 8),
+
+          // Condensed Counter Controls
+          Consumer<ScorePanelProvider>(
+            builder: (context, scorePanelProvider, _) {
+              return Row(
+                children: [
+                  Expanded(
+                    child: ScoreCounter(
+                      label: 'Goals',
+                      isHomeTeam: isHomeTeam,
+                      isGoal: true,
+                      scorePanelProvider: scorePanelProvider,
+                      enabled: enabled,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ScoreCounter(
+                      label: 'Behinds',
+                      isHomeTeam: isHomeTeam,
+                      isGoal: false,
+                      scorePanelProvider: scorePanelProvider,
+                      enabled: enabled,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+
+          const SizedBox(height: 8),
+
+          // Quarter Breakdown with Running Totals
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(12.0),
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(8.0),
             ),
             child: Column(
               children: [
-                // Header
+                // Main Header
                 Container(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 6.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .surfaceContainerHigh
+                        .withValues(alpha: 0.5),
                     borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(12.0),
-                      topRight: Radius.circular(12.0),
+                      topLeft: Radius.circular(8.0),
+                      topRight: Radius.circular(8.0),
                     ),
                   ),
                   child: Row(
                     children: [
+                      const SizedBox(width: 32), // Quarter column
                       Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Quarter',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        child: Center(
+                          child: Text(
+                            'Goals',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
                       ),
                       Expanded(
-                        child: Text(
-                          'G',
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        child: Center(
+                          child: Text(
+                            'Behinds',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
                       ),
                       Expanded(
-                        child: Text(
-                          'B',
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Pts',
-                          textAlign: TextAlign.center,
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        child: Center(
+                          child: Text(
+                            'Points',
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
                       ),
                     ],
@@ -550,8 +569,26 @@ class ScoreTable extends StatelessWidget {
     final teamBehinds = teamEvents.where((e) => e.type == 'behind').length;
     final teamPoints = teamGoals * 6 + teamBehinds;
 
+    // Calculate running totals up to this quarter
+    int runningGoals = 0;
+    int runningBehinds = 0;
+    if (!isFutureQuarter) {
+      try {
+        for (int q = 1; q <= quarter + 1; q++) {
+          final qEvents = _eventsByQuarter(q);
+          final qTeamEvents = qEvents['team'] ?? [];
+          runningGoals += qTeamEvents.where((e) => e.type == 'goal').length;
+          runningBehinds += qTeamEvents.where((e) => e.type == 'behind').length;
+        }
+      } catch (e) {
+        runningGoals = teamGoals;
+        runningBehinds = teamBehinds;
+      }
+    }
+    final runningPoints = runningGoals * 6 + runningBehinds;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
         color: isCurrentQuarter
             ? Theme.of(context)
@@ -562,92 +599,194 @@ class ScoreTable extends StatelessWidget {
         border: Border(
           bottom: quarter < 3
               ? BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                  width: 1,
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                  width: 0.5,
                 )
               : BorderSide.none,
         ),
       ),
       child: Row(
         children: [
+          // Quarter label
+          SizedBox(
+            width: 32,
+            child: Text(
+              '${quarter + 1}',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight:
+                        isCurrentQuarter ? FontWeight.w700 : FontWeight.w500,
+                    color: isCurrentQuarter
+                        ? Theme.of(context).colorScheme.primary
+                        : null,
+                  ),
+            ),
+          ),
+
+          // Goals (Quarter + Total)
           Expanded(
-            flex: 2,
             child: Row(
               children: [
-                Text(
-                  _quarterLabels[quarter],
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: isCurrentQuarter
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        color: isCurrentQuarter
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ),
-                ),
-                if (isCurrentQuarter)
-                  Container(
-                    margin: const EdgeInsets.only(left: 8.0),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 6.0, vertical: 2.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+                Expanded(
+                  child: Center(
                     child: Text(
-                      'LIVE',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
+                      isFutureQuarter ? '-' : teamGoals.toString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: isFutureQuarter
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4)
+                                : null,
                           ),
                     ),
                   ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isCurrentQuarter
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.1)
+                          : Theme.of(context)
+                              .colorScheme
+                              .surface
+                              .withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Center(
+                      child: Text(
+                        isFutureQuarter ? '-' : runningGoals.toString(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isCurrentQuarter
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.7),
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+
+          // Behinds (Quarter + Total)
           Expanded(
-            child: Text(
-              isFutureQuarter ? '-' : teamGoals.toString(),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isFutureQuarter
-                        ? Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5)
-                        : null,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      isFutureQuarter ? '-' : teamBehinds.toString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: isFutureQuarter
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4)
+                                : null,
+                          ),
+                    ),
                   ),
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isCurrentQuarter
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.1)
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Center(
+                      child: Text(
+                        isFutureQuarter ? '-' : runningBehinds.toString(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isCurrentQuarter
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.7),
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+
+          // Points (Quarter + Total)
           Expanded(
-            child: Text(
-              isFutureQuarter ? '-' : teamBehinds.toString(),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isFutureQuarter
-                        ? Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5)
-                        : null,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      isFutureQuarter ? '-' : teamPoints.toString(),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: isFutureQuarter
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.4)
+                                : null,
+                          ),
+                    ),
                   ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              isFutureQuarter ? '-' : teamPoints.toString(),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isFutureQuarter
-                        ? Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.5)
-                        : null,
+                ),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isCurrentQuarter
+                          ? Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.15)
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh
+                              .withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Center(
+                      child: Text(
+                        isFutureQuarter ? '-' : runningPoints.toString(),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: isCurrentQuarter
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.8),
+                            ),
+                      ),
+                    ),
                   ),
+                ),
+              ],
             ),
           ),
         ],

@@ -235,28 +235,37 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _games.isEmpty
-              ? const Center(
+              ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
                         Icons.history,
                         size: 64,
-                        color: Colors.grey,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.6),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       Text(
                         'No saved games',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.grey,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                         'Games you save will appear here',
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
                         ),
                       ),
                     ],

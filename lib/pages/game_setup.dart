@@ -279,7 +279,7 @@ class _GameSetupState extends State<GameSetup> {
               ),
               const SizedBox(height: 24),
               Card(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(

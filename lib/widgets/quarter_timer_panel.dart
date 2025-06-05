@@ -62,68 +62,88 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameSetupProvider, ScorePanelProvider>(
-      builder: (context, gameSetupProvider, scorePanelProvider, _) {
-        return Column(
-          children: [
-            // Quarter Selection
-            ValueListenableBuilder<bool>(
-              valueListenable: widget.isTimerRunning,
-              builder: (context, isTimerRunning, _) {
-                return SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment<int>(
-                        value: 1,
-                        label: Text('Q1'),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Consumer2<GameSetupProvider, ScorePanelProvider>(
+        builder: (context, gameSetupProvider, scorePanelProvider, _) {
+          return Column(
+            children: [
+              // Quarter Selection
+              ValueListenableBuilder<bool>(
+                valueListenable: widget.isTimerRunning,
+                builder: (context, isTimerRunning, _) {
+                  return SizedBox(
+                    width: double.infinity,
+                    child: SegmentedButton<int>(
+                      style: SegmentedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.surface,
+                        foregroundColor: !isTimerRunning
+                            ? Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.38)
+                            : Theme.of(context).colorScheme.onSurface,
+                        disabledForegroundColor: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.38),
+                        selectedForegroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        selectedBackgroundColor:
+                            Theme.of(context).colorScheme.primary,
                       ),
-                      ButtonSegment<int>(
-                        value: 2,
-                        label: Text('Q2'),
-                      ),
-                      ButtonSegment<int>(
-                        value: 3,
-                        label: Text('Q3'),
-                      ),
-                      ButtonSegment<int>(
-                        value: 4,
-                        label: Text('Q4'),
-                      ),
-                    ],
-                    selected: {scorePanelProvider.selectedQuarter},
-                    onSelectionChanged: (Set<int> newSelection) {
-                      if (!isTimerRunning && newSelection.isNotEmpty) {
-                        _handleQuarterChange(
-                          newSelection.first,
-                          scorePanelProvider,
-                        );
-                      }
-                    },
-                    multiSelectionEnabled: false,
-                    emptySelectionAllowed: false,
-                    showSelectedIcon: false,
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12.0),
+                      segments: const [
+                        ButtonSegment<int>(
+                          value: 1,
+                          label: Text('Q1'),
+                        ),
+                        ButtonSegment<int>(
+                          value: 2,
+                          label: Text('Q2'),
+                        ),
+                        ButtonSegment<int>(
+                          value: 3,
+                          label: Text('Q3'),
+                        ),
+                        ButtonSegment<int>(
+                          value: 4,
+                          label: Text('Q4'),
+                        ),
+                      ],
+                      selected: {scorePanelProvider.selectedQuarter},
+                      onSelectionChanged: (Set<int> newSelection) {
+                        if (!isTimerRunning && newSelection.isNotEmpty) {
+                          _handleQuarterChange(
+                            newSelection.first,
+                            scorePanelProvider,
+                          );
+                        }
+                      },
+                      multiSelectionEnabled: false,
+                      emptySelectionAllowed: false,
+                      showSelectedIcon: false,
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 8.0),
 
-            // Timer Widget
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(12.0),
+              // Timer Widget
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: TimerWidget(
+                      key: _timerKey, isRunning: widget.isTimerRunning),
+                ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TimerWidget(
-                    key: _timerKey, isRunning: widget.isTimerRunning),
-              ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 }

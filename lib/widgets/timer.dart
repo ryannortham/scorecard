@@ -216,10 +216,7 @@ class TimerWidgetState extends State<TimerWidget> {
       Container(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerLowest
-              .withValues(alpha: 0.5),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: StreamBuilder<int>(
@@ -271,8 +268,10 @@ class TimerWidgetState extends State<TimerWidget> {
 
           return LinearProgressIndicator(
             value: progress,
-            backgroundColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHigh
+                .withValues(alpha: 0.4),
             valueColor: AlwaysStoppedAnimation<Color>(
               Theme.of(context).colorScheme.primary,
             ),
