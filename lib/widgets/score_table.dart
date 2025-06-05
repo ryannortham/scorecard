@@ -411,16 +411,10 @@ class ScoreTable extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.sports_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     displayTeam,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                         ),
