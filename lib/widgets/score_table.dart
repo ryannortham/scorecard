@@ -67,12 +67,12 @@ class ScoreTable extends StatelessWidget {
             alignment: Alignment.center,
             child: Row(
               children: [
-                const Expanded(
-                  flex: 3,
+                Expanded(
+                  flex: 7,
                   child: Center(child: Text('')),
                 ),
                 Expanded(
-                  flex: 1,
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context)
@@ -92,12 +92,12 @@ class ScoreTable extends StatelessWidget {
             alignment: Alignment.center,
             child: Row(
               children: [
-                const Expanded(
-                  flex: 3,
+                Expanded(
+                  flex: 7,
                   child: Center(child: Text('')),
                 ),
                 Expanded(
-                  flex: 1,
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context)
@@ -117,12 +117,12 @@ class ScoreTable extends StatelessWidget {
             alignment: Alignment.center,
             child: Row(
               children: [
-                const Expanded(
-                  flex: 3,
+                Expanded(
+                  flex: 7,
                   child: Center(child: Text('')),
                 ),
                 Expanded(
-                  flex: 1,
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context)
@@ -188,13 +188,13 @@ class ScoreTable extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                flex: 3,
+                flex: 7,
                 child: Center(
                   child: Text(teamGoals.toString()),
                 ),
               ),
               Expanded(
-                flex: 1,
+                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: isCurrentQuarter
@@ -236,13 +236,13 @@ class ScoreTable extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                flex: 3,
+                flex: 7,
                 child: Center(
                   child: Text(teamBehinds.toString()),
                 ),
               ),
               Expanded(
-                flex: 1,
+                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: isCurrentQuarter
@@ -284,7 +284,7 @@ class ScoreTable extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                flex: 3,
+                flex: 7,
                 child: Center(
                   child: Text(
                     teamPoints.toString(),
@@ -293,7 +293,7 @@ class ScoreTable extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 1,
+                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: isCurrentQuarter
@@ -627,6 +627,7 @@ class ScoreTable extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
+                  flex: 7,
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamGoals.toString(),
@@ -643,6 +644,7 @@ class ScoreTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: isCurrentQuarter
@@ -683,6 +685,7 @@ class ScoreTable extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
+                  flex: 7,
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamBehinds.toString(),
@@ -699,6 +702,7 @@ class ScoreTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: isCurrentQuarter
@@ -739,6 +743,7 @@ class ScoreTable extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
+                  flex: 7,
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamPoints.toString(),
@@ -755,6 +760,7 @@ class ScoreTable extends StatelessWidget {
                   ),
                 ),
                 Expanded(
+                  flex: 3,
                   child: Container(
                     decoration: BoxDecoration(
                       color: isCurrentQuarter
