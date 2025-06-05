@@ -30,47 +30,20 @@ class ScorePanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ScorePanelProvider>(
       builder: (context, scorePanelProvider, _) {
-        return Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              width: double.infinity,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                border: Border(
-                  top: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                  ),
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor,
-                  ),
-                ),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                child: _buildScoreCounter('Goals', true, scorePanelProvider),
               ),
-              child: FittedBox(
-                child: Text(
-                  teamName,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  overflow: TextOverflow.visible,
-                ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildScoreCounter('Behinds', false, scorePanelProvider),
               ),
-            ),
-            Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  isHomeTeam
-                      ? scorePanelProvider.homePoints.toString()
-                      : scorePanelProvider.awayPoints.toString(),
-                  style: Theme.of(context).textTheme.displayMedium,
-                )),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildScoreCounter('Goals', true, scorePanelProvider),
-                _buildScoreCounter('Behinds', false, scorePanelProvider),
-              ],
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

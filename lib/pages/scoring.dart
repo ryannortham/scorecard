@@ -5,7 +5,6 @@ import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/widgets/score_panel.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/quarter_timer_panel.dart';
 import 'settings.dart';
@@ -94,15 +93,20 @@ class ScoringState extends State<Scoring> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
+              icon: Icon(
+                Icons.exit_to_app_outlined,
+                color: Theme.of(context).colorScheme.error,
+              ),
               title: const Text('Exit Game?'),
+              content: const Text('Any unsaved progress will be lost.'),
               actions: [
                 TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton.tonal(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: const Text('Exit'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Continue'),
                 ),
               ],
             );
@@ -192,24 +196,25 @@ class ScoringState extends State<Scoring> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          icon: Icon(
+            Icons.sports_outlined,
+            color: Theme.of(context).colorScheme.primary,
+            size: 32,
+          ),
           title: Text('End of Quarter $quarter'),
-          content:
-              Text('Quarter $quarter has ended. What would you like to do?'),
+          content: Text(
+            'Quarter $quarter has ended. What would you like to do?',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
           actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop('continue'),
-                  child: const Text('Continue Playing'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop('next'),
-                  child: Text('Go to Quarter $nextQuarter'),
-                ),
-              ],
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('continue'),
+              child: const Text('Continue Playing'),
             ),
-            // Remove Save & Exit option for quarters 1-3
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop('next'),
+              child: Text('Go to Quarter $nextQuarter'),
+            ),
           ],
         );
       },
@@ -244,22 +249,24 @@ class ScoringState extends State<Scoring> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
+          icon: Icon(
+            Icons.emoji_events_outlined,
+            color: Theme.of(context).colorScheme.primary,
+            size: 32,
+          ),
           title: const Text('End of Game'),
-          content:
-              const Text('The 4th quarter has ended. The game is complete!'),
+          content: Text(
+            'The 4th quarter has ended. The game is complete!',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
           actions: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop('continue'),
-                  child: const Text('Continue Playing'),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop('exit'),
-                  child: const Text('Exit Game'),
-                ),
-              ],
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('continue'),
+              child: const Text('Continue Playing'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop('exit'),
+              child: const Text('Exit Game'),
             ),
           ],
         );
@@ -303,6 +310,9 @@ class ScoringState extends State<Scoring> {
           child: Scaffold(
             appBar: AppBar(
               title: Text(widget.title),
+              centerTitle: true,
+              elevation: 0,
+              surfaceTintColor: Theme.of(context).colorScheme.surface,
               actions: [
                 // Settings button
                 IconButton(
@@ -330,44 +340,68 @@ class ScoringState extends State<Scoring> {
                 ),
               ],
             ),
-            body: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  QuarterTimerPanel(
-                      key: _quarterTimerKey, isTimerRunning: isTimerRunning),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isTimerRunning,
-                    builder: (context, running, _) => ScorePanel(
-                      teamName: homeTeamName,
-                      isHomeTeam: true,
-                      enabled: running,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Timer Panel Card
+                    Card(
+                      elevation: 0,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withValues(alpha: 0.3),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: QuarterTimerPanel(
+                            key: _quarterTimerKey,
+                            isTimerRunning: isTimerRunning),
+                      ),
                     ),
-                  ),
-                  ScoreTable(
-                    events: List<GameEvent>.from(
-                        gameEvents), // Create a defensive copy
-                    homeTeam: homeTeamName,
-                    awayTeam: awayTeamName,
-                    displayTeam: homeTeamName,
-                  ),
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isTimerRunning,
-                    builder: (context, running, _) => ScorePanel(
-                      teamName: awayTeamName,
-                      isHomeTeam: false,
-                      enabled: running,
+                    const SizedBox(height: 24),
+
+                    // Home Team Score Table
+                    Card(
+                      elevation: 0,
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, running, _) => ScoreTable(
+                          events: List<GameEvent>.from(
+                              gameEvents), // Create a defensive copy
+                          homeTeam: homeTeamName,
+                          awayTeam: awayTeamName,
+                          displayTeam: homeTeamName,
+                          isHomeTeam: true,
+                          enabled: running,
+                        ),
+                      ),
                     ),
-                  ),
-                  ScoreTable(
-                    events: List<GameEvent>.from(
-                        gameEvents), // Create a defensive copy
-                    homeTeam: homeTeamName,
-                    awayTeam: awayTeamName,
-                    displayTeam: awayTeamName,
-                  ),
-                ],
+                    const SizedBox(height: 24),
+
+                    // Away Team Score Table
+                    Card(
+                      elevation: 0,
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, running, _) => ScoreTable(
+                          events: List<GameEvent>.from(
+                              gameEvents), // Create a defensive copy
+                          homeTeam: homeTeamName,
+                          awayTeam: awayTeamName,
+                          displayTeam: awayTeamName,
+                          isHomeTeam: false,
+                          enabled: running,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
           ),

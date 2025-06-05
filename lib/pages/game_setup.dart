@@ -31,16 +31,6 @@ class _GameSetupState extends State<GameSetup> {
   final TextEditingController _awayTeamController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
-  Widget _buildButton(String text, VoidCallback onPressed) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.40,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        child: Text(text),
-      ),
-    );
-  }
-
   Widget _buildTextField({
     required GlobalKey<FormState> formKey,
     required TextEditingController controller,
@@ -282,10 +272,6 @@ class _GameSetupState extends State<GameSetup> {
                                 awayTeamKey.currentState?.validate();
                               }
                             : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 12),
-                        ),
                       ),
                     ],
                   ),

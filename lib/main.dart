@@ -67,57 +67,201 @@ class GoalKeeperApp extends StatelessWidget {
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
                 // Enhanced button themes for better visibility
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: lightColorScheme.onPrimary,
+                    backgroundColor: lightColorScheme.primary,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledBackgroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.12),
+                    elevation: 2,
+                    shadowColor: lightColorScheme.shadow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
+                filledButtonTheme: FilledButtonThemeData(
+                  style: FilledButton.styleFrom(
+                    foregroundColor: lightColorScheme.onPrimary,
+                    backgroundColor: lightColorScheme.primary,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledBackgroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
                 textButtonTheme: TextButtonThemeData(
                   style: TextButton.styleFrom(
                     foregroundColor: lightColorScheme.primary,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
                 outlinedButtonTheme: OutlinedButtonThemeData(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: lightColorScheme.primary,
+                    backgroundColor: Colors.transparent,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
                     side: BorderSide(
-                      color: lightColorScheme.onSurface,
+                      color: lightColorScheme.outline,
                       width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
+                iconButtonTheme: IconButtonThemeData(
+                  style: IconButton.styleFrom(
+                    foregroundColor: lightColorScheme.onSurfaceVariant,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                   ),
                 ),
                 toggleButtonsTheme: ToggleButtonsThemeData(
-                  borderColor: lightColorScheme.onSurface,
+                  borderColor: lightColorScheme.outline,
                   selectedBorderColor: lightColorScheme.primary,
                   fillColor: lightColorScheme.primaryContainer,
                   selectedColor: lightColorScheme.onPrimaryContainer,
+                  color: lightColorScheme.onSurface,
                   borderWidth: 1.5,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                segmentedButtonTheme: SegmentedButtonThemeData(
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: lightColorScheme.surfaceContainer,
+                    foregroundColor: lightColorScheme.onSurface,
+                    selectedBackgroundColor: lightColorScheme.primary,
+                    selectedForegroundColor: lightColorScheme.onPrimary,
+                    disabledForegroundColor:
+                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
                 ),
               ),
               darkTheme: ThemeData(
                 colorScheme: darkColorScheme,
                 useMaterial3: true,
-                // Enhanced button themes for better visibility in dark mode
+                // Complete button theme configuration for dark mode
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: darkColorScheme.onPrimary,
+                    backgroundColor: darkColorScheme.primary,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledBackgroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.12),
+                    elevation: 2,
+                    shadowColor: darkColorScheme.shadow,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
+                filledButtonTheme: FilledButtonThemeData(
+                  style: FilledButton.styleFrom(
+                    foregroundColor: darkColorScheme.onPrimary,
+                    backgroundColor: darkColorScheme.primary,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledBackgroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
                 textButtonTheme: TextButtonThemeData(
                   style: TextButton.styleFrom(
                     foregroundColor: darkColorScheme.primary,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
                     // Add subtle background for better visibility in dark mode
                     backgroundColor:
                         darkColorScheme.primary.withValues(alpha: 0.08),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
                 outlinedButtonTheme: OutlinedButtonThemeData(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: darkColorScheme.primary,
-                    side: BorderSide(
-                      color: darkColorScheme.onSurface,
-                      width: 2.0, // Thicker border for dark mode visibility
-                    ),
                     backgroundColor: darkColorScheme.surface,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    side: BorderSide(
+                      color: darkColorScheme.outline,
+                      width: 1.5,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                ),
+                iconButtonTheme: IconButtonThemeData(
+                  style: IconButton.styleFrom(
+                    foregroundColor: darkColorScheme.onSurfaceVariant,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
                   ),
                 ),
                 toggleButtonsTheme: ToggleButtonsThemeData(
-                  borderColor: darkColorScheme.onSurface,
+                  borderColor: darkColorScheme.outline,
                   selectedBorderColor: darkColorScheme.primary,
                   fillColor: darkColorScheme.primaryContainer,
                   selectedColor: darkColorScheme.onPrimaryContainer,
                   color: darkColorScheme.onSurface,
-                  borderWidth: 2.0, // Thicker for better visibility
+                  borderWidth: 1.5,
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                segmentedButtonTheme: SegmentedButtonThemeData(
+                  style: SegmentedButton.styleFrom(
+                    backgroundColor: darkColorScheme.surfaceContainer,
+                    foregroundColor: darkColorScheme.onSurface,
+                    selectedBackgroundColor: darkColorScheme.primary,
+                    selectedForegroundColor: darkColorScheme.onPrimary,
+                    disabledForegroundColor:
+                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    side: BorderSide.none,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
                 ),
               ),
               themeMode: settingsProvider.themeMode,

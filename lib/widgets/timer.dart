@@ -212,8 +212,16 @@ class TimerWidgetState extends State<TimerWidget> {
   @override
   Widget build(BuildContext context) {
     return Column(children: <Widget>[
-      Padding(
-        padding: const EdgeInsets.all(4),
+      // Timer Display
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerLowest
+              .withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
         child: StreamBuilder<int>(
           stream: tenthSecondStream,
           initialData: _useCustomTimer
@@ -239,52 +247,121 @@ class TimerWidgetState extends State<TimerWidget> {
 
             return Text(
               displayTime,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: getTimerColor(),
-                  ),
+              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: getTimerColor(),
+                fontWeight: FontWeight.w500,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             );
           },
         ),
       ),
+      const SizedBox(height: 8),
+
+      // Progress Indicator
+      Consumer2<GameSetupProvider, ScorePanelProvider>(
+        builder: (context, gameSetupProvider, scorePanelProvider, _) {
+          double progress = 0.0;
+          if (gameSetupProvider.quarterMSec > 0 &&
+              scorePanelProvider.timerRawTime >= 0) {
+            progress =
+                scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
+            progress = progress.clamp(0.0, 1.0);
+          }
+
+          return LinearProgressIndicator(
+            value: progress,
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.primary,
+            ),
+          );
+        },
+      ),
+      const SizedBox(height: 12),
+
+      // Control Buttons
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.30,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: widget.isRunning ?? isRunning,
-              builder: (context, isTimerRunning, _) {
-                return ElevatedButton(
+          // Play/Pause/Stop Button
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.isRunning ?? isRunning,
+            builder: (context, isTimerRunning, _) {
+              // Determine button text based on current state
+              String buttonText;
+              if (!isTimerRunning) {
+                buttonText = 'Start';
+              } else {
+                // Check if we're in overtime (should show "Stop")
+                if (_useCustomTimer) {
+                  buttonText = _customTimerValue <= 0 ? 'Stop' : 'Pause';
+                } else {
+                  buttonText = _stopWatchTimer.rawTime.value > quarterMSec
+                      ? 'Stop'
+                      : 'Pause';
+                }
+              }
+
+              return SizedBox(
+                width: 120, // Wider to accommodate full text
+                child: FilledButton.icon(
                   onPressed: toggleTimer,
-                  child: FaIcon(getIcon()),
-                );
-              },
-            ),
+                  icon: FaIcon(getIcon(), size: 18),
+                  label: Text(
+                    buttonText,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              );
+            },
           ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.30,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: widget.isRunning ?? isRunning,
-              builder: (context, isTimerRunning, _) {
-                return ElevatedButton(
-                  onPressed: isTimerRunning
-                      ? null
-                      : () {
-                          resetTimer();
-                        },
-                  child: FaIcon(
+
+          // Reset Button
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.isRunning ?? isRunning,
+            builder: (context, isTimerRunning, _) {
+              // Check if reset should be enabled
+              bool isResetEnabled;
+              if (isTimerRunning) {
+                // If timer is running, reset should be disabled
+                isResetEnabled = false;
+              } else {
+                // If timer is stopped, check if it's at default value
+                if (_useCustomTimer) {
+                  // For countdown timer, default is quarterMSec
+                  isResetEnabled = _customTimerValue != quarterMSec;
+                } else {
+                  // For count-up timer, default is 0
+                  isResetEnabled = _stopWatchTimer.rawTime.value != 0;
+                }
+              }
+
+              return SizedBox(
+                width: 120, // Wider to match the other button
+                child: FilledButton.tonalIcon(
+                  onPressed: isResetEnabled ? resetTimer : null,
+                  icon: FaIcon(
                     FontAwesomeIcons.arrowRotateLeft,
-                    color: isTimerRunning
+                    size: 18,
+                    color: !isResetEnabled
                         ? Theme.of(context)
                             .colorScheme
                             .onSurface
                             .withValues(alpha: 0.38)
-                        : null, // null defaults to the icon theme color
+                        : null,
                   ),
-                );
-              },
-            ),
-          )
+                  label: const Text(
+                    'Reset',
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              );
+            },
+          ),
         ],
       ),
     ]);

@@ -60,107 +60,67 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
     _timerKey.currentState?.resetTimer();
   }
 
-  Color? _getQuarterTextColor(BuildContext context, int quarterNumber,
-      int selectedQuarter, bool isTimerRunning) {
-    // When timer is running, mute non-selected quarters to show they're effectively disabled
-    if (isTimerRunning && quarterNumber != selectedQuarter) {
-      return Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38);
-    }
-
-    // For all other cases (timer not running, or selected quarter), use default colors
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer2<GameSetupProvider, ScorePanelProvider>(
       builder: (context, gameSetupProvider, scorePanelProvider, _) {
         return Column(
           children: [
-            SizedBox(
-              width: double.infinity,
-              child: LinearProgressIndicator(
-                value: getProgressValue(gameSetupProvider, scorePanelProvider),
-                minHeight: 4,
-              ),
-            ),
-            const SizedBox(height: 8.0),
+            // Quarter Selection
             ValueListenableBuilder<bool>(
               valueListenable: widget.isTimerRunning,
               builder: (context, isTimerRunning, _) {
-                return ToggleButtons(
-                  isSelected: List.generate(
-                      4,
-                      (index) =>
-                          scorePanelProvider.selectedQuarter == index + 1),
-                  onPressed: (index) {
-                    final quarterNumber = index + 1;
-                    // If timer is running, only allow selecting the current quarter (no-op)
-                    if (isTimerRunning &&
-                        quarterNumber != scorePanelProvider.selectedQuarter) {
-                      return;
-                    }
-                    _handleQuarterChange(quarterNumber, scorePanelProvider);
-                  },
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Quarter 1',
-                        style: TextStyle(
-                          color: _getQuarterTextColor(
-                              context,
-                              1,
-                              scorePanelProvider.selectedQuarter,
-                              isTimerRunning),
-                        ),
+                return SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<int>(
+                    segments: const [
+                      ButtonSegment<int>(
+                        value: 1,
+                        label: Text('Q1'),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Quarter 2',
-                        style: TextStyle(
-                          color: _getQuarterTextColor(
-                              context,
-                              2,
-                              scorePanelProvider.selectedQuarter,
-                              isTimerRunning),
-                        ),
+                      ButtonSegment<int>(
+                        value: 2,
+                        label: Text('Q2'),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Quarter 3',
-                        style: TextStyle(
-                          color: _getQuarterTextColor(
-                              context,
-                              3,
-                              scorePanelProvider.selectedQuarter,
-                              isTimerRunning),
-                        ),
+                      ButtonSegment<int>(
+                        value: 3,
+                        label: Text('Q3'),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Quarter 4',
-                        style: TextStyle(
-                          color: _getQuarterTextColor(
-                              context,
-                              4,
-                              scorePanelProvider.selectedQuarter,
-                              isTimerRunning),
-                        ),
+                      ButtonSegment<int>(
+                        value: 4,
+                        label: Text('Q4'),
                       ),
-                    ),
-                  ],
+                    ],
+                    selected: {scorePanelProvider.selectedQuarter},
+                    onSelectionChanged: (Set<int> newSelection) {
+                      if (!isTimerRunning && newSelection.isNotEmpty) {
+                        _handleQuarterChange(
+                          newSelection.first,
+                          scorePanelProvider,
+                        );
+                      }
+                    },
+                    multiSelectionEnabled: false,
+                    emptySelectionAllowed: false,
+                    showSelectedIcon: false,
+                  ),
                 );
               },
             ),
-            TimerWidget(key: _timerKey, isRunning: widget.isTimerRunning),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 12.0),
+
+            // Timer Widget
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TimerWidget(
+                    key: _timerKey, isRunning: widget.isTimerRunning),
+              ),
+            ),
           ],
         );
       },

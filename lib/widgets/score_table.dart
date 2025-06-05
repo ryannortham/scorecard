@@ -3,19 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/widgets/score_counter.dart';
 
 class ScoreTable extends StatelessWidget {
   final List<GameEvent> events;
   final String homeTeam;
   final String awayTeam;
   final String displayTeam; // The team whose data this table should display
+  final bool isHomeTeam; // Whether this is the home team
+  final bool enabled; // Whether the counters should be enabled
 
   const ScoreTable(
       {super.key,
       required this.events,
       required this.homeTeam,
       required this.awayTeam,
-      required this.displayTeam});
+      required this.displayTeam,
+      required this.isHomeTeam,
+      this.enabled = true});
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
     try {
@@ -372,73 +377,279 @@ class ScoreTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Table(
-        border: TableBorder(
-          verticalInside:
-              BorderSide(width: 1, color: Theme.of(context).dividerColor),
-          horizontalInside:
-              BorderSide(width: 1, color: Theme.of(context).dividerColor),
-          top: BorderSide(width: 2, color: Theme.of(context).dividerColor),
-          bottom: BorderSide(width: 2, color: Theme.of(context).dividerColor),
-          left: BorderSide(width: 2, color: Theme.of(context).dividerColor),
-          right: BorderSide(width: 2, color: Theme.of(context).dividerColor),
-        ),
-        columnWidths: const {
-          0: FlexColumnWidth(0.10), // Qtr
-          1: FlexColumnWidth(0.30), // Goals (main + total)
-          2: FlexColumnWidth(0.30), // Behinds (main + total)
-          3: FlexColumnWidth(0.30), // Score (main + total)
-        },
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Custom header row with spanning headers
-          TableRow(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom:
-                    BorderSide(width: 1, color: Theme.of(context).dividerColor),
-              ),
+          // Team Header with Counter Controls
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Team Name
+                Row(
+                  children: [
+                    Icon(
+                      Icons.sports_outlined,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      displayTeam,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Points Display
+                Center(
+                  child: Consumer<ScorePanelProvider>(
+                    builder: (context, scorePanelProvider, _) {
+                      final goals =
+                          scorePanelProvider.getCount(isHomeTeam, true);
+                      final behinds =
+                          scorePanelProvider.getCount(isHomeTeam, false);
+                      final points = goals * 6 + behinds;
+
+                      return Text(
+                        points.toString(),
+                        style:
+                            Theme.of(context).textTheme.displaySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Counter Controls
+                Consumer<ScorePanelProvider>(
+                  builder: (context, scorePanelProvider, _) {
+                    return Row(
+                      children: [
+                        // Goals Counter
+                        Expanded(
+                          child: ScoreCounter(
+                            label: 'Goals',
+                            isHomeTeam: isHomeTeam,
+                            isGoal: true,
+                            scorePanelProvider: scorePanelProvider,
+                            enabled: enabled,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // Behinds Counter
+                        Expanded(
+                          child: ScoreCounter(
+                            label: 'Behinds',
+                            isHomeTeam: isHomeTeam,
+                            isGoal: false,
+                            scorePanelProvider: scorePanelProvider,
+                            enabled: enabled,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
-            children: [
-              // Quarter header
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                child: Text('Qtr', style: boldStyle),
-              ),
-              // Goals header spanning both columns
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border(
-                    right: BorderSide(
-                        width: 1, color: Theme.of(context).dividerColor),
-                  ),
-                ),
-                child: Text('Goals', style: boldStyle),
-              ),
-              // Behinds header spanning both columns
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  border: Border(
-                    right: BorderSide(
-                        width: 1, color: Theme.of(context).dividerColor),
-                  ),
-                ),
-                child: Text('Behinds', style: boldStyle),
-              ),
-              // Points header spanning both columns
-              Container(
-                height: 28,
-                alignment: Alignment.center,
-                child: Text('Score', style: boldStyle),
-              ),
-            ],
           ),
-          for (int i = 0; i < 4; i++) createRow(context, i),
+
+          // Quarter Breakdown
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainer,
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12.0),
+                      topRight: Radius.circular(12.0),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Quarter',
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'G',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'B',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          'Pts',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Quarter rows
+                for (int i = 0; i < 4; i++) _buildQuarterRow(context, i),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuarterRow(BuildContext context, int quarter) {
+    final currentQuarter =
+        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+    final isCurrentQuarter = quarter + 1 == currentQuarter;
+    final isFutureQuarter = quarter + 1 > currentQuarter;
+
+    final byQuarter = _eventsByQuarter(quarter + 1);
+    final teamEvents = byQuarter['team'] ?? [];
+    final teamGoals = teamEvents.where((e) => e.type == 'goal').length;
+    final teamBehinds = teamEvents.where((e) => e.type == 'behind').length;
+    final teamPoints = teamGoals * 6 + teamBehinds;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: isCurrentQuarter
+            ? Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3)
+            : null,
+        border: Border(
+          bottom: quarter < 3
+              ? BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                  width: 1,
+                )
+              : BorderSide.none,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Row(
+              children: [
+                Text(
+                  _quarterLabels[quarter],
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: isCurrentQuarter
+                            ? FontWeight.w600
+                            : FontWeight.w500,
+                        color: isCurrentQuarter
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ),
+                ),
+                if (isCurrentQuarter)
+                  Container(
+                    margin: const EdgeInsets.only(left: 8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6.0, vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Text(
+                      'LIVE',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              isFutureQuarter ? '-' : teamGoals.toString(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isFutureQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.5)
+                        : null,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              isFutureQuarter ? '-' : teamBehinds.toString(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isFutureQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.5)
+                        : null,
+                  ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              isFutureQuarter ? '-' : teamPoints.toString(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isFutureQuarter
+                        ? Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.5)
+                        : null,
+                  ),
+            ),
+          ),
         ],
       ),
     );
