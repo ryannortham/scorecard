@@ -340,7 +340,7 @@ class ScoringState extends State<Scoring> {
                               widget.title,
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleMedium
+                                  .titleLarge
                                   ?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),

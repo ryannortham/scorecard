@@ -131,8 +131,8 @@ class _SettingsState extends State<Settings> {
                         borderWidth: 2,
                         borderRadius: 36,
                         textSize:
-                            Theme.of(context).textTheme.titleLarge?.fontSize ??
-                                22,
+                            Theme.of(context).textTheme.titleMedium?.fontSize ??
+                                16,
                         count:
                             settingsProvider.defaultQuarterMinutes.toDouble(),
                         minCount: 1,

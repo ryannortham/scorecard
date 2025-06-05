@@ -244,9 +244,9 @@ class TimerWidgetState extends State<TimerWidget> {
 
             return Text(
               displayTime,
-              style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: getTimerColor(),
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             );

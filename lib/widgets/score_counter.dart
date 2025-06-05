@@ -82,7 +82,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                   child: Text(
                     currentCount.toString(),
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: widget.enabled
                               ? Theme.of(context).colorScheme.onSurfaceVariant
                               : Theme.of(context)

@@ -279,7 +279,10 @@ class _GameSetupState extends State<GameSetup> {
               ),
               const SizedBox(height: 24),
               Card(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.8),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -287,7 +290,9 @@ class _GameSetupState extends State<GameSetup> {
                     children: [
                       Text(
                         'Game Settings',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       const SizedBox(height: 8),
                       Row(

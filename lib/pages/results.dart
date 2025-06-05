@@ -58,7 +58,9 @@ class ResultsState extends State<Results> {
             child: FittedBox(
               child: Text(
                 homeTeamName,
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                 overflow: TextOverflow.visible,
               ),
             ),
@@ -83,7 +85,9 @@ class ResultsState extends State<Results> {
             child: FittedBox(
               child: Text(
                 awayTeamName,
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                 overflow: TextOverflow.visible,
               ),
             ),

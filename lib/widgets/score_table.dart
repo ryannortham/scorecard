@@ -210,13 +210,13 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       runningGoals.toString(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.7),
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ),
@@ -258,13 +258,13 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       runningBehinds.toString(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.7),
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
                 ),
@@ -309,14 +309,13 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       runningPoints.toString(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.7),
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.7),
+                          ),
                     ),
                   ),
                 ),
@@ -328,7 +327,7 @@ class ScoreTable extends StatelessWidget {
     );
   }
 
-  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.bold);
+  final TextStyle boldStyle = const TextStyle(fontWeight: FontWeight.w600);
 
   Widget createCell(BuildContext context, String text,
       {bool isBold = false, bool isSmall = false}) {
@@ -337,13 +336,17 @@ class ScoreTable extends StatelessWidget {
       child: Center(
         child: Text(
           text,
-          style: TextStyle(
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            fontSize: isSmall ? 10 : null,
-            color: isSmall
-                ? Theme.of(context).colorScheme.onSurface.withAlpha(179)
-                : null,
-          ),
+          style: isSmall
+              ? Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.7),
+                  )
+              : Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: isBold ? FontWeight.w600 : FontWeight.normal,
+                  ),
         ),
       ),
     );
@@ -429,10 +432,11 @@ class ScoreTable extends StatelessWidget {
 
                     return Text(
                       points.toString(),
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
                     );
                   },
                 ),
@@ -606,9 +610,9 @@ class ScoreTable extends StatelessWidget {
             width: 32,
             child: Text(
               '${quarter + 1}',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight:
-                        isCurrentQuarter ? FontWeight.w700 : FontWeight.w500,
+                        isCurrentQuarter ? FontWeight.w700 : FontWeight.w600,
                     color: isCurrentQuarter
                         ? Theme.of(context).colorScheme.primary
                         : null,
@@ -625,7 +629,7 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamGoals.toString(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isFutureQuarter
                                 ? Theme.of(context)
@@ -656,8 +660,7 @@ class ScoreTable extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningGoals.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
                                   ? Theme.of(context).colorScheme.primary
@@ -683,7 +686,7 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamBehinds.toString(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isFutureQuarter
                                 ? Theme.of(context)
@@ -714,8 +717,7 @@ class ScoreTable extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningBehinds.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
                                   ? Theme.of(context).colorScheme.primary
@@ -741,7 +743,7 @@ class ScoreTable extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '-' : teamPoints.toString(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: isFutureQuarter
                                 ? Theme.of(context)
@@ -772,8 +774,7 @@ class ScoreTable extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningPoints.toString(),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontSize: 10,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: isCurrentQuarter
                                   ? Theme.of(context).colorScheme.primary

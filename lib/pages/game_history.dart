@@ -103,7 +103,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     'Timer Mode: ${game.isCountdownTimer ? 'Countdown' : 'Count Up'}'),
                 const SizedBox(height: 12),
                 const Text('Final Score:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontWeight: FontWeight.w600)),
                 Text(
                     '${game.homeTeam}: ${game.homeGoals}.${game.homeBehinds} (${game.homePoints})'),
                 Text(
@@ -113,7 +113,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                 if (game.events.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   const Text('Quarter Breakdown:',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontWeight: FontWeight.w600)),
                   for (int i = 1; i <= 4; i++) ...[
                     () {
                       final quarterEvents =
@@ -250,23 +250,23 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       const SizedBox(height: 16),
                       Text(
                         'No saved games',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Games you save will appear here',
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
-                        ),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.6),
+                            ),
                       ),
                     ],
                   ),
@@ -285,7 +285,12 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                         child: ListTile(
                           title: Text(
                             '${game.homeTeam} vs ${game.awayTeam}',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,10 +301,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                               ),
                               Text(
                                 _getGameResult(game),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
                               ),
                             ],
                           ),

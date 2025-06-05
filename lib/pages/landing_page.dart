@@ -48,12 +48,16 @@ class LandingPageState extends State<LandingPage> {
             const Spacer(flex: 8),
             Text(
               'Welcome to GoalKeeper',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             const Spacer(flex: 2),
             Text(
               'What would you like to do?',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
             const Spacer(flex: 1),
             _buildButton(
