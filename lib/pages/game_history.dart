@@ -132,6 +132,25 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     '${game.homeTeam}: ${game.homeGoals}.${game.homeBehinds} (${game.homePoints})'),
                 Text(
                     '${game.awayTeam}: ${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})'),
+                const SizedBox(height: 8),
+                if (game.homePoints != game.awayPoints)
+                  Text(
+                    homeWins
+                        ? '${game.homeTeam} Won By ${game.homePoints - game.awayPoints}'
+                        : '${game.awayTeam} Won By ${game.awayPoints - game.homePoints}',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                else
+                  Text(
+                    'Draw',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 if (game.events.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Text('Quarter Breakdown:',
@@ -178,16 +197,6 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         );
       },
     );
-  }
-
-  String _getGameResult(GameRecord game) {
-    if (game.homePoints > game.awayPoints) {
-      return '${game.homeTeam} won';
-    } else if (game.awayPoints > game.homePoints) {
-      return '${game.awayTeam} won';
-    } else {
-      return 'Draw';
-    }
   }
 
   @override
@@ -309,31 +318,105 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                           vertical: 8,
                         ),
                         child: ListTile(
-                          title: Text(
-                            '${game.homeTeam} vs ${game.awayTeam}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                          title: RichText(
+                            text: TextSpan(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                              children: [
+                                TextSpan(
+                                  text: game.homeTeam,
+                                  style: TextStyle(
+                                    color: game.homePoints > game.awayPoints
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                    fontWeight:
+                                        game.homePoints > game.awayPoints
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                  ),
                                 ),
+                                TextSpan(
+                                  text: ' vs ',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: game.awayTeam,
+                                  style: TextStyle(
+                                    color: game.awayPoints > game.homePoints
+                                        ? Theme.of(context).colorScheme.primary
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                    fontWeight:
+                                        game.awayPoints > game.homePoints
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(DateFormat('MMM d, yyyy').format(game.date)),
-                              Text(
-                                '${game.homeGoals}.${game.homeBehinds} (${game.homePoints}) - ${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})',
-                              ),
-                              Text(
-                                _getGameResult(game),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).primaryColor,
+                              RichText(
+                                text: TextSpan(
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          '${game.homeGoals}.${game.homeBehinds} (${game.homePoints})',
+                                      style: TextStyle(
+                                        color: game.homePoints > game.awayPoints
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                        fontWeight:
+                                            game.homePoints > game.awayPoints
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                      ),
                                     ),
+                                    TextSpan(
+                                      text: ' - ',
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text:
+                                          '${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})',
+                                      style: TextStyle(
+                                        color: game.awayPoints > game.homePoints
+                                            ? Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                        fontWeight:
+                                            game.awayPoints > game.homePoints
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
