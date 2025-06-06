@@ -246,6 +246,15 @@ class ScoringState extends State<Scoring> {
                       ),
                     ),
 
+                    // Timer Panel Card - moved to top
+                    Card(
+                      elevation: 1,
+                      child: QuarterTimerPanel(
+                          key: _quarterTimerKey,
+                          isTimerRunning: isTimerRunning),
+                    ),
+                    const SizedBox(height: 8),
+
                     // Home Team Score Table
                     ValueListenableBuilder<bool>(
                       valueListenable: isTimerRunning,
@@ -283,15 +292,6 @@ class ScoringState extends State<Scoring> {
                           ),
                         );
                       },
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Timer Panel Card
-                    Card(
-                      elevation: 1,
-                      child: QuarterTimerPanel(
-                          key: _quarterTimerKey,
-                          isTimerRunning: isTimerRunning),
                     ),
                     const SizedBox(height: 16),
                   ],

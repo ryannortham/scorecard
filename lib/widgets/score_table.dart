@@ -12,6 +12,8 @@ class ScoreTable extends StatelessWidget {
   final String displayTeam; // The team whose data this table should display
   final bool isHomeTeam; // Whether this is the home team
   final bool enabled; // Whether the counters should be enabled
+  final bool showHeader; // Whether to show the team header
+  final bool showCounters; // Whether to show the score counters
 
   const ScoreTable(
       {super.key,
@@ -20,7 +22,9 @@ class ScoreTable extends StatelessWidget {
       required this.awayTeam,
       required this.displayTeam,
       required this.isHomeTeam,
-      this.enabled = true});
+      this.enabled = true,
+      this.showHeader = true,
+      this.showCounters = true});
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
     try {
@@ -402,80 +406,83 @@ class ScoreTable extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Condensed Team Header
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withValues(alpha: 0.3),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    displayTeam,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                Consumer<ScorePanelProvider>(
-                  builder: (context, scorePanelProvider, _) {
-                    final goals = scorePanelProvider.getCount(isHomeTeam, true);
-                    final behinds =
-                        scorePanelProvider.getCount(isHomeTeam, false);
-                    final points = goals * 6 + behinds;
-
-                    return Text(
-                      points.toString(),
-                      style:
-                          Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Condensed Counter Controls
-          Consumer<ScorePanelProvider>(
-            builder: (context, scorePanelProvider, _) {
-              return Row(
+          // Condensed Team Header (conditionally shown)
+          if (showHeader) ...[
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Row(
                 children: [
                   Expanded(
-                    child: ScoreCounter(
-                      label: 'Goals',
-                      isHomeTeam: isHomeTeam,
-                      isGoal: true,
-                      scorePanelProvider: scorePanelProvider,
-                      enabled: enabled,
+                    child: Text(
+                      displayTeam,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ScoreCounter(
-                      label: 'Behinds',
-                      isHomeTeam: isHomeTeam,
-                      isGoal: false,
-                      scorePanelProvider: scorePanelProvider,
-                      enabled: enabled,
-                    ),
+                  Consumer<ScorePanelProvider>(
+                    builder: (context, scorePanelProvider, _) {
+                      final goals =
+                          scorePanelProvider.getCount(isHomeTeam, true);
+                      final behinds =
+                          scorePanelProvider.getCount(isHomeTeam, false);
+                      final points = goals * 6 + behinds;
+
+                      return Text(
+                        points.toString(),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      );
+                    },
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
 
-          const SizedBox(height: 8),
+          // Condensed Counter Controls (conditionally shown)
+          if (showCounters) ...[
+            Consumer<ScorePanelProvider>(
+              builder: (context, scorePanelProvider, _) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: ScoreCounter(
+                        label: 'Goals',
+                        isHomeTeam: isHomeTeam,
+                        isGoal: true,
+                        scorePanelProvider: scorePanelProvider,
+                        enabled: enabled,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ScoreCounter(
+                        label: 'Behinds',
+                        isHomeTeam: isHomeTeam,
+                        isGoal: false,
+                        scorePanelProvider: scorePanelProvider,
+                        enabled: enabled,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
 
           // Quarter Breakdown with Running Totals
           Container(
