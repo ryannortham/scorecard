@@ -115,46 +115,69 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     return maxQuarter;
   }
 
-  /// Get detailed game progress text for in-progress games
+  /// Get simplified game progress text
+  /// Returns either "Full Time" or "Q[N]: [elapsed time]"
   String _getGameProgressText(GameRecord game) {
-    // For games not complete, show appropriate quarter status
+    // Check if game is complete
+    if (_isGameComplete(game)) {
+      return 'Full Time';
+    }
+
+    // For games in progress, show quarter and time
     final currentQuarter = _getCurrentQuarter(game);
 
-    // If no events, show game as just starting
+    // If no events, just show the quarter number with 00:00 time
     if (game.events.isEmpty) {
-      return 'in progress Q1';
+      return 'Q$currentQuarter: 00:00';
     }
 
-    // Check if we're in between quarters (current quarter has a pause but we also have events in the next quarter)
-    bool hasNextQuarterEvents =
-        game.events.any((e) => e.quarter > currentQuarter);
-    bool hasCurrentQuarterPause = game.events
-        .any((e) => e.quarter == currentQuarter && e.type == 'clock_pause');
+    // Get all events for the current quarter
+    final currentQuarterEvents =
+        game.events.where((e) => e.quarter == currentQuarter).toList();
+    if (currentQuarterEvents.isEmpty) {
+      return 'Q$currentQuarter: 00:00';
+    }
 
-    if (hasCurrentQuarterPause && !hasNextQuarterEvents) {
-      // This quarter is paused but next quarter hasn't started
-      return 'Q$currentQuarter paused';
-    } else {
-      // Quarter is in progress - find the latest event in this quarter to determine elapsed time
-      final quarterEvents =
-          game.events.where((e) => e.quarter == currentQuarter).toList();
-      if (quarterEvents.isEmpty) {
-        return 'in progress Q$currentQuarter';
+    // Get all scoring events (goals and behinds) for this quarter
+    final scoringEvents = currentQuarterEvents
+        .where((e) => e.type == 'goal' || e.type == 'behind')
+        .toList();
+
+    // If there are no scoring events, check for clock events
+    if (scoringEvents.isEmpty) {
+      final clockEvents = currentQuarterEvents
+          .where((e) => e.type.startsWith('clock_'))
+          .toList();
+
+      // If there are clock events, use the latest one
+      if (clockEvents.isNotEmpty) {
+        final latestClockEvent = clockEvents.reduce(
+            (a, b) => a.time.inMilliseconds > b.time.inMilliseconds ? a : b);
+
+        final elapsedTimeMs = latestClockEvent.time.inMilliseconds;
+        final minutes = (elapsedTimeMs / (1000 * 60)).floor();
+        final seconds = ((elapsedTimeMs % (1000 * 60)) / 1000).floor();
+        final formattedTime =
+            '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+        return 'Q$currentQuarter: $formattedTime';
       }
 
-      // Get the max time from the current quarter's events to show elapsed time
-      final maxTimeMs = quarterEvents
-          .map((e) => e.time.inMilliseconds)
-          .reduce((a, b) => a > b ? a : b);
-
-      // Format the time nicely
-      final minutes = (maxTimeMs / (1000 * 60)).floor();
-      final seconds = ((maxTimeMs % (1000 * 60)) / 1000).floor();
-      final formattedTime =
-          '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-
-      return 'Q$currentQuarter: $formattedTime';
+      return 'Q$currentQuarter: 00:00';
     }
+
+    // Use the latest scoring event's time
+    final latestScoringEvent = scoringEvents.reduce(
+        (a, b) => a.time.inMilliseconds > b.time.inMilliseconds ? a : b);
+
+    // Format the elapsed time
+    final elapsedTimeMs = latestScoringEvent.time.inMilliseconds;
+    final minutes = (elapsedTimeMs / (1000 * 60)).floor();
+    final seconds = ((elapsedTimeMs % (1000 * 60)) / 1000).floor();
+    final formattedTime =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    return 'Q$currentQuarter: $formattedTime';
   }
 
   void _showGameDetails(GameRecord game) {
