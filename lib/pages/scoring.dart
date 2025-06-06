@@ -26,7 +26,7 @@ class ScoringState extends State<Scoring> {
   final List<GameEvent> gameEvents = [];
   final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
       GlobalKey<QuarterTimerPanelState>();
-  
+
   String? _currentGameId; // Track the current game's ID for updates
   Timer? _saveTimer; // Timer for throttling save operations
 
@@ -35,7 +35,7 @@ class ScoringState extends State<Scoring> {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
-    
+
     // Auto-save a new game record when first entering the scoring screen
     if (_currentGameId == null) {
       _createInitialGameRecord();
@@ -58,10 +58,11 @@ class ScoringState extends State<Scoring> {
         awayGoals: 0,
         awayBehinds: 0,
       );
-      
+
       await GameHistoryService.saveGame(gameRecord);
       _currentGameId = gameRecord.id;
-      debugPrint('Auto-saved initial game record: ${gameRecord.homeTeam} vs ${gameRecord.awayTeam}');
+      debugPrint(
+          'Auto-saved initial game record: ${gameRecord.homeTeam} vs ${gameRecord.awayTeam}');
     } catch (e) {
       // Handle error silently - don't disrupt the user experience
       debugPrint('Error creating initial game record: $e');
@@ -71,7 +72,7 @@ class ScoringState extends State<Scoring> {
   void _scheduleGameUpdate() {
     // Cancel any existing timer
     _saveTimer?.cancel();
-    
+
     // Schedule a new save operation with a 1-second delay to throttle saves
     _saveTimer = Timer(const Duration(seconds: 1), () {
       _updateGameRecord();
@@ -80,7 +81,7 @@ class ScoringState extends State<Scoring> {
 
   void _updateGameRecord() async {
     if (_currentGameId == null) return;
-    
+
     try {
       final gameRecord = GameHistoryService.createGameRecord(
         date: DateTime.now(),
@@ -94,12 +95,13 @@ class ScoringState extends State<Scoring> {
         awayGoals: scorePanelProvider.awayGoals,
         awayBehinds: scorePanelProvider.awayBehinds,
       );
-      
+
       // Delete the old record and save the updated one
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
       _currentGameId = gameRecord.id;
-      debugPrint('Auto-updated game record: ${gameRecord.homeTeam} ${gameRecord.homeGoals}.${gameRecord.homeBehinds} - ${gameRecord.awayTeam} ${gameRecord.awayGoals}.${gameRecord.awayBehinds}');
+      debugPrint(
+          'Auto-updated game record: ${gameRecord.homeTeam} ${gameRecord.homeGoals}.${gameRecord.homeBehinds} - ${gameRecord.awayTeam} ${gameRecord.awayGoals}.${gameRecord.awayBehinds}');
     } catch (e) {
       // Handle error silently - don't disrupt the user experience
       debugPrint('Error updating game record: $e');
@@ -131,7 +133,8 @@ class ScoringState extends State<Scoring> {
                 color: Theme.of(context).colorScheme.error,
               ),
               title: const Text('Exit Game?'),
-              content: const Text('Are you sure you want to exit the current game?'),
+              content:
+                  const Text('Are you sure you want to exit the current game?'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
