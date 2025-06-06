@@ -169,25 +169,13 @@ class TimerWidgetState extends State<TimerWidget> {
       _useCustomTimer ? _isCustomTimerRunning : _stopWatchTimer.isRunning;
   IconData getIcon() {
     if (_useCustomTimer) {
-      if (_isCustomTimerRunning) {
-        // If timer is running and in negative time (overtime), show stop icon
-        if (_customTimerValue <= 0) {
-          return FontAwesomeIcons.stop;
-        }
-        return FontAwesomeIcons.pause;
-      } else {
-        return FontAwesomeIcons.play;
-      }
+      return _isCustomTimerRunning
+          ? FontAwesomeIcons.pause
+          : FontAwesomeIcons.play;
     } else {
-      if (_stopWatchTimer.isRunning) {
-        // If timer is running and past quarter end (overtime), show stop icon
-        if (_stopWatchTimer.rawTime.value > quarterMSec) {
-          return FontAwesomeIcons.stop;
-        }
-        return FontAwesomeIcons.pause;
-      } else {
-        return FontAwesomeIcons.play;
-      }
+      return _stopWatchTimer.isRunning
+          ? FontAwesomeIcons.pause
+          : FontAwesomeIcons.play;
     }
   }
 
@@ -283,32 +271,17 @@ class TimerWidgetState extends State<TimerWidget> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          // Play/Pause/Stop Button
+          // Play/Pause Button
           ValueListenableBuilder<bool>(
             valueListenable: widget.isRunning ?? isRunning,
             builder: (context, isTimerRunning, _) {
-              // Determine button text based on current state
-              String buttonText;
-              if (!isTimerRunning) {
-                buttonText = 'Start';
-              } else {
-                // Check if we're in overtime (should show "Stop")
-                if (_useCustomTimer) {
-                  buttonText = _customTimerValue <= 0 ? 'Stop' : 'Pause';
-                } else {
-                  buttonText = _stopWatchTimer.rawTime.value > quarterMSec
-                      ? 'Stop'
-                      : 'Pause';
-                }
-              }
-
               return SizedBox(
                 width: 120, // Wider to accommodate full text
                 child: FilledButton.icon(
                   onPressed: toggleTimer,
                   icon: FaIcon(getIcon(), size: 18),
                   label: Text(
-                    buttonText,
+                    isTimerRunning ? 'Pause' : 'Start',
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
