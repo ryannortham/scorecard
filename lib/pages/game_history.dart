@@ -85,11 +85,39 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   }
 
   void _showGameDetails(GameRecord game) {
+    final bool homeWins = game.homePoints > game.awayPoints;
+    final bool awayWins = game.awayPoints > game.homePoints;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('${game.homeTeam} vs ${game.awayTeam}'),
+          title: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+              children: [
+                TextSpan(
+                  text: game.homeTeam,
+                  style: TextStyle(
+                    color:
+                        homeWins ? Theme.of(context).colorScheme.primary : null,
+                    fontWeight: homeWins ? FontWeight.w600 : null,
+                  ),
+                ),
+                const TextSpan(text: ' vs '),
+                TextSpan(
+                  text: game.awayTeam,
+                  style: TextStyle(
+                    color:
+                        awayWins ? Theme.of(context).colorScheme.primary : null,
+                    fontWeight: awayWins ? FontWeight.w600 : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -97,10 +125,6 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               children: [
                 Text(
                     'Date: ${DateFormat('EEEE, MMM d, yyyy').format(game.date)}'),
-                const SizedBox(height: 8),
-                Text('Quarter Length: ${game.quarterMinutes} minutes'),
-                Text(
-                    'Timer Mode: ${game.isCountdownTimer ? 'Countdown' : 'Count Up'}'),
                 const SizedBox(height: 12),
                 const Text('Final Score:',
                     style: TextStyle(fontWeight: FontWeight.w600)),
@@ -108,12 +132,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     '${game.homeTeam}: ${game.homeGoals}.${game.homeBehinds} (${game.homePoints})'),
                 Text(
                     '${game.awayTeam}: ${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})'),
-                const SizedBox(height: 12),
-                Text('Total Events: ${game.events.length}'),
                 if (game.events.isNotEmpty) ...[
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   const Text('Quarter Breakdown:',
                       style: TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
                   for (int i = 1; i <= 4; i++) ...[
                     () {
                       final quarterEvents =
@@ -135,8 +158,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                               e.team == game.awayTeam && e.type == 'behind')
                           .length;
 
-                      return Text(
-                          'Q$i: ${game.homeTeam} $homeGoals.$homeBehinds - ${game.awayTeam} $awayGoals.$awayBehinds');
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Text(
+                            'Q$i: ${game.homeTeam} $homeGoals.$homeBehinds - ${game.awayTeam} $awayGoals.$awayBehinds'),
+                      );
                     }(),
                   ],
                 ],
