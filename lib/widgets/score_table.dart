@@ -609,7 +609,7 @@ class ScoreTable extends StatelessWidget {
           SizedBox(
             width: 32,
             child: Text(
-              '${quarter + 1}',
+              'Q${quarter + 1}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight:
                         isCurrentQuarter ? FontWeight.w700 : FontWeight.w600,
