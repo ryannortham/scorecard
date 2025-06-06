@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/pages/scoring.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -82,10 +83,15 @@ class TimerWidgetState extends State<TimerWidget> {
         .asyncMap((_) => _stopWatchTimer.rawTime.value);
     secondStream = Stream.periodic(const Duration(seconds: 1))
         .asyncMap((_) => _stopWatchTimer.rawTime.value);
-    _secondSubscription = secondStream.listen((_) {
+    _secondSubscription = secondStream.listen((rawTime) {
       // Use addPostFrameCallback to avoid setState during build
       WidgetsBinding.instance.addPostFrameCallback((_) {
         scorePanelProvider.setTimerRawTime(_stopWatchTimer.rawTime.value);
+
+        // Check if the quarter timer is completed (we've reached/exceeded the time limit)
+        if (_isQuarterCompleted()) {
+          _checkAndNotifyTimerCompletion();
+        }
       });
     });
   }
@@ -140,6 +146,11 @@ class TimerWidgetState extends State<TimerWidget> {
       // Update provider after build phase
       WidgetsBinding.instance.addPostFrameCallback((_) {
         scorePanelProvider.setTimerRawTime(_customTimerValue);
+
+        // Check if the quarter timer is completed
+        if (_isQuarterCompleted()) {
+          _checkAndNotifyTimerCompletion();
+        }
       });
     });
   }
@@ -162,6 +173,37 @@ class TimerWidgetState extends State<TimerWidget> {
       widget.isRunning!.value = false;
     } else {
       isRunning.value = false;
+    }
+  }
+
+  // Check if timer has reached or exceeded the quarter length
+  bool _isQuarterCompleted() {
+    if (_useCustomTimer) {
+      // For countdown timer, complete when <= 0
+      return _customTimerValue <= 0;
+    } else {
+      // For count-up timer, complete when time exceeds quarter length
+      return _stopWatchTimer.rawTime.value >= quarterMSec;
+    }
+  }
+
+  // Method to notify timer completion
+  void _checkAndNotifyTimerCompletion() {
+    // Find parent ScoringState to notify of timer completion
+    if (_isQuarterCompleted()) {
+      // Use post-frame callback to avoid during-build state changes
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Handle quarter end event by notifying parent
+        final scoringState = context.findAncestorStateOfType<ScoringState>();
+        if (scoringState != null) {
+          // Get the current quarter
+          final currentQuarter = scorePanelProvider.selectedQuarter;
+          // Record that the quarter has ended
+          scoringState.recordQuarterEnd(currentQuarter);
+          // Stop the timer
+          toggleTimer();
+        }
+      });
     }
   }
 

@@ -25,6 +25,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   Future<void> _loadGames() async {
     try {
+      // Clean up duplicate games on load
+      int removedCount = await GameHistoryService.deduplicateGames();
+      if (removedCount > 0) {
+        debugPrint('Removed $removedCount duplicate games');
+      }
+
+      // Load the deduplicated games
       final games = await GameHistoryService.loadGames();
       setState(() {
         _games = games;
@@ -82,6 +89,71 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           );
         }
       }
+    }
+  }
+
+  /// Check if a game is in progress or completed
+  bool _isGameComplete(GameRecord game) {
+    // If no events, it's definitely not complete
+    if (game.events.isEmpty) return false;
+
+    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
+    bool hasQ4ClockPause =
+        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
+    if (hasQ4ClockPause) return true;
+
+    return false;
+  }
+
+  /// Gets the current quarter based on the latest events
+  int _getCurrentQuarter(GameRecord game) {
+    if (game.events.isEmpty) return 1;
+
+    // Find the highest quarter number with events
+    final maxQuarter =
+        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
+    return maxQuarter;
+  }
+
+  /// Get detailed game progress text for in-progress games
+  String _getGameProgressText(GameRecord game) {
+    // For games not complete, show appropriate quarter status
+    final currentQuarter = _getCurrentQuarter(game);
+
+    // If no events, show game as just starting
+    if (game.events.isEmpty) {
+      return 'in progress Q1';
+    }
+
+    // Check if we're in between quarters (current quarter has a pause but we also have events in the next quarter)
+    bool hasNextQuarterEvents =
+        game.events.any((e) => e.quarter > currentQuarter);
+    bool hasCurrentQuarterPause = game.events
+        .any((e) => e.quarter == currentQuarter && e.type == 'clock_pause');
+
+    if (hasCurrentQuarterPause && !hasNextQuarterEvents) {
+      // This quarter is paused but next quarter hasn't started
+      return 'Q$currentQuarter paused';
+    } else {
+      // Quarter is in progress - find the latest event in this quarter to determine elapsed time
+      final quarterEvents =
+          game.events.where((e) => e.quarter == currentQuarter).toList();
+      if (quarterEvents.isEmpty) {
+        return 'in progress Q$currentQuarter';
+      }
+
+      // Get the max time from the current quarter's events to show elapsed time
+      final maxTimeMs = quarterEvents
+          .map((e) => e.time.inMilliseconds)
+          .reduce((a, b) => a > b ? a : b);
+
+      // Format the time nicely
+      final minutes = (maxTimeMs / (1000 * 60)).floor();
+      final seconds = ((maxTimeMs % (1000 * 60)) / 1000).floor();
+      final formattedTime =
+          '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+      return 'Q$currentQuarter: $formattedTime';
     }
   }
 
@@ -210,7 +282,37 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(DateFormat('MMM d, yyyy').format(game.date)),
+                              Row(
+                                children: [
+                                  Text(DateFormat('MMM d, yyyy')
+                                      .format(game.date)),
+                                  const SizedBox(width: 8),
+                                  if (!_isGameComplete(game))
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .tertiaryContainer
+                                            .withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        _getGameProgressText(game),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onTertiaryContainer,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                               RichText(
                                 text: TextSpan(
                                   style: Theme.of(context).textTheme.bodyMedium,

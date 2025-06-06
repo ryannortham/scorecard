@@ -1,18 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class GameDetailsPage extends StatelessWidget {
   final GameRecord game;
 
   const GameDetailsPage({super.key, required this.game});
 
+  /// Determines if the game is complete based on timer events
+  bool _isGameComplete() {
+    // If no events, it's definitely not complete
+    if (game.events.isEmpty) return false;
+
+    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
+    bool hasQ4ClockPause =
+        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
+    if (hasQ4ClockPause) return true;
+
+    // Not enough evidence to consider the game complete
+    return false;
+  }
+
+  /// Gets the current quarter based on the latest events
+  int _getCurrentQuarter() {
+    if (game.events.isEmpty) return 1;
+
+    // Find the highest quarter number with events
+    final maxQuarter =
+        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
+    return maxQuarter;
+  }
+
+  /// Gets the game status string for display
+  String _getGameStatus() {
+    // First check if game is complete
+    if (_isGameComplete()) {
+      return 'Full Time';
+    }
+
+    // For games not complete, show appropriate quarter status
+    final currentQuarter = _getCurrentQuarter();
+
+    // If no events, show game as just starting Q1
+    if (game.events.isEmpty) {
+      return 'Q1 starting';
+    }
+
+    // Check if we're in between quarters (current quarter has a pause but we also have events in the next quarter)
+    bool hasNextQuarterEvents =
+        game.events.any((e) => e.quarter > currentQuarter);
+    bool hasCurrentQuarterPause = game.events
+        .any((e) => e.quarter == currentQuarter && e.type == 'clock_pause');
+
+    if (hasCurrentQuarterPause && !hasNextQuarterEvents) {
+      // This quarter is paused but next quarter hasn't started
+      return 'Q$currentQuarter paused';
+    } else {
+      // Quarter is in progress - find the latest event in this quarter to determine elapsed time
+      final quarterEvents =
+          game.events.where((e) => e.quarter == currentQuarter).toList();
+      if (quarterEvents.isEmpty) {
+        return 'Q$currentQuarter in progress';
+      }
+
+      // Get the max time from the current quarter's events to show elapsed time
+      final maxTimeMs = quarterEvents
+          .map((e) => e.time.inMilliseconds)
+          .reduce((a, b) => a > b ? a : b);
+
+      // Format the time nicely
+      final minutes = (maxTimeMs / (1000 * 60)).floor();
+      final seconds = ((maxTimeMs % (1000 * 60)) / 1000).floor();
+      final formattedTime =
+          '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+      return 'Q$currentQuarter: $formattedTime';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool homeWins = game.homePoints > game.awayPoints;
     final bool awayWins = game.awayPoints > game.homePoints;
+    final bool isComplete = _isGameComplete();
 
     return Scaffold(
       appBar: AppBar(
@@ -67,9 +141,29 @@ class GameDetailsPage extends StatelessWidget {
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      DateFormat('EEEE, MMM d, yyyy').format(game.date),
-                      style: Theme.of(context).textTheme.titleMedium,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            DateFormat('EEEE, MMM d, yyyy').format(game.date),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _getGameStatus(),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -224,38 +318,43 @@ class GameDetailsPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    Center(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: game.homePoints != game.awayPoints
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          game.homePoints != game.awayPoints
-                              ? homeWins
-                                  ? '${game.homeTeam} Won By ${game.homePoints - game.awayPoints}'
-                                  : '${game.awayTeam} Won By ${game.awayPoints - game.homePoints}'
-                              : 'Draw',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: game.homePoints != game.awayPoints
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onSecondaryContainer,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                    // Only show win message if game is complete
+                    if (isComplete) ...[
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: game.homePoints != game.awayPoints
+                                ? Theme.of(context).colorScheme.primaryContainer
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .secondaryContainer,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            game.homePoints != game.awayPoints
+                                ? homeWins
+                                    ? '${game.homeTeam} Won By ${game.homePoints - game.awayPoints}'
+                                    : '${game.awayTeam} Won By ${game.awayPoints - game.homePoints}'
+                                : 'Draw',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: game.homePoints != game.awayPoints
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onSecondaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -307,15 +406,21 @@ class GameDetailsPage extends StatelessWidget {
                       ),
 
                       // Home Team Score Table
-                      ScoreTable(
-                        events: game.events,
-                        homeTeam: game.homeTeam,
-                        awayTeam: game.awayTeam,
-                        displayTeam: game.homeTeam,
-                        isHomeTeam: true,
-                        enabled: false, // Disable interactions in details view
-                        showHeader: false, // Hide team header
-                        showCounters: false, // Hide score counters
+                      ChangeNotifierProvider<ScorePanelProvider>(
+                        create: (_) => ScorePanelProvider()
+                          ..setSelectedQuarter(
+                              _getCurrentQuarter()), // Use current quarter
+                        child: ScoreTable(
+                          events: game.events,
+                          homeTeam: game.homeTeam,
+                          awayTeam: game.awayTeam,
+                          displayTeam: game.homeTeam,
+                          isHomeTeam: true,
+                          enabled:
+                              false, // Disable interactions in details view
+                          showHeader: false, // Hide team header
+                          showCounters: false, // Hide score counters
+                        ),
                       ),
 
                       const SizedBox(height: 16),
@@ -337,15 +442,21 @@ class GameDetailsPage extends StatelessWidget {
                       ),
 
                       // Away Team Score Table
-                      ScoreTable(
-                        events: game.events,
-                        homeTeam: game.homeTeam,
-                        awayTeam: game.awayTeam,
-                        displayTeam: game.awayTeam,
-                        isHomeTeam: false,
-                        enabled: false, // Disable interactions in details view
-                        showHeader: false, // Hide team header
-                        showCounters: false, // Hide score counters
+                      ChangeNotifierProvider<ScorePanelProvider>(
+                        create: (_) => ScorePanelProvider()
+                          ..setSelectedQuarter(
+                              _getCurrentQuarter()), // Use current quarter
+                        child: ScoreTable(
+                          events: game.events,
+                          homeTeam: game.homeTeam,
+                          awayTeam: game.awayTeam,
+                          displayTeam: game.awayTeam,
+                          isHomeTeam: false,
+                          enabled:
+                              false, // Disable interactions in details view
+                          showHeader: false, // Hide team header
+                          showCounters: false, // Hide score counters
+                        ),
                       ),
                     ],
                   ),

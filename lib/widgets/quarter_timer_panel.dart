@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/widgets/timer.dart';
+import 'package:goalkeeper/pages/scoring.dart';
 import 'package:provider/provider.dart';
 
 class QuarterTimerPanel extends StatefulWidget {
@@ -52,6 +53,19 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
 
     // If selecting the same quarter, do nothing
     if (newQuarter == currentQuarter) return;
+
+    // Find parent ScoringState to record quarter end event
+    final scoringState = context.findAncestorStateOfType<ScoringState>();
+    if (scoringState != null) {
+      // Record clock_end event for the previous quarter
+      scoringState.recordQuarterEnd(currentQuarter);
+
+      // If timer is running, pause it before changing quarters
+      if (widget.isTimerRunning.value) {
+        // Pause timer to ensure clean state for new quarter
+        _timerKey.currentState?.toggleTimer();
+      }
+    }
 
     // Switch to the new quarter
     scorePanelProvider.setSelectedQuarter(newQuarter);

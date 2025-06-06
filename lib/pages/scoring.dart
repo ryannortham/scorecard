@@ -30,21 +30,36 @@ class ScoringState extends State<Scoring> {
   String? _currentGameId; // Track the current game's ID for updates
   Timer? _saveTimer; // Timer for throttling save operations
 
+  // Add tracking for clock state
+  bool _isClockRunning = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
 
-    // Auto-save a new game record when first entering the scoring screen
+    // Only add listener once, don't auto-save until actual game activity
     if (_currentGameId == null) {
+      // Create the initial game record immediately to establish an ID
       _createInitialGameRecord();
-      // Add listeners for score changes to auto-save
-      scorePanelProvider.addListener(_scheduleGameUpdate);
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Add listener to the timer running state to track clock events
+    isTimerRunning.addListener(() {
+      _onTimerRunningChanged(isTimerRunning.value);
+    });
+  }
+
   void _createInitialGameRecord() async {
+    // Only create a new game record if we don't already have one
+    if (_currentGameId != null) return;
+
     try {
       final gameRecord = GameHistoryService.createGameRecord(
         date: DateTime.now(),
@@ -52,17 +67,20 @@ class ScoringState extends State<Scoring> {
         awayTeam: gameSetupProvider.awayTeam,
         quarterMinutes: gameSetupProvider.quarterMinutes,
         isCountdownTimer: gameSetupProvider.isCountdownTimer,
-        events: [],
-        homeGoals: 0,
-        homeBehinds: 0,
-        awayGoals: 0,
-        awayBehinds: 0,
+        events: List<GameEvent>.from(gameEvents),
+        homeGoals: scorePanelProvider.homeGoals,
+        homeBehinds: scorePanelProvider.homeBehinds,
+        awayGoals: scorePanelProvider.awayGoals,
+        awayBehinds: scorePanelProvider.awayBehinds,
       );
 
       await GameHistoryService.saveGame(gameRecord);
       _currentGameId = gameRecord.id;
       debugPrint(
           'Auto-saved initial game record: ${gameRecord.homeTeam} vs ${gameRecord.awayTeam}');
+
+      // Now that we have a game ID, add the listener for future updates
+      scorePanelProvider.addListener(_scheduleGameUpdate);
     } catch (e) {
       // Handle error silently - don't disrupt the user experience
       debugPrint('Error creating initial game record: $e');
@@ -70,11 +88,18 @@ class ScoringState extends State<Scoring> {
   }
 
   void _scheduleGameUpdate() {
+    // If we don't have a game ID yet, this was called too early
+    if (_currentGameId == null) {
+      debugPrint('Attempted to update game before ID was created');
+      return;
+    }
+
     // Cancel any existing timer
     _saveTimer?.cancel();
 
-    // Schedule a new save operation with a 1-second delay to throttle saves
-    _saveTimer = Timer(const Duration(seconds: 1), () {
+    // Schedule a new save operation with a 2-second delay to throttle saves
+    // The longer delay helps reduce unnecessary writes
+    _saveTimer = Timer(const Duration(seconds: 2), () {
       _updateGameRecord();
     });
   }
@@ -108,15 +133,129 @@ class ScoringState extends State<Scoring> {
     }
   }
 
+  /// Records a clock event (start, pause, end) for the current quarter
+  void _recordClockEvent(String eventType) {
+    final currentQuarter = scorePanelProvider.selectedQuarter;
+    final currentTime = Duration(milliseconds: scorePanelProvider.timerRawTime);
+
+    // Only add the event if it doesn't duplicate the most recent event of the same type
+    bool shouldAdd = true;
+    if (gameEvents.isNotEmpty) {
+      final lastEvent = gameEvents.last;
+      // Don't add duplicate sequential events of the same type and quarter
+      if (lastEvent.type == eventType && lastEvent.quarter == currentQuarter) {
+        shouldAdd = false;
+      }
+    }
+
+    if (shouldAdd) {
+      setState(() {
+        gameEvents.add(
+          GameEvent(
+            quarter: currentQuarter,
+            time: currentTime,
+            team: "", // Empty string for clock events
+            type: eventType,
+          ),
+        );
+      });
+
+      // Update game record with the new clock event
+      _scheduleGameUpdate();
+    }
+  }
+
+  /// Track timer state changes
+  void _onTimerRunningChanged(bool isRunning) {
+    if (isRunning && !_isClockRunning) {
+      // Timer started
+      _recordClockEvent('clock_start');
+      _isClockRunning = true;
+    } else if (!isRunning && _isClockRunning) {
+      // Timer paused
+      _recordClockEvent('clock_pause');
+      _isClockRunning = false;
+    }
+  }
+
+  /// Record end of quarter event
+  /// This method is called from the QuarterTimerPanel when quarters change
+  /// and from the timer widget when a quarter's time expires
+  void recordQuarterEnd(int quarter) {
+    // Ensure we're using the current timer value
+    final currentTime = Duration(milliseconds: scorePanelProvider.timerRawTime);
+
+    setState(() {
+      gameEvents.add(
+        GameEvent(
+          quarter: quarter,
+          time: currentTime,
+          team: "", // Empty string for clock events
+          type: 'clock_end',
+        ),
+      );
+    });
+
+    // Update game record with the quarter end event
+    _scheduleGameUpdate();
+
+    // If this is the end of quarter 4, handle game completion
+    if (quarter == 4) {
+      _handleGameCompletion();
+    }
+  }
+
   // Public method that can be called by score counter when events change
   void updateGameAfterEventChange() {
     _scheduleGameUpdate();
+  }
+
+  /// Check if the game is completed (Q4 has ended)
+  bool _isGameComplete() {
+    // Check for any clock_end events in quarter 4
+    return gameEvents.any((e) => e.quarter == 4 && e.type == 'clock_end');
+  }
+
+  /// Handle game completion by showing a dialog
+  void _handleGameCompletion() {
+    // Only show completion dialog once
+    if (_isGameComplete()) {
+      // Use post-frame callback to avoid during-build dialog issues
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: const Text('Game Complete'),
+            content: const Text(
+                'The game has been completed and saved to your history.'),
+            actions: [
+              FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Return to previous screen
+                },
+                child: const Text('View Game History'),
+              ),
+            ],
+          ),
+        );
+      });
+    }
   }
 
   @override
   void dispose() {
     // Cancel any pending save timer
     _saveTimer?.cancel();
+
+    // Force a final update before leaving the screen to ensure latest state is saved
+    if (_currentGameId != null) {
+      _updateGameRecord();
+    }
+
     // Remove the listener to prevent memory leaks
     scorePanelProvider.removeListener(_scheduleGameUpdate);
     isTimerRunning.dispose();
@@ -152,7 +291,22 @@ class ScoringState extends State<Scoring> {
   }
 
   Future<bool> _onWillPop() async {
-    return await _showExitConfirmation();
+    final shouldExit = await _showExitConfirmation();
+
+    // If the user confirms exit and the timer is still running, stop it and record the event
+    if (shouldExit && _isClockRunning) {
+      // Stop the timer
+      isTimerRunning.value = false;
+
+      // Make sure the timer is visually stopped
+      _quarterTimerKey.currentState?.resetTimer();
+
+      // Record the clock pause event manually since we're not going through the normal flow
+      _recordClockEvent('clock_pause');
+      _isClockRunning = false;
+    }
+
+    return shouldExit;
   }
 
   @override

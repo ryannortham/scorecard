@@ -2,12 +2,18 @@ class GameEvent {
   final int quarter;
   final Duration time;
   final String team;
-  final String type; // 'goal' or 'behind'
+  // Updated type values:
+  // - 'goal' : Goal scored
+  // - 'behind' : Behind scored
+  // - 'clock_start' : Timer started for quarter
+  // - 'clock_pause' : Timer paused for quarter
+  // - 'clock_end' : Quarter ended
+  final String type;
 
   GameEvent({
     required this.quarter,
     required this.time,
-    required this.team,
+    required this.team, // Empty string for clock events
     required this.type,
   });
 
