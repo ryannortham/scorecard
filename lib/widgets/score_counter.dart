@@ -161,6 +161,8 @@ class ScoreCounterState extends State<ScoreCounter> {
           state.gameEvents.removeAt(idx);
         }
       });
+      // Auto-save after event removal
+      state?.updateGameAfterEventChange();
     } else if (newCount > oldCount) {
       // Add a new event
       final event = GameEvent(
@@ -172,6 +174,8 @@ class ScoreCounterState extends State<ScoreCounter> {
       state?.setState(() {
         state.gameEvents.add(event);
       });
+      // Auto-save after event addition
+      state?.updateGameAfterEventChange();
     }
   }
 }

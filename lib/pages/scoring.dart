@@ -3,9 +3,11 @@ import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
+import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/score_table.dart';
 import 'package:goalkeeper/widgets/quarter_timer_panel.dart';
+import 'dart:async';
 import 'settings.dart';
 
 class Scoring extends StatefulWidget {
@@ -24,49 +26,99 @@ class ScoringState extends State<Scoring> {
   final List<GameEvent> gameEvents = [];
   final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
       GlobalKey<QuarterTimerPanelState>();
+  
+  String? _currentGameId; // Track the current game's ID for updates
+  Timer? _saveTimer; // Timer for throttling save operations
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupProvider>(context);
     scorePanelProvider = Provider.of<ScorePanelProvider>(context);
+    
+    // Auto-save a new game record when first entering the scoring screen
+    if (_currentGameId == null) {
+      _createInitialGameRecord();
+      // Add listeners for score changes to auto-save
+      scorePanelProvider.addListener(_scheduleGameUpdate);
+    }
+  }
+
+  void _createInitialGameRecord() async {
+    try {
+      final gameRecord = GameHistoryService.createGameRecord(
+        date: DateTime.now(),
+        homeTeam: gameSetupProvider.homeTeam,
+        awayTeam: gameSetupProvider.awayTeam,
+        quarterMinutes: gameSetupProvider.quarterMinutes,
+        isCountdownTimer: gameSetupProvider.isCountdownTimer,
+        events: [],
+        homeGoals: 0,
+        homeBehinds: 0,
+        awayGoals: 0,
+        awayBehinds: 0,
+      );
+      
+      await GameHistoryService.saveGame(gameRecord);
+      _currentGameId = gameRecord.id;
+      debugPrint('Auto-saved initial game record: ${gameRecord.homeTeam} vs ${gameRecord.awayTeam}');
+    } catch (e) {
+      // Handle error silently - don't disrupt the user experience
+      debugPrint('Error creating initial game record: $e');
+    }
+  }
+
+  void _scheduleGameUpdate() {
+    // Cancel any existing timer
+    _saveTimer?.cancel();
+    
+    // Schedule a new save operation with a 1-second delay to throttle saves
+    _saveTimer = Timer(const Duration(seconds: 1), () {
+      _updateGameRecord();
+    });
+  }
+
+  void _updateGameRecord() async {
+    if (_currentGameId == null) return;
+    
+    try {
+      final gameRecord = GameHistoryService.createGameRecord(
+        date: DateTime.now(),
+        homeTeam: gameSetupProvider.homeTeam,
+        awayTeam: gameSetupProvider.awayTeam,
+        quarterMinutes: gameSetupProvider.quarterMinutes,
+        isCountdownTimer: gameSetupProvider.isCountdownTimer,
+        events: List<GameEvent>.from(gameEvents),
+        homeGoals: scorePanelProvider.homeGoals,
+        homeBehinds: scorePanelProvider.homeBehinds,
+        awayGoals: scorePanelProvider.awayGoals,
+        awayBehinds: scorePanelProvider.awayBehinds,
+      );
+      
+      // Delete the old record and save the updated one
+      await GameHistoryService.deleteGame(_currentGameId!);
+      await GameHistoryService.saveGame(gameRecord);
+      _currentGameId = gameRecord.id;
+      debugPrint('Auto-updated game record: ${gameRecord.homeTeam} ${gameRecord.homeGoals}.${gameRecord.homeBehinds} - ${gameRecord.awayTeam} ${gameRecord.awayGoals}.${gameRecord.awayBehinds}');
+    } catch (e) {
+      // Handle error silently - don't disrupt the user experience
+      debugPrint('Error updating game record: $e');
+    }
+  }
+
+  // Public method that can be called by score counter when events change
+  void updateGameAfterEventChange() {
+    _scheduleGameUpdate();
   }
 
   @override
   void dispose() {
+    // Cancel any pending save timer
+    _saveTimer?.cancel();
+    // Remove the listener to prevent memory leaks
+    scorePanelProvider.removeListener(_scheduleGameUpdate);
     isTimerRunning.dispose();
     super.dispose();
-  }
-
-  bool _hasGameStateChanged() {
-    // Check if any scores have been entered
-    if (scorePanelProvider.homeGoals > 0 ||
-        scorePanelProvider.homeBehinds > 0 ||
-        scorePanelProvider.awayGoals > 0 ||
-        scorePanelProvider.awayBehinds > 0) {
-      return true;
-    }
-
-    // Check if any game events have been recorded
-    if (gameEvents.isNotEmpty) {
-      return true;
-    }
-
-    // Check if timer has actually been used (not just preset)
-    // For countdown timer: initial value is quarterMSec, so any change means it was used
-    // For count-up timer: initial value is 0, so any positive value means it was used
-    final initialTimerValue =
-        gameSetupProvider.isCountdownTimer ? gameSetupProvider.quarterMSec : 0;
-    if (scorePanelProvider.timerRawTime != initialTimerValue) {
-      return true;
-    }
-
-    // Check if quarter has been changed from initial
-    if (scorePanelProvider.selectedQuarter != 1) {
-      return true;
-    }
-
-    return false;
   }
 
   Future<bool> _showExitConfirmation() async {
@@ -79,7 +131,7 @@ class ScoringState extends State<Scoring> {
                 color: Theme.of(context).colorScheme.error,
               ),
               title: const Text('Exit Game?'),
-              content: const Text('Any unsaved progress will be lost.'),
+              content: const Text('Are you sure you want to exit the current game?'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -97,14 +149,8 @@ class ScoringState extends State<Scoring> {
   }
 
   Future<bool> _onWillPop() async {
-    if (_hasGameStateChanged()) {
-      // Simple confirmation when the user has changed the game state
-      return await _showExitConfirmation();
-    }
-    return true; // Allow back navigation if no changes
+    return await _showExitConfirmation();
   }
-
-  // Removed _saveGame and _finishGame methods as they are no longer needed
 
   @override
   Widget build(BuildContext context) {

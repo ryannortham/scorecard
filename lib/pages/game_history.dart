@@ -249,7 +249,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'No saved games',
+                        'No games yet',
                         style:
                             Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Theme.of(context)
@@ -260,7 +260,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Games you save will appear here',
+                        'Games are automatically saved when you start scoring',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
