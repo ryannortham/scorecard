@@ -216,32 +216,16 @@ class ScoringState extends State<Scoring> {
     return gameEvents.any((e) => e.quarter == 4 && e.type == 'clock_end');
   }
 
-  /// Handle game completion by showing a dialog
+  /// Handle game completion by navigating back to previous screen
   void _handleGameCompletion() {
-    // Only show completion dialog once
+    // Only navigate back once when game is complete
     if (_isGameComplete()) {
-      // Use post-frame callback to avoid during-build dialog issues
+      // Use post-frame callback to avoid during-build navigation issues
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
 
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            title: const Text('Game Complete'),
-            content: const Text(
-                'The game has been completed and saved to your history.'),
-            actions: [
-              FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Return to previous screen
-                },
-                child: const Text('View Game History'),
-              ),
-            ],
-          ),
-        );
+        // Navigate back to previous screen (game history)
+        Navigator.of(context).pop();
       });
     }
   }

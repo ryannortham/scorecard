@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/widgets/timer.dart';
-import 'package:goalkeeper/pages/scoring.dart';
 import 'package:provider/provider.dart';
 
 class QuarterTimerPanel extends StatefulWidget {
@@ -33,47 +32,6 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
     }
   }
 
-  double getProgressValue(GameSetupProvider gameSetupProvider,
-      ScorePanelProvider scorePanelProvider) {
-    if (gameSetupProvider.quarterMSec <= 0 ||
-        scorePanelProvider.timerRawTime < 0) {
-      return 0.0;
-    }
-
-    double progress =
-        scorePanelProvider.timerRawTime / gameSetupProvider.quarterMSec;
-    return progress.clamp(0.0, 1.0);
-  }
-
-  void _handleQuarterChange(
-    int newQuarter,
-    ScorePanelProvider scorePanelProvider,
-  ) {
-    final currentQuarter = scorePanelProvider.selectedQuarter;
-
-    // If selecting the same quarter, do nothing
-    if (newQuarter == currentQuarter) return;
-
-    // Find parent ScoringState to record quarter end event
-    final scoringState = context.findAncestorStateOfType<ScoringState>();
-    if (scoringState != null) {
-      // Record clock_end event for the previous quarter
-      scoringState.recordQuarterEnd(currentQuarter);
-
-      // If timer is running, pause it before changing quarters
-      if (widget.isTimerRunning.value) {
-        // Pause timer to ensure clean state for new quarter
-        _timerKey.currentState?.toggleTimer();
-      }
-    }
-
-    // Switch to the new quarter
-    scorePanelProvider.setSelectedQuarter(newQuarter);
-
-    // Reset the actual timer widget
-    _timerKey.currentState?.resetTimer();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -82,64 +40,8 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
         builder: (context, gameSetupProvider, scorePanelProvider, _) {
           return Column(
             children: [
-              // Quarter Selection
-              ValueListenableBuilder<bool>(
-                valueListenable: widget.isTimerRunning,
-                builder: (context, isTimerRunning, _) {
-                  return SizedBox(
-                    width: double.infinity,
-                    child: SegmentedButton<int>(
-                      style: SegmentedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        foregroundColor: !isTimerRunning
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.38)
-                            : Theme.of(context).colorScheme.onSurface,
-                        disabledForegroundColor: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.38),
-                        selectedForegroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                        selectedBackgroundColor:
-                            Theme.of(context).colorScheme.primary,
-                      ),
-                      segments: const [
-                        ButtonSegment<int>(
-                          value: 1,
-                          label: Text('Q1'),
-                        ),
-                        ButtonSegment<int>(
-                          value: 2,
-                          label: Text('Q2'),
-                        ),
-                        ButtonSegment<int>(
-                          value: 3,
-                          label: Text('Q3'),
-                        ),
-                        ButtonSegment<int>(
-                          value: 4,
-                          label: Text('Q4'),
-                        ),
-                      ],
-                      selected: {scorePanelProvider.selectedQuarter},
-                      onSelectionChanged: (Set<int> newSelection) {
-                        if (!isTimerRunning && newSelection.isNotEmpty) {
-                          _handleQuarterChange(
-                            newSelection.first,
-                            scorePanelProvider,
-                          );
-                        }
-                      },
-                      multiSelectionEnabled: false,
-                      emptySelectionAllowed: false,
-                      showSelectedIcon: false,
-                    ),
-                  );
-                },
-              ),
+              // Quarter Progress Indicator
+              _buildQuarterProgressIndicator(scorePanelProvider),
               const SizedBox(height: 8.0),
 
               // Timer Widget
@@ -157,6 +59,62 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildQuarterProgressIndicator(ScorePanelProvider scorePanelProvider) {
+    final currentQuarter = scorePanelProvider.selectedQuarter;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Row(
+        children: List.generate(4, (index) {
+          final quarterNumber = index + 1;
+          final isCurrentQuarter = quarterNumber == currentQuarter;
+          final isCompleted = quarterNumber < currentQuarter;
+
+          return Expanded(
+            child: Container(
+              margin: index < 3
+                  ? const EdgeInsets.only(right: 4.0)
+                  : EdgeInsets.zero,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+              decoration: BoxDecoration(
+                color: isCurrentQuarter
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : isCompleted
+                        ? Theme.of(context).colorScheme.secondaryContainer
+                        : Colors.transparent,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                'Q$quarterNumber',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: isCurrentQuarter
+                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                          : isCompleted
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.6),
+                      fontWeight:
+                          isCurrentQuarter ? FontWeight.w600 : FontWeight.w500,
+                    ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

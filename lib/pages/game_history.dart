@@ -318,7 +318,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .tertiaryContainer
-                                            .withOpacity(0.7),
+                                            .withValues(alpha: 0.7),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(

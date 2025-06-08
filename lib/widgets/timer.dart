@@ -217,7 +217,8 @@ class TimerWidgetState extends State<TimerWidget> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(isLastQuarter ? 'End Game?' : 'Next Quarter?'),
+          title: Text(
+              isLastQuarter ? 'End Game?' : 'End Quarter $currentQuarter?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -234,6 +235,9 @@ class TimerWidgetState extends State<TimerWidget> {
 
     // If user cancelled or dismissed dialog, don't proceed
     if (confirmed != true) return;
+
+    // Check if widget is still mounted after async operation
+    if (!mounted) return;
 
     // Find parent ScoringState to record quarter end event
     final scoringState = context.findAncestorStateOfType<ScoringState>();
