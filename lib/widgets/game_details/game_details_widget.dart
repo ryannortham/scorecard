@@ -244,6 +244,7 @@ class GameDetailsWidget extends StatelessWidget {
                   homePoints: game.homePoints,
                   awayPoints: game.awayPoints,
                   isGameComplete: isComplete,
+                  isHistoryMode: dataSource == GameDataSource.staticData,
                 ),
               ],
             ),

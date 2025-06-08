@@ -7,6 +7,7 @@ class GameResultBadge extends StatelessWidget {
   final int homePoints;
   final int awayPoints;
   final bool isGameComplete;
+  final bool isHistoryMode;
 
   const GameResultBadge({
     super.key,
@@ -15,25 +16,43 @@ class GameResultBadge extends StatelessWidget {
     required this.homePoints,
     required this.awayPoints,
     required this.isGameComplete,
+    this.isHistoryMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!isGameComplete) {
-      return const SizedBox.shrink();
-    }
-
     final isDraw = homePoints == awayPoints;
     final homeWins = homePoints > awayPoints;
     final margin = (homePoints - awayPoints).abs();
 
+    // Don't show anything if it's a draw with no score
+    if (isDraw && homePoints == 0) {
+      return const SizedBox.shrink();
+    }
+
     String resultText;
     if (isDraw) {
-      resultText = 'Draw';
-    } else if (homeWins) {
-      resultText = '$homeTeam Won By $margin';
+      if (isHistoryMode) {
+        // Only show "Draw" for completed games
+        resultText = 'Draw';
+      } else {
+        // For live games with tied scores, don't show anything
+        return const SizedBox.shrink();
+      }
+    } else if (isHistoryMode) {
+      // For history mode, always show "won by"
+      if (homeWins) {
+        resultText = '$homeTeam won by $margin';
+      } else {
+        resultText = '$awayTeam won by $margin';
+      }
     } else {
-      resultText = '$awayTeam Won By $margin';
+      // For live mode, always show "leads by"
+      if (homeWins) {
+        resultText = '$homeTeam leads by $margin';
+      } else {
+        resultText = '$awayTeam leads by $margin';
+      }
     }
 
     return Center(
