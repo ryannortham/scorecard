@@ -6,6 +6,8 @@ import 'package:goalkeeper/widgets/scoring/score_table.dart';
 import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
 import 'package:goalkeeper/widgets/game_details/team_score_display.dart';
 import 'package:goalkeeper/widgets/game_details/game_result_badge.dart';
+import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -159,6 +161,23 @@ class GameDetailsWidget extends StatelessWidget {
     }
   }
 
+  /// Builds the title for live games showing quarter and elapsed time
+  String _buildLiveGameTitle(
+      BuildContext context, ScorePanelAdapter scorePanelAdapter) {
+    final gameStateService = GameStateService.instance;
+
+    final currentQuarter = scorePanelAdapter.selectedQuarter;
+    final elapsedTimeMs = gameStateService.getElapsedTimeInQuarter();
+
+    // Format elapsed time using the same method as timer widget
+    final timeStr = StopWatchTimer.getDisplayTime(elapsedTimeMs,
+        hours: false, milliSecond: true);
+    // Remove the last character (centiseconds)
+    final formattedTime = timeStr.substring(0, timeStr.length - 1);
+
+    return 'Q$currentQuarter $formattedTime';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (dataSource == GameDataSource.liveData) {
@@ -199,56 +218,108 @@ class GameDetailsWidget extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Final Score Card
-          GameInfoCard(
-            icon: Icons.sports_score,
-            title: dataSource == GameDataSource.liveData
-                ? 'Current Score'
-                : 'Final Score',
-            content: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Expanded(
-                      child: TeamScoreDisplay(
-                        teamName: game.homeTeam,
-                        goals: game.homeGoals,
-                        behinds: game.homeBehinds,
-                        points: game.homePoints,
-                        isWinner: homeWins,
+          dataSource == GameDataSource.liveData
+              ? Consumer<ScorePanelAdapter>(
+                  builder: (context, scorePanelAdapter, child) {
+                    return GameInfoCard(
+                      icon: Icons.sports_score,
+                      title: _buildLiveGameTitle(context, scorePanelAdapter),
+                      content: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: TeamScoreDisplay(
+                                  teamName: game.homeTeam,
+                                  goals: game.homeGoals,
+                                  behinds: game.homeBehinds,
+                                  points: game.homePoints,
+                                  isWinner: homeWins,
+                                ),
+                              ),
+                              Container(
+                                width: 2,
+                                height: 80,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withValues(alpha: 0.3),
+                              ),
+                              Expanded(
+                                child: TeamScoreDisplay(
+                                  teamName: game.awayTeam,
+                                  goals: game.awayGoals,
+                                  behinds: game.awayBehinds,
+                                  points: game.awayPoints,
+                                  isWinner: awayWins,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          GameResultBadge(
+                            homeTeam: game.homeTeam,
+                            awayTeam: game.awayTeam,
+                            homePoints: game.homePoints,
+                            awayPoints: game.awayPoints,
+                            isGameComplete: isComplete,
+                            isHistoryMode:
+                                dataSource == GameDataSource.staticData,
+                          ),
+                        ],
                       ),
-                    ),
-                    Container(
-                      width: 2,
-                      height: 80,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withValues(alpha: 0.3),
-                    ),
-                    Expanded(
-                      child: TeamScoreDisplay(
-                        teamName: game.awayTeam,
-                        goals: game.awayGoals,
-                        behinds: game.awayBehinds,
-                        points: game.awayPoints,
-                        isWinner: awayWins,
+                    );
+                  },
+                )
+              : GameInfoCard(
+                  icon: Icons.sports_score,
+                  title: 'Final Score',
+                  content: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: TeamScoreDisplay(
+                              teamName: game.homeTeam,
+                              goals: game.homeGoals,
+                              behinds: game.homeBehinds,
+                              points: game.homePoints,
+                              isWinner: homeWins,
+                            ),
+                          ),
+                          Container(
+                            width: 2,
+                            height: 80,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.3),
+                          ),
+                          Expanded(
+                            child: TeamScoreDisplay(
+                              teamName: game.awayTeam,
+                              goals: game.awayGoals,
+                              behinds: game.awayBehinds,
+                              points: game.awayPoints,
+                              isWinner: awayWins,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      GameResultBadge(
+                        homeTeam: game.homeTeam,
+                        awayTeam: game.awayTeam,
+                        homePoints: game.homePoints,
+                        awayPoints: game.awayPoints,
+                        isGameComplete: isComplete,
+                        isHistoryMode: dataSource == GameDataSource.staticData,
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                GameResultBadge(
-                  homeTeam: game.homeTeam,
-                  awayTeam: game.awayTeam,
-                  homePoints: game.homePoints,
-                  awayPoints: game.awayPoints,
-                  isGameComplete: isComplete,
-                  isHistoryMode: dataSource == GameDataSource.staticData,
-                ),
-              ],
-            ),
-          ),
 
           // Quarter Breakdown Card
           const SizedBox(height: 16),
