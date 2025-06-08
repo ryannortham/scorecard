@@ -208,7 +208,7 @@ class TimerWidgetState extends State<TimerWidget> {
               progress = timerValue / gameSetupAdapter.quarterMSec;
               progress = progress.clamp(0.0, 1.0);
             }
-            
+
             return LinearProgressIndicator(
               value: progress,
               backgroundColor: Theme.of(context)

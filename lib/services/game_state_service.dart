@@ -32,9 +32,10 @@ class GameStateService extends ChangeNotifier {
   Timer? _backgroundTimer;
   DateTime? _timerStartTime;
   int _timeWhenStarted = 0;
-  
+
   // Stream controller for real-time timer updates
-  final StreamController<int> _timerStreamController = StreamController<int>.broadcast();
+  final StreamController<int> _timerStreamController =
+      StreamController<int>.broadcast();
 
   // Game persistence
   String? _currentGameId;
@@ -57,7 +58,7 @@ class GameStateService extends ChangeNotifier {
   int get timerRawTime => _timerRawTime;
   int get selectedQuarter => _selectedQuarter;
   bool get isTimerRunning => _isTimerRunning;
-  
+
   // Stream for real-time timer updates (millisecond precision)
   Stream<int> get timerStream => _timerStreamController.stream;
 
