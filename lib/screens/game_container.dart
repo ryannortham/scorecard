@@ -6,7 +6,6 @@ import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/screens/scoring.dart';
 import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
-import 'package:goalkeeper/widgets/common/custom_app_bar.dart';
 import 'package:goalkeeper/services/scoring_state_manager.dart';
 import 'settings.dart';
 
@@ -108,28 +107,32 @@ class _GameContainerState extends State<GameContainer> {
         }
       },
       child: Scaffold(
-        appBar: CustomAppBar(
-          title:
-              '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
-          showSettings: true,
-          onSettingsPressed: () async {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const Settings(title: 'Settings'),
-              ),
-            );
-            // Update game setup with current settings when returning
-            if (context.mounted) {
-              final settingsProvider =
-                  Provider.of<SettingsProvider>(context, listen: false);
-              final gameSetupProvider =
-                  Provider.of<GameSetupAdapter>(context, listen: false);
-              gameSetupProvider
-                  .setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
-              gameSetupProvider.setIsCountdownTimer(
-                  settingsProvider.defaultIsCountdownTimer);
-            }
-          },
+        appBar: AppBar(
+          title: Text(
+              '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.more_vert),
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const Settings(title: 'Settings'),
+                  ),
+                );
+                // Update game setup with current settings when returning
+                if (context.mounted) {
+                  final settingsProvider =
+                      Provider.of<SettingsProvider>(context, listen: false);
+                  final gameSetupProvider =
+                      Provider.of<GameSetupAdapter>(context, listen: false);
+                  gameSetupProvider.setQuarterMinutes(
+                      settingsProvider.defaultQuarterMinutes);
+                  gameSetupProvider.setIsCountdownTimer(
+                      settingsProvider.defaultIsCountdownTimer);
+                }
+              },
+            ),
+          ],
         ),
         body: PageView(
           controller: _pageController,

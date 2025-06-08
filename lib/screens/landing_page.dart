@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../adapters/game_setup_adapter.dart';
 import '../providers/settings_provider.dart';
-import '../widgets/common/custom_app_bar.dart';
-import '../widgets/common/custom_button.dart';
 import 'game_setup.dart';
 import 'game_history.dart';
 import 'settings.dart';
@@ -20,13 +18,18 @@ class LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: widget.title,
-        onSettingsPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const Settings(title: 'Settings'),
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
       body: Center(
         child: Column(
@@ -47,45 +50,51 @@ class LandingPageState extends State<LandingPage> {
                   ),
             ),
             const Spacer(flex: 1),
-            CustomButton(
-              text: "Start New Game",
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.75,
-              onPressed: () async {
-                // Reset GameSetupAdapter before navigating using settings defaults
-                final gameSetupAdapter =
-                    Provider.of<GameSetupAdapter>(context, listen: false);
-                final settingsProvider =
-                    Provider.of<SettingsProvider>(context, listen: false);
+              child: ElevatedButton(
+                onPressed: () async {
+                  // Reset GameSetupAdapter before navigating using settings defaults
+                  final gameSetupAdapter =
+                      Provider.of<GameSetupAdapter>(context, listen: false);
+                  final settingsProvider =
+                      Provider.of<SettingsProvider>(context, listen: false);
 
-                // Store navigator before async operation to avoid using context across async gaps
-                final navigator = Navigator.of(context);
+                  // Store navigator before async operation to avoid using context across async gaps
+                  final navigator = Navigator.of(context);
 
-                // Ensure settings are loaded before proceeding
-                if (!settingsProvider.loaded) {
-                  await settingsProvider.loadSettings();
-                }
+                  // Ensure settings are loaded before proceeding
+                  if (!settingsProvider.loaded) {
+                    await settingsProvider.loadSettings();
+                  }
 
-                gameSetupAdapter.reset(
-                  defaultQuarterMinutes: settingsProvider.defaultQuarterMinutes,
-                  defaultIsCountdownTimer:
-                      settingsProvider.defaultIsCountdownTimer,
-                  favoriteTeam: settingsProvider.favoriteTeam,
-                );
-                navigator.push(
-                  MaterialPageRoute(
-                    builder: (context) => const GameSetup(title: 'Game Setup'),
-                  ),
-                );
-              },
+                  gameSetupAdapter.reset(
+                    defaultQuarterMinutes:
+                        settingsProvider.defaultQuarterMinutes,
+                    defaultIsCountdownTimer:
+                        settingsProvider.defaultIsCountdownTimer,
+                    favoriteTeam: settingsProvider.favoriteTeam,
+                  );
+                  navigator.push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const GameSetup(title: 'Game Setup'),
+                    ),
+                  );
+                },
+                child: const Text("Start New Game"),
+              ),
             ),
             const Spacer(flex: 1),
-            CustomButton(
-              text: "Game History",
+            SizedBox(
               width: MediaQuery.of(context).size.width * 0.75,
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const GameHistoryScreen(),
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GameHistoryScreen(),
+                  ),
                 ),
+                child: const Text("Game History"),
               ),
             ),
             const Spacer(flex: 8),

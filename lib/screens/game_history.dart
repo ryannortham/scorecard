@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../providers/game_record.dart';
 import '../services/game_history_service.dart';
-import '../widgets/common/custom_app_bar.dart';
 import '../widgets/game_history/game_history_card.dart';
 import 'game_details.dart';
 import 'settings.dart';
@@ -79,13 +78,18 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Game History',
-        onSettingsPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const Settings(title: 'Settings'),
+      appBar: AppBar(
+        title: const Text('Game History'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

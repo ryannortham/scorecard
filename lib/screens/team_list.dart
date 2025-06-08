@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/teams_provider.dart';
-import '../widgets/common/custom_app_bar.dart';
 import 'settings.dart';
 
 class TeamList extends StatelessWidget {
@@ -19,13 +18,18 @@ class TeamList extends StatelessWidget {
         teamsProvider.teams.where((team) => team != teamToExclude).toList();
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: title,
-        onSettingsPressed: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const Settings(title: 'Settings'),
+      appBar: AppBar(
+        title: Text(title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
       body: teamsProvider.loaded
           ? Padding(

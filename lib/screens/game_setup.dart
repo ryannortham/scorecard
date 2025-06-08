@@ -4,9 +4,6 @@ import 'package:intl/intl.dart';
 import '../adapters/game_setup_adapter.dart';
 import '../adapters/score_panel_adapter.dart';
 import '../providers/settings_provider.dart';
-import '../widgets/common/custom_app_bar.dart';
-import '../widgets/common/custom_button.dart';
-import '../widgets/common/custom_form_field.dart';
 import '../widgets/game_setup/team_selection_widget.dart';
 import '../widgets/game_setup/game_settings_display.dart';
 import 'game_container.dart';
@@ -90,19 +87,24 @@ class _GameSetupState extends State<GameSetup> {
     final gameSetupAdapter = Provider.of<GameSetupAdapter>(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: widget.title,
-        onSettingsPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const Settings(title: 'Settings'),
-            ),
-          );
-          // Update game setup with current settings when returning
-          if (context.mounted) {
-            _updateSettingsFromProvider();
-          }
-        },
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const Settings(title: 'Settings'),
+                ),
+              );
+              // Update game setup with current settings when returning
+              if (context.mounted) {
+                _updateSettingsFromProvider();
+              }
+            },
+          ),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -111,28 +113,37 @@ class _GameSetupState extends State<GameSetup> {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              CustomFormField(
-                formKey: dateKey,
-                controller: _dateController,
-                labelText: 'Game Date',
-                emptyValueError: 'Please select Game Date',
-                onTap: () async {
-                  final DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate:
-                        DateTime.now().subtract(const Duration(days: 365)),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
+              Form(
+                key: dateKey,
+                child: TextFormField(
+                  readOnly: true,
+                  controller: _dateController,
+                  decoration: const InputDecoration(
+                    labelText: 'Game Date',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select Game Date';
+                    }
+                    return null;
+                  },
+                  onTap: () async {
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
 
-                  if (pickedDate != null) {
-                    gameSetupAdapter.setGameDate(pickedDate);
-                    _dateController.text =
-                        DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
-                  }
-                  dateKey.currentState!.validate();
-                  return null;
-                },
+                    if (pickedDate != null) {
+                      gameSetupAdapter.setGameDate(pickedDate);
+                      _dateController.text =
+                          DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
+                    }
+                    dateKey.currentState!.validate();
+                  },
+                ),
               ),
               const SizedBox(height: 20),
               TeamSelectionWidget(
@@ -157,41 +168,47 @@ class _GameSetupState extends State<GameSetup> {
               const GameSettingsDisplay(),
               const SizedBox(height: 32),
               Center(
-                child: CustomButton(
-                  text: 'Start Scoring',
+                child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
-                  onPressed: () {
-                    if (isValidSetup()) {
-                      final gameSetupAdapter =
-                          Provider.of<GameSetupAdapter>(context, listen: false);
-                      final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
-                          context,
-                          listen: false);
-                      final settingsProvider =
-                          Provider.of<SettingsProvider>(context, listen: false);
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (isValidSetup()) {
+                        final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+                            context,
+                            listen: false);
+                        final scorePanelAdapter =
+                            Provider.of<ScorePanelAdapter>(context,
+                                listen: false);
+                        final settingsProvider = Provider.of<SettingsProvider>(
+                            context,
+                            listen: false);
 
-                      // First configure the game with current setup data
-                      gameSetupAdapter.setHomeTeam(homeTeam ?? '');
-                      gameSetupAdapter.setAwayTeam(awayTeam ?? '');
+                        // First configure the game with current setup data
+                        gameSetupAdapter.setHomeTeam(homeTeam ?? '');
+                        gameSetupAdapter.setAwayTeam(awayTeam ?? '');
 
-                      // Configure timer settings
-                      scorePanelAdapter.configureTimer(
-                        isCountdownMode:
-                            settingsProvider.defaultIsCountdownTimer,
-                        quarterMaxTime:
-                            settingsProvider.defaultQuarterMinutes * 60 * 1000,
-                      );
+                        // Configure timer settings
+                        scorePanelAdapter.configureTimer(
+                          isCountdownMode:
+                              settingsProvider.defaultIsCountdownTimer,
+                          quarterMaxTime:
+                              settingsProvider.defaultQuarterMinutes *
+                                  60 *
+                                  1000,
+                        );
 
-                      // Then reset the score state for a new game
-                      scorePanelAdapter.resetGame();
+                        // Then reset the score state for a new game
+                        scorePanelAdapter.resetGame();
 
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const GameContainer(),
-                        ),
-                      );
-                    }
-                  },
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const GameContainer(),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Start Scoring'),
+                  ),
                 ),
               ),
               const Spacer(flex: 1),

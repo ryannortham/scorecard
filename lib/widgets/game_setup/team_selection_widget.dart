@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../adapters/game_setup_adapter.dart';
 import '../../providers/teams_provider.dart';
 import '../../screens/team_list.dart';
-import '../common/custom_form_field.dart';
 
 /// Widget for selecting home and away teams with swap functionality
 class TeamSelectionWidget extends StatefulWidget {
@@ -131,27 +130,47 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomFormField(
-                formKey: widget.homeTeamKey,
-                controller: widget.homeTeamController,
-                labelText: 'Home Team',
-                emptyValueError: 'Please select Home Team',
-                onTap: () => _selectTeam(
-                  title: 'Select Home Team',
-                  teamType: 'home',
-                  excludeTeam: widget.awayTeam,
+              Form(
+                key: widget.homeTeamKey,
+                child: TextFormField(
+                  readOnly: true,
+                  controller: widget.homeTeamController,
+                  decoration: const InputDecoration(
+                    labelText: 'Home Team',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select Home Team';
+                    }
+                    return null;
+                  },
+                  onTap: () => _selectTeam(
+                    title: 'Select Home Team',
+                    teamType: 'home',
+                    excludeTeam: widget.awayTeam,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
-              CustomFormField(
-                formKey: widget.awayTeamKey,
-                controller: widget.awayTeamController,
-                labelText: 'Away Team',
-                emptyValueError: 'Please select Away Team',
-                onTap: () => _selectTeam(
-                  title: 'Select Away Team',
-                  teamType: 'away',
-                  excludeTeam: widget.homeTeam,
+              Form(
+                key: widget.awayTeamKey,
+                child: TextFormField(
+                  readOnly: true,
+                  controller: widget.awayTeamController,
+                  decoration: const InputDecoration(
+                    labelText: 'Away Team',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select Away Team';
+                    }
+                    return null;
+                  },
+                  onTap: () => _selectTeam(
+                    title: 'Select Away Team',
+                    teamType: 'away',
+                    excludeTeam: widget.homeTeam,
+                  ),
                 ),
               ),
             ],

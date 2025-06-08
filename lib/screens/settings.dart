@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
-import '../widgets/common/custom_app_bar.dart';
-import '../widgets/settings/settings_section.dart';
-import '../widgets/settings/settings_dropdown_row.dart';
-import '../widgets/settings/settings_switch_row.dart';
-import '../widgets/settings/settings_counter_row.dart';
-import '../widgets/settings/settings_team_selection_row.dart';
 import 'team_list.dart';
 
 class Settings extends StatefulWidget {
@@ -57,7 +51,7 @@ class _SettingsState extends State<Settings> {
 
     if (!settingsProvider.loaded) {
       return Scaffold(
-        appBar: const CustomAppBar(title: 'Settings'),
+        appBar: AppBar(title: const Text('Settings')),
         body: const Center(
           child: CircularProgressIndicator(),
         ),
@@ -65,120 +59,239 @@ class _SettingsState extends State<Settings> {
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Settings'),
+      appBar: AppBar(title: const Text('Settings')),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Game Settings Section
-            SettingsSection(
+            _buildSection(
+              context: context,
               children: [
-                SettingsTeamSelectionRow(
-                  label: 'Favorite Team',
-                  selectedTeam: settingsProvider.favoriteTeam,
-                  buttonText: 'Select Team',
-                  onSelectTeam: () async {
-                    await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TeamList(
-                          title: 'Select Favorite Team',
-                          onTeamSelected: (teamName) {
-                            settingsProvider.setFavoriteTeam(teamName);
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                  onClearTeam: settingsProvider.favoriteTeam.isNotEmpty
-                      ? () => settingsProvider.setFavoriteTeam('')
-                      : null,
-                ),
-                SettingsCounterRow(
-                  label: 'Quarter Minutes',
-                  value: settingsProvider.defaultQuarterMinutes.toDouble(),
-                  minCount: 1,
-                  maxCount: 20,
-                  onCountChange: (count) {
-                    settingsProvider.setDefaultQuarterMinutes(count.toInt());
-                  },
-                ),
-                SettingsSwitchRow(
-                  label: 'Countdown Timer',
-                  value: settingsProvider.defaultIsCountdownTimer,
-                  onChanged: (value) {
-                    settingsProvider.setDefaultIsCountdownTimer(value);
-                  },
-                ),
+                _buildTeamSelectionTile(context, settingsProvider),
+                const SizedBox(height: 24),
+                _buildQuarterMinutesTile(context, settingsProvider),
+                const SizedBox(height: 24),
+                _buildCountdownTimerTile(context, settingsProvider),
               ],
             ),
 
+            const SizedBox(height: 32),
+
             // Theme Settings Section
-            SettingsSection(
+            _buildSection(
+              context: context,
               title: 'Theme Options',
               children: [
-                SettingsDropdownRow<ThemeMode>(
-                  label: 'Theme Mode',
-                  value: settingsProvider.themeMode,
-                  onChanged: (ThemeMode? newValue) {
-                    if (newValue != null) {
-                      settingsProvider.setThemeMode(newValue);
-                    }
-                  },
-                  items: const [
-                    DropdownMenuItem(
-                      value: ThemeMode.system,
-                      child: Text('System'),
-                    ),
-                    DropdownMenuItem(
-                      value: ThemeMode.light,
-                      child: Text('Light'),
-                    ),
-                    DropdownMenuItem(
-                      value: ThemeMode.dark,
-                      child: Text('Dark'),
-                    ),
-                  ],
-                ),
-                SettingsDropdownRow<String>(
-                  label: 'Color Theme',
-                  value: settingsProvider.colorTheme,
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      settingsProvider.setColorTheme(newValue);
-                    }
-                  },
-                  items: [
-                    _buildColorDropdownItem('adaptive',
-                        'Adaptive (Device Colors)', _getAdaptiveColor()),
-                    _buildColorDropdownItem(
-                        'blue', 'Blue', const Color(0xFF1976D2)),
-                    _buildColorDropdownItem(
-                        'green', 'Green', const Color(0xFF2E7D32)),
-                    _buildColorDropdownItem(
-                        'teal', 'Teal', const Color(0xFF00695C)),
-                    _buildColorDropdownItem(
-                        'purple', 'Purple', const Color(0xFF6A1B9A)),
-                    _buildColorDropdownItem(
-                        'indigo', 'Indigo', const Color(0xFF283593)),
-                    _buildColorDropdownItem(
-                        'red', 'Red', const Color(0xFFC62828)),
-                    _buildColorDropdownItem(
-                        'pink', 'Pink', const Color(0xFFAD1457)),
-                    _buildColorDropdownItem(
-                        'deep_orange', 'Deep Orange', const Color(0xFFD84315)),
-                    _buildColorDropdownItem(
-                        'amber', 'Amber', const Color(0xFFF57C00)),
-                    _buildColorDropdownItem(
-                        'cyan', 'Cyan', const Color(0xFF00838F)),
-                    _buildColorDropdownItem(
-                        'brown', 'Brown', const Color(0xFF5D4037)),
-                  ],
-                ),
+                _buildThemeModeTile(context, settingsProvider),
+                const SizedBox(height: 24),
+                _buildColorThemeTile(context, settingsProvider),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSection({
+    required BuildContext context,
+    String? title,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (title != null) ...[
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+        ],
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildTeamSelectionTile(
+      BuildContext context, SettingsProvider provider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Favorite Team',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                await Navigator.push<String>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TeamList(
+                      title: 'Select Favorite Team',
+                      onTeamSelected: (teamName) {
+                        provider.setFavoriteTeam(teamName);
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: Text(
+                provider.favoriteTeam.isEmpty
+                    ? 'Select Team'
+                    : provider.favoriteTeam,
+              ),
+            ),
+            if (provider.favoriteTeam.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => provider.setFavoriteTeam(''),
+                icon: const Icon(Icons.clear),
+                tooltip: 'Clear favorite team',
+              ),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuarterMinutesTile(
+      BuildContext context, SettingsProvider provider) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Quarter Minutes',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${provider.defaultQuarterMinutes}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Slider(
+          value: provider.defaultQuarterMinutes.toDouble(),
+          min: 1,
+          max: 20,
+          divisions: 19,
+          label: '${provider.defaultQuarterMinutes}',
+          onChanged: (value) {
+            provider.setDefaultQuarterMinutes(value.toInt());
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountdownTimerTile(
+      BuildContext context, SettingsProvider provider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Countdown Timer',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        Switch(
+          value: provider.defaultIsCountdownTimer,
+          onChanged: (value) {
+            provider.setDefaultIsCountdownTimer(value);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildThemeModeTile(BuildContext context, SettingsProvider provider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Theme Mode',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        DropdownButton<ThemeMode>(
+          value: provider.themeMode,
+          onChanged: (ThemeMode? newValue) {
+            if (newValue != null) {
+              provider.setThemeMode(newValue);
+            }
+          },
+          items: const [
+            DropdownMenuItem(
+              value: ThemeMode.system,
+              child: Text('System'),
+            ),
+            DropdownMenuItem(
+              value: ThemeMode.light,
+              child: Text('Light'),
+            ),
+            DropdownMenuItem(
+              value: ThemeMode.dark,
+              child: Text('Dark'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildColorThemeTile(BuildContext context, SettingsProvider provider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Color Theme',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        DropdownButton<String>(
+          value: provider.colorTheme,
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              provider.setColorTheme(newValue);
+            }
+          },
+          items: [
+            _buildColorDropdownItem(
+                'adaptive', 'Adaptive (Device Colors)', _getAdaptiveColor()),
+            _buildColorDropdownItem('blue', 'Blue', const Color(0xFF1976D2)),
+            _buildColorDropdownItem('green', 'Green', const Color(0xFF2E7D32)),
+            _buildColorDropdownItem('teal', 'Teal', const Color(0xFF00695C)),
+            _buildColorDropdownItem(
+                'purple', 'Purple', const Color(0xFF6A1B9A)),
+            _buildColorDropdownItem(
+                'indigo', 'Indigo', const Color(0xFF283593)),
+            _buildColorDropdownItem('red', 'Red', const Color(0xFFC62828)),
+            _buildColorDropdownItem('pink', 'Pink', const Color(0xFFAD1457)),
+            _buildColorDropdownItem(
+                'deep_orange', 'Deep Orange', const Color(0xFFD84315)),
+            _buildColorDropdownItem('amber', 'Amber', const Color(0xFFF57C00)),
+            _buildColorDropdownItem('cyan', 'Cyan', const Color(0xFF00838F)),
+            _buildColorDropdownItem('brown', 'Brown', const Color(0xFF5D4037)),
+          ],
+        ),
+      ],
     );
   }
 }
