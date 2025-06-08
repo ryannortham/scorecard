@@ -722,8 +722,8 @@ class ScoreTable extends StatelessWidget {
                               .withValues(alpha: 0.1)
                           : Theme.of(context)
                               .colorScheme
-                              .surfaceContainerHigh
-                              .withValues(alpha: 0.3),
+                              .surface
+                              .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -776,11 +776,11 @@ class ScoreTable extends StatelessWidget {
                           ? Theme.of(context)
                               .colorScheme
                               .primary
-                              .withValues(alpha: 0.15)
+                              .withValues(alpha: 0.1)
                           : Theme.of(context)
                               .colorScheme
-                              .surfaceContainerHigh
-                              .withValues(alpha: 0.3),
+                              .surface
+                              .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -788,13 +788,13 @@ class ScoreTable extends StatelessWidget {
                       child: Text(
                         isFutureQuarter ? '-' : runningPoints.toString(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
                                   ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurface
-                                      .withValues(alpha: 0.8),
+                                      .withValues(alpha: 0.7),
                             ),
                       ),
                     ),

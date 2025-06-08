@@ -207,6 +207,62 @@ class TimerWidgetState extends State<TimerWidget> {
     }
   }
 
+  // Method to handle next quarter transition
+  void _handleNextQuarter() async {
+    final currentQuarter = scorePanelProvider.selectedQuarter;
+    final isLastQuarter = currentQuarter == 4;
+
+    // Show confirmation dialog
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isLastQuarter ? 'End Game?' : 'Next Quarter?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user cancelled or dismissed dialog, don't proceed
+    if (confirmed != true) return;
+
+    // Find parent ScoringState to record quarter end event
+    final scoringState = context.findAncestorStateOfType<ScoringState>();
+    if (scoringState != null) {
+      // Record clock_end event for the current quarter
+      scoringState.recordQuarterEnd(currentQuarter);
+
+      // If it's the last quarter (Q4), end the game
+      if (currentQuarter == 4) {
+        // Game completion is handled in recordQuarterEnd
+        return;
+      }
+
+      // Otherwise, transition to the next quarter
+      final nextQuarter = currentQuarter + 1;
+
+      // If timer is running, pause it before changing quarters
+      if (isTimerActuallyRunning) {
+        toggleTimer();
+      }
+
+      // Switch to the next quarter
+      scorePanelProvider.setSelectedQuarter(nextQuarter);
+
+      // Reset the timer for the new quarter
+      resetTimer();
+    }
+  }
+
   bool get isTimerActuallyRunning =>
       _useCustomTimer ? _isCustomTimerRunning : _stopWatchTimer.isRunning;
   IconData getIcon() {
@@ -313,26 +369,7 @@ class TimerWidgetState extends State<TimerWidget> {
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          // Play/Pause Button
-          ValueListenableBuilder<bool>(
-            valueListenable: widget.isRunning ?? isRunning,
-            builder: (context, isTimerRunning, _) {
-              return SizedBox(
-                width: 120, // Wider to accommodate full text
-                child: FilledButton.icon(
-                  onPressed: toggleTimer,
-                  icon: FaIcon(getIcon(), size: 18),
-                  label: Text(
-                    isTimerRunning ? 'Pause' : 'Start',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // Reset Button
+          // Reset Button (moved to left, smaller relative size)
           ValueListenableBuilder<bool>(
             valueListenable: widget.isRunning ?? isRunning,
             builder: (context, isTimerRunning, _) {
@@ -352,24 +389,105 @@ class TimerWidgetState extends State<TimerWidget> {
                 }
               }
 
-              return SizedBox(
-                width: 120, // Wider to match the other button
-                child: FilledButton.tonalIcon(
-                  onPressed: isResetEnabled ? resetTimer : null,
-                  icon: FaIcon(
-                    FontAwesomeIcons.arrowRotateLeft,
-                    size: 18,
-                    color: !isResetEnabled
-                        ? Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.38)
-                        : null,
+              return Expanded(
+                flex: 2, // Smaller relative size
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: FilledButton.tonalIcon(
+                    onPressed: isResetEnabled ? resetTimer : null,
+                    icon: FaIcon(
+                      FontAwesomeIcons.arrowRotateLeft,
+                      size: 16,
+                      color: !isResetEnabled
+                          ? Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.38)
+                          : null,
+                    ),
+                    label: const Text(
+                      'Reset',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
-                  label: const Text(
-                    'Reset',
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
+                ),
+              );
+            },
+          ),
+
+          // Play/Pause Button
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.isRunning ?? isRunning,
+            builder: (context, isTimerRunning, _) {
+              return Expanded(
+                flex: 3, // Largest relative size for primary action
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: FilledButton.icon(
+                    onPressed: toggleTimer,
+                    icon: FaIcon(getIcon(), size: 18),
+                    label: Text(
+                      isTimerRunning ? 'Pause' : 'Start',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // Next Button
+          ValueListenableBuilder<bool>(
+            valueListenable: widget.isRunning ?? isRunning,
+            builder: (context, isTimerRunning, _) {
+              // Check if next should be enabled
+              bool isNextEnabled;
+              if (isTimerRunning) {
+                // If timer is running, next should be disabled
+                isNextEnabled = false;
+              } else {
+                // If timer is stopped, check if it's at default value
+                if (_useCustomTimer) {
+                  // For countdown timer, default is quarterMSec
+                  isNextEnabled = _customTimerValue != quarterMSec;
+                } else {
+                  // For count-up timer, default is 0
+                  isNextEnabled = _stopWatchTimer.rawTime.value != 0;
+                }
+              }
+
+              // Check if it's the last quarter (Q4)
+              final isLastQuarter = scorePanelProvider.selectedQuarter == 4;
+
+              return Expanded(
+                flex: 2, // Same relative size as reset button
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: FilledButton.tonalIcon(
+                    onPressed: isNextEnabled
+                        ? () {
+                            _handleNextQuarter();
+                          }
+                        : null,
+                    icon: FaIcon(
+                      isLastQuarter
+                          ? FontAwesomeIcons.flag
+                          : FontAwesomeIcons.arrowRight,
+                      size: 16,
+                      color: !isNextEnabled
+                          ? Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.38)
+                          : null,
+                    ),
+                    label: Text(
+                      isLastQuarter ? 'End' : 'Next',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
                 ),
               );
