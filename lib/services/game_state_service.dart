@@ -166,6 +166,32 @@ class GameStateService extends ChangeNotifier {
     _timerStartTime = null;
   }
 
+  /// Calculate the actual elapsed time in the current quarter
+  /// This should be used for business logic, not display purposes
+  /// Returns elapsed time in milliseconds (can exceed quarter duration in overtime)
+  int getElapsedTimeInQuarter() {
+    final timerRawTime = _timerRawTime;
+    final quarterMSec = this.quarterMSec;
+
+    int elapsedMSec;
+    if (_isCountdownTimer) {
+      elapsedMSec = quarterMSec - timerRawTime;
+    } else {
+      elapsedMSec = timerRawTime;
+    }
+
+    // Don't clamp - allow overtime scenarios
+    return elapsedMSec;
+  }
+
+  /// Get the remaining time in the current quarter
+  /// Returns negative values when in overtime
+  int getRemainingTimeInQuarter() {
+    final quarterMSec = this.quarterMSec;
+    final elapsedMSec = getElapsedTimeInQuarter();
+    return quarterMSec - elapsedMSec;
+  }
+
   // Game Configuration
   void configureGame({
     required String homeTeam,

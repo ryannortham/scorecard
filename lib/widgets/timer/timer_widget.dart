@@ -70,29 +70,42 @@ class TimerWidgetState extends State<TimerWidget> {
     final currentQuarter = scorePanelProvider.selectedQuarter;
     final isLastQuarter = currentQuarter == 4;
 
-    // Show confirmation dialog
-    final bool? confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-              isLastQuarter ? 'End Game?' : 'End Quarter $currentQuarter?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+    // Check if there are 30 seconds or less remaining in the quarter
+    // Use actual elapsed time for business logic, not display time
+    final thirtySecondsInMs = 30 * 1000; // 30 seconds in milliseconds
+    final remainingTimeInQuarter =
+        _gameStateService.getRemainingTimeInQuarter();
+    // Skip confirmation if 30 seconds or less remaining, OR if in overtime (negative time)
+    final shouldSkipConfirmation = remainingTimeInQuarter <= thirtySecondsInMs;
 
-    // If user cancelled or dismissed dialog, don't proceed
-    if (confirmed != true) return;
+    bool confirmed = true; // Default to confirmed if skipping dialog
+
+    // Show confirmation dialog only if more than 30 seconds remaining
+    if (!shouldSkipConfirmation) {
+      final bool? dialogResult = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+                isLastQuarter ? 'End Game?' : 'End Quarter $currentQuarter?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      confirmed = dialogResult == true;
+    }
+
+    // If user cancelled dialog, don't proceed
+    if (!confirmed) return;
 
     // Check if widget is still mounted after async operation
     if (!mounted) return;
