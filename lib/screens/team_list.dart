@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/teams_provider.dart';
+import '../services/navigation_service.dart';
 import 'settings.dart';
 
 class TeamList extends StatelessWidget {
@@ -58,15 +59,10 @@ class TeamList extends StatelessWidget {
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete_outline),
                             tooltip: 'Delete',
-                            onPressed: () async {
-                              final deletedTeam = teamNames[index];
-                              await teamsProvider.deleteTeam(realIndex);
-                              if (context.mounted) {
-                                Navigator.pop(context, deletedTeam);
-                              }
-                            },
+                            onPressed: () => _showDeleteTeamConfirmation(
+                                context, teamsProvider, realIndex, teamName),
                           ),
                         ],
                       ),
@@ -223,5 +219,24 @@ class TeamList extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _showDeleteTeamConfirmation(BuildContext context,
+      TeamsProvider teamsProvider, int index, String teamName) async {
+    final confirmed = await AppNavigator.showConfirmationDialog(
+      context: context,
+      title: 'Delete Team?',
+      content: 'Are you sure you want to delete "$teamName"?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDestructive: true,
+    );
+
+    if (confirmed) {
+      await teamsProvider.deleteTeam(index);
+      if (context.mounted) {
+        Navigator.pop(context, teamName);
+      }
+    }
   }
 }
