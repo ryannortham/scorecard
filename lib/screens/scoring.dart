@@ -146,17 +146,21 @@ class ScoringState extends State<Scoring> {
                   ValueListenableBuilder<bool>(
                     valueListenable: isTimerRunning,
                     builder: (context, timerRunning, child) {
-                      return Card(
-                        elevation: 1,
-                        child: ScoreTable(
-                          events: List<GameEvent>.from(
-                              gameEvents), // Create a defensive copy
-                          homeTeam: homeTeamName,
-                          awayTeam: awayTeamName,
-                          displayTeam: homeTeamName,
-                          isHomeTeam: true,
-                          enabled: timerRunning,
-                        ),
+                      return Consumer<ScorePanelAdapter>(
+                        builder: (context, scorePanelAdapter, child) {
+                          return Card(
+                            elevation: 1,
+                            child: ScoreTable(
+                              events: List<GameEvent>.from(
+                                  gameEvents), // Create a defensive copy
+                              homeTeam: homeTeamName,
+                              awayTeam: awayTeamName,
+                              displayTeam: homeTeamName,
+                              isHomeTeam: true,
+                              enabled: timerRunning,
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
@@ -166,17 +170,21 @@ class ScoringState extends State<Scoring> {
                   ValueListenableBuilder<bool>(
                     valueListenable: isTimerRunning,
                     builder: (context, timerRunning, child) {
-                      return Card(
-                        elevation: 1,
-                        child: ScoreTable(
-                          events: List<GameEvent>.from(
-                              gameEvents), // Create a defensive copy
-                          homeTeam: homeTeamName,
-                          awayTeam: awayTeamName,
-                          displayTeam: awayTeamName,
-                          isHomeTeam: false,
-                          enabled: timerRunning,
-                        ),
+                      return Consumer<ScorePanelAdapter>(
+                        builder: (context, scorePanelAdapter, child) {
+                          return Card(
+                            elevation: 1,
+                            child: ScoreTable(
+                              events: List<GameEvent>.from(
+                                  gameEvents), // Create a defensive copy
+                              homeTeam: homeTeamName,
+                              awayTeam: awayTeamName,
+                              displayTeam: awayTeamName,
+                              isHomeTeam: false,
+                              enabled: timerRunning,
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

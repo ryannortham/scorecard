@@ -14,6 +14,8 @@ class ScoreTable extends StatelessWidget {
   final bool enabled; // Whether the counters should be enabled
   final bool showHeader; // Whether to show the team header
   final bool showCounters; // Whether to show the score counters
+  final int?
+      currentQuarter; // Optional override for current quarter (for static contexts)
   // Removed isGameDetailsView parameter as we want consistent behavior
 
   const ScoreTable({
@@ -26,6 +28,7 @@ class ScoreTable extends StatelessWidget {
     this.enabled = true,
     this.showHeader = true,
     this.showCounters = true,
+    this.currentQuarter,
   });
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
@@ -49,12 +52,19 @@ class ScoreTable extends StatelessWidget {
   static const List<String> _quarterLabels = ['1st', '2nd', '3rd', '4th'];
 
   TableRow createRow(BuildContext context, int quarter) {
-    final currentQuarter =
-        Provider.of<ScorePanelAdapter>(context, listen: true).selectedQuarter;
-    final isCurrentQuarter = quarter + 1 == currentQuarter;
+    // Use provided currentQuarter if available (for static contexts like game details),
+    // otherwise get it from provider (for live contexts like scoring screen)
+    late final int selectedQuarter;
+    if (currentQuarter != null) {
+      selectedQuarter = currentQuarter!;
+    } else {
+      selectedQuarter = Provider.of<ScorePanelAdapter>(context, listen: false)
+          .selectedQuarter;
+    }
+    final isCurrentQuarter = quarter + 1 == selectedQuarter;
 
     // Determine if this is a future quarter - consistent behavior in all views
-    final isFutureQuarter = quarter + 1 > currentQuarter;
+    final isFutureQuarter = quarter + 1 > selectedQuarter;
 
     // For future quarters, show blank cells
     if (isFutureQuarter) {

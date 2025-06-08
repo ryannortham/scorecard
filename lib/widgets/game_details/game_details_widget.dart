@@ -142,20 +142,19 @@ class GameDetailsWidget extends StatelessWidget {
         },
       );
     } else {
-      // For static data, create a new adapter with the appropriate quarter
-      return ChangeNotifierProvider<ScorePanelAdapter>(
-        create: (_) =>
-            ScorePanelAdapter()..setSelectedQuarter(_getCurrentQuarter(game)),
-        child: ScoreTable(
-          events: game.events,
-          homeTeam: game.homeTeam,
-          awayTeam: game.awayTeam,
-          displayTeam: displayTeam,
-          isHomeTeam: isHomeTeam,
-          enabled: false, // Disable interactions in details view
-          showHeader: false, // Hide team header
-          showCounters: false, // Hide score counters
-        ),
+      // For static data, pass the current quarter directly to avoid provider listening
+      final int currentQuarter = _getCurrentQuarter(game);
+      return ScoreTable(
+        events: game.events,
+        homeTeam: game.homeTeam,
+        awayTeam: game.awayTeam,
+        displayTeam: displayTeam,
+        isHomeTeam: isHomeTeam,
+        enabled: false, // Disable interactions in details view
+        showHeader: false, // Hide team header
+        showCounters: false, // Hide score counters
+        currentQuarter:
+            currentQuarter, // Pass quarter directly to avoid provider listening
       );
     }
   }

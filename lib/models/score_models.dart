@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/theme/theme_extensions.dart';
 
 /// Base class for score-related data
 class ScoreData {
@@ -82,23 +81,37 @@ class CompactScoreDisplay extends StatelessWidget {
       children: [
         Text(
           teamScore.name,
-          style: AppTextStyles.teamName(context, isWinner: teamScore.isWinner),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: teamScore.isWinner
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+                fontWeight:
+                    teamScore.isWinner ? FontWeight.w600 : FontWeight.w500,
+              ),
           textAlign: TextAlign.center,
         ),
-        AppSpacing.gapXS,
+        const SizedBox(height: 4),
         Text(
           '${teamScore.score.goals}.${teamScore.score.behinds}',
-          style:
-              AppTextStyles.scoreDisplay(context, isWinner: teamScore.isWinner)
-                  .copyWith(fontSize: fontSize),
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                color: teamScore.isWinner
+                    ? Theme.of(context).colorScheme.primary
+                    : null,
+                fontWeight: FontWeight.w700,
+                fontSize: fontSize,
+              ),
           textAlign: TextAlign.center,
         ),
         if (showPoints) ...[
-          AppSpacing.gapXS,
+          const SizedBox(height: 4),
           Text(
             '(${teamScore.score.points})',
-            style: AppTextStyles.pointsDisplay(context,
-                isWinner: teamScore.isWinner),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: teamScore.isWinner
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                  fontWeight: teamScore.isWinner ? FontWeight.w600 : null,
+                ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -122,12 +135,12 @@ class DetailedScoreDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: AppSpacing.paddingMD,
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             CompactScoreDisplay(teamScore: teamScore),
             if (additionalInfo != null) ...[
-              AppSpacing.gapMD,
+              const SizedBox(height: 16),
               additionalInfo!,
             ],
           ],
@@ -164,12 +177,18 @@ class MatchSummary extends StatelessWidget {
           ),
         ),
         if (showVersus) ...[
-          AppSpacing.gapMD,
+          const SizedBox(height: 16, width: 16),
           Text(
             'vs',
-            style: AppTextStyles.subtitle(context),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
+                  fontWeight: FontWeight.w500,
+                ),
           ),
-          AppSpacing.gapMD,
+          const SizedBox(height: 16, width: 16),
         ],
         Expanded(
           child: CompactScoreDisplay(
