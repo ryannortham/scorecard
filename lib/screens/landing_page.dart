@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../providers/game_setup_provider.dart';
+import '../providers/settings_provider.dart';
+import '../widgets/common/custom_app_bar.dart';
+import '../widgets/common/custom_button.dart';
 import 'game_setup.dart';
 import 'game_history.dart';
 import 'settings.dart';
-import '../providers/game_setup_provider.dart';
-import '../providers/settings_provider.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key, required this.title});
@@ -16,30 +17,16 @@ class LandingPage extends StatefulWidget {
 }
 
 class LandingPageState extends State<LandingPage> {
-  Widget _buildButton(String text, VoidCallback onPressed) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.75,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        child: Text(text),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const Settings(title: 'Settings'),
-              ),
-            ),
+      appBar: CustomAppBar(
+        title: widget.title,
+        onSettingsPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const Settings(title: 'Settings'),
           ),
-        ],
+        ),
       ),
       body: Center(
         child: Column(
@@ -60,9 +47,10 @@ class LandingPageState extends State<LandingPage> {
                   ),
             ),
             const Spacer(flex: 1),
-            _buildButton(
-              "Start New Game",
-              () async {
+            CustomButton(
+              text: "Start New Game",
+              width: MediaQuery.of(context).size.width * 0.75,
+              onPressed: () async {
                 // Reset GameSetupProvider before navigating using settings defaults
                 final gameSetupProvider =
                     Provider.of<GameSetupProvider>(context, listen: false);
@@ -91,9 +79,10 @@ class LandingPageState extends State<LandingPage> {
               },
             ),
             const Spacer(flex: 1),
-            _buildButton(
-              "Game History",
-              () => Navigator.of(context).push(
+            CustomButton(
+              text: "Game History",
+              width: MediaQuery.of(context).size.width * 0.75,
+              onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => const GameHistoryScreen(),
                 ),

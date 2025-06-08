@@ -1,16 +1,15 @@
 # GoalKeeper
 App for AFL goal umpires to keep track of game scores
 
-
 # Architecture
 
-![architecture diagram](diagrams/architecture.drawio.png)
+*Architecture diagram available in project documentation*
 
 # UI Mockup
 
 Source: https://miro.com/app/board/uXjVMN7hQ4Q=/
 
-![ui mockup](diagrams/ui-mockup.png)
+*UI mockup available in external Miro board*
 
 # Database Schema
 

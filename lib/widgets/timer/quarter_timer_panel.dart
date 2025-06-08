@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'package:goalkeeper/widgets/timer.dart';
+import 'timer_widget.dart';
 import 'package:provider/provider.dart';
 
 class QuarterTimerPanel extends StatefulWidget {

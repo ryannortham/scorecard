@@ -5,8 +5,9 @@ import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/widgets/score_table.dart';
-import 'package:goalkeeper/widgets/quarter_timer_panel.dart';
+import 'package:goalkeeper/widgets/scoring/scoring.dart';
+import 'package:goalkeeper/widgets/scoring/scoring_header.dart';
+import 'package:goalkeeper/widgets/timer/timer.dart';
 import 'dart:async';
 import 'settings.dart';
 
@@ -319,69 +320,35 @@ class ScoringState extends State<Scoring> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Header with title and menu
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 6.0),
-                      child: Row(
-                        children: [
-                          // Back button
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () async {
-                              final shouldPop = await _onWillPop();
-                              if (shouldPop && context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                            },
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(36, 36),
-                              padding: const EdgeInsets.all(6),
-                            ),
+                    ScoringHeader(
+                      title: widget.title,
+                      onBackPressed: () async {
+                        final shouldPop = await _onWillPop();
+                        if (shouldPop && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      onSettingsPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const Settings(title: 'Settings'),
                           ),
-                          const SizedBox(width: 6),
-                          // Title
-                          Expanded(
-                            child: Text(
-                              widget.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                          // Settings button
-                          IconButton(
-                            icon: const Icon(Icons.more_vert),
-                            tooltip: 'Menu',
-                            onPressed: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const Settings(title: 'Settings'),
-                                ),
-                              );
-                              // Update game setup with current settings when returning
-                              if (context.mounted) {
-                                final settingsProvider =
-                                    Provider.of<SettingsProvider>(context,
-                                        listen: false);
-                                final gameSetupProvider =
-                                    Provider.of<GameSetupProvider>(context,
-                                        listen: false);
-                                gameSetupProvider.setQuarterMinutes(
-                                    settingsProvider.defaultQuarterMinutes);
-                                gameSetupProvider.setIsCountdownTimer(
-                                    settingsProvider.defaultIsCountdownTimer);
-                              }
-                            },
-                            style: IconButton.styleFrom(
-                              minimumSize: const Size(36, 36),
-                              padding: const EdgeInsets.all(6),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                        // Update game setup with current settings when returning
+                        if (context.mounted) {
+                          final settingsProvider =
+                              Provider.of<SettingsProvider>(context,
+                                  listen: false);
+                          final gameSetupProvider =
+                              Provider.of<GameSetupProvider>(context,
+                                  listen: false);
+                          gameSetupProvider.setQuarterMinutes(
+                              settingsProvider.defaultQuarterMinutes);
+                          gameSetupProvider.setIsCountdownTimer(
+                              settingsProvider.defaultIsCountdownTimer);
+                        }
+                      },
                     ),
 
                     // Timer Panel Card - moved to top

@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'package:goalkeeper/pages/scoring_tab.dart';
+import 'package:goalkeeper/screens/scoring.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -189,12 +188,12 @@ class TimerWidgetState extends State<TimerWidget> {
 
   // Method to notify timer completion
   void _checkAndNotifyTimerCompletion() {
-    // Find parent ScoringTabState to notify of timer completion
+    // Find parent ScoringState to notify of timer completion
     if (_isQuarterCompleted()) {
       // Use post-frame callback to avoid during-build state changes
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Handle quarter end event by notifying parent
-        final scoringState = context.findAncestorStateOfType<ScoringTabState>();
+        final scoringState = context.findAncestorStateOfType<ScoringState>();
         if (scoringState != null) {
           // Get the current quarter
           final currentQuarter = scorePanelProvider.selectedQuarter;
@@ -239,8 +238,8 @@ class TimerWidgetState extends State<TimerWidget> {
     // Check if widget is still mounted after async operation
     if (!mounted) return;
 
-    // Find parent ScoringTabState to record quarter end event
-    final scoringState = context.findAncestorStateOfType<ScoringTabState>();
+    // Find parent ScoringState to record quarter end event
+    final scoringState = context.findAncestorStateOfType<ScoringState>();
     if (scoringState != null) {
       // Record clock_end event for the current quarter
       scoringState.recordQuarterEnd(currentQuarter);
@@ -271,13 +270,9 @@ class TimerWidgetState extends State<TimerWidget> {
       _useCustomTimer ? _isCustomTimerRunning : _stopWatchTimer.isRunning;
   IconData getIcon() {
     if (_useCustomTimer) {
-      return _isCustomTimerRunning
-          ? FontAwesomeIcons.pause
-          : FontAwesomeIcons.play;
+      return _isCustomTimerRunning ? Icons.pause : Icons.play_arrow;
     } else {
-      return _stopWatchTimer.isRunning
-          ? FontAwesomeIcons.pause
-          : FontAwesomeIcons.play;
+      return _stopWatchTimer.isRunning ? Icons.pause : Icons.play_arrow;
     }
   }
 
@@ -399,8 +394,8 @@ class TimerWidgetState extends State<TimerWidget> {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: FilledButton.tonalIcon(
                     onPressed: isResetEnabled ? resetTimer : null,
-                    icon: FaIcon(
-                      FontAwesomeIcons.arrowRotateLeft,
+                    icon: Icon(
+                      Icons.refresh,
                       size: 16,
                       color: !isResetEnabled
                           ? Theme.of(context)
@@ -430,7 +425,7 @@ class TimerWidgetState extends State<TimerWidget> {
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: FilledButton.icon(
                     onPressed: toggleTimer,
-                    icon: FaIcon(getIcon(), size: 18),
+                    icon: Icon(getIcon(), size: 18),
                     label: Text(
                       isTimerRunning ? 'Pause' : 'Start',
                       overflow: TextOverflow.ellipsis,
@@ -475,10 +470,8 @@ class TimerWidgetState extends State<TimerWidget> {
                             _handleNextQuarter();
                           }
                         : null,
-                    icon: FaIcon(
-                      isLastQuarter
-                          ? FontAwesomeIcons.flag
-                          : FontAwesomeIcons.arrowRight,
+                    icon: Icon(
+                      isLastQuarter ? Icons.flag : Icons.arrow_forward,
                       size: 16,
                       color: !isNextEnabled
                           ? Theme.of(context)

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/widgets/score_counter.dart';
+import 'score_counter.dart';
 
 class ScoreTable extends StatelessWidget {
   final List<GameEvent> events;

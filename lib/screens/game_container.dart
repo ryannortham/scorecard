@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/pages/scoring_tab.dart';
-import 'package:goalkeeper/pages/game_details.dart';
+import 'package:goalkeeper/screens/scoring.dart';
+import 'package:goalkeeper/screens/game_details.dart';
+import 'package:goalkeeper/widgets/common/custom_app_bar.dart';
 import 'settings.dart';
 
 class GameContainer extends StatefulWidget {
@@ -19,8 +19,7 @@ class GameContainer extends StatefulWidget {
 class _GameContainerState extends State<GameContainer> {
   int _currentIndex = 0;
   late PageController _pageController;
-  final GlobalKey<ScoringTabState> _scoringTabKey =
-      GlobalKey<ScoringTabState>();
+  final GlobalKey<ScoringState> _scoringKey = GlobalKey<ScoringState>();
 
   @override
   void initState() {
@@ -74,20 +73,17 @@ class _GameContainerState extends State<GameContainer> {
   }
 
   Future<bool> _onWillPop() async {
-    // If we're on the scoring tab, delegate to the scoring tab's exit logic
-    if (_currentIndex == 0 && _scoringTabKey.currentState != null) {
-      return await _scoringTabKey.currentState!.handleExit();
-    }
-
+    // Always show exit confirmation for now
+    // TODO: Could add specific logic for scoring tab if needed
     return await _showExitConfirmation();
   }
 
-  Widget _buildGameDetailsWrapper() {
+  Widget _buildGameDetailsContent() {
     return Consumer3<GameSetupProvider, ScorePanelProvider, GameSetupProvider>(
       builder: (context, gameSetupProvider, scorePanelProvider, _, __) {
-        // Get the current game events from the scoring tab
+        // Get the current game events from the scoring screen
         final List<GameEvent> currentEvents =
-            _scoringTabKey.currentState?.gameEvents ?? [];
+            _scoringKey.currentState?.gameEvents ?? [];
 
         // Create a temporary GameRecord from current state
         final GameRecord currentGame = GameRecord(
@@ -104,6 +100,7 @@ class _GameContainerState extends State<GameContainer> {
           awayBehinds: scorePanelProvider.awayBehinds,
         );
 
+        // Use GameDetailsContent from the GameDetailsPage
         return GameDetailsContent(game: currentGame);
       },
     );
@@ -124,33 +121,28 @@ class _GameContainerState extends State<GameContainer> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-              '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.more_vert),
-              tooltip: 'Menu',
-              onPressed: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const Settings(title: 'Settings'),
-                  ),
-                );
-                // Update game setup with current settings when returning
-                if (context.mounted) {
-                  final settingsProvider =
-                      Provider.of<SettingsProvider>(context, listen: false);
-                  final gameSetupProvider =
-                      Provider.of<GameSetupProvider>(context, listen: false);
-                  gameSetupProvider.setQuarterMinutes(
-                      settingsProvider.defaultQuarterMinutes);
-                  gameSetupProvider.setIsCountdownTimer(
-                      settingsProvider.defaultIsCountdownTimer);
-                }
-              },
-            ),
-          ],
+        appBar: CustomAppBar(
+          title:
+              '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+          showSettings: true,
+          onSettingsPressed: () async {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Settings(title: 'Settings'),
+              ),
+            );
+            // Update game setup with current settings when returning
+            if (context.mounted) {
+              final settingsProvider =
+                  Provider.of<SettingsProvider>(context, listen: false);
+              final gameSetupProvider =
+                  Provider.of<GameSetupProvider>(context, listen: false);
+              gameSetupProvider
+                  .setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
+              gameSetupProvider.setIsCountdownTimer(
+                  settingsProvider.defaultIsCountdownTimer);
+            }
+          },
         ),
         body: PageView(
           controller: _pageController,
@@ -160,8 +152,8 @@ class _GameContainerState extends State<GameContainer> {
             });
           },
           children: [
-            ScoringTab(key: _scoringTabKey),
-            _buildGameDetailsWrapper(),
+            Scoring(key: _scoringKey, title: 'Scoring'),
+            _buildGameDetailsContent(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -170,11 +162,11 @@ class _GameContainerState extends State<GameContainer> {
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.calculator),
+              icon: Icon(Icons.sports_score),
               label: 'Scoring',
             ),
             BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.circleInfo),
+              icon: Icon(Icons.info_outline),
               label: 'Details',
             ),
           ],

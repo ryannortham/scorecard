@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../providers/teams_provider.dart';
+import '../widgets/common/custom_app_bar.dart';
 import 'settings.dart';
 
 class TeamList extends StatelessWidget {
@@ -19,18 +19,13 @@ class TeamList extends StatelessWidget {
         teamsProvider.teams.where((team) => team != teamToExclude).toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.ellipsisVertical),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const Settings(title: 'Settings'),
-              ),
-            ),
+      appBar: CustomAppBar(
+        title: title,
+        onSettingsPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const Settings(title: 'Settings'),
           ),
-        ],
+        ),
       ),
       body: teamsProvider.loaded
           ? Padding(
@@ -51,7 +46,7 @@ class TeamList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: FaIcon(FontAwesomeIcons.pen),
+                            icon: const Icon(Icons.edit),
                             tooltip: 'Edit',
                             onPressed: () {
                               _showEditTeamDialog(
@@ -59,7 +54,7 @@ class TeamList extends StatelessWidget {
                             },
                           ),
                           IconButton(
-                            icon: FaIcon(FontAwesomeIcons.trash),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             tooltip: 'Delete',
                             onPressed: () async {
                               final deletedTeam = teamNames[index];
@@ -80,7 +75,7 @@ class TeamList extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTeamDialog(context, teamsProvider),
         tooltip: 'Add Team',
-        child: FaIcon(FontAwesomeIcons.plus),
+        child: const Icon(Icons.add),
       ),
     );
   }

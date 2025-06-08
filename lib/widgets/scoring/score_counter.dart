@@ -3,7 +3,7 @@ import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
-import 'package:goalkeeper/pages/scoring_tab.dart';
+import 'package:goalkeeper/screens/scoring.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
@@ -151,7 +151,7 @@ class ScoreCounterState extends State<ScoreCounter> {
 
     final quarterElapsedTime = Duration(milliseconds: elapsedMSec);
 
-    final state = context.findAncestorStateOfType<ScoringTabState>();
+    final state = context.findAncestorStateOfType<ScoringState>();
     if (newCount < oldCount) {
       // Remove the last matching event for this team/type/quarter
       state?.setState(() {

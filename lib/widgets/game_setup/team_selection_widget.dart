@@ -1,0 +1,176 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/game_setup_provider.dart';
+import '../../providers/teams_provider.dart';
+import '../../screens/team_list.dart';
+import '../common/custom_form_field.dart';
+
+/// Widget for selecting home and away teams with swap functionality
+class TeamSelectionWidget extends StatefulWidget {
+  final GlobalKey<FormState> homeTeamKey;
+  final GlobalKey<FormState> awayTeamKey;
+  final TextEditingController homeTeamController;
+  final TextEditingController awayTeamController;
+  final String? homeTeam;
+  final String? awayTeam;
+  final ValueChanged<String?> onHomeTeamChanged;
+  final ValueChanged<String?> onAwayTeamChanged;
+
+  const TeamSelectionWidget({
+    super.key,
+    required this.homeTeamKey,
+    required this.awayTeamKey,
+    required this.homeTeamController,
+    required this.awayTeamController,
+    required this.homeTeam,
+    required this.awayTeam,
+    required this.onHomeTeamChanged,
+    required this.onAwayTeamChanged,
+  });
+
+  @override
+  State<TeamSelectionWidget> createState() => _TeamSelectionWidgetState();
+}
+
+class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
+  Future<String?> _selectTeam({
+    required String title,
+    required String teamType,
+    required String? excludeTeam,
+  }) async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TeamList(
+          title: title,
+          onTeamSelected: (teamName) {
+            final gameSetupProvider =
+                Provider.of<GameSetupProvider>(context, listen: false);
+            if (teamType == 'home') {
+              gameSetupProvider.setHomeTeam(teamName);
+              widget.homeTeamController.text = teamName;
+            } else {
+              gameSetupProvider.setAwayTeam(teamName);
+              widget.awayTeamController.text = teamName;
+            }
+          },
+        ),
+        settings: RouteSettings(arguments: excludeTeam),
+      ),
+    );
+
+    if (result != null) {
+      final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+      final gameSetupProvider =
+          Provider.of<GameSetupProvider>(context, listen: false);
+
+      // Handle team deletion or reselection
+      if (teamType == 'home') {
+        if (result == widget.homeTeam) {
+          if (!teamsProvider.teams.contains(result)) {
+            widget.onHomeTeamChanged(null);
+            widget.homeTeamController.text = '';
+            gameSetupProvider.setHomeTeam('');
+          } else {
+            widget.onHomeTeamChanged(result);
+            widget.homeTeamController.text = result;
+            gameSetupProvider.setHomeTeam(result);
+          }
+        } else {
+          widget.onHomeTeamChanged(result);
+          widget.homeTeamController.text = result;
+          gameSetupProvider.setHomeTeam(result);
+        }
+        widget.homeTeamKey.currentState?.validate();
+      } else {
+        if (result == widget.awayTeam) {
+          if (!teamsProvider.teams.contains(result)) {
+            widget.onAwayTeamChanged(null);
+            widget.awayTeamController.text = '';
+            gameSetupProvider.setAwayTeam('');
+          } else {
+            widget.onAwayTeamChanged(result);
+            widget.awayTeamController.text = result;
+            gameSetupProvider.setAwayTeam(result);
+          }
+        } else {
+          widget.onAwayTeamChanged(result);
+          widget.awayTeamController.text = result;
+          gameSetupProvider.setAwayTeam(result);
+        }
+        widget.awayTeamKey.currentState?.validate();
+      }
+    }
+    return null;
+  }
+
+  void _swapTeams() {
+    final gameSetupProvider =
+        Provider.of<GameSetupProvider>(context, listen: false);
+
+    final tempTeam = widget.homeTeam;
+    widget.onHomeTeamChanged(widget.awayTeam);
+    widget.onAwayTeamChanged(tempTeam);
+
+    widget.homeTeamController.text = widget.awayTeam ?? '';
+    widget.awayTeamController.text = tempTeam ?? '';
+
+    gameSetupProvider.setHomeTeam(widget.awayTeam ?? '');
+    gameSetupProvider.setAwayTeam(tempTeam ?? '');
+
+    widget.homeTeamKey.currentState?.validate();
+    widget.awayTeamKey.currentState?.validate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomFormField(
+                formKey: widget.homeTeamKey,
+                controller: widget.homeTeamController,
+                labelText: 'Home Team',
+                emptyValueError: 'Please select Home Team',
+                onTap: () => _selectTeam(
+                  title: 'Select Home Team',
+                  teamType: 'home',
+                  excludeTeam: widget.awayTeam,
+                ),
+              ),
+              const SizedBox(height: 20),
+              CustomFormField(
+                formKey: widget.awayTeamKey,
+                controller: widget.awayTeamController,
+                labelText: 'Away Team',
+                emptyValueError: 'Please select Away Team',
+                onTap: () => _selectTeam(
+                  title: 'Select Away Team',
+                  teamType: 'away',
+                  excludeTeam: widget.homeTeam,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 24),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton.icon(
+              icon: const Icon(Icons.swap_vert),
+              label: const Text('Swap'),
+              onPressed: (widget.homeTeam != null || widget.awayTeam != null)
+                  ? _swapTeams
+                  : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
