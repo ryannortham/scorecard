@@ -49,13 +49,7 @@ class _GameContainerState extends State<GameContainer> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              icon: Icon(
-                Icons.exit_to_app_outlined,
-                color: Theme.of(context).colorScheme.error,
-              ),
               title: const Text('Exit Game?'),
-              content:
-                  const Text('Are you sure you want to exit the current game?'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),

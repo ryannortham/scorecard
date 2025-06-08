@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../providers/game_record.dart';
+import '../../services/navigation_service.dart';
 
 /// A reusable widget for displaying a game card in the history list
 class GameHistoryCard extends StatelessWidget {
@@ -46,7 +47,7 @@ class GameHistoryCard extends StatelessWidget {
         ),
         onTap: onTap,
         trailing: IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
+          icon: const Icon(Icons.delete_outline),
           onPressed: () => _showDeleteConfirmation(context),
         ),
       ),
@@ -54,28 +55,18 @@ class GameHistoryCard extends StatelessWidget {
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final confirmed = await AppNavigator.showConfirmationDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Game'),
-          content: Text(
-              'Are you sure you want to delete the game between ${game.homeTeam} and ${game.awayTeam}?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete', style: TextStyle(color: Colors.red)),
-            ),
-          ],
-        );
-      },
+      title: 'Delete Game?',
+      content:
+          '${game.homeTeam} vs ${game.awayTeam}\n${dateFormat.format(game.date)}',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDestructive: true,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       onDelete();
     }
   }
