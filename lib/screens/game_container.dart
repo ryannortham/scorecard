@@ -67,8 +67,7 @@ class _GameContainerState extends State<GameContainer> {
   }
 
   Future<bool> _onWillPop() async {
-    // Always show exit confirmation for now
-    // TODO: Could add specific logic for scoring tab if needed
+    // Always show exit confirmation when leaving an active game
     return await _showExitConfirmation();
   }
 

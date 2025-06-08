@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../providers/game_record.dart';
 import '../services/game_history_service.dart';
 import '../widgets/game_history/game_history_card.dart';
-import 'game_details.dart';
+import 'package:goalkeeper/screens/game_details.dart' as details;
 import 'settings.dart';
 
 class GameHistoryScreen extends StatefulWidget {
@@ -70,7 +70,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   void _showGameDetails(GameRecord game) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => GameDetailsPage(game: game),
+        builder: (context) => details.GameDetailsPage(game: game),
       ),
     );
   }

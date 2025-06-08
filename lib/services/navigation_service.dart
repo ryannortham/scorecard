@@ -3,7 +3,7 @@ import 'package:goalkeeper/screens/settings.dart';
 import 'package:goalkeeper/screens/team_list.dart';
 import 'package:goalkeeper/screens/game_setup.dart';
 import 'package:goalkeeper/screens/game_history.dart';
-import 'package:goalkeeper/screens/game_details.dart';
+import 'package:goalkeeper/screens/game_details.dart' as details;
 import 'package:goalkeeper/screens/game_container.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 
@@ -69,7 +69,7 @@ class AppNavigator {
   }) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(
-        builder: (context) => GameDetailsPage(game: game),
+        builder: (context) => details.GameDetailsPage(game: game),
       ),
     );
   }
