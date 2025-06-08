@@ -6,7 +6,7 @@ import 'package:goalkeeper/providers/score_panel_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
 import 'team_list.dart';
-import 'scoring.dart';
+import 'game_container.dart';
 import 'settings.dart';
 import '../providers/teams_provider.dart';
 
@@ -337,8 +337,7 @@ class _GameSetupState extends State<GameSetup> {
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const Scoring(title: 'Scoring'),
+                            builder: (context) => const GameContainer(),
                           ),
                         );
                       }

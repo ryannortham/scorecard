@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'package:goalkeeper/pages/scoring.dart';
+import 'package:goalkeeper/pages/scoring_tab.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -189,12 +189,12 @@ class TimerWidgetState extends State<TimerWidget> {
 
   // Method to notify timer completion
   void _checkAndNotifyTimerCompletion() {
-    // Find parent ScoringState to notify of timer completion
+    // Find parent ScoringTabState to notify of timer completion
     if (_isQuarterCompleted()) {
       // Use post-frame callback to avoid during-build state changes
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Handle quarter end event by notifying parent
-        final scoringState = context.findAncestorStateOfType<ScoringState>();
+        final scoringState = context.findAncestorStateOfType<ScoringTabState>();
         if (scoringState != null) {
           // Get the current quarter
           final currentQuarter = scorePanelProvider.selectedQuarter;
@@ -239,8 +239,8 @@ class TimerWidgetState extends State<TimerWidget> {
     // Check if widget is still mounted after async operation
     if (!mounted) return;
 
-    // Find parent ScoringState to record quarter end event
-    final scoringState = context.findAncestorStateOfType<ScoringState>();
+    // Find parent ScoringTabState to record quarter end event
+    final scoringState = context.findAncestorStateOfType<ScoringTabState>();
     if (scoringState != null) {
       // Record clock_end event for the current quarter
       scoringState.recordQuarterEnd(currentQuarter);

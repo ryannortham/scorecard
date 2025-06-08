@@ -469,3 +469,499 @@ class GameDetailsPage extends StatelessWidget {
     );
   }
 }
+
+/// Content-only version of GameDetailsPage for use in tabs
+/// This widget contains all the game details content without Scaffold/AppBar
+class GameDetailsContent extends StatelessWidget {
+  final GameRecord game;
+
+  const GameDetailsContent({super.key, required this.game});
+
+  /// Determines if the game is complete based on timer events
+  bool _isGameComplete() {
+    // If no events, it's definitely not complete
+    if (game.events.isEmpty) return false;
+
+    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
+    bool hasQ4ClockPause =
+        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
+    if (hasQ4ClockPause) return true;
+
+    // Not enough evidence to consider the game complete
+    return false;
+  }
+
+  /// Gets the current quarter based on the latest events
+  int _getCurrentQuarter() {
+    if (game.events.isEmpty) return 1;
+
+    // Find the highest quarter number with events
+    final maxQuarter =
+        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
+    return maxQuarter;
+  }
+
+  /// Gets the game status string for display
+  String _getGameStatus() {
+    // First check if game is complete
+    if (_isGameComplete()) {
+      return 'Full Time';
+    }
+
+    // For games not complete, show appropriate quarter status
+    final currentQuarter = _getCurrentQuarter();
+
+    // If no events, show game as just starting Q1
+    if (game.events.isEmpty) {
+      return 'Q1 starting';
+    }
+
+    // Check if we're in between quarters (current quarter has a pause but we also have events in the next quarter)
+    bool hasNextQuarterEvents =
+        game.events.any((e) => e.quarter > currentQuarter);
+    bool hasCurrentQuarterPause = game.events
+        .any((e) => e.quarter == currentQuarter && e.type == 'clock_pause');
+
+    if (hasCurrentQuarterPause && hasNextQuarterEvents) {
+      return 'Q${currentQuarter + 1} starting';
+    } else if (hasCurrentQuarterPause) {
+      return 'Q$currentQuarter ended';
+    } else {
+      return 'Q$currentQuarter in progress';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool homeWins = game.homePoints > game.awayPoints;
+    final bool awayWins = game.awayPoints > game.homePoints;
+    final bool isComplete = _isGameComplete();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Date Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          DateFormat('EEEE, MMM d, yyyy').format(game.date),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          DateFormat('h:mm a').format(game.date),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.6),
+                                  ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Game Settings Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.settings,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Game Settings',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Quarter Duration',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                          ),
+                          Text(
+                            '${game.quarterMinutes} minutes',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Timer Mode',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                          ),
+                          Text(
+                            game.isCountdownTimer ? 'Countdown' : 'Count Up',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Status Card
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(
+                    isComplete ? Icons.flag : Icons.play_circle,
+                    color: isComplete
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.secondary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Game Status',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _getGameStatus(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.copyWith(
+                                color: isComplete
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Score Display
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  // Teams and Final Scores Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Home Team Score
+                      Column(
+                        children: [
+                          Text(
+                            game.homeTeam,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: homeWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: homeWins ? FontWeight.w600 : null,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${game.homeGoals}.${game.homeBehinds}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
+                                  color: homeWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          Text(
+                            '(${game.homePoints})',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: homeWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: homeWins ? FontWeight.w600 : null,
+                                ),
+                          ),
+                        ],
+                      ),
+
+                      // VS Separator
+                      Column(
+                        children: [
+                          Text(
+                            'vs',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                          ),
+                        ],
+                      ),
+
+                      // Away Team Score
+                      Column(
+                        children: [
+                          Text(
+                            game.awayTeam,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: awayWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: awayWins ? FontWeight.w600 : null,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${game.awayGoals}.${game.awayBehinds}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineLarge
+                                ?.copyWith(
+                                  color: awayWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          Text(
+                            '(${game.awayPoints})',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: awayWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                  fontWeight: awayWins ? FontWeight.w600 : null,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Only show win message if game is complete
+                  if (isComplete) ...[
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: game.homePoints != game.awayPoints
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          game.homePoints != game.awayPoints
+                              ? homeWins
+                                  ? '${game.homeTeam} Won By ${game.homePoints - game.awayPoints}'
+                                  : '${game.awayTeam} Won By ${game.awayPoints - game.homePoints}'
+                              : 'Draw',
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: game.homePoints != game.awayPoints
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .onSecondaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Quarter by Quarter Details
+          if (game.events.isNotEmpty) ...[
+            Text(
+              'Quarter by Quarter',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 4,
+              itemBuilder: (context, quarterIndex) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Quarter header
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 8.0),
+                      child: Text(
+                        'Quarter ${quarterIndex + 1}',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                      ),
+                    ),
+
+                    // Home Team Label
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
+                      child: Text(
+                        game.homeTeam,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: homeWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
+                      ),
+                    ),
+
+                    // Home Team Score Table
+                    ChangeNotifierProvider<ScorePanelProvider>(
+                      create: (_) => ScorePanelProvider()
+                        ..setSelectedQuarter(quarterIndex + 1),
+                      child: ScoreTable(
+                        events: game.events,
+                        homeTeam: game.homeTeam,
+                        awayTeam: game.awayTeam,
+                        displayTeam: game.homeTeam,
+                        isHomeTeam: true,
+                        enabled: false, // Disable interactions in details view
+                        showHeader: false, // Hide team header
+                        showCounters: false, // Hide score counters
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Away Team Label
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0, vertical: 4.0),
+                      child: Text(
+                        game.awayTeam,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: awayWins
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
+                      ),
+                    ),
+
+                    // Away Team Score Table
+                    ChangeNotifierProvider<ScorePanelProvider>(
+                      create: (_) => ScorePanelProvider()
+                        ..setSelectedQuarter(quarterIndex + 1),
+                      child: ScoreTable(
+                        events: game.events,
+                        homeTeam: game.homeTeam,
+                        awayTeam: game.awayTeam,
+                        displayTeam: game.awayTeam,
+                        isHomeTeam: false,
+                        enabled: false, // Disable interactions in details view
+                        showHeader: false, // Hide team header
+                        showCounters: false, // Hide score counters
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+                  ],
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
