@@ -97,7 +97,7 @@ class _SettingsState extends State<Settings> {
                   label: 'Quarter Minutes',
                   value: settingsProvider.defaultQuarterMinutes.toDouble(),
                   minCount: 1,
-                  maxCount: 60,
+                  maxCount: 20,
                   onCountChange: (count) {
                     settingsProvider.setDefaultQuarterMinutes(count.toInt());
                   },
@@ -151,27 +151,27 @@ class _SettingsState extends State<Settings> {
                     _buildColorDropdownItem('adaptive',
                         'Adaptive (Device Colors)', _getAdaptiveColor()),
                     _buildColorDropdownItem(
-                        'blue', 'Ocean Blue', const Color(0xFF1976D2)),
+                        'blue', 'Blue', const Color(0xFF1976D2)),
                     _buildColorDropdownItem(
-                        'teal', 'Emerald Teal', const Color(0xFF00695C)),
+                        'green', 'Green', const Color(0xFF2E7D32)),
                     _buildColorDropdownItem(
-                        'green', 'Forest Green', const Color(0xFF2E7D32)),
+                        'teal', 'Teal', const Color(0xFF00695C)),
                     _buildColorDropdownItem(
-                        'amber', 'Golden Amber', const Color(0xFFF57C00)),
-                    _buildColorDropdownItem('deep_orange', 'Sunset Orange',
-                        const Color(0xFFD84315)),
+                        'purple', 'Purple', const Color(0xFF6A1B9A)),
                     _buildColorDropdownItem(
-                        'red', 'Ruby Red', const Color(0xFFC62828)),
+                        'indigo', 'Indigo', const Color(0xFF283593)),
                     _buildColorDropdownItem(
-                        'pink', 'Rose Pink', const Color(0xFFAD1457)),
+                        'red', 'Red', const Color(0xFFC62828)),
                     _buildColorDropdownItem(
-                        'purple', 'Royal Purple', const Color(0xFF6A1B9A)),
+                        'pink', 'Pink', const Color(0xFFAD1457)),
                     _buildColorDropdownItem(
-                        'indigo', 'Midnight Indigo', const Color(0xFF283593)),
+                        'deep_orange', 'Deep Orange', const Color(0xFFD84315)),
                     _buildColorDropdownItem(
-                        'cyan', 'Azure Cyan', const Color(0xFF00838F)),
+                        'amber', 'Amber', const Color(0xFFF57C00)),
                     _buildColorDropdownItem(
-                        'brown', 'Earth Brown', const Color(0xFF5D4037)),
+                        'cyan', 'Cyan', const Color(0xFF00838F)),
+                    _buildColorDropdownItem(
+                        'brown', 'Brown', const Color(0xFF5D4037)),
                   ],
                 ),
               ],

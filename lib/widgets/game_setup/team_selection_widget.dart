@@ -59,7 +59,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
       ),
     );
 
-    if (result != null) {
+    if (result != null && mounted) {
       final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
       final gameSetupProvider =
           Provider.of<GameSetupProvider>(context, listen: false);

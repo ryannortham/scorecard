@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
-import 'package:goalkeeper/widgets/scoring/scoring_header.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
 import 'dart:async';
-import 'settings.dart';
 
 class Scoring extends StatefulWidget {
   const Scoring({super.key, required this.title});
@@ -319,39 +316,7 @@ class ScoringState extends State<Scoring> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Header with title and menu
-                    ScoringHeader(
-                      title: widget.title,
-                      onBackPressed: () async {
-                        final shouldPop = await _onWillPop();
-                        if (shouldPop && context.mounted) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      onSettingsPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const Settings(title: 'Settings'),
-                          ),
-                        );
-                        // Update game setup with current settings when returning
-                        if (context.mounted) {
-                          final settingsProvider =
-                              Provider.of<SettingsProvider>(context,
-                                  listen: false);
-                          final gameSetupProvider =
-                              Provider.of<GameSetupProvider>(context,
-                                  listen: false);
-                          gameSetupProvider.setQuarterMinutes(
-                              settingsProvider.defaultQuarterMinutes);
-                          gameSetupProvider.setIsCountdownTimer(
-                              settingsProvider.defaultIsCountdownTimer);
-                        }
-                      },
-                    ),
-
-                    // Timer Panel Card - moved to top
+                    // Timer Panel Card
                     Card(
                       elevation: 1,
                       child: QuarterTimerPanel(

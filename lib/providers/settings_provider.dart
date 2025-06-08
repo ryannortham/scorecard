@@ -19,7 +19,7 @@ class SettingsProvider extends ChangeNotifier {
   bool get defaultIsCountdownTimer => _defaultIsCountdownTimer;
   String get favoriteTeam => _favoriteTeam;
   ThemeMode get themeMode => _themeMode;
-  String get colorTheme => _colorTheme;
+  String get colorTheme => _validateColorTheme(_colorTheme);
   bool get loaded => _loaded;
 
   SettingsProvider() {
@@ -40,8 +40,35 @@ class SettingsProvider extends ChangeNotifier {
     );
     _colorTheme = prefs.getString(_colorThemeKey) ?? 'adaptive';
 
+    // Validate color theme and reset to default if invalid
+    _colorTheme = _validateColorTheme(_colorTheme);
+
     _loaded = true;
     notifyListeners();
+  }
+
+  // Helper method to validate color theme and return a valid one
+  String _validateColorTheme(String theme) {
+    const validThemes = {
+      'adaptive',
+      'blue',
+      'green',
+      'teal',
+      'purple',
+      'indigo',
+      'red',
+      'pink',
+      'deep_orange',
+      'amber',
+      'cyan',
+      'brown'
+    };
+
+    if (validThemes.contains(theme)) {
+      return theme;
+    } else {
+      return 'adaptive'; // Default fallback
+    }
   }
 
   Future<void> _saveSettings() async {
@@ -78,7 +105,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> setColorTheme(String theme) async {
-    _colorTheme = theme;
+    _colorTheme = _validateColorTheme(theme);
     await _saveSettings();
     notifyListeners();
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:customizable_counter/customizable_counter.dart';
 
-/// A counter row widget for settings with consistent styling
+/// A counter row widget for settings with consistent styling using Material 3 Slider
 class SettingsCounterRow extends StatelessWidget {
   final String label;
   final double value;
@@ -20,22 +19,40 @@ class SettingsCounterRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.titleMedium,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                '${value.round()}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
         ),
-        CustomizableCounter(
-          borderWidth: 2,
-          borderRadius: 36,
-          textSize: Theme.of(context).textTheme.titleMedium?.fontSize ?? 16,
-          count: value,
-          minCount: minCount,
-          maxCount: maxCount,
-          showButtonText: false,
-          onCountChange: onCountChange,
+        const SizedBox(height: 8),
+        Slider(
+          value: value,
+          min: minCount,
+          max: maxCount,
+          divisions: (maxCount - minCount).round(),
+          label: '${value.round()}',
+          onChanged: onCountChange,
         ),
       ],
     );
