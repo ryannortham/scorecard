@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/game_setup_provider.dart';
+import '../../adapters/game_setup_adapter.dart';
 import '../../providers/teams_provider.dart';
 import '../../screens/team_list.dart';
 import '../common/custom_form_field.dart';
@@ -44,13 +44,13 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
         builder: (context) => TeamList(
           title: title,
           onTeamSelected: (teamName) {
-            final gameSetupProvider =
-                Provider.of<GameSetupProvider>(context, listen: false);
+            final gameSetupAdapter =
+                Provider.of<GameSetupAdapter>(context, listen: false);
             if (teamType == 'home') {
-              gameSetupProvider.setHomeTeam(teamName);
+              gameSetupAdapter.setHomeTeam(teamName);
               widget.homeTeamController.text = teamName;
             } else {
-              gameSetupProvider.setAwayTeam(teamName);
+              gameSetupAdapter.setAwayTeam(teamName);
               widget.awayTeamController.text = teamName;
             }
           },
@@ -61,8 +61,8 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
 
     if (result != null && mounted) {
       final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-      final gameSetupProvider =
-          Provider.of<GameSetupProvider>(context, listen: false);
+      final gameSetupAdapter =
+          Provider.of<GameSetupAdapter>(context, listen: false);
 
       // Handle team deletion or reselection
       if (teamType == 'home') {
@@ -70,16 +70,16 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           if (!teamsProvider.teams.contains(result)) {
             widget.onHomeTeamChanged(null);
             widget.homeTeamController.text = '';
-            gameSetupProvider.setHomeTeam('');
+            gameSetupAdapter.setHomeTeam('');
           } else {
             widget.onHomeTeamChanged(result);
             widget.homeTeamController.text = result;
-            gameSetupProvider.setHomeTeam(result);
+            gameSetupAdapter.setHomeTeam(result);
           }
         } else {
           widget.onHomeTeamChanged(result);
           widget.homeTeamController.text = result;
-          gameSetupProvider.setHomeTeam(result);
+          gameSetupAdapter.setHomeTeam(result);
         }
         widget.homeTeamKey.currentState?.validate();
       } else {
@@ -87,16 +87,16 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           if (!teamsProvider.teams.contains(result)) {
             widget.onAwayTeamChanged(null);
             widget.awayTeamController.text = '';
-            gameSetupProvider.setAwayTeam('');
+            gameSetupAdapter.setAwayTeam('');
           } else {
             widget.onAwayTeamChanged(result);
             widget.awayTeamController.text = result;
-            gameSetupProvider.setAwayTeam(result);
+            gameSetupAdapter.setAwayTeam(result);
           }
         } else {
           widget.onAwayTeamChanged(result);
           widget.awayTeamController.text = result;
-          gameSetupProvider.setAwayTeam(result);
+          gameSetupAdapter.setAwayTeam(result);
         }
         widget.awayTeamKey.currentState?.validate();
       }
@@ -105,8 +105,8 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
   }
 
   void _swapTeams() {
-    final gameSetupProvider =
-        Provider.of<GameSetupProvider>(context, listen: false);
+    final gameSetupAdapter =
+        Provider.of<GameSetupAdapter>(context, listen: false);
 
     final tempTeam = widget.homeTeam;
     widget.onHomeTeamChanged(widget.awayTeam);
@@ -115,8 +115,8 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
     widget.homeTeamController.text = widget.awayTeam ?? '';
     widget.awayTeamController.text = tempTeam ?? '';
 
-    gameSetupProvider.setHomeTeam(widget.awayTeam ?? '');
-    gameSetupProvider.setAwayTeam(tempTeam ?? '');
+    gameSetupAdapter.setHomeTeam(widget.awayTeam ?? '');
+    gameSetupAdapter.setAwayTeam(tempTeam ?? '');
 
     widget.homeTeamKey.currentState?.validate();
     widget.awayTeamKey.currentState?.validate();

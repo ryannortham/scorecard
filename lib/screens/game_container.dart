@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/providers/game_setup_provider.dart';
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
-import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/screens/scoring.dart';
-import 'package:goalkeeper/screens/game_details.dart';
+import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:goalkeeper/widgets/common/custom_app_bar.dart';
+import 'package:goalkeeper/services/scoring_state_manager.dart';
 import 'settings.dart';
 
 class GameContainer extends StatefulWidget {
@@ -79,36 +80,22 @@ class _GameContainerState extends State<GameContainer> {
   }
 
   Widget _buildGameDetailsContent() {
-    return Consumer3<GameSetupProvider, ScorePanelProvider, GameSetupProvider>(
-      builder: (context, gameSetupProvider, scorePanelProvider, _, __) {
-        // Get the current game events from the scoring screen
-        final List<GameEvent> currentEvents =
-            _scoringKey.currentState?.gameEvents ?? [];
+    return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
+      builder: (context, gameSetupProvider, scorePanelProvider, _) {
+        // Get the current game events from the scoring state manager
+        final ScoringStateManager scoringStateManager =
+            ScoringStateManager.instance;
+        final List<GameEvent> currentEvents = scoringStateManager.gameEvents;
 
-        // Create a temporary GameRecord from current state
-        final GameRecord currentGame = GameRecord(
-          id: 'current-game', // Temporary ID for current game
-          date: gameSetupProvider.gameDate,
-          homeTeam: gameSetupProvider.homeTeam,
-          awayTeam: gameSetupProvider.awayTeam,
-          quarterMinutes: gameSetupProvider.quarterMinutes,
-          isCountdownTimer: gameSetupProvider.isCountdownTimer,
-          events: currentEvents,
-          homeGoals: scorePanelProvider.homeGoals,
-          homeBehinds: scorePanelProvider.homeBehinds,
-          awayGoals: scorePanelProvider.awayGoals,
-          awayBehinds: scorePanelProvider.awayBehinds,
-        );
-
-        // Use GameDetailsContent from the GameDetailsPage
-        return GameDetailsContent(game: currentGame);
+        // Use the GameDetailsWidget with live data
+        return GameDetailsWidget.fromLiveData(events: currentEvents);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final gameSetupProvider = Provider.of<GameSetupProvider>(context);
+    final gameSetupProvider = Provider.of<GameSetupAdapter>(context);
 
     return PopScope(
       canPop: false,
@@ -136,7 +123,7 @@ class _GameContainerState extends State<GameContainer> {
               final settingsProvider =
                   Provider.of<SettingsProvider>(context, listen: false);
               final gameSetupProvider =
-                  Provider.of<GameSetupProvider>(context, listen: false);
+                  Provider.of<GameSetupAdapter>(context, listen: false);
               gameSetupProvider
                   .setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
               gameSetupProvider.setIsCountdownTimer(

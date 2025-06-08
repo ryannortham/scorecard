@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/game_setup_provider.dart';
-import '../providers/score_panel_provider.dart';
+import '../adapters/game_setup_adapter.dart';
+import '../adapters/score_panel_adapter.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/common/custom_app_bar.dart';
 import '../widgets/common/custom_button.dart';
@@ -45,7 +45,7 @@ class _GameSetupState extends State<GameSetup> {
     final settingsProvider =
         Provider.of<SettingsProvider>(context, listen: false);
     final gameSetupProvider =
-        Provider.of<GameSetupProvider>(context, listen: false);
+        Provider.of<GameSetupAdapter>(context, listen: false);
     gameSetupProvider.setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
     gameSetupProvider
         .setIsCountdownTimer(settingsProvider.defaultIsCountdownTimer);
@@ -62,17 +62,17 @@ class _GameSetupState extends State<GameSetup> {
     super.initState();
     // Synchronize text controllers with provider values on initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gameSetupProvider =
-          Provider.of<GameSetupProvider>(context, listen: false);
-      _homeTeamController.text = gameSetupProvider.homeTeam;
-      _awayTeamController.text = gameSetupProvider.awayTeam;
+      final gameSetupAdapter =
+          Provider.of<GameSetupAdapter>(context, listen: false);
+      _homeTeamController.text = gameSetupAdapter.homeTeam;
+      _awayTeamController.text = gameSetupAdapter.awayTeam;
       _dateController.text =
-          DateFormat('EEEE dd/MM/yyyy').format(gameSetupProvider.gameDate);
-      homeTeam = gameSetupProvider.homeTeam.isNotEmpty
-          ? gameSetupProvider.homeTeam
+          DateFormat('EEEE dd/MM/yyyy').format(gameSetupAdapter.gameDate);
+      homeTeam = gameSetupAdapter.homeTeam.isNotEmpty
+          ? gameSetupAdapter.homeTeam
           : null;
-      awayTeam = gameSetupProvider.awayTeam.isNotEmpty
-          ? gameSetupProvider.awayTeam
+      awayTeam = gameSetupAdapter.awayTeam.isNotEmpty
+          ? gameSetupAdapter.awayTeam
           : null;
     });
   }
@@ -87,7 +87,7 @@ class _GameSetupState extends State<GameSetup> {
 
   @override
   Widget build(BuildContext context) {
-    final gameSetupProvider = Provider.of<GameSetupProvider>(context);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(context);
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -126,7 +126,7 @@ class _GameSetupState extends State<GameSetup> {
                   );
 
                   if (pickedDate != null) {
-                    gameSetupProvider.setGameDate(pickedDate);
+                    gameSetupAdapter.setGameDate(pickedDate);
                     _dateController.text =
                         DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
                   }
@@ -162,11 +162,28 @@ class _GameSetupState extends State<GameSetup> {
                   width: MediaQuery.of(context).size.width * 0.6,
                   onPressed: () {
                     if (isValidSetup()) {
-                      // Reset the score state for a new game
-                      final scorePanelProvider =
-                          Provider.of<ScorePanelProvider>(context,
-                              listen: false);
-                      scorePanelProvider.resetGame();
+                      final gameSetupAdapter =
+                          Provider.of<GameSetupAdapter>(context, listen: false);
+                      final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
+                          context,
+                          listen: false);
+                      final settingsProvider =
+                          Provider.of<SettingsProvider>(context, listen: false);
+
+                      // First configure the game with current setup data
+                      gameSetupAdapter.setHomeTeam(homeTeam ?? '');
+                      gameSetupAdapter.setAwayTeam(awayTeam ?? '');
+
+                      // Configure timer settings
+                      scorePanelAdapter.configureTimer(
+                        isCountdownMode:
+                            settingsProvider.defaultIsCountdownTimer,
+                        quarterMaxTime:
+                            settingsProvider.defaultQuarterMinutes * 60 * 1000,
+                      );
+
+                      // Then reset the score state for a new game
+                      scorePanelAdapter.resetGame();
 
                       Navigator.of(context).push(
                         MaterialPageRoute(

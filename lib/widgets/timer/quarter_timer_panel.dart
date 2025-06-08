@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/providers/game_setup_provider.dart';
-import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'timer_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Consumer2<GameSetupProvider, ScorePanelProvider>(
+      child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
         builder: (context, gameSetupProvider, scorePanelProvider, _) {
           return Column(
             children: [
@@ -63,7 +63,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
     );
   }
 
-  Widget _buildQuarterProgressIndicator(ScorePanelProvider scorePanelProvider) {
+  Widget _buildQuarterProgressIndicator(ScorePanelAdapter scorePanelProvider) {
     final currentQuarter = scorePanelProvider.selectedQuarter;
 
     return Container(

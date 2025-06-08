@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/game_setup_provider.dart';
+import '../adapters/game_setup_adapter.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/common/custom_app_bar.dart';
 import '../widgets/common/custom_button.dart';
@@ -51,9 +51,9 @@ class LandingPageState extends State<LandingPage> {
               text: "Start New Game",
               width: MediaQuery.of(context).size.width * 0.75,
               onPressed: () async {
-                // Reset GameSetupProvider before navigating using settings defaults
-                final gameSetupProvider =
-                    Provider.of<GameSetupProvider>(context, listen: false);
+                // Reset GameSetupAdapter before navigating using settings defaults
+                final gameSetupAdapter =
+                    Provider.of<GameSetupAdapter>(context, listen: false);
                 final settingsProvider =
                     Provider.of<SettingsProvider>(context, listen: false);
 
@@ -65,7 +65,7 @@ class LandingPageState extends State<LandingPage> {
                   await settingsProvider.loadSettings();
                 }
 
-                gameSetupProvider.reset(
+                gameSetupAdapter.reset(
                   defaultQuarterMinutes: settingsProvider.defaultQuarterMinutes,
                   defaultIsCountdownTimer:
                       settingsProvider.defaultIsCountdownTimer,

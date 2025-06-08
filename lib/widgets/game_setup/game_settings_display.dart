@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/game_setup_provider.dart';
+import '../../adapters/game_setup_adapter.dart';
 import '../common/settings_card.dart';
 
 /// Widget for displaying game settings configuration
@@ -9,8 +9,8 @@ class GameSettingsDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GameSetupProvider>(
-      builder: (context, gameSetupProvider, child) {
+    return Consumer<GameSetupAdapter>(
+      builder: (context, gameSetupAdapter, child) {
         return SettingsCard(
           title: 'Game Settings',
           children: [
@@ -19,7 +19,7 @@ class GameSettingsDisplay extends StatelessWidget {
               children: [
                 const Text('Quarter Minutes:'),
                 Text(
-                  '${gameSetupProvider.quarterMinutes}',
+                  '${gameSetupAdapter.quarterMinutes}',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -30,7 +30,7 @@ class GameSettingsDisplay extends StatelessWidget {
               children: [
                 const Text('Timer Type:'),
                 Text(
-                  gameSetupProvider.isCountdownTimer ? 'Countdown' : 'Count Up',
+                  gameSetupAdapter.isCountdownTimer ? 'Countdown' : 'Count Up',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],

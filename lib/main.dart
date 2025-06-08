@@ -1,10 +1,10 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/screens/landing_page.dart';
-import 'package:goalkeeper/providers/score_panel_provider.dart';
-import 'package:goalkeeper/providers/game_setup_provider.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -12,8 +12,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => GameSetupProvider()),
-        ChangeNotifierProvider(create: (_) => ScorePanelProvider()),
+        ChangeNotifierProvider(create: (_) => GameSetupAdapter()),
+        ChangeNotifierProvider(create: (_) => ScorePanelAdapter()),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),
       ],
       child: const GoalKeeperApp(),

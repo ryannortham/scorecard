@@ -1,7 +1,7 @@
 // Score table widget for displaying team scores by quarter
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/providers/score_panel_provider.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'score_counter.dart';
 
@@ -50,7 +50,7 @@ class ScoreTable extends StatelessWidget {
 
   TableRow createRow(BuildContext context, int quarter) {
     final currentQuarter =
-        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+        Provider.of<ScorePanelAdapter>(context, listen: true).selectedQuarter;
     final isCurrentQuarter = quarter + 1 == currentQuarter;
 
     // Determine if this is a future quarter - consistent behavior in all views
@@ -432,12 +432,12 @@ class ScoreTable extends StatelessWidget {
                           ),
                     ),
                   ),
-                  Consumer<ScorePanelProvider>(
-                    builder: (context, scorePanelProvider, _) {
+                  Consumer<ScorePanelAdapter>(
+                    builder: (context, scorePanelAdapter, _) {
                       final goals =
-                          scorePanelProvider.getCount(isHomeTeam, true);
+                          scorePanelAdapter.getCount(isHomeTeam, true);
                       final behinds =
-                          scorePanelProvider.getCount(isHomeTeam, false);
+                          scorePanelAdapter.getCount(isHomeTeam, false);
                       final points = goals * 6 + behinds;
 
                       return Text(
@@ -458,32 +458,26 @@ class ScoreTable extends StatelessWidget {
 
           // Condensed Counter Controls (conditionally shown)
           if (showCounters) ...[
-            Consumer<ScorePanelProvider>(
-              builder: (context, scorePanelProvider, _) {
-                return Row(
-                  children: [
-                    Expanded(
-                      child: ScoreCounter(
-                        label: 'Goals',
-                        isHomeTeam: isHomeTeam,
-                        isGoal: true,
-                        scorePanelProvider: scorePanelProvider,
-                        enabled: enabled,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ScoreCounter(
-                        label: 'Behinds',
-                        isHomeTeam: isHomeTeam,
-                        isGoal: false,
-                        scorePanelProvider: scorePanelProvider,
-                        enabled: enabled,
-                      ),
-                    ),
-                  ],
-                );
-              },
+            Row(
+              children: [
+                Expanded(
+                  child: ScoreCounter(
+                    label: 'Goals',
+                    isHomeTeam: isHomeTeam,
+                    isGoal: true,
+                    enabled: enabled,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ScoreCounter(
+                    label: 'Behinds',
+                    isHomeTeam: isHomeTeam,
+                    isGoal: false,
+                    enabled: enabled,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
           ],
@@ -568,7 +562,7 @@ class ScoreTable extends StatelessWidget {
 
   Widget _buildQuarterRow(BuildContext context, int quarter) {
     final currentQuarter =
-        Provider.of<ScorePanelProvider>(context, listen: true).selectedQuarter;
+        Provider.of<ScorePanelAdapter>(context, listen: true).selectedQuarter;
     final isCurrentQuarter = quarter + 1 == currentQuarter;
 
     // Determine if this is a future quarter - consistent behavior in all views
