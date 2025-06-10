@@ -205,10 +205,10 @@ class GameDetailsWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Date Card
+          // Match Info Card
           GameInfoCard(
-            icon: Icons.calendar_today,
-            title: 'Game Date',
+            icon: Icons.sports_rugby,
+            title: '${game.homeTeam} vs ${game.awayTeam}',
             content: Text(
               DateFormat('EEEE, MMM d, yyyy').format(game.date),
               style: Theme.of(context).textTheme.titleMedium,
