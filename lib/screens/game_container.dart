@@ -10,6 +10,7 @@ import 'package:goalkeeper/services/scoring_state_manager.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
 import 'dart:io';
 import 'settings.dart';
 
@@ -26,6 +27,7 @@ class _GameContainerState extends State<GameContainer> {
   final GlobalKey<ScoringState> _scoringKey = GlobalKey<ScoringState>();
   final GlobalKey _gameDetailsKey = GlobalKey();
   bool _isSharing = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -193,6 +195,103 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
     return '${cleanHome}_v_${cleanAway}_$timestamp.png';
   }
 
+  void _saveToGallery(BuildContext context) async {
+    // Prevent multiple save operations at once
+    if (_isSaving) return;
+
+    setState(() {
+      _isSaving = true;
+    });
+
+    try {
+      // Use a post-frame callback to ensure layout is complete
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          // Capture the full widget using WidgetShotPlus
+          await _saveWithWidgetShotPlus();
+        } catch (e) {
+          debugPrint('Error in _saveToGallery post-frame callback: $e');
+          // Show error message if save fails
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save screenshot: $e'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } finally {
+          // Ensure we restore the state
+          if (mounted) {
+            setState(() {
+              _isSaving = false;
+            });
+          }
+        }
+      });
+    } catch (e) {
+      // Handle any synchronous errors
+      debugPrint('Error setting up post-frame callback: $e');
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to prepare screenshot: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Save to gallery using WidgetShotPlus
+  Future<void> _saveWithWidgetShotPlus() async {
+    try {
+      final boundary = _gameDetailsKey.currentContext?.findRenderObject()
+          as WidgetShotPlusRenderRepaintBoundary?;
+
+      if (boundary == null) {
+        throw Exception('Could not find WidgetShotPlus boundary');
+      }
+
+      // Capture the full widget content
+      final imageBytes = await boundary.screenshot(
+        format: ShotFormat.png,
+        quality: 100,
+        pixelRatio: 2.0,
+      );
+
+      if (imageBytes == null) {
+        throw Exception('Failed to capture image');
+      }
+
+      // Save to gallery using gal
+      final fileName = _generateFileName();
+      await Gal.putImageBytes(imageBytes, name: fileName);
+
+      // Show success feedback for save operation
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Game details saved to gallery!'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error saving widget: $e');
+      rethrow; // Re-throw to be handled by caller
+    }
+  }
+
   Widget _buildGameDetailsContent() {
     return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
       builder: (context, gameSetupProvider, scorePanelProvider, _) {
@@ -229,6 +328,19 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
           title: Text(
               '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}'),
           actions: [
+            // Show save button only on Details tab
+            if (_currentIndex == 1)
+              IconButton(
+                icon: _isSaving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.download),
+                onPressed: _isSaving ? null : () => _saveToGallery(context),
+                tooltip: 'Save to Gallery',
+              ),
             IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () async {
