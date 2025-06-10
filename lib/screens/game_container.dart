@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/screens/scoring.dart';
 import 'settings.dart';
+import 'game_history.dart';
 
 class GameContainer extends StatefulWidget {
   const GameContainer({super.key});
@@ -53,6 +54,15 @@ class _GameContainerState extends State<GameContainer> {
     // are no longer in settings - they're managed on the game setup screen
   }
 
+  /// Navigate to game history screen
+  void _navigateToGameHistory() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const GameHistoryScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameSetupProvider = Provider.of<GameSetupAdapter>(context);
@@ -88,6 +98,9 @@ class _GameContainerState extends State<GameContainer> {
                   case 'settings':
                     _navigateToSettings();
                     break;
+                  case 'game_history':
+                    _navigateToGameHistory();
+                    break;
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
@@ -96,6 +109,14 @@ class _GameContainerState extends State<GameContainer> {
                   child: ListTile(
                     leading: Icon(Icons.settings),
                     title: Text('Settings'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'game_history',
+                  child: ListTile(
+                    leading: Icon(Icons.history),
+                    title: Text('Game History'),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
