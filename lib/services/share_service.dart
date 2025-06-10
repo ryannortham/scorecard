@@ -23,21 +23,29 @@ class ShareService {
       // Add a small delay to ensure rendering is complete
       await Future.delayed(const Duration(milliseconds: 200));
 
-      // Verify the boundary is valid - do this before any async gap
-      if (repaintBoundaryKey.currentContext == null) {
-        if (contextMounted && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Cannot share: View is not ready'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
+      // Check if context is still valid after the delay
+      if (!contextMounted || !context.mounted) {
         return;
       }
 
-      // Capture the widget as an image using the improved ImageService method
+      // Verify the boundary is valid
+      if (repaintBoundaryKey.currentContext == null) {
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+        final theme = Theme.of(context);
+        scaffoldMessenger.showSnackBar(
+          SnackBar(
+            content: const Text('Cannot share: View is not ready'),
+            backgroundColor: theme.colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
+
+      // Capture the widget as an image - confirm context is valid right before async call
+      if (!context.mounted) {
+        return;
+      }
       final pngBytes = await ImageService.captureWidgetAsBytes(
         repaintBoundaryKey: repaintBoundaryKey,
         context: context,
@@ -45,16 +53,18 @@ class ShareService {
       );
 
       // Check if the context is still valid after the async operation
-      if (!contextMounted) {
+      if (!context.mounted) {
         return;
       }
 
       if (pngBytes == null || pngBytes.isEmpty) {
         if (contextMounted && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          final scaffoldMessenger = ScaffoldMessenger.of(context);
+          final theme = Theme.of(context);
+          scaffoldMessenger.showSnackBar(
             SnackBar(
               content: const Text('Failed to capture image'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: theme.colorScheme.error,
               duration: const Duration(seconds: 3),
             ),
           );
@@ -114,11 +124,13 @@ class ShareService {
           // Re-check context.mounted after each async gap
           if (contextMounted && context.mounted && !hasShownFeedback) {
             hasShownFeedback = true;
-            ScaffoldMessenger.of(context).showSnackBar(
+            final scaffoldMessenger = ScaffoldMessenger.of(context);
+            final theme = Theme.of(context);
+            scaffoldMessenger.showSnackBar(
               SnackBar(
                 content: const Text(
                     'Shared text details only (image not supported)'),
-                backgroundColor: Theme.of(context).colorScheme.secondary,
+                backgroundColor: theme.colorScheme.secondary,
                 duration: const Duration(seconds: 2),
               ),
             );
@@ -175,12 +187,14 @@ class ShareService {
       // Check if context is still valid after async operation
       if (contextMounted && context.mounted) {
         final isErrorMessage = message?.contains('Error') ?? false;
-        ScaffoldMessenger.of(context).showSnackBar(
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+        final theme = Theme.of(context);
+        scaffoldMessenger.showSnackBar(
           SnackBar(
             content: Text(message ?? 'Game details copied to clipboard'),
             backgroundColor: isErrorMessage
-                ? Theme.of(context).colorScheme.error
-                : Theme.of(context).colorScheme.primary,
+                ? theme.colorScheme.error
+                : theme.colorScheme.primary,
             duration: Duration(seconds: isErrorMessage ? 3 : 2),
           ),
         );

@@ -66,21 +66,19 @@ class GameDetailsWidget extends StatelessWidget {
   const GameDetailsWidget.fromStaticData({
     super.key,
     required GameRecord game,
-    ScrollController? scrollController,
+    this.scrollController,
   })  : dataSource = GameDataSource.staticData,
         staticGame = game,
-        liveEvents = null,
-        scrollController = scrollController;
+        liveEvents = null;
 
   /// Factory constructor for live data (current game)
   const GameDetailsWidget.fromLiveData({
     super.key,
     required List<GameEvent> events,
-    ScrollController? scrollController,
+    this.scrollController,
   })  : dataSource = GameDataSource.liveData,
         staticGame = null,
-        liveEvents = events,
-        scrollController = scrollController;
+        liveEvents = events;
 
   /// Determines if the game is complete based on timer events
   bool _isGameComplete(GameRecord game) {

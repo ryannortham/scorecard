@@ -216,7 +216,7 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
       );
 
       // Show success feedback
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Game details shared successfully!'),
@@ -231,7 +231,7 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
       // Fallback to text-only sharing
       await Share.share(shareText);
 
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Shared as text (image capture failed)'),
@@ -271,7 +271,7 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
       await Gal.putImageBytes(imageBytes, name: fileName);
 
       // Show success feedback
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Game details saved to gallery!'),
