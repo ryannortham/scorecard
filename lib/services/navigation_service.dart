@@ -4,7 +4,7 @@ import 'package:goalkeeper/screens/team_list.dart';
 import 'package:goalkeeper/screens/game_setup.dart';
 import 'package:goalkeeper/screens/game_history.dart';
 import 'package:goalkeeper/screens/game_details.dart' as details;
-import 'package:goalkeeper/screens/game_container.dart';
+import 'package:goalkeeper/screens/scoring.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 
 /// Centralized navigation service following Flutter best practices
@@ -15,7 +15,7 @@ class AppNavigator {
   static const String gameSetup = '/game-setup';
   static const String gameHistory = '/game-history';
   static const String gameDetails = '/game-details';
-  static const String gameContainer = '/game-container';
+  static const String scoring = '/scoring';
 
   /// Navigate to settings page
   static Future<T?> toSettings<T extends Object?>(BuildContext context) {
@@ -74,11 +74,11 @@ class AppNavigator {
     );
   }
 
-  /// Navigate to active game container
-  static Future<T?> toGameContainer<T extends Object?>(BuildContext context) {
+  /// Navigate to active scoring screen
+  static Future<T?> toScoring<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(
-        builder: (context) => const GameContainer(),
+        builder: (context) => const Scoring(title: 'Scoring'),
       ),
     );
   }

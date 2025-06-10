@@ -11,6 +11,8 @@ import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
+import 'settings.dart';
+import 'game_history.dart';
 import 'dart:io';
 
 class Scoring extends StatefulWidget {
@@ -37,6 +39,53 @@ class ScoringState extends State<Scoring> {
   final GlobalKey _gameDetailsKey = GlobalKey();
   bool _isSharing = false;
   bool _isSaving = false;
+
+  Future<bool> _showExitConfirmation() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Exit Game?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Exit'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<bool> _onWillPop() async {
+    // Always show exit confirmation when leaving an active game
+    return await _showExitConfirmation();
+  }
+
+  /// Navigate to settings screen
+  void _navigateToSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const Settings(title: 'Settings'),
+      ),
+    );
+    // No need to update game setup since quarter minutes and countdown timer
+    // are no longer in settings - they're managed on the game setup screen
+  }
+
+  /// Navigate to game history screen
+  void _navigateToGameHistory() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const GameHistoryScreen(),
+      ),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -399,98 +448,190 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
     String homeTeamName = gameSetupProvider.homeTeam;
     String awayTeamName = gameSetupProvider.awayTeam;
 
-    return Consumer<GameSetupAdapter>(
-      builder: (context, scorePanelState, _) {
-        return Scaffold(
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Consumer<GameSetupAdapter>(
+        builder: (context, scorePanelState, _) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('$homeTeamName vs $awayTeamName'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.save_alt),
+                  tooltip: 'Save Game Image',
+                  onPressed: () {
+                    saveGameImage(context);
+                  },
+                ),
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.more_vert),
+                    tooltip: 'Menu',
+                    onPressed: () {
+                      Scaffold.of(context).openEndDrawer();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            endDrawer: Drawer(
+              child: ListView(
+                padding: EdgeInsets.zero,
                 children: [
-                  // Timer Panel Card
-                  Card(
-                    elevation: 1,
-                    child: QuarterTimerPanel(
-                        key: _quarterTimerKey, isTimerRunning: isTimerRunning),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Home Team Score Table
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isTimerRunning,
-                    builder: (context, timerRunning, child) {
-                      return Consumer<ScorePanelAdapter>(
-                        builder: (context, scorePanelAdapter, child) {
-                          return Card(
-                            elevation: 1,
-                            child: ScoreTable(
-                              events: List<GameEvent>.from(
-                                  gameEvents), // Create a defensive copy
-                              homeTeam: homeTeamName,
-                              awayTeam: awayTeamName,
-                              displayTeam: homeTeamName,
-                              isHomeTeam: true,
-                              enabled: timerRunning,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Away Team Score Table
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isTimerRunning,
-                    builder: (context, timerRunning, child) {
-                      return Consumer<ScorePanelAdapter>(
-                        builder: (context, scorePanelAdapter, child) {
-                          return Card(
-                            elevation: 1,
-                            child: ScoreTable(
-                              events: List<GameEvent>.from(
-                                  gameEvents), // Create a defensive copy
-                              homeTeam: homeTeamName,
-                              awayTeam: awayTeamName,
-                              displayTeam: awayTeamName,
-                              isHomeTeam: false,
-                              enabled: timerRunning,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Hidden game details widget for screenshot capture
-                  // Position it off-screen but still render it
-                  Transform.translate(
-                    offset: const Offset(-10000, 0),
-                    child: Opacity(
-                      opacity: 0.01, // Nearly invisible but still rendered
-                      child: _buildGameDetailsContent(),
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.sports_rugby,
+                          size: 32,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'GoalKeeper',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        Text(
+                          'Menu',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.settings),
+                    title: const Text('Settings'),
+                    onTap: () {
+                      Navigator.pop(context); // Close the drawer
+                      _navigateToSettings();
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.history),
+                    title: const Text('Game History'),
+                    onTap: () {
+                      Navigator.pop(context); // Close the drawer
+                      _navigateToGameHistory();
+                    },
                   ),
                 ],
               ),
             ),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _isSharing ? null : () => _shareGameDetails(context),
-            tooltip: 'Share Game Details',
-            child: _isSharing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.share),
-          ),
-        );
-      },
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Timer Panel Card
+                    Card(
+                      elevation: 1,
+                      child: QuarterTimerPanel(
+                          key: _quarterTimerKey,
+                          isTimerRunning: isTimerRunning),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Home Team Score Table
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return Consumer<ScorePanelAdapter>(
+                          builder: (context, scorePanelAdapter, child) {
+                            return Card(
+                              elevation: 1,
+                              child: ScoreTable(
+                                events: List<GameEvent>.from(
+                                    gameEvents), // Create a defensive copy
+                                homeTeam: homeTeamName,
+                                awayTeam: awayTeamName,
+                                displayTeam: homeTeamName,
+                                isHomeTeam: true,
+                                enabled: timerRunning,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Away Team Score Table
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return Consumer<ScorePanelAdapter>(
+                          builder: (context, scorePanelAdapter, child) {
+                            return Card(
+                              elevation: 1,
+                              child: ScoreTable(
+                                events: List<GameEvent>.from(
+                                    gameEvents), // Create a defensive copy
+                                homeTeam: homeTeamName,
+                                awayTeam: awayTeamName,
+                                displayTeam: awayTeamName,
+                                isHomeTeam: false,
+                                enabled: timerRunning,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Hidden game details widget for screenshot capture
+                    // Position it off-screen but still render it
+                    Transform.translate(
+                      offset: const Offset(-10000, 0),
+                      child: Opacity(
+                        opacity: 0.01, // Nearly invisible but still rendered
+                        child: _buildGameDetailsContent(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: _isSharing ? null : () => _shareGameDetails(context),
+              tooltip: 'Share Game Details',
+              child: _isSharing
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.share),
+            ),
+          );
+        },
+      ),
     );
   }
 }

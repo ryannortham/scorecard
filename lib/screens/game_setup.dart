@@ -6,7 +6,7 @@ import '../adapters/score_panel_adapter.dart';
 import '../providers/user_preferences_provider.dart';
 import '../widgets/game_setup/team_selection_widget.dart';
 import '../widgets/game_setup/game_settings_configuration.dart';
-import 'game_container.dart';
+import 'scoring.dart';
 import 'settings.dart';
 import 'game_history.dart';
 
@@ -268,7 +268,8 @@ class _GameSetupState extends State<GameSetup> {
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const GameContainer(),
+                            builder: (context) =>
+                                const Scoring(title: 'Scoring'),
                           ),
                         );
                       }
