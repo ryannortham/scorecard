@@ -90,39 +90,70 @@ class _GameContainerState extends State<GameContainer> {
                 _scoringKey.currentState?.saveGameImage(context);
               },
             ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              tooltip: 'Menu',
-              onSelected: (String value) {
-                switch (value) {
-                  case 'settings':
-                    _navigateToSettings();
-                    break;
-                  case 'game_history':
-                    _navigateToGameHistory();
-                    break;
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'settings',
-                  child: ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Settings'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'game_history',
-                  child: ListTile(
-                    leading: Icon(Icons.history),
-                    title: Text('Game History'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
+            Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.more_vert),
+                tooltip: 'Menu',
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              ),
             ),
           ],
+        ),
+        endDrawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(
+                      Icons.sports_rugby,
+                      size: 32,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'GoalKeeper',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    Text(
+                      'Menu',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.settings),
+                title: const Text('Settings'),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  _navigateToSettings();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.history),
+                title: const Text('Game History'),
+                onTap: () {
+                  Navigator.pop(context); // Close the drawer
+                  _navigateToGameHistory();
+                },
+              ),
+            ],
+          ),
         ),
         body: Scoring(key: _scoringKey, title: 'Scoring'),
       ),

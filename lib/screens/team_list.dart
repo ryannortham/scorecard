@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/teams_provider.dart';
 import '../services/navigation_service.dart';
 import 'settings.dart';
+import 'game_history.dart';
 
 class TeamList extends StatelessWidget {
   const TeamList(
@@ -22,15 +23,77 @@ class TeamList extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const Settings(title: 'Settings'),
-              ),
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'Menu',
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
             ),
           ),
         ],
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.sports_rugby,
+                    size: 32,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'GoalKeeper',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    'Menu',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const Settings(title: 'Settings'),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Game History'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const GameHistoryScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: teamsProvider.loaded
           ? Padding(
