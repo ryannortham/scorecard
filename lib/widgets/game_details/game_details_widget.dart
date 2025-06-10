@@ -48,11 +48,15 @@ class GameDetailsWidget extends StatelessWidget {
   /// Live game events (used when dataSource is liveData)
   final List<GameEvent>? liveEvents;
 
+  /// Optional scroll controller for screenshot capture
+  final ScrollController? scrollController;
+
   const GameDetailsWidget({
     super.key,
     required this.dataSource,
     this.staticGame,
     this.liveEvents,
+    this.scrollController,
   }) : assert(
             (dataSource == GameDataSource.staticData && staticGame != null) ||
                 (dataSource == GameDataSource.liveData && liveEvents != null),
@@ -62,17 +66,21 @@ class GameDetailsWidget extends StatelessWidget {
   const GameDetailsWidget.fromStaticData({
     super.key,
     required GameRecord game,
+    ScrollController? scrollController,
   })  : dataSource = GameDataSource.staticData,
         staticGame = game,
-        liveEvents = null;
+        liveEvents = null,
+        scrollController = scrollController;
 
   /// Factory constructor for live data (current game)
   const GameDetailsWidget.fromLiveData({
     super.key,
     required List<GameEvent> events,
+    ScrollController? scrollController,
   })  : dataSource = GameDataSource.liveData,
         staticGame = null,
-        liveEvents = events;
+        liveEvents = events,
+        scrollController = scrollController;
 
   /// Determines if the game is complete based on timer events
   bool _isGameComplete(GameRecord game) {
@@ -201,6 +209,7 @@ class GameDetailsWidget extends StatelessWidget {
     final bool isComplete = _isGameComplete(game);
 
     return SingleChildScrollView(
+      controller: scrollController,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,5 +391,197 @@ class GameDetailsWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// A specialized widget for capturing game details as images
+/// This renders the full content without scroll constraints
+class CaptureableGameDetailsWidget extends StatelessWidget {
+  final GameRecord game;
+
+  const CaptureableGameDetailsWidget({super.key, required this.game});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool homeWins = game.homePoints > game.awayPoints;
+    final bool awayWins = game.awayPoints > game.homePoints;
+    final bool isComplete = _isGameComplete(game);
+
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Match Info Card
+          GameInfoCard(
+            icon: Icons.sports_rugby,
+            title: '${game.homeTeam} vs ${game.awayTeam}',
+            content: Text(
+              DateFormat('EEEE, MMM d, yyyy').format(game.date),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Final Score Card
+          GameInfoCard(
+            icon: Icons.sports_score,
+            title: 'Final Score',
+            content: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: TeamScoreDisplay(
+                        teamName: game.homeTeam,
+                        goals: game.homeGoals,
+                        behinds: game.homeBehinds,
+                        points: game.homePoints,
+                        isWinner: homeWins,
+                      ),
+                    ),
+                    Container(
+                      width: 2,
+                      height: 80,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withValues(alpha: 0.3),
+                    ),
+                    Expanded(
+                      child: TeamScoreDisplay(
+                        teamName: game.awayTeam,
+                        goals: game.awayGoals,
+                        behinds: game.awayBehinds,
+                        points: game.awayPoints,
+                        isWinner: awayWins,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                GameResultBadge(
+                  homeTeam: game.homeTeam,
+                  awayTeam: game.awayTeam,
+                  homePoints: game.homePoints,
+                  awayPoints: game.awayPoints,
+                  isGameComplete: isComplete,
+                  isHistoryMode: true, // Always use history mode for captures
+                ),
+              ],
+            ),
+          ),
+
+          // Quarter Breakdown Card
+          const SizedBox(height: 16),
+          GameInfoCard(
+            icon: Icons.timeline,
+            title: 'Quarter Breakdown',
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Home Team Label
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
+                  child: Text(
+                    game.homeTeam,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: homeWins
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        ),
+                  ),
+                ),
+
+                // Home Team Score Table
+                _buildCaptureScoreTable(
+                  context: context,
+                  game: game,
+                  displayTeam: game.homeTeam,
+                  isHomeTeam: true,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Away Team Label
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0, vertical: 4.0),
+                  child: Text(
+                    game.awayTeam,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: awayWins
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                        ),
+                  ),
+                ),
+
+                // Away Team Score Table
+                _buildCaptureScoreTable(
+                  context: context,
+                  game: game,
+                  displayTeam: game.awayTeam,
+                  isHomeTeam: false,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds a score table specifically for capture (no interactivity, full content)
+  Widget _buildCaptureScoreTable({
+    required BuildContext context,
+    required GameRecord game,
+    required String displayTeam,
+    required bool isHomeTeam,
+  }) {
+    final int currentQuarter = _getCurrentQuarter(game);
+
+    return ScoreTable(
+      events: game.events,
+      homeTeam: game.homeTeam,
+      awayTeam: game.awayTeam,
+      displayTeam: displayTeam,
+      isHomeTeam: isHomeTeam,
+      enabled: false, // Disable interactions in capture
+      showHeader: false, // Hide team header
+      showCounters: false, // Hide score counters
+      currentQuarter: currentQuarter, // Pass quarter directly
+    );
+  }
+
+  /// Determines if the game is complete based on timer events
+  bool _isGameComplete(GameRecord game) {
+    // If no events, it's definitely not complete
+    if (game.events.isEmpty) return false;
+
+    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
+    bool hasQ4ClockPause =
+        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
+    if (hasQ4ClockPause) return true;
+
+    // Not enough evidence to consider the game complete
+    return false;
+  }
+
+  /// Gets the current quarter based on the latest events
+  int _getCurrentQuarter(GameRecord game) {
+    if (game.events.isEmpty) return 1;
+
+    // Find the highest quarter number with events
+    final maxQuarter =
+        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
+    return maxQuarter;
   }
 }

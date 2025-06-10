@@ -44,6 +44,9 @@ dependencies:
   uuid: ^4.5.1
   share_plus: ^10.1.4
   path_provider: ^2.1.5
+  widget_screenshot_plus: ^0.0.6
+  screenshot: ^3.0.0
+  gal: ^2.3.0
 
 dev_dependencies:
   # The "flutter_lints" package below contains a set of recommended lints to
