@@ -70,10 +70,6 @@ class _SettingsState extends State<Settings> {
               context: context,
               children: [
                 _buildTeamSelectionTile(context, settingsProvider),
-                const SizedBox(height: 24),
-                _buildQuarterMinutesTile(context, settingsProvider),
-                const SizedBox(height: 24),
-                _buildCountdownTimerTile(context, settingsProvider),
               ],
             ),
 
@@ -156,68 +152,6 @@ class _SettingsState extends State<Settings> {
               ),
             ],
           ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuarterMinutesTile(
-      BuildContext context, SettingsProvider provider) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Quarter Minutes',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                '${provider.defaultQuarterMinutes}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Slider(
-          value: provider.defaultQuarterMinutes.toDouble(),
-          min: 1,
-          max: 20,
-          divisions: 19,
-          label: '${provider.defaultQuarterMinutes}',
-          onChanged: (value) {
-            provider.setDefaultQuarterMinutes(value.toInt());
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCountdownTimerTile(
-      BuildContext context, SettingsProvider provider) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          'Countdown Timer',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Switch(
-          value: provider.defaultIsCountdownTimer,
-          onChanged: (value) {
-            provider.setDefaultIsCountdownTimer(value);
-          },
         ),
       ],
     );

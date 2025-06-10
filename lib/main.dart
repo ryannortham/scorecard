@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/screens/landing_page.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
 import 'package:goalkeeper/providers/settings_provider.dart';
+import 'package:goalkeeper/providers/game_setup_preferences_provider.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => GameSetupPreferencesProvider()),
         ChangeNotifierProvider(create: (_) => GameSetupAdapter()),
         ChangeNotifierProvider(create: (_) => ScorePanelAdapter()),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),

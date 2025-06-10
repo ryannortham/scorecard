@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/providers/settings_provider.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/screens/scoring.dart';
@@ -358,17 +357,8 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                     builder: (context) => const Settings(title: 'Settings'),
                   ),
                 );
-                // Update game setup with current settings when returning
-                if (context.mounted) {
-                  final settingsProvider =
-                      Provider.of<SettingsProvider>(context, listen: false);
-                  final gameSetupProvider =
-                      Provider.of<GameSetupAdapter>(context, listen: false);
-                  gameSetupProvider.setQuarterMinutes(
-                      settingsProvider.defaultQuarterMinutes);
-                  gameSetupProvider.setIsCountdownTimer(
-                      settingsProvider.defaultIsCountdownTimer);
-                }
+                // No need to update game setup since quarter minutes and countdown timer
+                // are no longer in settings - they're managed on the game setup screen
               },
             ),
           ],

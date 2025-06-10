@@ -4,8 +4,9 @@ import 'package:intl/intl.dart';
 import '../adapters/game_setup_adapter.dart';
 import '../adapters/score_panel_adapter.dart';
 import '../providers/settings_provider.dart';
+import '../providers/game_setup_preferences_provider.dart';
 import '../widgets/game_setup/team_selection_widget.dart';
-import '../widgets/game_setup/game_settings_display.dart';
+import '../widgets/game_setup/game_settings_configuration.dart';
 import 'game_container.dart';
 import 'settings.dart';
 
@@ -41,11 +42,15 @@ class _GameSetupState extends State<GameSetup> {
   void _updateSettingsFromProvider() {
     final settingsProvider =
         Provider.of<SettingsProvider>(context, listen: false);
+    final preferencesProvider =
+        Provider.of<GameSetupPreferencesProvider>(context, listen: false);
     final gameSetupProvider =
         Provider.of<GameSetupAdapter>(context, listen: false);
-    gameSetupProvider.setQuarterMinutes(settingsProvider.defaultQuarterMinutes);
-    gameSetupProvider
-        .setIsCountdownTimer(settingsProvider.defaultIsCountdownTimer);
+
+    // Use preferences for quarter minutes and countdown timer
+    gameSetupProvider.setQuarterMinutes(preferencesProvider.quarterMinutes);
+    gameSetupProvider.setIsCountdownTimer(preferencesProvider.isCountdownTimer);
+
     // Set favorite team as home team if home team is currently empty
     if (gameSetupProvider.homeTeam.isEmpty &&
         settingsProvider.favoriteTeam.isNotEmpty) {
@@ -61,6 +66,16 @@ class _GameSetupState extends State<GameSetup> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameSetupAdapter =
           Provider.of<GameSetupAdapter>(context, listen: false);
+      final preferencesProvider =
+          Provider.of<GameSetupPreferencesProvider>(context, listen: false);
+
+      // Initialize game settings from saved preferences
+      if (preferencesProvider.loaded) {
+        gameSetupAdapter.setQuarterMinutes(preferencesProvider.quarterMinutes);
+        gameSetupAdapter
+            .setIsCountdownTimer(preferencesProvider.isCountdownTimer);
+      }
+
       _homeTeamController.text = gameSetupAdapter.homeTeam;
       _awayTeamController.text = gameSetupAdapter.awayTeam;
       _dateController.text =
@@ -165,7 +180,7 @@ class _GameSetupState extends State<GameSetup> {
                 },
               ),
               const SizedBox(height: 24),
-              const GameSettingsDisplay(),
+              const GameSettingsConfiguration(),
               const SizedBox(height: 32),
               Center(
                 child: SizedBox(
@@ -179,22 +194,16 @@ class _GameSetupState extends State<GameSetup> {
                         final scorePanelAdapter =
                             Provider.of<ScorePanelAdapter>(context,
                                 listen: false);
-                        final settingsProvider = Provider.of<SettingsProvider>(
-                            context,
-                            listen: false);
 
                         // First configure the game with current setup data
                         gameSetupAdapter.setHomeTeam(homeTeam ?? '');
                         gameSetupAdapter.setAwayTeam(awayTeam ?? '');
 
-                        // Configure timer settings
+                        // Configure timer settings using current game setup adapter values
                         scorePanelAdapter.configureTimer(
-                          isCountdownMode:
-                              settingsProvider.defaultIsCountdownTimer,
+                          isCountdownMode: gameSetupAdapter.isCountdownTimer,
                           quarterMaxTime:
-                              settingsProvider.defaultQuarterMinutes *
-                                  60 *
-                                  1000,
+                              gameSetupAdapter.quarterMinutes * 60 * 1000,
                         );
 
                         // Then reset the score state for a new game
