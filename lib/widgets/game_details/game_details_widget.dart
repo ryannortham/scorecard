@@ -399,11 +399,57 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
 
   const CaptureableGameDetailsWidget({super.key, required this.game});
 
+  /// Determines if the game is complete based on timer events
+  static bool _isGameCompleteForCapture(GameRecord game) {
+    // If no events, it's definitely not complete
+    if (game.events.isEmpty) return false;
+
+    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
+    bool hasQ4ClockPause =
+        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
+    if (hasQ4ClockPause) return true;
+
+    // Not enough evidence to consider the game complete
+    return false;
+  }
+
+  /// Gets the current quarter based on the latest events
+  static int _getCurrentQuarterForCapture(GameRecord game) {
+    if (game.events.isEmpty) return 1;
+
+    // Find the highest quarter number with events
+    final maxQuarter =
+        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
+    return maxQuarter;
+  }
+
+  /// Builds the title for live games showing quarter and current status
+  String _buildGameTitle(BuildContext context) {
+    final isComplete = _isGameCompleteForCapture(game);
+    if (isComplete) {
+      return 'Final Score';
+    } else {
+      final currentQuarter = _getCurrentQuarterForCapture(game);
+
+      // Get elapsed time from GameStateService
+      final gameStateService = GameStateService.instance;
+      final elapsedTimeMs = gameStateService.getElapsedTimeInQuarter();
+
+      // Format elapsed time using the same method as timer widget
+      final timeStr = StopWatchTimer.getDisplayTime(elapsedTimeMs,
+          hours: false, milliSecond: true);
+      // Remove the last character (centiseconds)
+      final formattedTime = timeStr.substring(0, timeStr.length - 1);
+
+      return 'Q$currentQuarter $formattedTime';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool homeWins = game.homePoints > game.awayPoints;
     final bool awayWins = game.awayPoints > game.homePoints;
-    final bool isComplete = _isGameComplete(game);
+    final bool isComplete = _isGameCompleteForCapture(game);
 
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -424,10 +470,10 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Final Score Card
+          // Score Card
           GameInfoCard(
             icon: Icons.sports_score,
-            title: 'Final Score',
+            title: _buildGameTitle(context),
             content: Column(
               children: [
                 Row(
@@ -468,7 +514,8 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
                   homePoints: game.homePoints,
                   awayPoints: game.awayPoints,
                   isGameComplete: isComplete,
-                  isHistoryMode: true, // Always use history mode for captures
+                  isHistoryMode:
+                      isComplete, // Use history mode only for completed games
                 ),
               ],
             ),
@@ -544,7 +591,7 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
     required String displayTeam,
     required bool isHomeTeam,
   }) {
-    final int currentQuarter = _getCurrentQuarter(game);
+    final int currentQuarter = _getCurrentQuarterForCapture(game);
 
     return ScoreTable(
       events: game.events,
@@ -557,29 +604,5 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
       showCounters: false, // Hide score counters
       currentQuarter: currentQuarter, // Pass quarter directly
     );
-  }
-
-  /// Determines if the game is complete based on timer events
-  bool _isGameComplete(GameRecord game) {
-    // If no events, it's definitely not complete
-    if (game.events.isEmpty) return false;
-
-    // PRIMARY CHECK: A game is complete if there's a clock_pause event in quarter 4
-    bool hasQ4ClockPause =
-        game.events.any((e) => e.quarter == 4 && e.type == 'clock_pause');
-    if (hasQ4ClockPause) return true;
-
-    // Not enough evidence to consider the game complete
-    return false;
-  }
-
-  /// Gets the current quarter based on the latest events
-  int _getCurrentQuarter(GameRecord game) {
-    if (game.events.isEmpty) return 1;
-
-    // Find the highest quarter number with events
-    final maxQuarter =
-        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
-    return maxQuarter;
   }
 }
