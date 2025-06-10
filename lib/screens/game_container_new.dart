@@ -62,14 +62,6 @@ class _GameContainerState extends State<GameContainer> {
               '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}'),
           actions: [
             IconButton(
-              icon: const Icon(Icons.save_alt),
-              tooltip: 'Save Game Image',
-              onPressed: () {
-                // Call the save method on the scoring widget
-                _scoringKey.currentState?.saveGameImage(context);
-              },
-            ),
-            IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () async {
                 await Navigator.of(context).push(
