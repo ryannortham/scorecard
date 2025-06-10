@@ -42,6 +42,17 @@ class _GameContainerState extends State<GameContainer> {
     return await _showExitConfirmation();
   }
 
+  /// Navigate to settings screen
+  void _navigateToSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const Settings(title: 'Settings'),
+      ),
+    );
+    // No need to update game setup since quarter minutes and countdown timer
+    // are no longer in settings - they're managed on the game setup screen
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameSetupProvider = Provider.of<GameSetupAdapter>(context);
@@ -69,17 +80,26 @@ class _GameContainerState extends State<GameContainer> {
                 _scoringKey.currentState?.saveGameImage(context);
               },
             ),
-            IconButton(
+            PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert),
-              onPressed: () async {
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const Settings(title: 'Settings'),
-                  ),
-                );
-                // No need to update game setup since quarter minutes and countdown timer
-                // are no longer in settings - they're managed on the game setup screen
+              tooltip: 'Menu',
+              onSelected: (String value) {
+                switch (value) {
+                  case 'settings':
+                    _navigateToSettings();
+                    break;
+                }
               },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'settings',
+                  child: ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text('Settings'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
