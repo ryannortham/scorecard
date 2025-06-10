@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'image_service.dart';
@@ -13,9 +12,6 @@ class ShareService {
     required BuildContext context,
     required String shareText,
   }) async {
-    // Track if we need to show feedback
-    bool hasShownFeedback = false;
-
     // Capture context.mounted early to avoid compiler warning
     final contextMounted = context.mounted;
 
@@ -73,9 +69,6 @@ class ShareService {
       }
 
       // Try to share the image with fallback to text
-      bool shareSuccess = false;
-      String? errorDetails;
-
       try {
         // Save the image to a temporary file with a unique name
         final directory = await getTemporaryDirectory();
@@ -95,8 +88,6 @@ class ShareService {
           subject: 'Game Details',
         );
 
-        shareSuccess = true;
-
         // Clean up the temporary file after a delay
         Future.delayed(const Duration(seconds: 30), () {
           try {
@@ -109,7 +100,6 @@ class ShareService {
           }
         });
       } catch (imageShareError) {
-        errorDetails = imageShareError.toString();
         debugPrint('Image sharing failed: $imageShareError');
 
         // Check context validity
@@ -119,88 +109,14 @@ class ShareService {
         try {
           debugPrint('Attempting text-only share');
           await Share.share(shareText, subject: 'Game Details');
-          shareSuccess = true;
-
-          // Re-check context.mounted after each async gap
-          if (contextMounted && context.mounted && !hasShownFeedback) {
-            hasShownFeedback = true;
-            final scaffoldMessenger = ScaffoldMessenger.of(context);
-            final theme = Theme.of(context);
-            scaffoldMessenger.showSnackBar(
-              SnackBar(
-                content: const Text(
-                    'Shared text details only (image not supported)'),
-                backgroundColor: theme.colorScheme.secondary,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
         } catch (textShareError) {
           debugPrint('Text sharing also failed: $textShareError');
-          shareSuccess = false;
-          errorDetails = '$imageShareError\n$textShareError';
+          // Both sharing methods failed, but we don't show any error messages
         }
       }
-
-      if (!shareSuccess) {
-        // Ultimate fallback to clipboard
-        if (contextMounted && context.mounted) {
-          await copyToClipboard(
-              text: shareText,
-              context: context,
-              message: errorDetails != null
-                  ? 'Sharing failed: Copied to clipboard instead'
-                  : null);
-          hasShownFeedback = true;
-        }
-      }
-
-      // No feedback needed for successful sharing
     } catch (e) {
       debugPrint('Error in shareWidgetAsImage: $e');
-
-      // Ultimate fallback to clipboard if everything fails
-      if (contextMounted && context.mounted && !hasShownFeedback) {
-        await copyToClipboard(
-          text: shareText,
-          context: context,
-          message: 'Error: ${e.toString()}\nCopied text to clipboard',
-        );
-        hasShownFeedback = true;
-      }
-    }
-  }
-
-  /// Fallback method that copies content to clipboard if sharing fails
-  static Future<void> copyToClipboard({
-    required String text,
-    required BuildContext context,
-    String? message,
-  }) async {
-    // Capture context.mounted before any async operations
-    final contextMounted = context.mounted;
-
-    try {
-      // Copy text to clipboard
-      await Clipboard.setData(ClipboardData(text: text));
-
-      // Check if context is still valid after async operation
-      if (contextMounted && context.mounted) {
-        final isErrorMessage = message?.contains('Error') ?? false;
-        final scaffoldMessenger = ScaffoldMessenger.of(context);
-        final theme = Theme.of(context);
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text(message ?? 'Game details copied to clipboard'),
-            backgroundColor: isErrorMessage
-                ? theme.colorScheme.error
-                : theme.colorScheme.primary,
-            duration: Duration(seconds: isErrorMessage ? 3 : 2),
-          ),
-        );
-      }
-    } catch (e) {
-      throw Exception('Failed to copy to clipboard: $e');
+      // Error occurred, but we don't show any error messages to the user
     }
   }
 }

@@ -215,31 +215,14 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
         text: shareText,
       );
 
-      // Show success feedback
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Game details shared successfully!'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // No success feedback needed - user can see share dialog
     } catch (e) {
       debugPrint('Error sharing widget: $e');
 
       // Fallback to text-only sharing
       await Share.share(shareText);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Shared as text (image capture failed)'),
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      // No success feedback needed for fallback sharing
     }
   }
 
@@ -270,7 +253,7 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
       final fileName = _generateFileName();
       await Gal.putImageBytes(imageBytes, name: fileName);
 
-      // Show success feedback
+      // Show success feedback for save operation
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
