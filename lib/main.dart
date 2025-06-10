@@ -2,8 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/screens/landing_page.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
-import 'package:goalkeeper/providers/settings_provider.dart';
-import 'package:goalkeeper/providers/game_setup_preferences_provider.dart';
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +11,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => GameSetupPreferencesProvider()),
+        ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
         ChangeNotifierProvider(create: (_) => GameSetupAdapter()),
         ChangeNotifierProvider(create: (_) => ScorePanelAdapter()),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),
@@ -28,10 +26,10 @@ class GoalKeeperApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SettingsProvider>(
-      builder: (context, settingsProvider, child) {
+    return Consumer<UserPreferencesProvider>(
+      builder: (context, userPreferences, child) {
         // Show loading screen until settings are loaded
-        if (!settingsProvider.loaded) {
+        if (!userPreferences.loaded) {
           return MaterialApp(
             title: 'GoalKeeper',
             theme: ThemeData(
@@ -48,10 +46,10 @@ class GoalKeeperApp extends StatelessWidget {
 
         return DynamicColorBuilder(
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            final seedColor = settingsProvider.getThemeColor();
+            final seedColor = userPreferences.getThemeColor();
 
             // Use dynamic colors if user selected 'adaptive' theme
-            final useDynamicColors = settingsProvider.colorTheme == 'adaptive';
+            final useDynamicColors = userPreferences.colorTheme == 'adaptive';
 
             // Get color schemes
             final lightColorScheme = (useDynamicColors && lightDynamic != null)
@@ -266,7 +264,7 @@ class GoalKeeperApp extends StatelessWidget {
                   ),
                 ),
               ),
-              themeMode: settingsProvider.themeMode,
+              themeMode: userPreferences.themeMode,
               home: const LandingPage(title: 'GoalKeeper'),
             );
           },

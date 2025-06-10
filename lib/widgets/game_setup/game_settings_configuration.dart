@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../adapters/game_setup_adapter.dart';
-import '../../providers/game_setup_preferences_provider.dart';
+import '../../providers/user_preferences_provider.dart';
 
 /// Widget for configuring game settings (quarter minutes and timer type)
 /// on the game setup screen with user interaction
@@ -10,9 +10,9 @@ class GameSettingsConfiguration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameSetupAdapter, GameSetupPreferencesProvider>(
-      builder: (context, gameSetupAdapter, preferencesProvider, child) {
-        if (!preferencesProvider.loaded) {
+    return Consumer2<GameSetupAdapter, UserPreferencesProvider>(
+      builder: (context, gameSetupAdapter, userPreferences, child) {
+        if (!userPreferences.loaded) {
           return const Card(
             child: Padding(
               padding: EdgeInsets.all(16.0),
@@ -40,13 +40,13 @@ class GameSettingsConfiguration extends StatelessWidget {
 
                 // Quarter Minutes Setting
                 _buildQuarterMinutesSection(
-                    context, gameSetupAdapter, preferencesProvider),
+                    context, gameSetupAdapter, userPreferences),
 
                 const SizedBox(height: 24),
 
                 // Timer Type Setting
                 _buildTimerTypeSection(
-                    context, gameSetupAdapter, preferencesProvider),
+                    context, gameSetupAdapter, userPreferences),
               ],
             ),
           ),
@@ -58,7 +58,7 @@ class GameSettingsConfiguration extends StatelessWidget {
   Widget _buildQuarterMinutesSection(
     BuildContext context,
     GameSetupAdapter gameSetupAdapter,
-    GameSetupPreferencesProvider preferencesProvider,
+    UserPreferencesProvider userPreferences,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +96,7 @@ class GameSettingsConfiguration extends StatelessWidget {
           onChanged: (value) {
             final minutes = value.toInt();
             gameSetupAdapter.setQuarterMinutes(minutes);
-            preferencesProvider.setQuarterMinutes(minutes);
+            userPreferences.setQuarterMinutes(minutes);
           },
         ),
       ],
@@ -106,7 +106,7 @@ class GameSettingsConfiguration extends StatelessWidget {
   Widget _buildTimerTypeSection(
     BuildContext context,
     GameSetupAdapter gameSetupAdapter,
-    GameSetupPreferencesProvider preferencesProvider,
+    UserPreferencesProvider userPreferences,
   ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -129,7 +129,7 @@ class GameSettingsConfiguration extends StatelessWidget {
               value: gameSetupAdapter.isCountdownTimer,
               onChanged: (value) {
                 gameSetupAdapter.setIsCountdownTimer(value);
-                preferencesProvider.setIsCountdownTimer(value);
+                userPreferences.setIsCountdownTimer(value);
               },
             ),
           ],

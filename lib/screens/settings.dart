@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/settings_provider.dart';
+import '../providers/user_preferences_provider.dart';
 import 'team_list.dart';
 
 class Settings extends StatefulWidget {
@@ -47,9 +47,9 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    final settingsProvider = Provider.of<SettingsProvider>(context);
+    final userPreferences = Provider.of<UserPreferencesProvider>(context);
 
-    if (!settingsProvider.loaded) {
+    if (!userPreferences.loaded) {
       return Scaffold(
         appBar: AppBar(title: const Text('Settings')),
         body: const Center(
@@ -69,7 +69,7 @@ class _SettingsState extends State<Settings> {
             _buildSection(
               context: context,
               children: [
-                _buildTeamSelectionTile(context, settingsProvider),
+                _buildTeamSelectionTile(context, userPreferences),
               ],
             ),
 
@@ -80,9 +80,9 @@ class _SettingsState extends State<Settings> {
               context: context,
               title: 'Theme Options',
               children: [
-                _buildThemeModeTile(context, settingsProvider),
+                _buildThemeModeTile(context, userPreferences),
                 const SizedBox(height: 24),
-                _buildColorThemeTile(context, settingsProvider),
+                _buildColorThemeTile(context, userPreferences),
               ],
             ),
           ],
@@ -112,7 +112,7 @@ class _SettingsState extends State<Settings> {
   }
 
   Widget _buildTeamSelectionTile(
-      BuildContext context, SettingsProvider provider) {
+      BuildContext context, UserPreferencesProvider provider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -157,7 +157,8 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildThemeModeTile(BuildContext context, SettingsProvider provider) {
+  Widget _buildThemeModeTile(
+      BuildContext context, UserPreferencesProvider provider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -191,7 +192,8 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildColorThemeTile(BuildContext context, SettingsProvider provider) {
+  Widget _buildColorThemeTile(
+      BuildContext context, UserPreferencesProvider provider) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

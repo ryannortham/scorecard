@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../adapters/game_setup_adapter.dart';
 import '../adapters/score_panel_adapter.dart';
-import '../providers/settings_provider.dart';
-import '../providers/game_setup_preferences_provider.dart';
+import '../providers/user_preferences_provider.dart';
 import '../widgets/game_setup/team_selection_widget.dart';
 import '../widgets/game_setup/game_settings_configuration.dart';
 import 'game_container.dart';
@@ -41,22 +40,20 @@ class _GameSetupState extends State<GameSetup> {
   }
 
   void _updateSettingsFromProvider() {
-    final settingsProvider =
-        Provider.of<SettingsProvider>(context, listen: false);
-    final preferencesProvider =
-        Provider.of<GameSetupPreferencesProvider>(context, listen: false);
+    final userPreferences =
+        Provider.of<UserPreferencesProvider>(context, listen: false);
     final gameSetupProvider =
         Provider.of<GameSetupAdapter>(context, listen: false);
 
     // Use preferences for quarter minutes and countdown timer
-    gameSetupProvider.setQuarterMinutes(preferencesProvider.quarterMinutes);
-    gameSetupProvider.setIsCountdownTimer(preferencesProvider.isCountdownTimer);
+    gameSetupProvider.setQuarterMinutes(userPreferences.quarterMinutes);
+    gameSetupProvider.setIsCountdownTimer(userPreferences.isCountdownTimer);
 
     // Set favorite team as home team if home team is currently empty
     if (gameSetupProvider.homeTeam.isEmpty &&
-        settingsProvider.favoriteTeam.isNotEmpty) {
-      gameSetupProvider.setHomeTeam(settingsProvider.favoriteTeam);
-      _homeTeamController.text = settingsProvider.favoriteTeam;
+        userPreferences.favoriteTeam.isNotEmpty) {
+      gameSetupProvider.setHomeTeam(userPreferences.favoriteTeam);
+      _homeTeamController.text = userPreferences.favoriteTeam;
     }
   }
 
@@ -67,14 +64,13 @@ class _GameSetupState extends State<GameSetup> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameSetupAdapter =
           Provider.of<GameSetupAdapter>(context, listen: false);
-      final preferencesProvider =
-          Provider.of<GameSetupPreferencesProvider>(context, listen: false);
+      final userPreferences =
+          Provider.of<UserPreferencesProvider>(context, listen: false);
 
       // Initialize game settings from saved preferences
-      if (preferencesProvider.loaded) {
-        gameSetupAdapter.setQuarterMinutes(preferencesProvider.quarterMinutes);
-        gameSetupAdapter
-            .setIsCountdownTimer(preferencesProvider.isCountdownTimer);
+      if (userPreferences.loaded) {
+        gameSetupAdapter.setQuarterMinutes(userPreferences.quarterMinutes);
+        gameSetupAdapter.setIsCountdownTimer(userPreferences.isCountdownTimer);
       }
 
       _homeTeamController.text = gameSetupAdapter.homeTeam;

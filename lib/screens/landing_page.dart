@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../adapters/game_setup_adapter.dart';
-import '../providers/settings_provider.dart';
-import '../providers/game_setup_preferences_provider.dart';
+import '../providers/user_preferences_provider.dart';
 import 'game_setup.dart';
 import 'game_history.dart';
 import 'settings.dart';
@@ -120,28 +119,22 @@ class LandingPageState extends State<LandingPage> {
                   // Reset GameSetupAdapter before navigating using preferences defaults
                   final gameSetupAdapter =
                       Provider.of<GameSetupAdapter>(context, listen: false);
-                  final settingsProvider =
-                      Provider.of<SettingsProvider>(context, listen: false);
-                  final preferencesProvider =
-                      Provider.of<GameSetupPreferencesProvider>(context,
-                          listen: false);
+                  final userPreferences = Provider.of<UserPreferencesProvider>(
+                      context,
+                      listen: false);
 
                   // Store navigator before async operation to avoid using context across async gaps
                   final navigator = Navigator.of(context);
 
-                  // Ensure settings and preferences are loaded before proceeding
-                  if (!settingsProvider.loaded) {
-                    await settingsProvider.loadSettings();
-                  }
-                  if (!preferencesProvider.loaded) {
-                    await preferencesProvider.loadPreferences();
+                  // Ensure preferences are loaded before proceeding
+                  if (!userPreferences.loaded) {
+                    await userPreferences.loadPreferences();
                   }
 
                   gameSetupAdapter.reset(
-                    defaultQuarterMinutes: preferencesProvider.quarterMinutes,
-                    defaultIsCountdownTimer:
-                        preferencesProvider.isCountdownTimer,
-                    favoriteTeam: settingsProvider.favoriteTeam,
+                    defaultQuarterMinutes: userPreferences.quarterMinutes,
+                    defaultIsCountdownTimer: userPreferences.isCountdownTimer,
+                    favoriteTeam: userPreferences.favoriteTeam,
                   );
                   navigator.push(
                     MaterialPageRoute(
