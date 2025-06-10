@@ -26,6 +26,7 @@ class _GameContainerState extends State<GameContainer> {
   late PageController _pageController;
   final GlobalKey<ScoringState> _scoringKey = GlobalKey<ScoringState>();
   final GlobalKey _gameDetailsKey = GlobalKey();
+  final ScrollController _scrollController = ScrollController();
   bool _isSharing = false;
   bool _isSaving = false;
 
@@ -38,6 +39,7 @@ class _GameContainerState extends State<GameContainer> {
   @override
   void dispose() {
     _pageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -149,11 +151,13 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         throw Exception('Could not find WidgetShotPlus boundary');
       }
 
-      // Capture the full widget content
+      // Capture the full widget content (including scrollable areas)
       final imageBytes = await boundary.screenshot(
         format: ShotFormat.png,
         quality: 100,
         pixelRatio: 2.0,
+        scrollController:
+            _scrollController, // This enables full content capture
       );
 
       if (imageBytes == null) {
@@ -261,11 +265,13 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         throw Exception('Could not find WidgetShotPlus boundary');
       }
 
-      // Capture the full widget content
+      // Capture the full widget content (including scrollable areas)
       final imageBytes = await boundary.screenshot(
         format: ShotFormat.png,
         quality: 100,
         pixelRatio: 2.0,
+        scrollController:
+            _scrollController, // This enables full content capture
       );
 
       if (imageBytes == null) {
@@ -303,7 +309,10 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         // Wrap in WidgetShotPlus for sharing capability
         return WidgetShotPlus(
           key: _gameDetailsKey,
-          child: GameDetailsWidget.fromLiveData(events: currentEvents),
+          child: GameDetailsWidget.fromLiveData(
+            events: currentEvents,
+            scrollController: _scrollController,
+          ),
         );
       },
     );
