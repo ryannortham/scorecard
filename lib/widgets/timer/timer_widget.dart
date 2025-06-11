@@ -352,7 +352,9 @@ class TimerWidgetState extends State<TimerWidget> {
                             }
                           : null,
                       icon: Icon(
-                        isLastQuarter ? Icons.flag : Icons.arrow_forward,
+                        isLastQuarter
+                            ? Icons.outlined_flag
+                            : Icons.arrow_forward,
                         size: 16,
                         color: !isNextEnabled
                             ? Theme.of(context)

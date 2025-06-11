@@ -229,7 +229,7 @@ class GameDetailsWidget extends StatelessWidget {
               ? Consumer<ScorePanelAdapter>(
                   builder: (context, scorePanelAdapter, child) {
                     return GameInfoCard(
-                      icon: Icons.sports_score,
+                      icon: Icons.outlined_flag,
                       title: _buildLiveGameTitle(context, scorePanelAdapter),
                       content: Column(
                         children: [
@@ -280,7 +280,7 @@ class GameDetailsWidget extends StatelessWidget {
                   },
                 )
               : GameInfoCard(
-                  icon: Icons.sports_score,
+                  icon: Icons.outlined_flag,
                   title: 'Final Score',
                   content: Column(
                     children: [
@@ -472,7 +472,7 @@ class CaptureableGameDetailsWidget extends StatelessWidget {
 
           // Score Card
           GameInfoCard(
-            icon: Icons.sports_score,
+            icon: Icons.outlined_flag,
             title: _buildGameTitle(context),
             content: Column(
               children: [
