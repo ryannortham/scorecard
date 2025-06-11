@@ -11,6 +11,7 @@ import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
+import '../widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'settings.dart';
 import 'game_history.dart';
 import 'dart:io';
@@ -41,25 +42,7 @@ class ScoringState extends State<Scoring> {
   bool _isSaving = false;
 
   Future<bool> _showExitConfirmation() async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Exit Game?'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
-                ),
-                FilledButton.tonal(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Exit'),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
+    return await ExitGameBottomSheet.show(context);
   }
 
   Future<bool> _onWillPop() async {

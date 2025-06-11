@@ -6,6 +6,7 @@ import 'package:goalkeeper/screens/game_history.dart';
 import 'package:goalkeeper/screens/game_details.dart' as details;
 import 'package:goalkeeper/screens/scoring.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 
 /// Centralized navigation service following Flutter best practices
 /// Reduces code duplication and provides type-safe navigation
@@ -83,7 +84,7 @@ class AppNavigator {
     );
   }
 
-  /// Show confirmation dialog with consistent styling
+  /// Show confirmation bottom sheet with consistent styling
   static Future<bool> showConfirmationDialog({
     required BuildContext context,
     required String title,
@@ -93,37 +94,11 @@ class AppNavigator {
     IconData? icon,
     bool isDestructive = false,
   }) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            icon: icon != null
-                ? Icon(
-                    icon,
-                    color: isDestructive
-                        ? Theme.of(context).colorScheme.error
-                        : Theme.of(context).colorScheme.primary,
-                  )
-                : null,
-            title: Text(title),
-            content: Text(content),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(cancelText),
-              ),
-              if (isDestructive)
-                FilledButton.tonal(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(confirmText),
-                )
-              else
-                FilledButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(confirmText),
-                ),
-            ],
-          ),
-        ) ??
-        false;
+    return await ConfirmationBottomSheet.show(
+      context: context,
+      actionText: confirmText,
+      actionIcon: icon ?? (isDestructive ? Icons.delete_outline : Icons.check),
+      onConfirm: () {}, // The bottom sheet handles navigation internally
+    );
   }
 }

@@ -5,6 +5,7 @@ import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
 import 'package:goalkeeper/screens/scoring.dart';
+import '../bottom_sheets/end_quarter_bottom_sheet.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -80,28 +81,14 @@ class TimerWidgetState extends State<TimerWidget> {
 
     bool confirmed = true; // Default to confirmed if skipping dialog
 
-    // Show confirmation dialog only if more than 30 seconds remaining
+    // Show confirmation bottom sheet only if more than 30 seconds remaining
     if (!shouldSkipConfirmation) {
-      final bool? dialogResult = await showDialog<bool>(
+      confirmed = await EndQuarterBottomSheet.show(
         context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-                isLastQuarter ? 'End Game?' : 'End Quarter $currentQuarter?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
+        currentQuarter: currentQuarter,
+        isLastQuarter: isLastQuarter,
+        onConfirm: () {}, // The bottom sheet handles navigation internally
       );
-      confirmed = dialogResult == true;
     }
 
     // If user cancelled dialog, don't proceed

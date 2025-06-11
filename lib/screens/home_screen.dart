@@ -30,7 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
       if (userPreferences.loaded) {
         final gameState = GameStateService.instance;
         if (!gameState.hasActiveGame) {
-          _initializeGameSetup(userPreferences);
+          // Use post-frame callback to avoid setState during build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _initializeGameSetup(userPreferences);
+            }
+          });
         }
       }
     }
