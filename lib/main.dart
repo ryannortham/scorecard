@@ -1,6 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/screens/landing_page.dart';
+import 'package:goalkeeper/screens/home_screen.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
 import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
@@ -265,7 +265,7 @@ class GoalKeeperApp extends StatelessWidget {
                 ),
               ),
               themeMode: userPreferences.themeMode,
-              home: const LandingPage(title: 'GoalKeeper'),
+              home: const HomeScreen(),
             );
           },
         );

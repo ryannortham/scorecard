@@ -74,6 +74,17 @@ class GameStateService extends ChangeNotifier {
   List<GameEvent> get gameEvents => List.unmodifiable(_gameEvents);
   String? get currentGameId => _currentGameId;
 
+  // Check if there's an active game
+  bool get hasActiveGame =>
+      _currentGameId != null &&
+      (_homeTeam.isNotEmpty ||
+          _awayTeam.isNotEmpty ||
+          _gameEvents.isNotEmpty ||
+          _homeGoals > 0 ||
+          _homeBehinds > 0 ||
+          _awayGoals > 0 ||
+          _awayBehinds > 0);
+
   // Score Management
   void setScore(bool isHomeTeam, bool isGoal, int count) {
     if (isGoal) {
