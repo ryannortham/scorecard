@@ -38,9 +38,11 @@ class GameScoreSection extends StatelessWidget {
         },
       );
     } else {
+      // For static data, check if the game is complete to determine the title
+      final title = isComplete ? 'Final Score' : _buildStaticGameTitle(game);
       return GameInfoCard(
         icon: Icons.outlined_flag,
-        title: 'Final Score',
+        title: title,
         content: _buildScoreContent(context, homeWins, awayWins, isComplete),
       );
     }
@@ -86,7 +88,8 @@ class GameScoreSection extends StatelessWidget {
           homePoints: game.homePoints,
           awayPoints: game.awayPoints,
           isGameComplete: isComplete,
-          isHistoryMode: !isLiveData,
+          isHistoryMode:
+              isComplete, // Use game completion status instead of !isLiveData
         ),
       ],
     );
@@ -98,5 +101,58 @@ class GameScoreSection extends StatelessWidget {
     bool hasQ4ClockEnd =
         game.events.any((e) => e.quarter == 4 && e.type == 'clock_end');
     return hasQ4ClockEnd;
+  }
+
+  /// Builds the title for in-progress games using static game data
+  String _buildStaticGameTitle(GameRecord game) {
+    // Find the current quarter from events
+    int currentQuarter = 1;
+    if (game.events.isNotEmpty) {
+      // Get the highest quarter with events, but not if it has a clock_end
+      final activeQuarters = game.events
+          .where((e) => e.type != 'clock_end')
+          .map((e) => e.quarter)
+          .toSet();
+
+      final endedQuarters = game.events
+          .where((e) => e.type == 'clock_end')
+          .map((e) => e.quarter)
+          .toSet();
+
+      if (activeQuarters.isNotEmpty) {
+        currentQuarter = activeQuarters.reduce((a, b) => a > b ? a : b);
+        // If this quarter has ended, we're in the next quarter
+        if (endedQuarters.contains(currentQuarter) && currentQuarter < 4) {
+          currentQuarter++;
+        }
+      }
+    }
+
+    // Calculate elapsed time in current quarter
+    Duration elapsedTime = Duration.zero;
+    if (game.events.isNotEmpty) {
+      // Find the latest timer events for the current quarter
+      final quarterEvents =
+          game.events.where((e) => e.quarter == currentQuarter).toList();
+
+      if (quarterEvents.isNotEmpty) {
+        // Find the last timer event (clock_start, clock_pause, etc.)
+        final timerEvents =
+            quarterEvents.where((e) => e.type.startsWith('clock_')).toList();
+
+        if (timerEvents.isNotEmpty) {
+          // Use the time from the latest event as the current elapsed time
+          elapsedTime = timerEvents.last.time;
+        }
+      }
+    }
+
+    // Format the time similar to how it's done in the timer display
+    final totalMinutes = elapsedTime.inMinutes;
+    final seconds = elapsedTime.inSeconds % 60;
+    final timeStr =
+        '${totalMinutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+
+    return 'Q$currentQuarter $timeStr';
   }
 }

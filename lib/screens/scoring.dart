@@ -487,7 +487,14 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         builder: (context, scorePanelState, _) {
           return Scaffold(
             appBar: AppBar(
-              title: Text('$homeTeamName vs $awayTeamName'),
+              title: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.center,
+                child: Text(
+                  '$homeTeamName vs $awayTeamName',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.save_alt),
