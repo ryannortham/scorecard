@@ -7,20 +7,9 @@ class GameHistoryService {
   static const String _gamesKey = 'saved_games';
   static const Uuid _uuid = Uuid();
 
-  /// Save a game to local storage
   static Future<void> saveGame(GameRecord game) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
-
-    // Debug logging to track what's being saved
-    print('Saving game: ${game.homeTeam} vs ${game.awayTeam}');
-    print(
-        'Home score: ${game.homeGoals}.${game.homeBehinds} (${game.homePoints})');
-    print(
-        'Away score: ${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})');
-    print('Events count: ${game.events.length}');
-    print(
-        'Events: ${game.events.map((e) => '${e.quarter}Q ${e.team} ${e.type}').join(', ')}');
 
     // Check if we already have a similar game (same teams and close timestamp)
     bool hasSimilarGame = false;
@@ -63,7 +52,6 @@ class GameHistoryService {
     await prefs.setStringList(_gamesKey, gamesJson);
   }
 
-  /// Load all saved games from local storage
   static Future<List<GameRecord>> loadGames() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
@@ -120,7 +108,6 @@ class GameHistoryService {
     return uniqueGames;
   }
 
-  /// Delete a specific game by ID
   static Future<void> deleteGame(String gameId) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
@@ -133,7 +120,6 @@ class GameHistoryService {
     await prefs.setStringList(_gamesKey, gamesJson);
   }
 
-  /// Create a GameRecord from current game state
   static GameRecord createGameRecord({
     required DateTime date,
     required String homeTeam,
@@ -161,20 +147,17 @@ class GameHistoryService {
     );
   }
 
-  /// Get the total number of saved games
   static Future<int> getGameCount() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
     return gamesJson.length;
   }
 
-  /// Clear all saved games (for debugging or user request)
   static Future<void> clearAllGames() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_gamesKey);
   }
 
-  /// Clean up any duplicate games currently in storage
   static Future<int> deduplicateGames() async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];

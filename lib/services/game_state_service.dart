@@ -3,15 +3,12 @@ import 'package:flutter/foundation.dart';
 import '../providers/game_record.dart';
 import 'game_history_service.dart';
 
-/// Centralized, widget-independent game state management service
-/// This service maintains all game state without depending on the widget tree
 class GameStateService extends ChangeNotifier {
   static GameStateService? _instance;
   static GameStateService get instance => _instance ??= GameStateService._();
 
   GameStateService._();
 
-  // Game state
   int _homeGoals = 0;
   int _homeBehinds = 0;
   int _awayGoals = 0;
@@ -21,32 +18,25 @@ class GameStateService extends ChangeNotifier {
   bool _isTimerRunning = false;
   final List<GameEvent> _gameEvents = [];
 
-  // Game configuration
   String _homeTeam = '';
   String _awayTeam = '';
   DateTime _gameDate = DateTime.now();
   int _quarterMinutes = 15;
   bool _isCountdownTimer = true;
 
-  // Timer management
   Timer? _backgroundTimer;
   DateTime? _timerStartTime;
   int _timeWhenStarted = 0;
 
-  // Stream controller for real-time timer updates
   final StreamController<int> _timerStreamController =
       StreamController<int>.broadcast();
 
-  // Game persistence
   String? _currentGameId;
   Timer? _saveTimer;
-
-  // Event listeners
   final List<VoidCallback> _gameEventListeners = [];
   final List<VoidCallback> _timerStateListeners = [];
   final List<VoidCallback> _scoreChangeListeners = [];
 
-  // Getters - Score State
   int get homeGoals => _homeGoals;
   int get homeBehinds => _homeBehinds;
   int get awayGoals => _awayGoals;
@@ -54,15 +44,11 @@ class GameStateService extends ChangeNotifier {
   int get homePoints => _homeGoals * 6 + _homeBehinds;
   int get awayPoints => _awayGoals * 6 + _awayBehinds;
 
-  // Getters - Timer State
   int get timerRawTime => _timerRawTime;
   int get selectedQuarter => _selectedQuarter;
   bool get isTimerRunning => _isTimerRunning;
-
-  // Stream for real-time timer updates (millisecond precision)
   Stream<int> get timerStream => _timerStreamController.stream;
 
-  // Getters - Game Configuration
   String get homeTeam => _homeTeam;
   String get awayTeam => _awayTeam;
   DateTime get gameDate => _gameDate;
@@ -70,11 +56,9 @@ class GameStateService extends ChangeNotifier {
   int get quarterMSec => _quarterMinutes * 60 * 1000;
   bool get isCountdownTimer => _isCountdownTimer;
 
-  // Getters - Game Events
   List<GameEvent> get gameEvents => List.unmodifiable(_gameEvents);
   String? get currentGameId => _currentGameId;
 
-  // Check if there's an active game
   bool get hasActiveGame =>
       _currentGameId != null &&
       (_homeTeam.isNotEmpty ||
@@ -85,7 +69,6 @@ class GameStateService extends ChangeNotifier {
           _awayGoals > 0 ||
           _awayBehinds > 0);
 
-  // Score Management
   void setScore(bool isHomeTeam, bool isGoal, int count) {
     if (isGoal) {
       isHomeTeam ? _homeGoals = count : _awayGoals = count;
@@ -103,7 +86,6 @@ class GameStateService extends ChangeNotifier {
         : (isGoal ? _awayGoals : _awayBehinds);
   }
 
-  // Timer Management
   void setTimerRawTime(int newTime) {
     _timerRawTime = newTime;
     _timerStreamController.add(_timerRawTime);
@@ -183,8 +165,6 @@ class GameStateService extends ChangeNotifier {
     _timerStartTime = null;
   }
 
-  /// Calculate the actual elapsed time in the current quarter
-  /// This should be used for business logic, not display purposes
   /// Returns elapsed time in milliseconds (can exceed quarter duration in overtime)
   int getElapsedTimeInQuarter() {
     final timerRawTime = _timerRawTime;
@@ -201,7 +181,6 @@ class GameStateService extends ChangeNotifier {
     return elapsedMSec;
   }
 
-  /// Get the remaining time in the current quarter
   /// Returns negative values when in overtime
   int getRemainingTimeInQuarter() {
     final quarterMSec = this.quarterMSec;
@@ -209,7 +188,6 @@ class GameStateService extends ChangeNotifier {
     return quarterMSec - elapsedMSec;
   }
 
-  // Game Configuration
   void configureGame({
     required String homeTeam,
     required String awayTeam,
@@ -217,9 +195,7 @@ class GameStateService extends ChangeNotifier {
     required int quarterMinutes,
     required bool isCountdownTimer,
   }) {
-    // Critical bugfix: Ensure that just configuring game settings doesn't create an active game
     final bool wasActive = hasActiveGame;
-    final String? previousId = _currentGameId;
 
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
@@ -227,19 +203,13 @@ class GameStateService extends ChangeNotifier {
     _quarterMinutes = quarterMinutes;
     _isCountdownTimer = isCountdownTimer;
 
-    // If there wasn't an active game before, ensure we don't create one just by configuring
     if (!wasActive) {
       _currentGameId = null;
-      debugPrint(
-          'Game configured with no active game - preventing unintended activation');
-    } else {
-      debugPrint('Game configuration updated for existing game: $previousId');
     }
 
     notifyListeners();
   }
 
-  // Game Event Management
   void addGameEvent(GameEvent event) {
     _gameEvents.add(event);
     _notifyGameEventListeners();
@@ -296,7 +266,6 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Score change with automatic event recording
   void updateScore(bool isHomeTeam, bool isGoal, int newCount) {
     final oldCount = getScore(isHomeTeam, isGoal);
     setScore(isHomeTeam, isGoal, newCount);
@@ -333,7 +302,6 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-  // Quarter Management
   Future<void> advanceToNextQuarter() async {
     recordQuarterEnd(_selectedQuarter);
 
@@ -348,7 +316,6 @@ class GameStateService extends ChangeNotifier {
     return _gameEvents.any((e) => e.quarter == 4 && e.type == 'clock_end');
   }
 
-  // Game Lifecycle Management
   Future<void> startNewGame() async {
     await _createInitialGameRecord();
   }
@@ -387,27 +354,20 @@ class GameStateService extends ChangeNotifier {
     });
   }
 
-  /// Force immediate save of game record - used when game is complete
-  /// This ensures the final game state is saved before any reset operations
+  /// Force immediate save of game record when game is complete
   Future<void> forceFinalSave() async {
     if (_currentGameId == null) return;
-    
-    debugPrint('Force final save called - current scores: $_homeTeam $_homeGoals.$_homeBehinds - $_awayTeam $_awayGoals.$_awayBehinds');
-    debugPrint('Events before save: ${_gameEvents.length} events');
-    
     // Cancel any pending timer and save immediately
     _saveTimer?.cancel();
     await _updateGameRecord();
-    debugPrint('Forced final save completed for game: $_currentGameId');
   }
 
   Future<void> _updateGameRecord() async {
     if (_currentGameId == null) return;
 
     try {
-      // CRITICAL FIX: Preserve the existing game ID instead of creating a new one
       final gameRecord = GameRecord(
-        id: _currentGameId!, // Use existing ID, don't create new one
+        id: _currentGameId!,
         date: _gameDate,
         homeTeam: _homeTeam,
         awayTeam: _awayTeam,
@@ -422,18 +382,12 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
-      // No need to update _currentGameId since we preserved it
-      debugPrint(
-          'Updated game record with ID $_currentGameId: $_homeTeam $_homeGoals.$_homeBehinds - $_awayTeam $_awayGoals.$_awayBehinds');
     } catch (e) {
       debugPrint('Error updating game record: $e');
     }
   }
 
   void resetGame() {
-    // Extra debugging to confirm game state is being reset
-    debugPrint('Resetting game state - gameId before: $_currentGameId');
-
     // Reset all game state variables
     _homeGoals = 0;
     _homeBehinds = 0;
@@ -444,25 +398,16 @@ class GameStateService extends ChangeNotifier {
     _isTimerRunning = false;
     _gameEvents.clear();
 
-    // Explicitly null out the game ID first to ensure hasActiveGame returns false
     _currentGameId = null;
 
     _stopBackgroundTimer();
     _saveTimer?.cancel();
     _timerStreamController.add(_timerRawTime);
 
-    // Verify game state is inactive after reset
-    if (hasActiveGame) {
-      debugPrint('WARNING: Game still active after reset!');
-    } else {
-      debugPrint('Game successfully reset - no active game');
-    }
-
     _notifyAllListeners();
     notifyListeners();
   }
 
-  // Event Listener Management
   void addGameEventListener(VoidCallback listener) {
     _gameEventListeners.add(listener);
   }

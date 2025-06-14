@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/services/scoring_state_manager.dart';
+import 'package:goalkeeper/services/game_state_service.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
@@ -118,10 +118,10 @@ class ScoreCounterState extends State<ScoreCounter> {
   }
 
   void _updateCount(int newCount) {
-    // Use the decoupled scoring state manager
-    final scoringStateManager = ScoringStateManager.instance;
+    // Use the game state service directly
+    final gameStateService = GameStateService.instance;
 
-    // The scoring state manager handles all event logic internally
-    scoringStateManager.updateScore(widget.isHomeTeam, widget.isGoal, newCount);
+    // The game state service handles all event logic internally
+    gameStateService.updateScore(widget.isHomeTeam, widget.isGoal, newCount);
   }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/services/scoring_state_manager.dart';
+import 'package:goalkeeper/services/game_state_service.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
@@ -34,8 +34,8 @@ class ScoringState extends State<Scoring> {
   final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
       GlobalKey<QuarterTimerPanelState>();
 
-  // Use the decoupled scoring state manager
-  final ScoringStateManager _scoringStateManager = ScoringStateManager.instance;
+  // Use the game state service directly
+  final GameStateService _gameStateService = GameStateService.instance;
   bool _isClockRunning = false;
 
   // Share functionality
@@ -82,8 +82,8 @@ class ScoringState extends State<Scoring> {
     _isClockRunning = scorePanelProvider.isTimerRunning;
 
     // Initialize the game if not already started
-    if (_scoringStateManager.currentGameId == null) {
-      _scoringStateManager.startNewGame();
+    if (_gameStateService.currentGameId == null) {
+      _gameStateService.startNewGame();
     }
   }
 
@@ -119,7 +119,7 @@ class ScoringState extends State<Scoring> {
   /// This method is called from the QuarterTimerPanel when quarters change
   /// and from the timer widget when a quarter's time expires
   void recordQuarterEnd(int quarter) {
-    _scoringStateManager.recordQuarterEnd(quarter);
+    _gameStateService.recordQuarterEnd(quarter);
 
     // Stop the timer and update provider state
     _isClockRunning = false;
@@ -133,13 +133,13 @@ class ScoringState extends State<Scoring> {
 
   // Public method that can be called by score counter when events change
   void updateGameAfterEventChange() {
-    // The scoring state manager handles automatic saving
-    _scoringStateManager.updateGameAfterEventChange();
+    // The game state service handles automatic saving
+    // This method now does nothing as the service handles saving automatically
   }
 
   /// Check if the game is completed (Q4 has ended)
   bool _isGameComplete() {
-    return _scoringStateManager.isGameComplete();
+    return _gameStateService.isGameComplete();
   }
 
   /// Handle game completion by navigating to game details screen
@@ -150,7 +150,7 @@ class ScoringState extends State<Scoring> {
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
 
-        final String? gameId = _scoringStateManager.currentGameId;
+        final String? gameId = _gameStateService.currentGameId;
         if (gameId == null) {
           debugPrint(
               'No current game ID found. Cannot navigate to game details.');
@@ -159,7 +159,7 @@ class ScoringState extends State<Scoring> {
 
         // CRITICAL FIX: Ensure final save completes before resetting
         // Force immediate save of the completed game before resetting state
-        await _scoringStateManager.forceFinalSave();
+        await _gameStateService.forceFinalSave();
 
         // Load all saved games and find the one with the matching ID
         // Since we now preserve the game ID, it should be found reliably
@@ -170,7 +170,8 @@ class ScoringState extends State<Scoring> {
             // Fallback: find the most recent game with matching teams
             final homeTeam = gameSetupProvider.homeTeam;
             final awayTeam = gameSetupProvider.awayTeam;
-            debugPrint('Could not find game with ID $gameId, using fallback search');
+            debugPrint(
+                'Could not find game with ID $gameId, using fallback search');
             return allGames.firstWhere(
               (game) => game.homeTeam == homeTeam && game.awayTeam == awayTeam,
             );
@@ -179,7 +180,7 @@ class ScoringState extends State<Scoring> {
 
         // Reset the game state AFTER ensuring save is complete
         // This ensures a clean state for the next game setup
-        _scoringStateManager.resetGame();
+        _gameStateService.resetGame();
 
         // Navigate to game details page passing the saved game record
         if (!mounted) return;
@@ -193,8 +194,8 @@ class ScoringState extends State<Scoring> {
     }
   }
 
-  // Access game events from the scoring state manager
-  List<GameEvent> get gameEvents => _scoringStateManager.gameEvents;
+  // Access game events from the game state service
+  List<GameEvent> get gameEvents => _gameStateService.gameEvents;
 
   @override
   void dispose() {
@@ -437,30 +438,28 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
   Widget _buildGameDetailsContent() {
     return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
       builder: (context, gameSetupProvider, scorePanelProvider, _) {
-        // Get the current game events from the scoring state manager
-        final ScoringStateManager scoringStateManager =
-            ScoringStateManager.instance;
-        final List<GameEvent> currentEvents = scoringStateManager.gameEvents;
-
-        // Build a GameRecord from current live data for capture
-        final GameRecord gameRecord = GameRecord(
-          id: 'current-game',
-          date: gameSetupProvider.gameDate,
-          homeTeam: gameSetupProvider.homeTeam,
-          awayTeam: gameSetupProvider.awayTeam,
-          quarterMinutes: gameSetupProvider.quarterMinutes,
-          isCountdownTimer: gameSetupProvider.isCountdownTimer,
-          events: currentEvents,
-          homeGoals: scorePanelProvider.homeGoals,
-          homeBehinds: scorePanelProvider.homeBehinds,
-          awayGoals: scorePanelProvider.awayGoals,
-          awayBehinds: scorePanelProvider.awayBehinds,
-        );
+        // Get the current game events from the game state service
+        final List<GameEvent> currentEvents = _gameStateService.gameEvents;
 
         // Wrap in WidgetShotPlus for sharing capability
         return WidgetShotPlus(
           key: _gameDetailsKey,
-          child: CaptureableGameDetailsWidget(game: gameRecord),
+          // Use GameDetailsWidget with static data for capturing
+          child: GameDetailsWidget.fromStaticData(
+            game: GameRecord(
+              id: 'current-game',
+              date: gameSetupProvider.gameDate,
+              homeTeam: gameSetupProvider.homeTeam,
+              awayTeam: gameSetupProvider.awayTeam,
+              quarterMinutes: gameSetupProvider.quarterMinutes,
+              isCountdownTimer: gameSetupProvider.isCountdownTimer,
+              events: currentEvents,
+              homeGoals: scorePanelProvider.homeGoals,
+              homeBehinds: scorePanelProvider.homeBehinds,
+              awayGoals: scorePanelProvider.awayGoals,
+              awayBehinds: scorePanelProvider.awayBehinds,
+            ),
+          ),
         );
       },
     );
