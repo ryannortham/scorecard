@@ -43,7 +43,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       // Show error message
       if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading games: $e')),
+          SnackBar(
+            content: Text('Error loading games: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     }
@@ -55,13 +59,21 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       await _loadGames(); // Refresh the list
       if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Game deleted successfully')),
+          SnackBar(
+            content: const Text('Game deleted successfully'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting game: $e')),
+          SnackBar(
+            content: Text('Error deleting game: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     }

@@ -100,6 +100,7 @@ class AppNavigator {
       actionText: confirmText,
       actionIcon: icon ?? (isDestructive ? Icons.delete_outline : Icons.check),
       onConfirm: () {}, // The bottom sheet handles navigation internally
+      isDestructive: isDestructive,
     );
   }
 }

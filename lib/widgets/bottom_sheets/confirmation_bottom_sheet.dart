@@ -6,12 +6,14 @@ class ConfirmationBottomSheet extends StatefulWidget {
   final String actionText;
   final IconData actionIcon;
   final VoidCallback onConfirm;
+  final bool isDestructive;
 
   const ConfirmationBottomSheet({
     super.key,
     required this.actionText,
     required this.actionIcon,
     required this.onConfirm,
+    this.isDestructive = false,
   });
 
   /// Show the confirmation bottom sheet
@@ -20,6 +22,7 @@ class ConfirmationBottomSheet extends StatefulWidget {
     required String actionText,
     required IconData actionIcon,
     required VoidCallback onConfirm,
+    bool isDestructive = false,
   }) async {
     final result = await showModalBottomSheet<bool>(
       context: context,
@@ -29,6 +32,7 @@ class ConfirmationBottomSheet extends StatefulWidget {
         actionText: actionText,
         actionIcon: actionIcon,
         onConfirm: onConfirm,
+        isDestructive: isDestructive,
       ),
     );
     return result ?? false;
@@ -79,8 +83,15 @@ class _ConfirmationBottomSheetState extends State<ConfirmationBottomSheet>
               },
               style: TextButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: Theme.of(context).colorScheme.onSurface,
-                overlayColor: Colors.transparent,
+                foregroundColor: widget.isDestructive
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).colorScheme.onSurface,
+                overlayColor: widget.isDestructive
+                    ? Theme.of(context).colorScheme.error.withValues(alpha: 0.1)
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.1),
                 side: BorderSide.none,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
