@@ -1,19 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:gal/gal.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:goalkeeper/services/screenshot_service.dart';
 import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
-import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
 
@@ -41,8 +35,8 @@ class ScoringState extends State<Scoring> {
   final GameStateService _gameStateService = GameStateService.instance;
   bool _isClockRunning = false;
 
-  // Share functionality
-  final GlobalKey _gameDetailsKey = GlobalKey();
+  // Share functionality - using screenshot service
+  final ScreenshotService _screenshotService = ScreenshotService();
   bool _isSharing = false;
   bool _isSaving = false;
 
@@ -214,34 +208,41 @@ class ScoringState extends State<Scoring> {
     });
 
     try {
+      final gameSetupAdapter =
+          Provider.of<GameSetupAdapter>(context, listen: false);
+      final scorePanelAdapter =
+          Provider.of<ScorePanelAdapter>(context, listen: false);
+
       final shareText = _buildShareText();
 
-      // Use post-frame callback to ensure UI is fully rendered
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await _shareWithWidgetShotPlus(shareText);
-        } catch (e) {
-          debugPrint('Error in share post-frame callback: $e');
-          // Show error if sharing failed
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to share: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        } finally {
-          if (mounted) {
-            setState(() {
-              _isSharing = false;
-            });
-          }
-        }
-      });
+      // Use the screenshot service to share live game details
+      await _screenshotService.shareLiveGameDetails(
+        homeTeam: gameSetupAdapter.homeTeam,
+        awayTeam: gameSetupAdapter.awayTeam,
+        gameDate: gameSetupAdapter.gameDate,
+        quarterMinutes: gameSetupAdapter.quarterMinutes,
+        isCountdownTimer: gameSetupAdapter.isCountdownTimer,
+        events: _gameStateService.gameEvents,
+        homeGoals: scorePanelAdapter.homeGoals,
+        homeBehinds: scorePanelAdapter.homeBehinds,
+        awayGoals: scorePanelAdapter.awayGoals,
+        awayBehinds: scorePanelAdapter.awayBehinds,
+        shareText: shareText,
+        themeData: Theme.of(context),
+      );
     } catch (e) {
-      debugPrint('Error preparing share: $e');
+      debugPrint('Error sharing game details: $e');
+      // Show error if sharing failed
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to share: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
       if (mounted) {
         setState(() {
           _isSharing = false;
@@ -258,42 +259,49 @@ class ScoringState extends State<Scoring> {
     });
 
     try {
-      // Use post-frame callback to ensure UI is fully rendered
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await _saveImageToDevice();
-          // Show success message
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Game image saved to gallery'),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        } catch (e) {
-          debugPrint('Error in save post-frame callback: $e');
-          // Show error if saving failed
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to save image: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        } finally {
-          if (mounted) {
-            setState(() {
-              _isSaving = false;
-            });
-          }
-        }
-      });
+      final gameSetupAdapter =
+          Provider.of<GameSetupAdapter>(context, listen: false);
+      final scorePanelAdapter =
+          Provider.of<ScorePanelAdapter>(context, listen: false);
+
+      // Use the screenshot service to save live game to gallery
+      await _screenshotService.saveLiveGameToGallery(
+        homeTeam: gameSetupAdapter.homeTeam,
+        awayTeam: gameSetupAdapter.awayTeam,
+        gameDate: gameSetupAdapter.gameDate,
+        quarterMinutes: gameSetupAdapter.quarterMinutes,
+        isCountdownTimer: gameSetupAdapter.isCountdownTimer,
+        events: _gameStateService.gameEvents,
+        homeGoals: scorePanelAdapter.homeGoals,
+        homeBehinds: scorePanelAdapter.homeBehinds,
+        awayGoals: scorePanelAdapter.awayGoals,
+        awayBehinds: scorePanelAdapter.awayBehinds,
+        themeData: Theme.of(context),
+      );
+
+      // Show success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Game image saved to gallery'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
-      debugPrint('Error preparing save: $e');
+      debugPrint('Error saving image: $e');
+      // Show error if saving failed
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save image: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
       if (mounted) {
         setState(() {
           _isSaving = false;
@@ -316,156 +324,6 @@ class ScoringState extends State<Scoring> {
     return '''${gameSetupAdapter.homeTeam} vs ${gameSetupAdapter.awayTeam}
 Score: $homeScore - $awayScore
 Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${gameSetupAdapter.gameDate.year}''';
-  }
-
-  /// Capture and share using WidgetShotPlus
-  Future<void> _shareWithWidgetShotPlus(String shareText) async {
-    try {
-      // Create a temporary render context for the widget
-      await _forceRenderWidget();
-
-      // Add delay to ensure widget is fully rendered
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      final boundary = _gameDetailsKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
-
-      if (boundary == null) {
-        throw Exception('Could not find WidgetShotPlus boundary');
-      }
-
-      // Capture the full widget content (without scroll controller to avoid errors)
-      final imageBytes = await boundary.screenshot(
-        format: ShotFormat.png,
-        quality: 100,
-        pixelRatio: 2.0,
-        // Remove scrollController to avoid attachment errors
-      );
-
-      if (imageBytes == null) {
-        throw Exception('Failed to capture image');
-      }
-
-      // Create a temporary file for sharing
-      final directory = await getTemporaryDirectory();
-      final fileName = _generateFileName();
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsBytes(imageBytes);
-
-      // Share the image with text
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: shareText,
-      );
-
-      // No success feedback needed - user can see share dialog
-    } catch (e) {
-      debugPrint('Error sharing widget: $e');
-
-      // Fallback to text-only sharing
-      await Share.share(shareText);
-
-      // No success feedback needed for fallback sharing
-    }
-  }
-
-  /// Save image to device using WidgetShotPlus
-  Future<void> _saveImageToDevice() async {
-    try {
-      // Create a temporary render context for the widget
-      await _forceRenderWidget();
-
-      // Add delay to ensure widget is fully rendered
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      final boundary = _gameDetailsKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
-
-      if (boundary == null) {
-        throw Exception('Could not find WidgetShotPlus boundary');
-      }
-
-      // Capture the full widget content (without scroll controller to avoid errors)
-      final imageBytes = await boundary.screenshot(
-        format: ShotFormat.png,
-        quality: 100,
-        pixelRatio: 2.0,
-        // Remove scrollController to avoid attachment errors
-      );
-
-      if (imageBytes == null) {
-        throw Exception('Failed to capture image');
-      }
-
-      // Save the image to device gallery using gal package
-      final fileName = _generateFileName();
-
-      // Create a temporary file first
-      final directory = await getTemporaryDirectory();
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsBytes(imageBytes);
-
-      // Save to gallery using gal
-      await Gal.putImage(file.path);
-
-      // Clean up temporary file
-      await file.delete();
-    } catch (e) {
-      debugPrint('Error saving image: $e');
-      rethrow;
-    }
-  }
-
-  /// Force render the hidden widget by temporarily making it visible
-  Future<void> _forceRenderWidget() async {
-    // Trigger a rebuild to ensure the widget is in the widget tree
-    if (mounted) {
-      setState(() {});
-      // Wait for the build to complete
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
-  /// Generate a descriptive filename for the image
-  String _generateFileName() {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final cleanHome =
-        gameSetupAdapter.homeTeam.replaceAll(RegExp(r'[^\w]'), '');
-    final cleanAway =
-        gameSetupAdapter.awayTeam.replaceAll(RegExp(r'[^\w]'), '');
-    return '${cleanHome}_v_${cleanAway}_$timestamp.png';
-  }
-
-  Widget _buildGameDetailsContent() {
-    return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-      builder: (context, gameSetupProvider, scorePanelProvider, _) {
-        // Get the current game events from the game state service
-        final List<GameEvent> currentEvents = _gameStateService.gameEvents;
-
-        // Wrap in WidgetShotPlus for sharing capability
-        return WidgetShotPlus(
-          key: _gameDetailsKey,
-          // Use GameDetailsWidget with static data for capturing
-          child: GameDetailsWidget.fromStaticData(
-            game: GameRecord(
-              id: 'current-game',
-              date: gameSetupProvider.gameDate,
-              homeTeam: gameSetupProvider.homeTeam,
-              awayTeam: gameSetupProvider.awayTeam,
-              quarterMinutes: gameSetupProvider.quarterMinutes,
-              isCountdownTimer: gameSetupProvider.isCountdownTimer,
-              events: currentEvents,
-              homeGoals: scorePanelProvider.homeGoals,
-              homeBehinds: scorePanelProvider.homeBehinds,
-              awayGoals: scorePanelProvider.awayGoals,
-              awayBehinds: scorePanelProvider.awayBehinds,
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -636,16 +494,6 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                       },
                     ),
                     const SizedBox(height: 8),
-
-                    // Hidden game details widget for screenshot capture
-                    // Position it off-screen but still render it
-                    Transform.translate(
-                      offset: const Offset(-10000, 0),
-                      child: Opacity(
-                        opacity: 0.01, // Nearly invisible but still rendered
-                        child: _buildGameDetailsContent(),
-                      ),
-                    ),
                   ],
                 ),
               ),
