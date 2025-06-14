@@ -568,7 +568,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
             ),
             body: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -580,7 +580,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           key: _quarterTimerKey,
                           isTimerRunning: isTimerRunning),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
                     // Home Team Score Table
                     ValueListenableBuilder<bool>(
@@ -604,7 +604,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         );
                       },
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
                     // Away Team Score Table
                     ValueListenableBuilder<bool>(
@@ -628,7 +628,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
 
                     // Hidden game details widget for screenshot capture
                     // Position it off-screen but still render it

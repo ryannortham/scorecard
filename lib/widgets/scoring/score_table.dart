@@ -71,7 +71,7 @@ class ScoreTable extends StatelessWidget {
 
             // Score counters - Show above the table when enabled
             if (showCounters && !isCompletedGame) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -82,7 +82,7 @@ class ScoreTable extends StatelessWidget {
                       enabled: enabled, // Pass the enabled state to the counter
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: ScoreCounter(
                       label: 'Behinds',
@@ -95,20 +95,20 @@ class ScoreTable extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Score table
             Card(
               elevation: 0,
               color: Colors.transparent,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
                     // Table header
                     const ScoreTableHeader(),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
 
                     // Quarter rows - Always show all 4 quarters
                     ...List.generate(

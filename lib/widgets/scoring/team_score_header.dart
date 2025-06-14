@@ -17,7 +17,7 @@ class TeamScoreHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(6.0),
       decoration: BoxDecoration(
         color: Theme.of(context)
             .colorScheme
@@ -30,7 +30,7 @@ class TeamScoreHeader extends StatelessWidget {
           Expanded(
             child: Text(
               teamName,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),

@@ -30,7 +30,7 @@ class QuarterScoreRow extends StatelessWidget {
     final teamPoints = teamGoals * 6 + teamBehinds;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
       decoration: BoxDecoration(
         color: isCurrentQuarter
             ? Theme.of(context)
@@ -100,7 +100,7 @@ class QuarterScoreRow extends StatelessWidget {
                               .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(2.0),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningGoals.toString(),
@@ -157,7 +157,7 @@ class QuarterScoreRow extends StatelessWidget {
                               .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(2.0),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningBehinds.toString(),
@@ -214,7 +214,7 @@ class QuarterScoreRow extends StatelessWidget {
                               .withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(2.0),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '-' : runningPoints.toString(),

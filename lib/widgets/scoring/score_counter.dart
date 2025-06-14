@@ -37,30 +37,30 @@ class ScoreCounterState extends State<ScoreCounter> {
             // Label
             Text(
               widget.label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
                     color: widget.enabled
                         ? Theme.of(context).colorScheme.onSurface
                         : Theme.of(context)
                             .colorScheme
                             .onSurface
                             .withValues(alpha: 0.38),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     height: 1.2,
                   ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
 
             // Unified Counter Widget
             Card(
-              elevation: 0,
+              elevation: 2,
               color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(12.0),
               ),
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
+                    const EdgeInsets.symmetric(horizontal: 3.0, vertical: 3.0),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -69,15 +69,15 @@ class ScoreCounterState extends State<ScoreCounter> {
                       onPressed: widget.enabled && currentCount > 0
                           ? () => _updateCount(currentCount - 1)
                           : null,
-                      icon: const Icon(Icons.remove, size: 16),
+                      icon: const Icon(Icons.remove, size: 18),
                       padding: const EdgeInsets.all(8.0),
                       constraints:
-                          const BoxConstraints(minWidth: 36, minHeight: 36),
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
 
                     // Count Display
                     Container(
-                      constraints: const BoxConstraints(minWidth: 40),
+                      constraints: const BoxConstraints(minWidth: 44),
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text(
                         currentCount.toString(),
@@ -92,7 +92,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                                           .colorScheme
                                           .onSurface
                                           .withValues(alpha: 0.38),
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                       ),
                     ),
@@ -102,10 +102,10 @@ class ScoreCounterState extends State<ScoreCounter> {
                       onPressed: widget.enabled && currentCount < 99
                           ? () => _updateCount(currentCount + 1)
                           : null,
-                      icon: const Icon(Icons.add, size: 16),
+                      icon: const Icon(Icons.add, size: 18),
                       padding: const EdgeInsets.all(8.0),
                       constraints:
-                          const BoxConstraints(minWidth: 36, minHeight: 36),
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
                   ],
                 ),

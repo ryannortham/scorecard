@@ -140,7 +140,7 @@ class TimerWidgetState extends State<TimerWidget> {
         // Timer Display Component
         const TimerDisplay(),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
 
         // Timer Controls Component
         TimerControls(

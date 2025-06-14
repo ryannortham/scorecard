@@ -35,14 +35,14 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(6.0),
       child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
         builder: (context, gameSetupProvider, scorePanelProvider, _) {
           return Column(
             children: [
               // Quarter Progress Indicator
               _buildQuarterProgressIndicator(scorePanelProvider),
-              const SizedBox(height: 8.0),
+              const SizedBox(height: 6.0),
 
               // Timer Widget
               Container(
@@ -51,7 +51,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: TimerWidget(
                       key: _timerKey, isRunning: widget.isTimerRunning),
                 ),
@@ -85,7 +85,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
                   ? const EdgeInsets.only(right: 4.0)
                   : EdgeInsets.zero,
               padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                  const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
               decoration: BoxDecoration(
                 color: isCurrentQuarter
                     ? Theme.of(context).colorScheme.primaryContainer
