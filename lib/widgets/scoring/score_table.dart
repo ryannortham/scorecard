@@ -53,6 +53,24 @@ class ScoreTable extends StatelessWidget {
     }
   }
 
+  /// Calculate running totals up to a specific quarter
+  Map<String, int> _calculateRunningTotals(int upToQuarter) {
+    int totalGoals = 0;
+    int totalBehinds = 0;
+
+    for (int q = 1; q <= upToQuarter; q++) {
+      final quarterEvents = _eventsByQuarter(q)['team'] ?? [];
+      totalGoals += quarterEvents.where((e) => e.type == 'goal').length;
+      totalBehinds += quarterEvents.where((e) => e.type == 'behind').length;
+    }
+
+    return {
+      'goals': totalGoals,
+      'behinds': totalBehinds,
+      'points': totalGoals * 6 + totalBehinds,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ScorePanelAdapter>(
@@ -117,11 +135,7 @@ class ScoreTable extends StatelessWidget {
                         final quarter = index + 1;
                         final quarterEvents =
                             _eventsByQuarter(quarter)['team'] ?? [];
-                        final goals =
-                            quarterEvents.where((e) => e.type == 'goal').length;
-                        final behinds = quarterEvents
-                            .where((e) => e.type == 'behind')
-                            .length;
+                        final runningTotals = _calculateRunningTotals(quarter);
 
                         return QuarterScoreRow(
                           quarter: index, // 0-based index
@@ -130,9 +144,9 @@ class ScoreTable extends StatelessWidget {
                               quarter == currentQ && !isCompletedGame,
                           isFutureQuarter:
                               quarter > currentQ && !isCompletedGame,
-                          runningGoals: goals,
-                          runningBehinds: behinds,
-                          runningPoints: goals * 6 + behinds,
+                          runningGoals: runningTotals['goals']!,
+                          runningBehinds: runningTotals['behinds']!,
+                          runningPoints: runningTotals['points']!,
                         );
                       },
                     ),
