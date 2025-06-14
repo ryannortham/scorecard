@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_preferences_provider.dart';
+
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'team_list.dart';
 
 class Settings extends StatefulWidget {

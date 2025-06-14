@@ -79,6 +79,13 @@ class _ConfirmationBottomSheetState extends State<ConfirmationBottomSheet>
                   Navigator.of(context).pop(true);
                   widget.onConfirm();
                 },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  overlayColor: Colors.transparent,
+                  side: BorderSide.none,
+                  padding: const EdgeInsets.all(16),
+                ),
                 icon: Icon(widget.actionIcon),
                 label: Text(widget.actionText),
               ),

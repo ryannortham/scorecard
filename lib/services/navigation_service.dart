@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+
+import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/screens/game_details.dart' as details;
+import 'package:goalkeeper/screens/game_history.dart';
+import 'package:goalkeeper/screens/game_setup.dart';
+import 'package:goalkeeper/screens/scoring.dart';
 import 'package:goalkeeper/screens/settings.dart';
 import 'package:goalkeeper/screens/team_list.dart';
-import 'package:goalkeeper/screens/game_setup.dart';
-import 'package:goalkeeper/screens/game_history.dart';
-import 'package:goalkeeper/screens/game_details.dart' as details;
-import 'package:goalkeeper/screens/scoring.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
+import 'package:goalkeeper/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 
 /// Centralized navigation service following Flutter best practices
 /// Reduces code duplication and provides type-safe navigation

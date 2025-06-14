@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../adapters/game_setup_adapter.dart';
+
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 
 /// Widget for displaying game settings configuration
 class GameSettingsDisplay extends StatelessWidget {

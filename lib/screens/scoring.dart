@@ -1,22 +1,25 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/providers/game_record.dart';
+import 'package:gal/gal.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
+
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
-import 'package:provider/provider.dart';
+import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
+import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
-import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
-import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:gal/gal.dart';
-import '../widgets/bottom_sheets/exit_game_bottom_sheet.dart';
-import 'settings.dart';
-import 'game_history.dart';
+
 import 'game_details.dart';
-import 'dart:io';
+import 'game_history.dart';
+import 'settings.dart';
 
 class Scoring extends StatefulWidget {
   const Scoring({super.key, required this.title});

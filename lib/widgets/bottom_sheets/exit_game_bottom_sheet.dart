@@ -57,6 +57,13 @@ class _ExitGameBottomSheetState extends State<ExitGameBottomSheet>
               // Exit button with leading icon
               TextButton.icon(
                 onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  overlayColor: Colors.transparent,
+                  side: BorderSide.none,
+                  padding: const EdgeInsets.all(16),
+                ),
                 icon: const Icon(Icons.exit_to_app_outlined),
                 label: const Text('Exit Game'),
               ),

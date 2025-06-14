@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/widgets/scoring/score_table.dart';
-import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
-import 'package:goalkeeper/widgets/game_details/team_score_display.dart';
-import 'package:goalkeeper/widgets/game_details/game_result_badge.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
+import 'package:goalkeeper/widgets/game_details/game_score_section.dart';
+import 'package:goalkeeper/widgets/game_details/live_game_title_builder.dart';
+import 'package:goalkeeper/widgets/game_details/quarter_breakdown_section.dart';
+import 'package:goalkeeper/widgets/scoring/score_table.dart';
 
 /// Data source types for the game details widget
 enum GameDataSource {
@@ -160,18 +160,7 @@ class GameDetailsWidget extends StatelessWidget {
   /// Builds the title for live games showing quarter and elapsed time
   String _buildLiveGameTitle(
       BuildContext context, ScorePanelAdapter scorePanelAdapter) {
-    final gameStateService = GameStateService.instance;
-
-    final currentQuarter = scorePanelAdapter.selectedQuarter;
-    final elapsedTimeMs = gameStateService.getElapsedTimeInQuarter();
-
-    // Format elapsed time using the same method as timer widget
-    final timeStr = StopWatchTimer.getDisplayTime(elapsedTimeMs,
-        hours: false, milliSecond: true);
-    // Remove the last character (centiseconds)
-    final formattedTime = timeStr.substring(0, timeStr.length - 1);
-
-    return 'Q$currentQuarter $formattedTime';
+    return LiveGameTitleBuilder.buildTitle(context, scorePanelAdapter);
   }
 
   @override
@@ -192,10 +181,6 @@ class GameDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildGameDetailsContent(BuildContext context, GameRecord game) {
-    final bool homeWins = game.homePoints > game.awayPoints;
-    final bool awayWins = game.awayPoints > game.homePoints;
-    final bool isComplete = isGameComplete(game);
-
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.all(16.0),
@@ -218,163 +203,27 @@ class GameDetailsWidget extends StatelessWidget {
           dataSource == GameDataSource.liveData
               ? Consumer<ScorePanelAdapter>(
                   builder: (context, scorePanelAdapter, child) {
-                    return GameInfoCard(
-                      icon: Icons.outlined_flag,
-                      title: _buildLiveGameTitle(context, scorePanelAdapter),
-                      content: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Expanded(
-                                child: TeamScoreDisplay(
-                                  teamName: game.homeTeam,
-                                  goals: game.homeGoals,
-                                  behinds: game.homeBehinds,
-                                  points: game.homePoints,
-                                  isWinner: homeWins,
-                                ),
-                              ),
-                              Container(
-                                width: 2,
-                                height: 80,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .outline
-                                    .withValues(alpha: 0.3),
-                              ),
-                              Expanded(
-                                child: TeamScoreDisplay(
-                                  teamName: game.awayTeam,
-                                  goals: game.awayGoals,
-                                  behinds: game.awayBehinds,
-                                  points: game.awayPoints,
-                                  isWinner: awayWins,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          GameResultBadge(
-                            homeTeam: game.homeTeam,
-                            awayTeam: game.awayTeam,
-                            homePoints: game.homePoints,
-                            awayPoints: game.awayPoints,
-                            isGameComplete: isComplete,
-                            isHistoryMode:
-                                dataSource == GameDataSource.staticData,
-                          ),
-                        ],
-                      ),
+                    final liveTitle =
+                        _buildLiveGameTitle(context, scorePanelAdapter);
+                    return GameScoreSection(
+                      game: game,
+                      isLiveData: true,
+                      liveTitleOverride: liveTitle,
                     );
                   },
                 )
-              : GameInfoCard(
-                  icon: Icons.outlined_flag,
-                  title: 'Final Score',
-                  content: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: TeamScoreDisplay(
-                              teamName: game.homeTeam,
-                              goals: game.homeGoals,
-                              behinds: game.homeBehinds,
-                              points: game.homePoints,
-                              isWinner: homeWins,
-                            ),
-                          ),
-                          Container(
-                            width: 2,
-                            height: 80,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withValues(alpha: 0.3),
-                          ),
-                          Expanded(
-                            child: TeamScoreDisplay(
-                              teamName: game.awayTeam,
-                              goals: game.awayGoals,
-                              behinds: game.awayBehinds,
-                              points: game.awayPoints,
-                              isWinner: awayWins,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      GameResultBadge(
-                        homeTeam: game.homeTeam,
-                        awayTeam: game.awayTeam,
-                        homePoints: game.homePoints,
-                        awayPoints: game.awayPoints,
-                        isGameComplete: isComplete,
-                        isHistoryMode: dataSource == GameDataSource.staticData,
-                      ),
-                    ],
-                  ),
+              : GameScoreSection(
+                  game: game,
+                  isLiveData: false,
                 ),
 
           // Quarter Breakdown Card
           const SizedBox(height: 16),
-          GameInfoCard(
-            icon: Icons.timeline,
-            title: 'Quarter Breakdown',
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Home Team Label
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  child: Text(
-                    game.homeTeam,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: homeWins
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                        ),
-                  ),
-                ),
-
-                // Home Team Score Table
-                _buildScoreTable(
-                  context: context,
-                  game: game,
-                  displayTeam: game.homeTeam,
-                  isHomeTeam: true,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Away Team Label
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  child: Text(
-                    game.awayTeam,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: awayWins
-                              ? Theme.of(context).colorScheme.primary
-                              : null,
-                        ),
-                  ),
-                ),
-
-                // Away Team Score Table
-                _buildScoreTable(
-                  context: context,
-                  game: game,
-                  displayTeam: game.awayTeam,
-                  isHomeTeam: false,
-                ),
-              ],
-            ),
+          QuarterBreakdownSection(
+            game: game,
+            isLiveData: dataSource == GameDataSource.liveData,
+            liveEvents: liveEvents,
+            scoreTableBuilder: _buildScoreTable,
           ),
         ],
       ),

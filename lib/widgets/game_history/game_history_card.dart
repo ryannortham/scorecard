@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../providers/game_record.dart';
-import '../../services/navigation_service.dart';
+
+import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/services/navigation_service.dart';
 
 /// A reusable widget for displaying a game card in the history list
 class GameHistoryCard extends StatelessWidget {

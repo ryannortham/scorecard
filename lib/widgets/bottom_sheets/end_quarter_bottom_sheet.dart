@@ -82,6 +82,13 @@ class _EndQuarterBottomSheetState extends State<EndQuarterBottomSheet>
                   Navigator.of(context).pop(true);
                   widget.onConfirm();
                 },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
+                  overlayColor: Colors.transparent,
+                  side: BorderSide.none,
+                  padding: const EdgeInsets.all(16),
+                ),
                 icon: Icon(icon),
                 label: Text(actionText),
               ),

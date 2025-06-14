@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../adapters/game_setup_adapter.dart';
-import '../providers/user_preferences_provider.dart';
-import '../services/game_state_service.dart';
+
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
+import 'package:goalkeeper/services/game_state_service.dart';
+
 import 'game_setup.dart';
 
 /// Home screen that determines the initial screen based on game state

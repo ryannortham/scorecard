@@ -1,7 +1,9 @@
 import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:goalkeeper/providers/game_record.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:goalkeeper/providers/game_record.dart';
 
 class GameHistoryService {
   static const String _gamesKey = 'saved_games';

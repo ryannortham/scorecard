@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../adapters/game_setup_adapter.dart';
-import '../adapters/score_panel_adapter.dart';
-import '../providers/user_preferences_provider.dart';
-import '../widgets/game_setup/team_selection_widget.dart';
-import '../widgets/game_setup/game_settings_configuration.dart';
+import 'package:provider/provider.dart';
+
+import 'package:goalkeeper/adapters/game_setup_adapter.dart';
+import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
+import 'package:goalkeeper/widgets/game_setup/game_settings_configuration.dart';
+import 'package:goalkeeper/widgets/game_setup/team_selection_widget.dart';
+
+import 'game_history.dart';
 import 'scoring.dart';
 import 'settings.dart';
-import 'game_history.dart';
 
 class GameSetup extends StatefulWidget {
   const GameSetup({super.key, required this.title});
