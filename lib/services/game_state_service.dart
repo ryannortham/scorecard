@@ -135,6 +135,12 @@ class GameStateService extends ChangeNotifier {
       {required bool isCountdownMode, required int quarterMaxTime}) {
     _isCountdownTimer = isCountdownMode;
     _quarterMinutes = quarterMaxTime ~/ (60 * 1000);
+
+    // Important: Never create a game record just for timer configuration
+    // This prevents configureTimer from inadvertently creating an "active game"
+    if (_currentGameId == null) {
+      debugPrint('Timer configured with no active game');
+    }
   }
 
   void resetTimer() {
@@ -211,11 +217,25 @@ class GameStateService extends ChangeNotifier {
     required int quarterMinutes,
     required bool isCountdownTimer,
   }) {
+    // Critical bugfix: Ensure that just configuring game settings doesn't create an active game
+    final bool wasActive = hasActiveGame;
+    final String? previousId = _currentGameId;
+
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
     _gameDate = gameDate;
     _quarterMinutes = quarterMinutes;
     _isCountdownTimer = isCountdownTimer;
+
+    // If there wasn't an active game before, ensure we don't create one just by configuring
+    if (!wasActive) {
+      _currentGameId = null;
+      debugPrint(
+          'Game configured with no active game - preventing unintended activation');
+    } else {
+      debugPrint('Game configuration updated for existing game: $previousId');
+    }
+
     notifyListeners();
   }
 
@@ -367,11 +387,27 @@ class GameStateService extends ChangeNotifier {
     });
   }
 
+  /// Force immediate save of game record - used when game is complete
+  /// This ensures the final game state is saved before any reset operations
+  Future<void> forceFinalSave() async {
+    if (_currentGameId == null) return;
+    
+    debugPrint('Force final save called - current scores: $_homeTeam $_homeGoals.$_homeBehinds - $_awayTeam $_awayGoals.$_awayBehinds');
+    debugPrint('Events before save: ${_gameEvents.length} events');
+    
+    // Cancel any pending timer and save immediately
+    _saveTimer?.cancel();
+    await _updateGameRecord();
+    debugPrint('Forced final save completed for game: $_currentGameId');
+  }
+
   Future<void> _updateGameRecord() async {
     if (_currentGameId == null) return;
 
     try {
-      final gameRecord = GameHistoryService.createGameRecord(
+      // CRITICAL FIX: Preserve the existing game ID instead of creating a new one
+      final gameRecord = GameRecord(
+        id: _currentGameId!, // Use existing ID, don't create new one
         date: _gameDate,
         homeTeam: _homeTeam,
         awayTeam: _awayTeam,
@@ -386,15 +422,19 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
-      _currentGameId = gameRecord.id;
+      // No need to update _currentGameId since we preserved it
       debugPrint(
-          'Updated game record: $_homeTeam $_homeGoals.$_homeBehinds - $_awayTeam $_awayGoals.$_awayBehinds');
+          'Updated game record with ID $_currentGameId: $_homeTeam $_homeGoals.$_homeBehinds - $_awayTeam $_awayGoals.$_awayBehinds');
     } catch (e) {
       debugPrint('Error updating game record: $e');
     }
   }
 
   void resetGame() {
+    // Extra debugging to confirm game state is being reset
+    debugPrint('Resetting game state - gameId before: $_currentGameId');
+
+    // Reset all game state variables
     _homeGoals = 0;
     _homeBehinds = 0;
     _awayGoals = 0;
@@ -403,11 +443,20 @@ class GameStateService extends ChangeNotifier {
     _selectedQuarter = 1;
     _isTimerRunning = false;
     _gameEvents.clear();
+
+    // Explicitly null out the game ID first to ensure hasActiveGame returns false
     _currentGameId = null;
 
     _stopBackgroundTimer();
     _saveTimer?.cancel();
     _timerStreamController.add(_timerRawTime);
+
+    // Verify game state is inactive after reset
+    if (hasActiveGame) {
+      debugPrint('WARNING: Game still active after reset!');
+    } else {
+      debugPrint('Game successfully reset - no active game');
+    }
 
     _notifyAllListeners();
     notifyListeners();

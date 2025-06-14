@@ -12,6 +12,16 @@ class GameHistoryService {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
+    // Debug logging to track what's being saved
+    print('Saving game: ${game.homeTeam} vs ${game.awayTeam}');
+    print(
+        'Home score: ${game.homeGoals}.${game.homeBehinds} (${game.homePoints})');
+    print(
+        'Away score: ${game.awayGoals}.${game.awayBehinds} (${game.awayPoints})');
+    print('Events count: ${game.events.length}');
+    print(
+        'Events: ${game.events.map((e) => '${e.quarter}Q ${e.team} ${e.type}').join(', ')}');
+
     // Check if we already have a similar game (same teams and close timestamp)
     bool hasSimilarGame = false;
     int similarGameIndex = -1;

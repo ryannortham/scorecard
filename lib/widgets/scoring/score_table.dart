@@ -16,7 +16,8 @@ class ScoreTable extends StatelessWidget {
   final bool showCounters; // Whether to show the score counters
   final int?
       currentQuarter; // Optional override for current quarter (for static contexts)
-  // Removed isGameDetailsView parameter as we want consistent behavior
+  final bool
+      isCompletedGame; // Whether this is showing a completed game (all quarters should be shown)
 
   const ScoreTable({
     super.key,
@@ -29,6 +30,7 @@ class ScoreTable extends StatelessWidget {
     this.showHeader = true,
     this.showCounters = true,
     this.currentQuarter,
+    this.isCompletedGame = false,
   });
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
@@ -571,13 +573,31 @@ class ScoreTable extends StatelessWidget {
   }
 
   Widget _buildQuarterRow(BuildContext context, int quarter) {
-    final currentQuarter =
+    // For completed games, always show all quarters
+    if (isCompletedGame) {
+      final isCurrentQuarter =
+          false; // No current quarter highlighting in completed games
+      final isFutureQuarter =
+          false; // No quarters are "future" in completed games
+
+      return _buildQuarterRowContent(
+          context, quarter, isCurrentQuarter, isFutureQuarter);
+    }
+
+    // For games in progress, get the current quarter from either passed parameter or provider
+    final effectiveQuarter = currentQuarter ??
         Provider.of<ScorePanelAdapter>(context, listen: true).selectedQuarter;
-    final isCurrentQuarter = quarter + 1 == currentQuarter;
+    final isCurrentQuarter = quarter + 1 == effectiveQuarter;
 
     // Determine if this is a future quarter - consistent behavior in all views
-    final isFutureQuarter = quarter + 1 > currentQuarter;
+    final isFutureQuarter = quarter + 1 > effectiveQuarter;
 
+    return _buildQuarterRowContent(
+        context, quarter, isCurrentQuarter, isFutureQuarter);
+  }
+
+  Widget _buildQuarterRowContent(BuildContext context, int quarter,
+      bool isCurrentQuarter, bool isFutureQuarter) {
     final byQuarter = _eventsByQuarter(quarter + 1);
     final teamEvents = byQuarter['team'] ?? [];
     final teamGoals = teamEvents.where((e) => e.type == 'goal').length;

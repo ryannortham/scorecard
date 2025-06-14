@@ -60,29 +60,47 @@ class _GameSetupState extends State<GameSetup> {
   @override
   void initState() {
     super.initState();
-    // Synchronize text controllers with provider values on initialization
+    // Completely reset and initialize game state on startup
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final gameSetupAdapter =
           Provider.of<GameSetupAdapter>(context, listen: false);
       final userPreferences =
           Provider.of<UserPreferencesProvider>(context, listen: false);
+      final scorePanelAdapter =
+          Provider.of<ScorePanelAdapter>(context, listen: false);
 
-      // Initialize game settings from saved preferences
-      if (userPreferences.loaded) {
-        gameSetupAdapter.setQuarterMinutes(userPreferences.quarterMinutes);
-        gameSetupAdapter.setIsCountdownTimer(userPreferences.isCountdownTimer);
+      // First, completely reset the game state
+      gameSetupAdapter.reset(
+        defaultQuarterMinutes: userPreferences.quarterMinutes,
+        defaultIsCountdownTimer: userPreferences.isCountdownTimer,
+        favoriteTeam: userPreferences.favoriteTeam,
+      );
+
+      // Reset the score panel as well
+      scorePanelAdapter.resetGame();
+
+      // Configure the timer with fresh settings
+      scorePanelAdapter.configureTimer(
+        isCountdownMode: userPreferences.isCountdownTimer,
+        quarterMaxTime: userPreferences.quarterMinutes * 60 * 1000,
+      );
+
+      // Now set up the form fields
+      String homeTeamValue = '';
+      if (userPreferences.favoriteTeam.isNotEmpty) {
+        homeTeamValue = userPreferences.favoriteTeam;
+        gameSetupAdapter.setHomeTeam(homeTeamValue);
       }
 
-      _homeTeamController.text = gameSetupAdapter.homeTeam;
-      _awayTeamController.text = gameSetupAdapter.awayTeam;
+      _homeTeamController.text = homeTeamValue;
+      _awayTeamController.text = '';
       _dateController.text =
-          DateFormat('EEEE dd/MM/yyyy').format(gameSetupAdapter.gameDate);
-      homeTeam = gameSetupAdapter.homeTeam.isNotEmpty
-          ? gameSetupAdapter.homeTeam
-          : null;
-      awayTeam = gameSetupAdapter.awayTeam.isNotEmpty
-          ? gameSetupAdapter.awayTeam
-          : null;
+          DateFormat('EEEE dd/MM/yyyy').format(DateTime.now());
+
+      setState(() {
+        homeTeam = homeTeamValue.isNotEmpty ? homeTeamValue : null;
+        awayTeam = null;
+      });
     });
   }
 

@@ -32,6 +32,11 @@ class ScoringStateManager {
     // with existing code that expects this method to exist
   }
 
+  // Force final save - used when game is complete to ensure data is saved before reset
+  Future<void> forceFinalSave() async {
+    await _gameState.forceFinalSave();
+  }
+
   // Start a new game
   Future<void> startNewGame() async {
     await _gameState.startNewGame();

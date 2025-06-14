@@ -3,6 +3,7 @@ import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/services/scoring_state_manager.dart';
+import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:provider/provider.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
@@ -14,6 +15,7 @@ import 'package:gal/gal.dart';
 import '../widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'settings.dart';
 import 'game_history.dart';
+import 'game_details.dart';
 import 'dart:io';
 
 class Scoring extends StatefulWidget {
@@ -140,15 +142,53 @@ class ScoringState extends State<Scoring> {
     return _scoringStateManager.isGameComplete();
   }
 
-  /// Handle game completion by navigating back to previous screen
+  /// Handle game completion by navigating to game details screen
   void _handleGameCompletion() {
-    // Only navigate back once when game is complete
+    // Only navigate once when game is complete
     if (_isGameComplete()) {
       // Use post-frame callback to avoid during-build navigation issues
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        // Navigate back to previous screen (game history)
-        Navigator.of(context).pop();
+
+        final String? gameId = _scoringStateManager.currentGameId;
+        if (gameId == null) {
+          debugPrint(
+              'No current game ID found. Cannot navigate to game details.');
+          return;
+        }
+
+        // CRITICAL FIX: Ensure final save completes before resetting
+        // Force immediate save of the completed game before resetting state
+        await _scoringStateManager.forceFinalSave();
+
+        // Load all saved games and find the one with the matching ID
+        // Since we now preserve the game ID, it should be found reliably
+        final allGames = await GameHistoryService.loadGames();
+        final gameRecord = allGames.firstWhere(
+          (game) => game.id == gameId,
+          orElse: () {
+            // Fallback: find the most recent game with matching teams
+            final homeTeam = gameSetupProvider.homeTeam;
+            final awayTeam = gameSetupProvider.awayTeam;
+            debugPrint('Could not find game with ID $gameId, using fallback search');
+            return allGames.firstWhere(
+              (game) => game.homeTeam == homeTeam && game.awayTeam == awayTeam,
+            );
+          },
+        );
+
+        // Reset the game state AFTER ensuring save is complete
+        // This ensures a clean state for the next game setup
+        _scoringStateManager.resetGame();
+
+        // Navigate to game details page passing the saved game record
+        if (!mounted) return;
+
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => GameDetailsPage(game: gameRecord),
+          ),
+        );
       });
     }
   }
