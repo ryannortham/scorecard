@@ -5,6 +5,45 @@ import 'package:uuid/uuid.dart';
 
 import 'package:goalkeeper/providers/game_record.dart';
 
+/// Lightweight game summary for list display
+class GameSummary {
+  final String id;
+  final DateTime date;
+  final String homeTeam;
+  final String awayTeam;
+  final int homeGoals;
+  final int homeBehinds;
+  final int awayGoals;
+  final int awayBehinds;
+
+  GameSummary({
+    required this.id,
+    required this.date,
+    required this.homeTeam,
+    required this.awayTeam,
+    required this.homeGoals,
+    required this.homeBehinds,
+    required this.awayGoals,
+    required this.awayBehinds,
+  });
+
+  int get homePoints => homeGoals * 6 + homeBehinds;
+  int get awayPoints => awayGoals * 6 + awayBehinds;
+
+  factory GameSummary.fromJson(Map<String, dynamic> json) {
+    return GameSummary(
+      id: json['id'] as String,
+      date: DateTime.parse(json['date'] as String),
+      homeTeam: json['homeTeam'] as String,
+      awayTeam: json['awayTeam'] as String,
+      homeGoals: json['homeGoals'] as int,
+      homeBehinds: json['homeBehinds'] as int,
+      awayGoals: json['awayGoals'] as int,
+      awayBehinds: json['awayBehinds'] as int,
+    );
+  }
+}
+
 class GameHistoryService {
   static const String _gamesKey = 'saved_games';
   static const Uuid _uuid = Uuid();
@@ -13,10 +52,9 @@ class GameHistoryService {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
-    // Remove any game with the same ID
+    // More efficient: Remove any game with the same ID without parsing
     gamesJson.removeWhere((gameJson) {
-      final existingGame = GameRecord.fromJson(jsonDecode(gameJson));
-      return existingGame.id == game.id;
+      return gameJson.contains('"id":"${game.id}"');
     });
 
     // Add the new game to the beginning of the list (most recent first)
@@ -25,29 +63,111 @@ class GameHistoryService {
     await prefs.setStringList(_gamesKey, gamesJson);
   }
 
-  static Future<List<GameRecord>> loadGames() async {
+  /// Load game summaries with pagination for efficient list display
+  static Future<List<GameSummary>> loadGameSummaries({
+    int limit = 20,
+    int offset = 0,
+    String? excludeGameId,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
-    // Parse all games and filter out empty ones
-    List<GameRecord> games = gamesJson
-        .map((gameJson) => GameRecord.fromJson(jsonDecode(gameJson)))
-        .where((game) =>
-            // Show games with any team names or events
-            (game.homeTeam.isNotEmpty && game.awayTeam.isNotEmpty) ||
-            game.events.isNotEmpty)
-        .toList();
+    // Calculate pagination bounds
+    final startIndex = offset;
+    final endIndex = (offset + limit).clamp(0, gamesJson.length);
 
-    return games;
+    if (startIndex >= gamesJson.length) {
+      return [];
+    }
+
+    // Process only the required slice
+    final summaries = <GameSummary>[];
+    for (int i = startIndex; i < endIndex; i++) {
+      try {
+        final gameJson = jsonDecode(gamesJson[i]) as Map<String, dynamic>;
+
+        // Skip excluded game (e.g., current game in progress)
+        if (excludeGameId != null && gameJson['id'] == excludeGameId) {
+          continue;
+        }
+
+        // Skip invalid games
+        final homeTeam = gameJson['homeTeam'] as String? ?? '';
+        final awayTeam = gameJson['awayTeam'] as String? ?? '';
+        if (homeTeam.isEmpty || awayTeam.isEmpty) {
+          continue;
+        }
+
+        final summary = GameSummary.fromJson(gameJson);
+        summaries.add(summary);
+      } catch (e) {
+        // Skip corrupted game data
+        continue;
+      }
+    }
+
+    return summaries;
+  }
+
+  /// Get total count of valid games (excluding specified game)
+  static Future<int> getValidGameCount({String? excludeGameId}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
+
+    int count = 0;
+    for (final gameJsonStr in gamesJson) {
+      try {
+        final gameJson = jsonDecode(gameJsonStr) as Map<String, dynamic>;
+
+        // Skip excluded game
+        if (excludeGameId != null && gameJson['id'] == excludeGameId) {
+          continue;
+        }
+
+        // Skip invalid games
+        final homeTeam = gameJson['homeTeam'] as String? ?? '';
+        final awayTeam = gameJson['awayTeam'] as String? ?? '';
+        if (homeTeam.isEmpty || awayTeam.isEmpty) {
+          continue;
+        }
+
+        count++;
+      } catch (e) {
+        // Skip corrupted games
+        continue;
+      }
+    }
+
+    return count;
+  }
+
+  /// Load a specific game by ID with full data (for details view)
+  static Future<GameRecord?> loadGameById(String gameId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
+
+    for (final gameJsonStr in gamesJson) {
+      try {
+        final gameJson = jsonDecode(gameJsonStr) as Map<String, dynamic>;
+        if (gameJson['id'] == gameId) {
+          return GameRecord.fromJson(gameJson);
+        }
+      } catch (e) {
+        // Skip corrupted game data
+        continue;
+      }
+    }
+
+    return null;
   }
 
   static Future<void> deleteGame(String gameId) async {
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
+    // More efficient deletion without parsing all games
     gamesJson.removeWhere((gameJson) {
-      final game = GameRecord.fromJson(jsonDecode(gameJson));
-      return game.id == gameId;
+      return gameJson.contains('"id":"$gameId"');
     });
 
     await prefs.setStringList(_gamesKey, gamesJson);
@@ -89,5 +209,30 @@ class GameHistoryService {
   static Future<void> clearAllGames() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_gamesKey);
+  }
+
+  /// Legacy method for backwards compatibility - loads all games at once
+  static Future<List<GameRecord>> loadGames() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
+
+    // Parse all games and filter out empty ones
+    List<GameRecord> games = gamesJson
+        .map((gameJson) {
+          try {
+            return GameRecord.fromJson(jsonDecode(gameJson));
+          } catch (e) {
+            return null; // Skip corrupted games
+          }
+        })
+        .where((game) => game != null)
+        .cast<GameRecord>()
+        .where((game) =>
+            // Show games with any team names or events
+            (game.homeTeam.isNotEmpty && game.awayTeam.isNotEmpty) ||
+            game.events.isNotEmpty)
+        .toList();
+
+    return games;
   }
 }

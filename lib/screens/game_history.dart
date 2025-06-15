@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../providers/game_record.dart';
 import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
-import '../widgets/game_history/game_history_card.dart';
+import '../widgets/game_history/game_summary_card.dart';
 import 'package:goalkeeper/screens/game_details.dart' as details;
 import 'settings.dart';
 
@@ -14,49 +13,103 @@ class GameHistoryScreen extends StatefulWidget {
 }
 
 class _GameHistoryScreenState extends State<GameHistoryScreen> {
-  List<GameRecord> _games = [];
+  List<GameSummary> _gameSummaries = [];
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMoreGames = true;
+  final int _pageSize = 20;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadGames();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreGames();
+    }
   }
 
   Future<void> _loadGames() async {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = true;
+      _gameSummaries.clear();
+      _hasMoreGames = true;
+    });
+
+    await _loadGamePage(0);
+  }
+
+  Future<void> _loadMoreGames() async {
+    if (_isLoadingMore || !_hasMoreGames) return;
+
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    await _loadGamePage(_gameSummaries.length);
+
+    setState(() {
+      _isLoadingMore = false;
+    });
+  }
+
+  Future<void> _loadGamePage(int offset) async {
     try {
-      final allGames = await GameHistoryService.loadGames();
       final gameStateService = GameStateService.instance;
 
-      // Filter out the game currently in progress
-      final games = allGames
-          .where((game) => game.id != gameStateService.currentGameId)
-          .toList();
+      final newSummaries = await GameHistoryService.loadGameSummaries(
+        limit: _pageSize,
+        offset: offset,
+        excludeGameId: gameStateService.currentGameId,
+      );
 
-      setState(() {
-        _games = games;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (offset == 0) {
+            _gameSummaries = newSummaries;
+            _isLoading = false;
+          } else {
+            _gameSummaries.addAll(newSummaries);
+          }
+          _hasMoreGames = newSummaries.length == _pageSize;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      // Show error message
-      if (mounted && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error loading games: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLoadingMore = false;
+        });
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error loading games: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }
 
-  Future<void> _deleteGame(GameRecord game) async {
+  Future<void> _deleteGame(String gameId) async {
     try {
-      await GameHistoryService.deleteGame(game.id);
+      await GameHistoryService.deleteGame(gameId);
       await _loadGames(); // Refresh the list
       if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,12 +133,16 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     }
   }
 
-  void _showGameDetails(GameRecord game) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => details.GameDetailsPage(game: game),
-      ),
-    );
+  Future<void> _showGameDetails(String gameId) async {
+    // Load the full game data only when needed
+    final game = await GameHistoryService.loadGameById(gameId);
+    if (game != null && mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => details.GameDetailsPage(game: game),
+        ),
+      );
+    }
   }
 
   @override
@@ -157,7 +214,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _games.isEmpty
+          : _gameSummaries.isEmpty
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -197,13 +254,23 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               : RefreshIndicator(
                   onRefresh: _loadGames,
                   child: ListView.builder(
-                    itemCount: _games.length,
+                    controller: _scrollController,
+                    itemCount: _gameSummaries.length +
+                        (_hasMoreGames || _isLoadingMore ? 1 : 0),
                     itemBuilder: (context, index) {
-                      final game = _games[index];
-                      return GameHistoryCard(
-                        game: game,
-                        onTap: () => _showGameDetails(game),
-                        onDelete: () => _deleteGame(game),
+                      // Show loading indicator at the bottom
+                      if (index == _gameSummaries.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final gameSummary = _gameSummaries[index];
+                      return GameSummaryCard(
+                        gameSummary: gameSummary,
+                        onTap: () => _showGameDetails(gameSummary.id),
+                        onDelete: () => _deleteGame(gameSummary.id),
                       );
                     },
                   ),
