@@ -2,19 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:goalkeeper/services/game_history_service.dart';
-import 'package:goalkeeper/services/navigation_service.dart';
 
 /// Optimized widget for displaying game summary in the history list
 class GameSummaryCard extends StatelessWidget {
   final GameSummary gameSummary;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback? onLongPress;
+  final bool isSelectionMode;
+  final bool isSelected;
 
   const GameSummaryCard({
     super.key,
     required this.gameSummary,
     required this.onTap,
-    required this.onDelete,
+    this.onLongPress,
+    this.isSelectionMode = false,
+    this.isSelected = false,
   });
 
   @override
@@ -24,7 +27,22 @@ class GameSummaryCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      elevation: isSelected ? 4.0 : 1.0,
+      color: isSelected
+          ? Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: 0.3)
+          : null,
       child: ListTile(
+        leading: isSelectionMode
+            ? Icon(
+                isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.outline,
+              )
+            : null,
         title: Text(
           '${gameSummary.homeTeam} vs ${gameSummary.awayTeam}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -47,29 +65,8 @@ class GameSummaryCard extends StatelessWidget {
           ],
         ),
         onTap: onTap,
-        trailing: IconButton(
-          icon: const Icon(Icons.delete_outline),
-          onPressed: () => _showDeleteConfirmation(context),
-        ),
+        onLongPress: onLongPress,
       ),
     );
-  }
-
-  Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final dateFormat = DateFormat('dd/MM/yyyy');
-
-    final confirmed = await AppNavigator.showConfirmationDialog(
-      context: context,
-      title: 'Delete Game?',
-      content:
-          '${gameSummary.homeTeam} vs ${gameSummary.awayTeam}\n${dateFormat.format(gameSummary.date)}',
-      confirmText: 'Delete',
-      cancelText: 'Cancel',
-      isDestructive: true,
-    );
-
-    if (confirmed) {
-      onDelete();
-    }
   }
 }

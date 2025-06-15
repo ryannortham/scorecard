@@ -34,7 +34,6 @@ class GameStateService extends ChangeNotifier {
       StreamController<int>.broadcast();
 
   String? _currentGameId;
-  Timer? _saveTimer;
   final List<VoidCallback> _gameEventListeners = [];
   final List<VoidCallback> _timerStateListeners = [];
   final List<VoidCallback> _scoreChangeListeners = [];
@@ -78,7 +77,7 @@ class GameStateService extends ChangeNotifier {
       isHomeTeam ? _homeBehinds = count : _awayBehinds = count;
     }
     _notifyScoreChangeListeners();
-    _scheduleGameSave();
+    _saveGameAsync();
     notifyListeners();
   }
 
@@ -215,7 +214,7 @@ class GameStateService extends ChangeNotifier {
   void addGameEvent(GameEvent event) {
     _gameEvents.add(event);
     _notifyGameEventListeners();
-    _scheduleGameSave();
+    _saveGameAsync();
     notifyListeners();
   }
 
@@ -225,7 +224,7 @@ class GameStateService extends ChangeNotifier {
     if (idx != -1) {
       _gameEvents.removeAt(idx);
       _notifyGameEventListeners();
-      _scheduleGameSave();
+      _saveGameAsync();
       notifyListeners();
     }
   }
@@ -326,6 +325,11 @@ class GameStateService extends ChangeNotifier {
     if (_currentGameId != null) return;
 
     try {
+      // Update the game date to NOW when we actually create the game record
+      // This ensures each game has the correct start time
+      _gameDate = DateTime.now();
+
+      // Create a game record to get a unique ID, but don't save it yet
       final gameRecord = GameHistoryService.createGameRecord(
         date: _gameDate,
         homeTeam: _homeTeam,
@@ -339,32 +343,51 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      await GameHistoryService.saveGame(gameRecord);
+      // Only store the ID, don't save to history yet
       _currentGameId = gameRecord.id;
-      debugPrint('Created initial game record: $_homeTeam vs $_awayTeam');
+      debugPrint(
+          'Created game ID for: $_homeTeam vs $_awayTeam at $_gameDate (not saved yet)');
     } catch (e) {
       debugPrint('Error creating initial game record: $e');
     }
   }
 
-  void _scheduleGameSave() {
-    if (_currentGameId == null) return;
+  /// Asynchronously save the game record without blocking the UI
+  Future<void> _saveGameAsync() async {
+    // Only save if we have meaningful game data
+    if (_currentGameId == null || !_shouldSaveGame()) return;
 
-    _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(seconds: 2), () {
-      _updateGameRecord();
+    // Run the save operation without awaiting to avoid blocking the UI
+    _updateGameRecord().catchError((error) {
+      debugPrint('Error in async game save: $error');
     });
+  }
+
+  /// Check if the game has meaningful data worth saving
+  bool _shouldSaveGame() {
+    return _homeGoals > 0 ||
+        _homeBehinds > 0 ||
+        _awayGoals > 0 ||
+        _awayBehinds > 0 ||
+        _gameEvents.isNotEmpty;
   }
 
   /// Force immediate save of game record when game is complete
   Future<void> forceFinalSave() async {
     if (_currentGameId == null) return;
-    // Cancel any pending timer and save immediately
-    _saveTimer?.cancel();
-    await _updateGameRecord();
+
+    // Only save if the game has meaningful data
+    if (_shouldSaveGame()) {
+      await _forceSaveGameRecord();
+    } else {
+      // Game has no meaningful data, just clear the current game ID
+      _currentGameId = null;
+      debugPrint(
+          'Game completed with no meaningful data, not saving to history');
+    }
   }
 
-  Future<void> _updateGameRecord() async {
+  Future<void> _forceSaveGameRecord() async {
     if (_currentGameId == null) return;
 
     try {
@@ -384,6 +407,33 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
+      debugPrint('Force saved final game record: $_homeTeam vs $_awayTeam');
+    } catch (e) {
+      debugPrint('Error force saving game record: $e');
+    }
+  }
+
+  Future<void> _updateGameRecord() async {
+    if (_currentGameId == null || !_shouldSaveGame()) return;
+
+    try {
+      final gameRecord = GameRecord(
+        id: _currentGameId!,
+        date: _gameDate,
+        homeTeam: _homeTeam,
+        awayTeam: _awayTeam,
+        quarterMinutes: _quarterMinutes,
+        isCountdownTimer: _isCountdownTimer,
+        events: List<GameEvent>.from(_gameEvents),
+        homeGoals: _homeGoals,
+        homeBehinds: _homeBehinds,
+        awayGoals: _awayGoals,
+        awayBehinds: _awayBehinds,
+      );
+
+      await GameHistoryService.deleteGame(_currentGameId!);
+      await GameHistoryService.saveGame(gameRecord);
+      debugPrint('Updated game record: $_homeTeam vs $_awayTeam');
     } catch (e) {
       debugPrint('Error updating game record: $e');
     }
@@ -403,7 +453,6 @@ class GameStateService extends ChangeNotifier {
     _currentGameId = null;
 
     _stopBackgroundTimer();
-    _saveTimer?.cancel();
     _timerStreamController.add(_timerRawTime);
 
     _notifyAllListeners();
@@ -461,7 +510,6 @@ class GameStateService extends ChangeNotifier {
   @override
   void dispose() {
     _backgroundTimer?.cancel();
-    _saveTimer?.cancel();
     _timerStreamController.close();
     _gameEventListeners.clear();
     _timerStateListeners.clear();
