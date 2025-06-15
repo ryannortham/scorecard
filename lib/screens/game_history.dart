@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../providers/game_record.dart';
 import '../services/game_history_service.dart';
+import '../services/game_state_service.dart';
 import '../widgets/game_history/game_history_card.dart';
 import 'package:goalkeeper/screens/game_details.dart' as details;
 import 'settings.dart';
@@ -24,14 +25,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   Future<void> _loadGames() async {
     try {
-      // Clean up duplicate games on load
-      int removedCount = await GameHistoryService.deduplicateGames();
-      if (removedCount > 0) {
-        debugPrint('Removed $removedCount duplicate games');
-      }
+      final allGames = await GameHistoryService.loadGames();
+      final gameStateService = GameStateService.instance;
 
-      // Load the deduplicated games
-      final games = await GameHistoryService.loadGames();
+      // Filter out the game currently in progress
+      final games = allGames
+          .where((game) => game.id != gameStateService.currentGameId)
+          .toList();
+
       setState(() {
         _games = games;
         _isLoading = false;
