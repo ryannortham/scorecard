@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/providers/user_preferences_provider.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
 
 import 'game_setup.dart';
@@ -58,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
         // BUGFIX: Always start with game setup, regardless of game state
         // This prevents unintended navigation when timer settings change
         // The only way to get to scoring should be through the Start Game button
-        debugPrint('HomeScreen: Showing GameSetup screen');
+        AppLogger.debug('HomeScreen: Showing GameSetup screen',
+            component: 'HomeScreen');
         return const GameSetup(title: 'Game Setup');
       },
     );

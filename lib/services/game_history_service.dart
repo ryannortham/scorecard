@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 
 /// Lightweight game summary for list display
 class GameSummary {
@@ -49,6 +49,8 @@ class GameHistoryService {
   static const Uuid _uuid = Uuid();
 
   static Future<void> saveGame(GameRecord game) async {
+    final stopwatch = Stopwatch()..start();
+
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
@@ -61,6 +63,13 @@ class GameHistoryService {
     gamesJson.insert(0, jsonEncode(game.toJson()));
 
     await prefs.setStringList(_gamesKey, gamesJson);
+
+    stopwatch.stop();
+    AppLogger.performance('Game save', stopwatch.elapsed,
+        component: 'GameHistory');
+    AppLogger.info('Game saved successfully',
+        component: 'GameHistory',
+        data: '${game.homeTeam} vs ${game.awayTeam} (${game.id})');
   }
 
   /// Load game summaries with pagination for efficient list display
@@ -101,7 +110,8 @@ class GameHistoryService {
         final summary = GameSummary.fromJson(gameJson);
         summaries.add(summary);
       } catch (e) {
-        // Skip corrupted game data
+        AppLogger.warning('Skipping corrupted game summary data',
+            component: 'GameHistory', data: e.toString());
         continue;
       }
     }
@@ -213,6 +223,8 @@ class GameHistoryService {
 
   /// Legacy method for backwards compatibility - loads all games at once
   static Future<List<GameRecord>> loadGames() async {
+    final stopwatch = Stopwatch()..start();
+
     final prefs = await SharedPreferences.getInstance();
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
@@ -222,6 +234,8 @@ class GameHistoryService {
           try {
             return GameRecord.fromJson(jsonDecode(gameJson));
           } catch (e) {
+            AppLogger.warning('Skipping corrupted game data',
+                component: 'GameHistory', data: e.toString());
             return null; // Skip corrupted games
           }
         })
@@ -232,6 +246,11 @@ class GameHistoryService {
             (game.homeTeam.isNotEmpty && game.awayTeam.isNotEmpty) ||
             game.events.isNotEmpty)
         .toList();
+
+    stopwatch.stop();
+    AppLogger.performance('Load games', stopwatch.elapsed,
+        component: 'GameHistory');
+    AppLogger.info('Loaded ${games.length} games', component: 'GameHistory');
 
     return games;
   }

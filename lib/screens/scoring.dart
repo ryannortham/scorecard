@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
 import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
@@ -147,8 +148,9 @@ class ScoringState extends State<Scoring> {
 
         final String? gameId = _gameStateService.currentGameId;
         if (gameId == null) {
-          debugPrint(
-              'No current game ID found. Cannot navigate to game details.');
+          AppLogger.warning(
+              'No current game ID found. Cannot navigate to game details',
+              component: 'Scoring');
           return;
         }
 
@@ -165,8 +167,10 @@ class ScoringState extends State<Scoring> {
             // Fallback: find the most recent game with matching teams
             final homeTeam = gameSetupProvider.homeTeam;
             final awayTeam = gameSetupProvider.awayTeam;
-            debugPrint(
-                'Could not find game with ID $gameId, using fallback search');
+            AppLogger.warning(
+                'Could not find game with ID $gameId, using fallback search',
+                component: 'Scoring',
+                data: '$homeTeam vs $awayTeam');
             return allGames.firstWhere(
               (game) => game.homeTeam == homeTeam && game.awayTeam == awayTeam,
             );
@@ -211,7 +215,8 @@ class ScoringState extends State<Scoring> {
         try {
           await _shareWithWidgetShotPlus(shareText);
         } catch (e) {
-          debugPrint('Error in share post-frame callback: $e');
+          AppLogger.error('Error in share post-frame callback',
+              component: 'Scoring', error: e);
           // Show error if sharing failed
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -231,7 +236,7 @@ class ScoringState extends State<Scoring> {
         }
       });
     } catch (e) {
-      debugPrint('Error preparing share: $e');
+      AppLogger.error('Error preparing share', component: 'Scoring', error: e);
       if (mounted) {
         setState(() {
           _isSharing = false;
@@ -283,7 +288,7 @@ class ScoringState extends State<Scoring> {
         text: shareText,
       );
     } catch (e) {
-      debugPrint('Error sharing widget: $e');
+      AppLogger.error('Error sharing widget', component: 'Scoring', error: e);
 
       // Fallback to text-only sharing
       await Share.share(shareText);
@@ -303,7 +308,8 @@ class ScoringState extends State<Scoring> {
         try {
           await _saveWithWidgetShotPlus();
         } catch (e) {
-          debugPrint('Error in save post-frame callback: $e');
+          AppLogger.error('Error in save post-frame callback',
+              component: 'Scoring', error: e);
           // Show error if save failed
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -323,7 +329,7 @@ class ScoringState extends State<Scoring> {
         }
       });
     } catch (e) {
-      debugPrint('Error preparing save: $e');
+      AppLogger.error('Error preparing save', component: 'Scoring', error: e);
       if (mounted) {
         setState(() {
           _isSaving = false;
@@ -378,7 +384,7 @@ class ScoringState extends State<Scoring> {
         );
       }
     } catch (e) {
-      debugPrint('Error saving widget: $e');
+      AppLogger.error('Error saving widget', component: 'Scoring', error: e);
       rethrow; // Re-throw to be handled by caller
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 
 class GameStateService extends ChangeNotifier {
   static GameStateService? _instance;
@@ -71,11 +72,24 @@ class GameStateService extends ChangeNotifier {
           _awayBehinds > 0);
 
   void setScore(bool isHomeTeam, bool isGoal, int count) {
+    final team = isHomeTeam ? _homeTeam : _awayTeam;
+    final scoreType = isGoal ? 'goals' : 'behinds';
+
     if (isGoal) {
       isHomeTeam ? _homeGoals = count : _awayGoals = count;
     } else {
       isHomeTeam ? _homeBehinds = count : _awayBehinds = count;
     }
+
+    AppLogger.gameEvent('Score update: $team $scoreType set to $count',
+        details: {
+          'quarter': _selectedQuarter,
+          'homeScore': '$_homeGoals.$_homeBehinds',
+          'awayScore': '$_awayGoals.$_awayBehinds',
+          'isGoal': isGoal,
+          'isHome': isHomeTeam,
+        });
+
     _notifyScoreChangeListeners();
     _saveGameAsync();
     notifyListeners();
@@ -94,6 +108,10 @@ class GameStateService extends ChangeNotifier {
   }
 
   void setSelectedQuarter(int newQuarter) {
+    if (_selectedQuarter != newQuarter) {
+      AppLogger.info('Quarter changed from $_selectedQuarter to $newQuarter',
+          component: 'GameState');
+    }
     _selectedQuarter = newQuarter;
     notifyListeners();
   }
@@ -121,7 +139,8 @@ class GameStateService extends ChangeNotifier {
 
     // Never create a game record for timer configuration
     if (_currentGameId == null) {
-      debugPrint('Timer configured with no active game');
+      AppLogger.debug('Timer configured with no active game',
+          component: 'GameState');
     }
   }
 
@@ -343,10 +362,16 @@ class GameStateService extends ChangeNotifier {
 
       // Only store the ID, don't save to history yet
       _currentGameId = gameRecord.id;
-      debugPrint(
-          'Created game ID for: $_homeTeam vs $_awayTeam at $_gameDate (not saved yet)');
+      AppLogger.debug('Created game ID: ${gameRecord.id}',
+          component: 'GameState',
+          data: {
+            'homeTeam': _homeTeam,
+            'awayTeam': _awayTeam,
+            'gameDate': _gameDate
+          });
     } catch (e) {
-      debugPrint('Error creating initial game record: $e');
+      AppLogger.error('Error creating initial game record',
+          component: 'GameState', error: e);
     }
   }
 
@@ -357,7 +382,8 @@ class GameStateService extends ChangeNotifier {
 
     // Run the save operation without awaiting to avoid blocking the UI
     _updateGameRecord().catchError((error) {
-      debugPrint('Error in async game save: $error');
+      AppLogger.error('Error in async game save',
+          component: 'GameState', error: error);
     });
   }
 
@@ -380,8 +406,9 @@ class GameStateService extends ChangeNotifier {
     } else {
       // Game has no meaningful data, just clear the current game ID
       _currentGameId = null;
-      debugPrint(
-          'Game completed with no meaningful data, not saving to history');
+      AppLogger.info(
+          'Game completed with no meaningful data, not saving to history',
+          component: 'GameState');
     }
   }
 
@@ -405,9 +432,11 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
-      debugPrint('Force saved final game record: $_homeTeam vs $_awayTeam');
+      AppLogger.info('Force saved final game record',
+          component: 'GameState', data: '$_homeTeam vs $_awayTeam');
     } catch (e) {
-      debugPrint('Error force saving game record: $e');
+      AppLogger.error('Error force saving game record',
+          component: 'GameState', error: e);
     }
   }
 
@@ -431,13 +460,15 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
-      debugPrint('Updated game record: $_homeTeam vs $_awayTeam');
     } catch (e) {
-      debugPrint('Error updating game record: $e');
+      AppLogger.error('Error updating game record',
+          component: 'GameState', error: e);
     }
   }
 
   void resetGame() {
+    AppLogger.info('Resetting game state', component: 'GameState');
+
     // Reset all game state variables
     _homeGoals = 0;
     _homeBehinds = 0;

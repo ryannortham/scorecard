@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/app_logger.dart';
 import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
@@ -93,6 +94,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         });
       }
     } catch (e) {
+      AppLogger.error('Error loading game summaries',
+          component: 'GameHistory', error: e);
       if (mounted) {
         setState(() {
           _isLoading = false;

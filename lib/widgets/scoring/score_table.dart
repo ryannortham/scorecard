@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/widgets/scoring/quarter_score_row.dart';
 import 'package:goalkeeper/widgets/scoring/score_table_header.dart';
 import 'package:goalkeeper/widgets/scoring/team_score_header.dart';
@@ -49,6 +50,9 @@ class ScoreTable extends StatelessWidget {
           .toList();
       return {'team': teamEvents};
     } catch (e) {
+      AppLogger.warning('Error calculating quarter scores',
+          component: 'ScoreTable',
+          data: 'Quarter $quarter, Team: $displayTeam');
       return {'team': []};
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -108,7 +109,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         try {
           await _shareWithWidgetShotPlus(shareText);
         } catch (e) {
-          debugPrint('Error in share post-frame callback: $e');
+          AppLogger.error('Error in share post-frame callback',
+              component: 'GameDetails', error: e);
           // Show error if sharing failed
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -128,7 +130,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         }
       });
     } catch (e) {
-      debugPrint('Error preparing share: $e');
+      AppLogger.error('Error preparing share',
+          component: 'GameDetails', error: e);
       if (mounted) {
         setState(() {
           _isSharing = false;
@@ -152,7 +155,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           // Capture the full widget using WidgetShotPlus
           await _saveWithWidgetShotPlus();
         } catch (e) {
-          debugPrint('Error in _saveToGallery post-frame callback: $e');
+          AppLogger.error('Error in _saveToGallery post-frame callback',
+              component: 'GameDetails', error: e);
           // Show error message if save fails
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +178,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       });
     } catch (e) {
       // Handle any synchronous errors
-      debugPrint('Error setting up post-frame callback: $e');
+      AppLogger.error('Error setting up post-frame callback',
+          component: 'GameDetails', error: e);
       if (mounted) {
         setState(() {
           _isSaving = false;
@@ -239,7 +244,8 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
 
       // No success feedback needed - user can see share dialog
     } catch (e) {
-      debugPrint('Error sharing widget: $e');
+      AppLogger.error('Error sharing widget',
+          component: 'GameDetails', error: e);
 
       // Fallback to text-only sharing
       await Share.share(shareText);
@@ -284,7 +290,8 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
         );
       }
     } catch (e) {
-      debugPrint('Error saving widget: $e');
+      AppLogger.error('Error saving widget',
+          component: 'GameDetails', error: e);
       rethrow; // Re-throw to be handled by caller
     }
   }

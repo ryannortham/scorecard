@@ -7,8 +7,13 @@ import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/teams_provider.dart';
 import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'package:goalkeeper/screens/home_screen.dart';
+import 'package:goalkeeper/services/app_logger.dart';
 
 void main() {
+  // Initialize logging system
+  AppLogger.initialize();
+  AppLogger.info('GoalKeeper app starting', component: 'Main');
+
   runApp(
     MultiProvider(
       providers: [
