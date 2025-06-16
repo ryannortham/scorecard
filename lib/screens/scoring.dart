@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
@@ -43,7 +44,6 @@ class ScoringState extends State<Scoring> {
   // Screenshot functionality
   final GlobalKey _screenshotWidgetKey = GlobalKey();
   bool _isSharing = false;
-  bool _isSaving = false;
 
   Future<bool> _showExitConfirmation() async {
     return await ExitGameBottomSheet.show(context);
@@ -208,6 +208,19 @@ class ScoringState extends State<Scoring> {
     });
 
     try {
+      // In debug mode, save image locally first
+      if (kDebugMode) {
+        try {
+          await _saveImageInDebugMode();
+          AppLogger.debug('Image saved locally before sharing',
+              component: 'Scoring');
+        } catch (e) {
+          AppLogger.error('Failed to save image locally',
+              component: 'Scoring', error: e);
+          // Continue with sharing even if save fails in debug mode
+        }
+      }
+
       final shareText = _buildShareText();
 
       // Use post-frame callback to ensure UI is fully rendered
@@ -295,61 +308,8 @@ class ScoringState extends State<Scoring> {
     }
   }
 
-  void saveGameImage(BuildContext context) async {
-    if (_isSaving) return;
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      // Use post-frame callback to ensure UI is fully rendered
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await _saveWithWidgetShotPlus();
-        } catch (e) {
-          AppLogger.error('Error in save post-frame callback',
-              component: 'Scoring', error: e);
-          // Show error if save failed
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to save screenshot: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        } finally {
-          if (mounted) {
-            setState(() {
-              _isSaving = false;
-            });
-          }
-        }
-      });
-    } catch (e) {
-      AppLogger.error('Error preparing save', component: 'Scoring', error: e);
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to prepare screenshot: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  /// Save to gallery using WidgetShotPlus
-  Future<void> _saveWithWidgetShotPlus() async {
+  /// Save image in debug mode (without UI state management)
+  Future<void> _saveImageInDebugMode() async {
     try {
       final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
           as WidgetShotPlusRenderRepaintBoundary?;
@@ -373,16 +333,7 @@ class ScoringState extends State<Scoring> {
       final fileName = _generateFileName();
       await Gal.putImageBytes(imageBytes, name: fileName);
 
-      // Show success message
-      if (mounted && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Game image saved to gallery'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      AppLogger.debug('Game image saved to gallery', component: 'Scoring');
     } catch (e) {
       AppLogger.error('Error saving widget', component: 'Scoring', error: e);
       rethrow; // Re-throw to be handled by caller
@@ -446,11 +397,16 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.save_alt),
-                  tooltip: 'Save Game Image',
-                  onPressed: () {
-                    saveGameImage(context);
-                  },
+                  icon: _isSharing
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.share),
+                  tooltip: 'Share Game Details',
+                  onPressed:
+                      _isSharing ? null : () => _shareGameDetails(context),
                 ),
                 Builder(
                   builder: (context) => IconButton(
@@ -611,17 +567,6 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                   ),
                 ],
               ),
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: _isSharing ? null : () => _shareGameDetails(context),
-              tooltip: 'Share Game Details',
-              child: _isSharing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.share),
             ),
           );
         },
