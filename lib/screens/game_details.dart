@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/app_logger.dart';
+import 'package:goalkeeper/services/game_history_service.dart';
+import 'package:goalkeeper/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -47,6 +49,11 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                 : const Icon(Icons.share),
             onPressed: _isSharing ? null : () => _shareGameDetails(context),
             tooltip: 'Share Game Details',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () => _deleteGame(context),
+            tooltip: 'Delete Game',
           ),
         ],
       ),
@@ -138,6 +145,45 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         setState(() {
           _isSharing = false;
         });
+      }
+    }
+  }
+
+  void _deleteGame(BuildContext context) async {
+    // Show confirmation bottom sheet
+    final shouldDelete = await ConfirmationBottomSheet.show(
+      context: context,
+      actionText: 'Delete Game',
+      actionIcon: Icons.delete_outline,
+      isDestructive: true,
+      onConfirm: () {}, // The bottom sheet handles navigation internally
+    );
+
+    if (shouldDelete && context.mounted) {
+      try {
+        // Delete the game from storage
+        await GameHistoryService.deleteGame(widget.game.id);
+
+        AppLogger.info('Game deleted successfully', component: 'GameDetails');
+
+        // Navigate back to the previous screen with result indicating deletion
+        if (context.mounted) {
+          Navigator.of(context).pop(true);
+        }
+      } catch (e) {
+        AppLogger.error('Failed to delete game',
+            component: 'GameDetails', error: e);
+
+        // Show error message
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete game: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }

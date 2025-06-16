@@ -190,11 +190,16 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     // Load the full game data only when needed
     final game = await GameHistoryService.loadGameById(gameId);
     if (game != null && mounted) {
-      Navigator.of(context).push(
+      final result = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (context) => details.GameDetailsPage(game: game),
         ),
       );
+
+      // If the game was deleted (result is true), refresh the list
+      if (result == true && mounted) {
+        await _loadGames();
+      }
     }
   }
 
