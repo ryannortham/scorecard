@@ -98,7 +98,8 @@ class AppNavigator {
     return await ConfirmationBottomSheet.show(
       context: context,
       actionText: confirmText,
-      actionIcon: icon ?? (isDestructive ? Icons.delete_outline : Icons.check),
+      actionIcon:
+          icon ?? (isDestructive ? Icons.delete_outline : Icons.check_outlined),
       onConfirm: () {}, // The bottom sheet handles navigation internally
       isDestructive: isDestructive,
     );

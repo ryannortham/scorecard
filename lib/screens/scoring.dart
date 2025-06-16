@@ -400,7 +400,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Icon(Icons.share),
+                      : const Icon(Icons.share_outlined),
                   tooltip: 'Share Game Details',
                   onPressed:
                       _isSharing ? null : () => _shareGameDetails(context),
@@ -457,7 +457,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                     ),
                   ),
                   ListTile(
-                    leading: const Icon(Icons.settings),
+                    leading: const Icon(Icons.settings_outlined),
                     title: const Text('Settings'),
                     onTap: () {
                       Navigator.pop(context); // Close the drawer
@@ -465,7 +465,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.history),
+                    leading: const Icon(Icons.history_outlined),
                     title: const Text('Game History'),
                     onTap: () {
                       Navigator.pop(context); // Close the drawer

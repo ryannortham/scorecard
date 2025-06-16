@@ -168,7 +168,7 @@ class _GameSetupState extends State<GameSetup> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
+              leading: const Icon(Icons.settings_outlined),
               title: const Text('Settings'),
               onTap: () async {
                 Navigator.pop(context); // Close the drawer
@@ -184,7 +184,7 @@ class _GameSetupState extends State<GameSetup> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
+              leading: const Icon(Icons.history_outlined),
               title: const Text('Game History'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
@@ -203,62 +203,82 @@ class _GameSetupState extends State<GameSetup> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(flex: 2),
-              Form(
-                key: dateKey,
-                child: TextFormField(
-                  readOnly: true,
-                  controller: _dateController,
-                  decoration: const InputDecoration(
-                    labelText: 'Game Date',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select Game Date';
-                    }
-                    return null;
-                  },
-                  onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate:
-                          DateTime.now().subtract(const Duration(days: 365)),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
+              const Spacer(flex: 1),
+              Card(
+                elevation: 1,
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.9),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Form(
+                        key: dateKey,
+                        child: TextFormField(
+                          readOnly: true,
+                          controller: _dateController,
+                          decoration: const InputDecoration(
+                            labelText: 'Game Date',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select Game Date';
+                            }
+                            return null;
+                          },
+                          onTap: () async {
+                            final DateTime? pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 365)),
+                            );
 
-                    if (pickedDate != null) {
-                      gameSetupAdapter.setGameDate(pickedDate);
-                      _dateController.text =
-                          DateFormat('EEEE dd/MM/yyyy').format(pickedDate);
-                    }
-                    dateKey.currentState!.validate();
-                  },
+                            if (pickedDate != null) {
+                              gameSetupAdapter.setGameDate(pickedDate);
+                              _dateController.text =
+                                  DateFormat('EEEE dd/MM/yyyy')
+                                      .format(pickedDate);
+                            }
+                            dateKey.currentState!.validate();
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TeamSelectionWidget(
+                        homeTeamKey: homeTeamKey,
+                        awayTeamKey: awayTeamKey,
+                        homeTeamController: _homeTeamController,
+                        awayTeamController: _awayTeamController,
+                        homeTeam: homeTeam,
+                        awayTeam: awayTeam,
+                        onHomeTeamChanged: (newTeam) {
+                          setState(() {
+                            homeTeam = newTeam;
+                          });
+                        },
+                        onAwayTeamChanged: (newTeam) {
+                          setState(() {
+                            awayTeam = newTeam;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      const GameSettingsConfiguration(),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 20),
-              TeamSelectionWidget(
-                homeTeamKey: homeTeamKey,
-                awayTeamKey: awayTeamKey,
-                homeTeamController: _homeTeamController,
-                awayTeamController: _awayTeamController,
-                homeTeam: homeTeam,
-                awayTeam: awayTeam,
-                onHomeTeamChanged: (newTeam) {
-                  setState(() {
-                    homeTeam = newTeam;
-                  });
-                },
-                onAwayTeamChanged: (newTeam) {
-                  setState(() {
-                    awayTeam = newTeam;
-                  });
-                },
-              ),
               const SizedBox(height: 24),
-              const GameSettingsConfiguration(),
-              const SizedBox(height: 32),
               Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,

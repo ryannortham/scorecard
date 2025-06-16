@@ -148,7 +148,7 @@ class _SettingsState extends State<Settings> {
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () => provider.setFavoriteTeam(''),
-                icon: const Icon(Icons.clear),
+                icon: const Icon(Icons.clear_outlined),
                 tooltip: 'Clear favorite team',
               ),
             ],

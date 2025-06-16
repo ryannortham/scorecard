@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/providers/user_preferences_provider.dart';
 
-/// Widget for configuring game settings (quarter minutes and timer type)
-/// on the game setup screen with user interaction
+/// Widget for configuring timer settings (quarter minutes and timer type)
+/// on the game setup screen
 class GameSettingsConfiguration extends StatelessWidget {
   const GameSettingsConfiguration({super.key});
 
@@ -14,43 +14,23 @@ class GameSettingsConfiguration extends StatelessWidget {
     return Consumer2<GameSetupAdapter, UserPreferencesProvider>(
       builder: (context, gameSetupAdapter, userPreferences, child) {
         if (!userPreferences.loaded) {
-          return const Card(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
+          return const Center(
+            child: CircularProgressIndicator(),
           );
         }
 
-        return Card(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Game Settings',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                const SizedBox(height: 16),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Quarter Minutes Setting
+            _buildQuarterMinutesSection(
+                context, gameSetupAdapter, userPreferences),
 
-                // Quarter Minutes Setting
-                _buildQuarterMinutesSection(
-                    context, gameSetupAdapter, userPreferences),
+            const SizedBox(height: 20),
 
-                const SizedBox(height: 24),
-
-                // Timer Type Setting
-                _buildTimerTypeSection(
-                    context, gameSetupAdapter, userPreferences),
-              ],
-            ),
-          ),
+            // Timer Type Setting
+            _buildTimerTypeSection(context, gameSetupAdapter, userPreferences),
+          ],
         );
       },
     );
@@ -69,17 +49,19 @@ class GameSettingsConfiguration extends StatelessWidget {
           children: [
             Text(
               'Quarter Minutes',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '${gameSetupAdapter.quarterMinutes}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w600,
                     ),
@@ -87,18 +69,26 @@ class GameSettingsConfiguration extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        Slider(
-          value: gameSetupAdapter.quarterMinutes.toDouble(),
-          min: 1,
-          max: 20,
-          divisions: 19,
-          label: '${gameSetupAdapter.quarterMinutes}',
-          onChanged: (value) {
-            final minutes = value.toInt();
-            gameSetupAdapter.setQuarterMinutes(minutes);
-            userPreferences.setQuarterMinutes(minutes);
-          },
+        const SizedBox(height: 12),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 4,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 10,
+            ),
+          ),
+          child: Slider(
+            value: gameSetupAdapter.quarterMinutes.toDouble(),
+            min: 1,
+            max: 20,
+            divisions: 19,
+            label: '${gameSetupAdapter.quarterMinutes}',
+            onChanged: (value) {
+              final minutes = value.toInt();
+              gameSetupAdapter.setQuarterMinutes(minutes);
+              userPreferences.setQuarterMinutes(minutes);
+            },
+          ),
         ),
       ],
     );
@@ -112,28 +102,30 @@ class GameSettingsConfiguration extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Timer Type',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              gameSetupAdapter.isCountdownTimer ? 'Countdown' : 'Count Up',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+              'Timer Type',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
             ),
-            const SizedBox(width: 8),
-            Switch(
-              value: gameSetupAdapter.isCountdownTimer,
-              onChanged: (value) {
-                gameSetupAdapter.setIsCountdownTimer(value);
-                userPreferences.setIsCountdownTimer(value);
-              },
+            const SizedBox(height: 4),
+            Text(
+              gameSetupAdapter.isCountdownTimer ? 'Countdown' : 'Count Up',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
+        ),
+        Switch(
+          value: gameSetupAdapter.isCountdownTimer,
+          onChanged: (value) {
+            gameSetupAdapter.setIsCountdownTimer(value);
+            userPreferences.setIsCountdownTimer(value);
+          },
         ),
       ],
     );

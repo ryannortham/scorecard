@@ -69,7 +69,7 @@ class TeamList extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
+              leading: const Icon(Icons.settings_outlined),
               title: const Text('Settings'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
@@ -81,7 +81,7 @@ class TeamList extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
+              leading: const Icon(Icons.history_outlined),
               title: const Text('Game History'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
@@ -136,7 +136,7 @@ class TeamList extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTeamDialog(context),
         tooltip: 'Add Team',
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_outlined),
       ),
     );
   }

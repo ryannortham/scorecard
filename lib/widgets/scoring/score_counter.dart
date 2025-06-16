@@ -72,7 +72,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                                   widget.isHomeTeam, widget.isGoal)
                           ? () => _updateCount(currentCount - 1)
                           : null,
-                      icon: const Icon(Icons.remove, size: 18),
+                      icon: const Icon(Icons.remove_outlined, size: 18),
                       padding: const EdgeInsets.all(8.0),
                       constraints:
                           const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -105,7 +105,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                       onPressed: widget.enabled && currentCount < 99
                           ? () => _updateCount(currentCount + 1)
                           : null,
-                      icon: const Icon(Icons.add, size: 18),
+                      icon: const Icon(Icons.add_outlined, size: 18),
                       padding: const EdgeInsets.all(8.0),
                       constraints:
                           const BoxConstraints(minWidth: 40, minHeight: 40),

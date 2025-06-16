@@ -148,7 +148,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     await ConfirmationBottomSheet.show(
       context: context,
       actionText: 'Delete ${_selectedGameIds.length} games',
-      actionIcon: Icons.delete,
+      actionIcon: Icons.delete_outline,
       isDestructive: true,
       onConfirm: () async {
         try {
@@ -219,14 +219,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               : const Text('Game History'),
           leading: _isSelectionMode
               ? IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.close_outlined),
                   onPressed: _exitSelectionMode,
                 )
               : null,
           actions: [
             if (_isSelectionMode)
               IconButton(
-                icon: const Icon(Icons.delete),
+                icon: const Icon(Icons.delete_outline),
                 onPressed:
                     _selectedGameIds.isNotEmpty ? _deleteSelectedGames : null,
               )
@@ -278,7 +278,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.settings),
+                leading: const Icon(Icons.settings_outlined),
                 title: const Text('Settings'),
                 onTap: () {
                   Navigator.pop(context); // Close the drawer

@@ -49,7 +49,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.share),
+                : const Icon(Icons.share_outlined),
             onPressed: _isSharing ? null : () => _shareGameDetails(context),
             tooltip: 'Share Game Details',
           ),
