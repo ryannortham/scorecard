@@ -1,6 +1,7 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
@@ -12,7 +13,7 @@ import 'package:goalkeeper/services/app_logger.dart';
 void main() {
   // Initialize logging system
   AppLogger.initialize();
-  AppLogger.info('GoalKeeper app starting', component: 'Main');
+  AppLogger.info('Footy Score Card app starting', component: 'Main');
 
   runApp(
     MultiProvider(
@@ -22,13 +23,13 @@ void main() {
         ChangeNotifierProvider(create: (_) => ScorePanelAdapter()),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),
       ],
-      child: const GoalKeeperApp(),
+      child: const FootyScoreCardApp(),
     ),
   );
 }
 
-class GoalKeeperApp extends StatelessWidget {
-  const GoalKeeperApp({super.key});
+class FootyScoreCardApp extends StatelessWidget {
+  const FootyScoreCardApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,14 +38,33 @@ class GoalKeeperApp extends StatelessWidget {
         // Show loading screen until settings are loaded
         if (!userPreferences.loaded) {
           return MaterialApp(
-            title: 'GoalKeeper',
+            title: 'Footy Score Card',
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,
             ),
-            home: const Scaffold(
+            home: Scaffold(
               body: Center(
-                child: CircularProgressIndicator(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icon/app_icon.svg',
+                      width: 80,
+                      height: 80,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Footy Score Card',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const CircularProgressIndicator(),
+                  ],
+                ),
               ),
             ),
           );
@@ -68,7 +88,7 @@ class GoalKeeperApp extends StatelessWidget {
                     seedColor: seedColor, brightness: Brightness.dark);
 
             return MaterialApp(
-              title: 'GoalKeeper',
+              title: 'Footy Score Card',
               theme: ThemeData(
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
