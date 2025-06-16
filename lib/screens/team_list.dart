@@ -277,9 +277,7 @@ class TeamList extends StatelessWidget {
 
     if (confirmed) {
       await teamsProvider.deleteTeam(index);
-      if (context.mounted) {
-        Navigator.pop(context, teamName);
-      }
+      // Stay on the team list after deletion - don't navigate back
     }
   }
 }
