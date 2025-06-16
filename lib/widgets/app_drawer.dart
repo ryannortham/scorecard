@@ -137,45 +137,45 @@ class AppDrawer extends StatelessWidget {
   String _getColorThemeText(String theme) {
     switch (theme) {
       case 'adaptive':
-        return 'Adaptive (Device Colors)';
+        return 'Adaptive';
       case 'blue':
-        return 'Ocean Blue';
+        return 'Blue';
       case 'light_blue':
-        return 'Sky Blue';
+        return 'Light Blue';
       case 'indigo':
-        return 'Midnight Indigo';
+        return 'Indigo';
       case 'deep_purple':
         return 'Deep Purple';
       case 'purple':
-        return 'Royal Purple';
+        return 'Purple';
       case 'pink':
-        return 'Rose Pink';
+        return 'Pink';
       case 'red':
-        return 'Ruby Red';
+        return 'Red';
       case 'deep_orange':
-        return 'Sunset Orange';
+        return 'Deep Orange';
       case 'orange':
-        return 'Vibrant Orange';
+        return 'Orange';
       case 'amber':
-        return 'Golden Amber';
+        return 'Amber';
       case 'yellow':
-        return 'Sunny Yellow';
+        return 'Yellow';
       case 'lime':
-        return 'Lime Green';
+        return 'Lime';
       case 'light_green':
-        return 'Fresh Green';
+        return 'Light Green';
       case 'green':
-        return 'Forest Green';
+        return 'Green';
       case 'teal':
-        return 'Emerald Teal';
+        return 'Teal';
       case 'cyan':
-        return 'Azure Cyan';
+        return 'Cyan';
       case 'brown':
-        return 'Earth Brown';
+        return 'Brown';
       case 'blue_grey':
-        return 'Steel Blue';
+        return 'Blue Grey';
       case 'grey':
-        return 'Modern Grey';
+        return 'Grey';
       default:
         return 'Adaptive';
     }
@@ -264,102 +264,48 @@ class AppDrawer extends StatelessWidget {
     final colorOptions = [
       {
         'value': 'adaptive',
-        'label': 'Adaptive (Device Colors)',
+        'label': 'Adaptive',
         'color': const Color(0xFF6750A4)
       },
-      // Blues
-      {
-        'value': 'blue',
-        'label': 'Ocean Blue',
-        'color': const Color(0xFF1976D2)
-      },
+      {'value': 'blue', 'label': 'Blue', 'color': const Color(0xFF1565C0)},
       {
         'value': 'light_blue',
-        'label': 'Sky Blue',
-        'color': const Color(0xFF0288D1)
+        'label': 'Light Blue',
+        'color': const Color(0xFF0277BD)
       },
-      {
-        'value': 'cyan',
-        'label': 'Azure Cyan',
-        'color': const Color(0xFF00838F)
-      },
-      {
-        'value': 'teal',
-        'label': 'Emerald Teal',
-        'color': const Color(0xFF00695C)
-      },
-      // Greens
-      {
-        'value': 'green',
-        'label': 'Forest Green',
-        'color': const Color(0xFF2E7D32)
-      },
-      {
-        'value': 'light_green',
-        'label': 'Fresh Green',
-        'color': const Color(0xFF689F38)
-      },
-      {
-        'value': 'lime',
-        'label': 'Lime Green',
-        'color': const Color(0xFF9E9D24)
-      },
-      // Yellows/Oranges
-      {
-        'value': 'yellow',
-        'label': 'Sunny Yellow',
-        'color': const Color(0xFFF9A825)
-      },
-      {
-        'value': 'amber',
-        'label': 'Golden Amber',
-        'color': const Color(0xFFFF8F00)
-      },
-      {
-        'value': 'orange',
-        'label': 'Vibrant Orange',
-        'color': const Color(0xFFF57C00)
-      },
-      {
-        'value': 'deep_orange',
-        'label': 'Sunset Orange',
-        'color': const Color(0xFFD84315)
-      },
-      // Reds/Pinks
-      {'value': 'red', 'label': 'Ruby Red', 'color': const Color(0xFFC62828)},
-      {'value': 'pink', 'label': 'Rose Pink', 'color': const Color(0xFFAD1457)},
-      // Purples
-      {
-        'value': 'purple',
-        'label': 'Royal Purple',
-        'color': const Color(0xFF6A1B9A)
-      },
+      {'value': 'indigo', 'label': 'Indigo', 'color': const Color(0xFF3F51B5)},
+      {'value': 'purple', 'label': 'Purple', 'color': const Color(0xFF9C27B0)},
       {
         'value': 'deep_purple',
         'label': 'Deep Purple',
-        'color': const Color(0xFF512DA8)
+        'color': const Color(0xFF673AB7)
       },
+      {'value': 'pink', 'label': 'Pink', 'color': const Color(0xFFE91E63)},
+      {'value': 'red', 'label': 'Red', 'color': const Color(0xFFD32F2F)},
       {
-        'value': 'indigo',
-        'label': 'Midnight Indigo',
-        'color': const Color(0xFF283593)
+        'value': 'deep_orange',
+        'label': 'Deep Orange',
+        'color': const Color(0xFFFF5722)
       },
-      // Neutrals
+      {'value': 'orange', 'label': 'Orange', 'color': const Color(0xFFFF9800)},
+      {'value': 'amber', 'label': 'Amber', 'color': const Color(0xFFFFC107)},
+      {'value': 'yellow', 'label': 'Yellow', 'color': const Color(0xFFFFEB3B)},
+      {'value': 'lime', 'label': 'Lime', 'color': const Color(0xFFCDDC39)},
       {
-        'value': 'brown',
-        'label': 'Earth Brown',
-        'color': const Color(0xFF5D4037)
+        'value': 'light_green',
+        'label': 'Light Green',
+        'color': const Color(0xFF8BC34A)
       },
+      {'value': 'green', 'label': 'Green', 'color': const Color(0xFF4CAF50)},
+      {'value': 'teal', 'label': 'Teal', 'color': const Color(0xFF009688)},
+      {'value': 'cyan', 'label': 'Cyan', 'color': const Color(0xFF00BCD4)},
+      {'value': 'brown', 'label': 'Brown', 'color': const Color(0xFF795548)},
       {
         'value': 'blue_grey',
-        'label': 'Steel Blue',
-        'color': const Color(0xFF455A64)
+        'label': 'Blue Grey',
+        'color': const Color(0xFF607D8B)
       },
-      {
-        'value': 'grey',
-        'label': 'Modern Grey',
-        'color': const Color(0xFF616161)
-      },
+      {'value': 'grey', 'label': 'Grey', 'color': const Color(0xFF9E9E9E)},
     ];
 
     showMenu<String>(

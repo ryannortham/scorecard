@@ -141,52 +141,51 @@ class UserPreferencesProvider extends ChangeNotifier {
     }
   }
 
-  /// Get color from theme name using Material Design 3 recommended colors
+  /// Get color from theme name using Material Design 3 seed colors
   Color getThemeColor() {
     switch (_colorTheme) {
       case 'adaptive':
-        return const Color(
-            0xFF6750A4); // Material Purple - fallback for when dynamic colors aren't available
+        return const Color(0xFF6750A4); // Material 3 baseline purple
       case 'blue':
-        return const Color(0xFF1976D2); // Material Blue 700
+        return const Color(0xFF1565C0); // Material 3 Blue seed
       case 'light_blue':
-        return const Color(0xFF0288D1); // Material Light Blue 700
+        return const Color(0xFF0277BD); // Material 3 Light Blue seed
       case 'indigo':
-        return const Color(0xFF283593); // Material Indigo 800
+        return const Color(0xFF3F51B5); // Material 3 Indigo seed
       case 'deep_purple':
-        return const Color(0xFF512DA8); // Material Deep Purple 700
+        return const Color(0xFF673AB7); // Material 3 Deep Purple seed
       case 'purple':
-        return const Color(0xFF6A1B9A); // Material Purple 800
+        return const Color(0xFF9C27B0); // Material 3 Purple seed
       case 'pink':
-        return const Color(0xFFAD1457); // Material Pink 800
+        return const Color(0xFFE91E63); // Material 3 Pink seed
       case 'red':
-        return const Color(0xFFC62828); // Material Red 800
+        return const Color(0xFFD32F2F); // Material 3 Red seed
       case 'deep_orange':
-        return const Color(0xFFD84315); // Material Deep Orange 800
+        return const Color(0xFFFF5722); // Material 3 Deep Orange seed
       case 'orange':
-        return const Color(0xFFF57C00); // Material Orange 800
+        return const Color(0xFFFF9800); // Material 3 Orange seed
       case 'amber':
-        return const Color(0xFFFF8F00); // Material Amber 800
+        return const Color(0xFFFFC107); // Material 3 Amber seed
       case 'yellow':
-        return const Color(0xFFF9A825); // Material Yellow 800
+        return const Color(0xFFFFEB3B); // Material 3 Yellow seed
       case 'lime':
-        return const Color(0xFF9E9D24); // Material Lime 800
+        return const Color(0xFFCDDC39); // Material 3 Lime seed
       case 'light_green':
-        return const Color(0xFF689F38); // Material Light Green 800
+        return const Color(0xFF8BC34A); // Material 3 Light Green seed
       case 'green':
-        return const Color(0xFF2E7D32); // Material Green 800
+        return const Color(0xFF4CAF50); // Material 3 Green seed
       case 'teal':
-        return const Color(0xFF00695C); // Material Teal 800
+        return const Color(0xFF009688); // Material 3 Teal seed
       case 'cyan':
-        return const Color(0xFF00838F); // Material Cyan 800
+        return const Color(0xFF00BCD4); // Material 3 Cyan seed
       case 'brown':
-        return const Color(0xFF5D4037); // Material Brown 700
+        return const Color(0xFF795548); // Material 3 Brown seed
       case 'blue_grey':
-        return const Color(0xFF455A64); // Material Blue Grey 700
+        return const Color(0xFF607D8B); // Material 3 Blue Grey seed
       case 'grey':
-        return const Color(0xFF616161); // Material Grey 600
+        return const Color(0xFF9E9E9E); // Material 3 Grey seed
       default:
-        return const Color(0xFF1976D2); // Default to Material Blue
+        return const Color(0xFF1565C0); // Default to Material 3 Blue
     }
   }
 
