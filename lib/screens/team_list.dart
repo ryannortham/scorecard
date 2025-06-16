@@ -162,6 +162,7 @@ class TeamList extends StatelessWidget {
               ),
               autofocus: true,
               textCapitalization: TextCapitalization.words,
+              maxLength: 30,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a team name';
@@ -221,6 +222,7 @@ class TeamList extends StatelessWidget {
               ),
               autofocus: true,
               textCapitalization: TextCapitalization.words,
+              maxLength: 30,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
                   return 'Please enter a team name';

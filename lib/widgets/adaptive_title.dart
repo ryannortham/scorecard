@@ -31,60 +31,22 @@ class AdaptiveTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveStyle = style ?? Theme.of(context).textTheme.titleLarge;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Create a text painter to measure the text
-        final textPainter = TextPainter(
-          text: TextSpan(text: title, style: effectiveStyle),
-          textDirection: TextDirection.ltr,
-          maxLines: maxLines,
-        );
-
-        textPainter.layout(maxWidth: double.infinity);
-        final textWidth = textPainter.size.width;
-        final availableWidth = constraints.maxWidth;
-
-        // If text fits naturally, just display it normally
-        if (textWidth <= availableWidth) {
-          return Text(
-            title,
-            style: effectiveStyle,
-            textAlign: textAlign,
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
-          );
-        }
-
-        // Calculate scale factor needed to fit
-        final scaleFactor = availableWidth / textWidth;
-
-        // If scale factor is above minimum, use FittedBox to scale down
-        if (scaleFactor >= minScaleFactor) {
-          return FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: textAlign == TextAlign.center
-                ? Alignment.center
-                : textAlign == TextAlign.left
-                    ? Alignment.centerLeft
-                    : Alignment.centerRight,
-            child: Text(
-              title,
-              style: effectiveStyle,
-              textAlign: textAlign,
-              maxLines: maxLines,
-            ),
-          );
-        }
-
-        // Scale factor is too small, use truncation with ellipsis
-        return Text(
-          title,
-          style: effectiveStyle,
-          textAlign: textAlign,
-          maxLines: maxLines,
-          overflow: TextOverflow.ellipsis,
-        );
-      },
+    // Simple and safe approach: just use FittedBox with scaleDown
+    // This avoids the LayoutBuilder infinite loop issue
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: textAlign == TextAlign.center
+          ? Alignment.center
+          : textAlign == TextAlign.left
+              ? Alignment.centerLeft
+              : Alignment.centerRight,
+      child: Text(
+        title,
+        style: effectiveStyle,
+        textAlign: textAlign,
+        maxLines: maxLines,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goalkeeper/widgets/adaptive_title.dart';
 
 /// Widget for displaying a team's score with highlighting for the winner
 class TeamScoreDisplay extends StatelessWidget {
@@ -28,13 +29,15 @@ class TeamScoreDisplay extends StatelessWidget {
     return Column(
       crossAxisAlignment: crossAxisAlignment,
       children: [
-        Text(
-          teamName,
+        AdaptiveTitle(
+          title: teamName,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: isWinner ? Theme.of(context).colorScheme.primary : null,
                 fontWeight: isWinner ? FontWeight.w600 : null,
               ),
-          textAlign: textAlign,
+          textAlign: centerAlign ? TextAlign.center : TextAlign.start,
+          maxLines: 1,
+          minScaleFactor: 0.6, // Allow more aggressive scaling for screenshots
         ),
         const SizedBox(height: 8),
         Text(

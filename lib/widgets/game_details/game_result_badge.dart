@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goalkeeper/widgets/adaptive_title.dart';
 
 /// Widget for displaying the game result (win/loss/draw) as a badge
 class GameResultBadge extends StatelessWidget {
@@ -64,14 +65,17 @@ class GameResultBadge extends StatelessWidget {
               : Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(
-          resultText,
+        child: AdaptiveTitle(
+          title: resultText,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: isDraw
                     ? Theme.of(context).colorScheme.onSecondaryContainer
                     : Theme.of(context).colorScheme.onPrimaryContainer,
                 fontWeight: FontWeight.w600,
               ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          minScaleFactor: 0.6, // Allow aggressive scaling for long team names
         ),
       ),
     );
