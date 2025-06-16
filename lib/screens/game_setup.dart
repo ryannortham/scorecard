@@ -121,52 +121,30 @@ class _GameSetupState extends State<GameSetup> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.more_vert),
-              tooltip: 'Menu',
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-            ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu),
+            tooltip: 'Menu',
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
           ),
-        ],
+        ),
       ),
-      endDrawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.sports_rugby,
-                    size: 32,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'GoalKeeper',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    'Menu',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                  ),
-                ],
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                'Footy Score Card',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.settings_outlined),
               title: const Text('Settings'),
