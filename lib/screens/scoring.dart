@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:gal/gal.dart';
+import 'dart:io';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
-import 'package:goalkeeper/services/screenshot_service.dart';
 import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
+import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 
 import 'game_details.dart';
 import 'game_history.dart';
@@ -35,8 +40,8 @@ class ScoringState extends State<Scoring> {
   final GameStateService _gameStateService = GameStateService.instance;
   bool _isClockRunning = false;
 
-  // Share functionality - using screenshot service
-  final ScreenshotService _screenshotService = ScreenshotService();
+  // Screenshot functionality
+  final GlobalKey _screenshotWidgetKey = GlobalKey();
   bool _isSharing = false;
   bool _isSaving = false;
 
@@ -208,46 +213,89 @@ class ScoringState extends State<Scoring> {
     });
 
     try {
-      final gameSetupAdapter =
-          Provider.of<GameSetupAdapter>(context, listen: false);
-      final scorePanelAdapter =
-          Provider.of<ScorePanelAdapter>(context, listen: false);
-
       final shareText = _buildShareText();
 
-      // Use the screenshot service to share live game details
-      await _screenshotService.shareLiveGameDetails(
-        homeTeam: gameSetupAdapter.homeTeam,
-        awayTeam: gameSetupAdapter.awayTeam,
-        gameDate: gameSetupAdapter.gameDate,
-        quarterMinutes: gameSetupAdapter.quarterMinutes,
-        isCountdownTimer: gameSetupAdapter.isCountdownTimer,
-        events: _gameStateService.gameEvents,
-        homeGoals: scorePanelAdapter.homeGoals,
-        homeBehinds: scorePanelAdapter.homeBehinds,
-        awayGoals: scorePanelAdapter.awayGoals,
-        awayBehinds: scorePanelAdapter.awayBehinds,
-        shareText: shareText,
-        themeData: Theme.of(context),
-      );
+      // Use post-frame callback to ensure UI is fully rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await _shareWithWidgetShotPlus(shareText);
+        } catch (e) {
+          debugPrint('Error in share post-frame callback: $e');
+          // Show error if sharing failed
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to share: $e'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isSharing = false;
+            });
+          }
+        }
+      });
     } catch (e) {
-      debugPrint('Error sharing game details: $e');
-      // Show error if sharing failed
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to share: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
+      debugPrint('Error preparing share: $e');
       if (mounted) {
         setState(() {
           _isSharing = false;
         });
       }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to prepare share: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Capture and share using WidgetShotPlus
+  Future<void> _shareWithWidgetShotPlus(String shareText) async {
+    try {
+      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
+          as WidgetShotPlusRenderRepaintBoundary?;
+
+      if (boundary == null) {
+        throw Exception('Could not find WidgetShotPlus boundary');
+      }
+
+      // Capture the screenshot widget
+      final imageBytes = await boundary.screenshot(
+        format: ShotFormat.png,
+        quality: 100,
+        pixelRatio: 2.0,
+      );
+
+      if (imageBytes == null) {
+        throw Exception('Failed to capture image');
+      }
+
+      // Create a temporary file for sharing
+      final directory = await getTemporaryDirectory();
+      final fileName = _generateFileName();
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(imageBytes);
+
+      // Share the image with text
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: shareText,
+      );
+    } catch (e) {
+      debugPrint('Error sharing widget: $e');
+
+      // Fallback to text-only sharing
+      await Share.share(shareText);
     }
   }
 
@@ -259,28 +307,77 @@ class ScoringState extends State<Scoring> {
     });
 
     try {
-      final gameSetupAdapter =
-          Provider.of<GameSetupAdapter>(context, listen: false);
-      final scorePanelAdapter =
-          Provider.of<ScorePanelAdapter>(context, listen: false);
+      // Use post-frame callback to ensure UI is fully rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await _saveWithWidgetShotPlus();
+        } catch (e) {
+          debugPrint('Error in save post-frame callback: $e');
+          // Show error if save failed
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Failed to save screenshot: $e'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isSaving = false;
+            });
+          }
+        }
+      });
+    } catch (e) {
+      debugPrint('Error preparing save: $e');
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
 
-      // Use the screenshot service to save live game to gallery
-      await _screenshotService.saveLiveGameToGallery(
-        homeTeam: gameSetupAdapter.homeTeam,
-        awayTeam: gameSetupAdapter.awayTeam,
-        gameDate: gameSetupAdapter.gameDate,
-        quarterMinutes: gameSetupAdapter.quarterMinutes,
-        isCountdownTimer: gameSetupAdapter.isCountdownTimer,
-        events: _gameStateService.gameEvents,
-        homeGoals: scorePanelAdapter.homeGoals,
-        homeBehinds: scorePanelAdapter.homeBehinds,
-        awayGoals: scorePanelAdapter.awayGoals,
-        awayBehinds: scorePanelAdapter.awayBehinds,
-        themeData: Theme.of(context),
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to prepare screenshot: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  /// Save to gallery using WidgetShotPlus
+  Future<void> _saveWithWidgetShotPlus() async {
+    try {
+      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
+          as WidgetShotPlusRenderRepaintBoundary?;
+
+      if (boundary == null) {
+        throw Exception('Could not find WidgetShotPlus boundary');
+      }
+
+      // Capture the screenshot widget
+      final imageBytes = await boundary.screenshot(
+        format: ShotFormat.png,
+        quality: 100,
+        pixelRatio: 2.0,
       );
 
+      if (imageBytes == null) {
+        throw Exception('Failed to capture image');
+      }
+
+      // Save to gallery using gal
+      final fileName = _generateFileName();
+      await Gal.putImageBytes(imageBytes, name: fileName);
+
       // Show success message
-      if (context.mounted) {
+      if (mounted && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Game image saved to gallery'),
@@ -290,24 +387,21 @@ class ScoringState extends State<Scoring> {
         );
       }
     } catch (e) {
-      debugPrint('Error saving image: $e');
-      // Show error if saving failed
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save image: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      debugPrint('Error saving widget: $e');
+      rethrow; // Re-throw to be handled by caller
     }
+  }
+
+  /// Generate a descriptive filename for the image
+  String _generateFileName() {
+    final gameSetupAdapter =
+        Provider.of<GameSetupAdapter>(context, listen: false);
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final cleanHome =
+        gameSetupAdapter.homeTeam.replaceAll(RegExp(r'[^\w]'), '');
+    final cleanAway =
+        gameSetupAdapter.awayTeam.replaceAll(RegExp(r'[^\w]'), '');
+    return '${cleanHome}_v_${cleanAway}_$timestamp.png';
   }
 
   String _buildShareText() {
@@ -432,70 +526,95 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
               ),
             ),
             body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Timer Panel Card
-                    Card(
-                      elevation: 1,
-                      child: QuarterTimerPanel(
-                          key: _quarterTimerKey,
-                          isTimerRunning: isTimerRunning),
-                    ),
-                    const SizedBox(height: 4),
+              child: Stack(
+                children: [
+                  // Main content
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Timer Panel Card
+                        Card(
+                          elevation: 1,
+                          child: QuarterTimerPanel(
+                              key: _quarterTimerKey,
+                              isTimerRunning: isTimerRunning),
+                        ),
+                        const SizedBox(height: 4),
 
-                    // Home Team Score Table
-                    ValueListenableBuilder<bool>(
-                      valueListenable: isTimerRunning,
-                      builder: (context, timerRunning, child) {
-                        return Consumer<ScorePanelAdapter>(
-                          builder: (context, scorePanelAdapter, child) {
-                            return Card(
-                              elevation: 1,
-                              child: ScoreTable(
-                                events: List<GameEvent>.from(
-                                    gameEvents), // Create a defensive copy
-                                homeTeam: homeTeamName,
-                                awayTeam: awayTeamName,
-                                displayTeam: homeTeamName,
-                                isHomeTeam: true,
-                                enabled: timerRunning,
-                              ),
+                        // Home Team Score Table
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isTimerRunning,
+                          builder: (context, timerRunning, child) {
+                            return Consumer<ScorePanelAdapter>(
+                              builder: (context, scorePanelAdapter, child) {
+                                return Card(
+                                  elevation: 1,
+                                  child: ScoreTable(
+                                    events: List<GameEvent>.from(
+                                        gameEvents), // Create a defensive copy
+                                    homeTeam: homeTeamName,
+                                    awayTeam: awayTeamName,
+                                    displayTeam: homeTeamName,
+                                    isHomeTeam: true,
+                                    enabled: timerRunning,
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 4),
+                        ),
+                        const SizedBox(height: 4),
 
-                    // Away Team Score Table
-                    ValueListenableBuilder<bool>(
-                      valueListenable: isTimerRunning,
-                      builder: (context, timerRunning, child) {
-                        return Consumer<ScorePanelAdapter>(
-                          builder: (context, scorePanelAdapter, child) {
-                            return Card(
-                              elevation: 1,
-                              child: ScoreTable(
-                                events: List<GameEvent>.from(
-                                    gameEvents), // Create a defensive copy
-                                homeTeam: homeTeamName,
-                                awayTeam: awayTeamName,
-                                displayTeam: awayTeamName,
-                                isHomeTeam: false,
-                                enabled: timerRunning,
-                              ),
+                        // Away Team Score Table
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isTimerRunning,
+                          builder: (context, timerRunning, child) {
+                            return Consumer<ScorePanelAdapter>(
+                              builder: (context, scorePanelAdapter, child) {
+                                return Card(
+                                  elevation: 1,
+                                  child: ScoreTable(
+                                    events: List<GameEvent>.from(
+                                        gameEvents), // Create a defensive copy
+                                    homeTeam: homeTeamName,
+                                    awayTeam: awayTeamName,
+                                    displayTeam: awayTeamName,
+                                    isHomeTeam: false,
+                                    enabled: timerRunning,
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
+                  ),
+
+                  // Hidden screenshot widget
+                  Positioned(
+                    left: -1000,
+                    top: -1000,
+                    child: WidgetShotPlus(
+                      key: _screenshotWidgetKey,
+                      child: Material(
+                        child: IntrinsicHeight(
+                          child: SizedBox(
+                            width: 400,
+                            child: GameDetailsWidget.fromLiveData(
+                              events: gameEvents,
+                              enableScrolling: false,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             floatingActionButton: FloatingActionButton(

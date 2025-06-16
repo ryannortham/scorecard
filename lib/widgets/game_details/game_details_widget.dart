@@ -37,12 +37,16 @@ class GameDetailsWidget extends StatelessWidget {
   /// Optional scroll controller
   final ScrollController? scrollController;
 
+  /// Whether to enable scrolling (disable for screenshots)
+  final bool enableScrolling;
+
   const GameDetailsWidget({
     super.key,
     required this.dataSource,
     this.staticGame,
     this.liveEvents,
     this.scrollController,
+    this.enableScrolling = true,
   }) : assert(
             (dataSource == GameDataSource.staticData && staticGame != null) ||
                 (dataSource == GameDataSource.liveData && liveEvents != null),
@@ -53,6 +57,7 @@ class GameDetailsWidget extends StatelessWidget {
     super.key,
     required GameRecord game,
     this.scrollController,
+    this.enableScrolling = true,
   })  : dataSource = GameDataSource.staticData,
         staticGame = game,
         liveEvents = null;
@@ -62,6 +67,7 @@ class GameDetailsWidget extends StatelessWidget {
     super.key,
     required List<GameEvent> events,
     this.scrollController,
+    this.enableScrolling = true,
   })  : dataSource = GameDataSource.liveData,
         staticGame = null,
         liveEvents = events;
@@ -181,53 +187,62 @@ class GameDetailsWidget extends StatelessWidget {
   }
 
   Widget _buildGameDetailsContent(BuildContext context, GameRecord game) {
-    return SingleChildScrollView(
-      controller: scrollController,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Match Info Card
-          GameInfoCard(
-            icon: Icons.sports_rugby,
-            title: '${game.homeTeam} vs ${game.awayTeam}',
-            content: Text(
-              DateFormat('EEEE, MMM d, yyyy').format(game.date),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+    final content = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Match Info Card
+        GameInfoCard(
+          icon: Icons.sports_rugby,
+          title: '${game.homeTeam} vs ${game.awayTeam}',
+          content: Text(
+            DateFormat('EEEE, MMM d, yyyy').format(game.date),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
+        ),
 
-          const SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-          // Final Score Card
-          dataSource == GameDataSource.liveData
-              ? Consumer<ScorePanelAdapter>(
-                  builder: (context, scorePanelAdapter, child) {
-                    final liveTitle =
-                        _buildLiveGameTitle(context, scorePanelAdapter);
-                    return GameScoreSection(
-                      game: game,
-                      isLiveData: true,
-                      liveTitleOverride: liveTitle,
-                    );
-                  },
-                )
-              : GameScoreSection(
-                  game: game,
-                  isLiveData: false,
-                ),
+        // Final Score Card
+        dataSource == GameDataSource.liveData
+            ? Consumer<ScorePanelAdapter>(
+                builder: (context, scorePanelAdapter, child) {
+                  final liveTitle =
+                      _buildLiveGameTitle(context, scorePanelAdapter);
+                  return GameScoreSection(
+                    game: game,
+                    isLiveData: true,
+                    liveTitleOverride: liveTitle,
+                  );
+                },
+              )
+            : GameScoreSection(
+                game: game,
+                isLiveData: false,
+              ),
 
-          // Quarter Breakdown Card
-          const SizedBox(height: 16),
-          QuarterBreakdownSection(
-            game: game,
-            isLiveData: dataSource == GameDataSource.liveData,
-            liveEvents: liveEvents,
-            scoreTableBuilder: _buildScoreTable,
-          ),
-        ],
-      ),
+        // Quarter Breakdown Card
+        const SizedBox(height: 16),
+        QuarterBreakdownSection(
+          game: game,
+          isLiveData: dataSource == GameDataSource.liveData,
+          liveEvents: liveEvents,
+          scoreTableBuilder: _buildScoreTable,
+        ),
+      ],
     );
+
+    if (enableScrolling) {
+      return SingleChildScrollView(
+        controller: scrollController,
+        padding: const EdgeInsets.all(16.0),
+        child: content,
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: content,
+      );
+    }
   }
 }
 

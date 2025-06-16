@@ -19,6 +19,7 @@ class GameDetailsPage extends StatefulWidget {
 
 class _GameDetailsPageState extends State<GameDetailsPage> {
   final GlobalKey _widgetShotKey = GlobalKey();
+  final GlobalKey _screenshotWidgetKey = GlobalKey();
   final ScrollController _scrollController = ScrollController();
   bool _isSharing = false;
   bool _isSaving = false;
@@ -48,12 +49,36 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           ),
         ],
       ),
-      body: WidgetShotPlus(
-        key: _widgetShotKey,
-        child: GameDetailsWidget.fromStaticData(
-          game: widget.game,
-          scrollController: _scrollController,
-        ),
+      body: Stack(
+        children: [
+          // Main content
+          WidgetShotPlus(
+            key: _widgetShotKey,
+            child: GameDetailsWidget.fromStaticData(
+              game: widget.game,
+              scrollController: _scrollController,
+            ),
+          ),
+          // Hidden screenshot widget
+          Positioned(
+            left: -1000,
+            top: -1000,
+            child: WidgetShotPlus(
+              key: _screenshotWidgetKey,
+              child: Material(
+                child: IntrinsicHeight(
+                  child: SizedBox(
+                    width: 400,
+                    child: GameDetailsWidget.fromStaticData(
+                      game: widget.game,
+                      enableScrolling: false,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _isSharing ? null : () => _shareGameDetails(context),
@@ -183,20 +208,18 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
   /// Capture and share using WidgetShotPlus
   Future<void> _shareWithWidgetShotPlus(String shareText) async {
     try {
-      final boundary = _widgetShotKey.currentContext?.findRenderObject()
+      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
           as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
       }
 
-      // Capture the full widget content (including scrollable areas)
+      // Capture the screenshot widget (no scroll controller needed)
       final imageBytes = await boundary.screenshot(
         format: ShotFormat.png,
         quality: 100,
         pixelRatio: 2.0,
-        scrollController:
-            _scrollController, // This enables full content capture
       );
 
       if (imageBytes == null) {
@@ -229,20 +252,18 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
   /// Save to gallery using WidgetShotPlus
   Future<void> _saveWithWidgetShotPlus() async {
     try {
-      final boundary = _widgetShotKey.currentContext?.findRenderObject()
+      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
           as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
       }
 
-      // Capture the full widget content (including scrollable areas)
+      // Capture the screenshot widget (no scroll controller needed)
       final imageBytes = await boundary.screenshot(
         format: ShotFormat.png,
         quality: 100,
         pixelRatio: 2.0,
-        scrollController:
-            _scrollController, // This enables full content capture
       );
 
       if (imageBytes == null) {

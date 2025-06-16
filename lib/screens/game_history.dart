@@ -23,7 +23,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
 
   // Selection mode state
   bool _isSelectionMode = false;
-  Set<String> _selectedGameIds = {};
+  final Set<String> _selectedGameIds = {};
 
   @override
   void initState() {
