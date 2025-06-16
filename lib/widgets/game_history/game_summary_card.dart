@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import 'package:goalkeeper/services/game_history_service.dart';
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
 
 /// Optimized widget for displaying game summary in the history list
 class GameSummaryCard extends StatelessWidget {
@@ -20,8 +22,36 @@ class GameSummaryCard extends StatelessWidget {
     this.isSelected = false,
   });
 
+  /// Determines if the trophy icon should be shown (favorite team won)
+  bool _shouldShowTrophyIcon(
+      GameSummary gameSummary, UserPreferencesProvider userPrefs) {
+    // Must have a favorite team set
+    if (userPrefs.favoriteTeam.isEmpty) return false;
+
+    // Check if there's a winner (no ties)
+    final homePoints = gameSummary.homePoints;
+    final awayPoints = gameSummary.awayPoints;
+
+    if (homePoints == awayPoints) return false; // No winner in a tie
+
+    final favoriteIsHome = gameSummary.homeTeam == userPrefs.favoriteTeam;
+    final favoriteIsAway = gameSummary.awayTeam == userPrefs.favoriteTeam;
+
+    // Favorite team must be playing in this game
+    if (!favoriteIsHome && !favoriteIsAway) return false;
+
+    // Check if favorite team won
+    if (favoriteIsHome && homePoints > awayPoints) return true;
+    if (favoriteIsAway && awayPoints > homePoints) return true;
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userPrefs = Provider.of<UserPreferencesProvider>(context);
+    final shouldShowTrophy = _shouldShowTrophyIcon(gameSummary, userPrefs);
+
     final dateFormat = DateFormat('dd/MM/yyyy');
     final timeFormat = DateFormat('HH:mm');
 
@@ -64,6 +94,10 @@ class GameSummaryCard extends StatelessWidget {
             ),
           ],
         ),
+        trailing: shouldShowTrophy
+            ? Icon(Icons.emoji_events_outlined,
+                color: Theme.of(context).colorScheme.secondary)
+            : null,
         onTap: onTap,
         onLongPress: onLongPress,
       ),

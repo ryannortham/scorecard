@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/game_record.dart';
+import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
 import 'package:goalkeeper/widgets/game_details/game_score_section.dart';
 import 'package:goalkeeper/widgets/game_details/live_game_title_builder.dart';
@@ -74,6 +75,34 @@ class GameDetailsWidget extends StatelessWidget {
   static bool isGameComplete(GameRecord game) {
     if (game.events.isEmpty) return false;
     return game.events.any((e) => e.quarter == 4 && e.type == 'clock_end');
+  }
+
+  /// Determines if the trophy icon should be shown (game complete and favorite team won)
+  bool _shouldShowTrophyIcon(
+      GameRecord game, UserPreferencesProvider userPrefs) {
+    // Game must be complete
+    if (!isGameComplete(game)) return false;
+
+    // Must have a favorite team set
+    if (userPrefs.favoriteTeam.isEmpty) return false;
+
+    // Check if favorite team won
+    final homePoints = game.homePoints;
+    final awayPoints = game.awayPoints;
+
+    if (homePoints == awayPoints) return false; // No winner in a tie
+
+    final favoriteIsHome = game.homeTeam == userPrefs.favoriteTeam;
+    final favoriteIsAway = game.awayTeam == userPrefs.favoriteTeam;
+
+    // Favorite team must be playing in this game
+    if (!favoriteIsHome && !favoriteIsAway) return false;
+
+    // Check if favorite team won
+    if (favoriteIsHome && homePoints > awayPoints) return true;
+    if (favoriteIsAway && awayPoints > homePoints) return true;
+
+    return false;
   }
 
   /// Gets the current quarter based on the latest events
@@ -169,11 +198,16 @@ class GameDetailsWidget extends StatelessWidget {
 
   Widget _buildGameDetailsContent(BuildContext context, GameRecord game,
       ScorePanelAdapter? scorePanelAdapter) {
+    final userPrefs = Provider.of<UserPreferencesProvider>(context);
+    final bool shouldShowTrophy = _shouldShowTrophyIcon(game, userPrefs);
+
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GameInfoCard(
-          icon: Icons.sports_rugby,
+          icon: shouldShowTrophy
+              ? Icons.emoji_events_outlined
+              : Icons.event_outlined,
           title: '${game.homeTeam} vs ${game.awayTeam}',
           content: Text(
             DateFormat('EEEE, MMM d, yyyy').format(game.date),
@@ -231,6 +265,3 @@ class GameDetailsWidget extends StatelessWidget {
     }
   }
 }
-
-// Capturable game details functionality is now integrated into the main widget
-// with the captureMode parameter
