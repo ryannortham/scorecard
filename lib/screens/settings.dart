@@ -176,10 +176,6 @@ class _SettingsState extends State<Settings> {
           },
           items: const [
             DropdownMenuItem(
-              value: ThemeMode.system,
-              child: Text('System'),
-            ),
-            DropdownMenuItem(
               value: ThemeMode.light,
               child: Text('Light'),
             ),

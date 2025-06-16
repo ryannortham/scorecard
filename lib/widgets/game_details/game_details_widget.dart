@@ -108,23 +108,20 @@ class GameDetailsWidget extends StatelessWidget {
     required GameRecord game,
     required String displayTeam,
     required bool isHomeTeam,
+    ScorePanelAdapter? scorePanelAdapter,
   }) {
-    if (dataSource == GameDataSource.liveData) {
-      // Use live ScorePanelAdapter for real-time updates
-      return Consumer<ScorePanelAdapter>(
-        builder: (context, scorePanelAdapter, child) {
-          return ScoreTable(
-            events: liveEvents ?? [],
-            homeTeam: game.homeTeam,
-            awayTeam: game.awayTeam,
-            displayTeam: displayTeam,
-            isHomeTeam: isHomeTeam,
-            enabled: false,
-            showHeader: false,
-            showCounters: false, // Hide score counters
-            isCompletedGame: false, // Live game is not completed
-          );
-        },
+    if (dataSource == GameDataSource.liveData && scorePanelAdapter != null) {
+      // Use provided ScorePanelAdapter for real-time updates (no Consumer needed)
+      return ScoreTable(
+        events: liveEvents ?? [],
+        homeTeam: game.homeTeam,
+        awayTeam: game.awayTeam,
+        displayTeam: displayTeam,
+        isHomeTeam: isHomeTeam,
+        enabled: false,
+        showHeader: false,
+        showCounters: false, // Hide score counters
+        isCompletedGame: false, // Live game is not completed
       );
     } else {
       // For static data, pass the current quarter directly to avoid provider listening
@@ -160,17 +157,18 @@ class GameDetailsWidget extends StatelessWidget {
       return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
         builder: (context, gameSetupAdapter, scorePanelAdapter, child) {
           final GameRecord game = _buildGameFromProviders(context);
-          return _buildGameDetailsContent(context, game);
+          return _buildGameDetailsContent(context, game, scorePanelAdapter);
         },
       );
     } else {
       // For static data, just use the provided game data
       final GameRecord game = staticGame!;
-      return _buildGameDetailsContent(context, game);
+      return _buildGameDetailsContent(context, game, null);
     }
   }
 
-  Widget _buildGameDetailsContent(BuildContext context, GameRecord game) {
+  Widget _buildGameDetailsContent(BuildContext context, GameRecord game,
+      ScorePanelAdapter? scorePanelAdapter) {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -183,18 +181,16 @@ class GameDetailsWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        dataSource == GameDataSource.liveData
-            ? Consumer<ScorePanelAdapter>(
-                builder: (context, scorePanelAdapter, child) {
-                  final liveTitle =
-                      _buildLiveGameTitle(context, scorePanelAdapter);
-                  return GameScoreSection(
-                    game: game,
-                    isLiveData: true,
-                    liveTitleOverride: liveTitle,
-                  );
-                },
-              )
+        dataSource == GameDataSource.liveData && scorePanelAdapter != null
+            ? (() {
+                final liveTitle =
+                    _buildLiveGameTitle(context, scorePanelAdapter);
+                return GameScoreSection(
+                  game: game,
+                  isLiveData: true,
+                  liveTitleOverride: liveTitle,
+                );
+              })()
             : GameScoreSection(
                 game: game,
                 isLiveData: false,
@@ -204,7 +200,19 @@ class GameDetailsWidget extends StatelessWidget {
           game: game,
           isLiveData: dataSource == GameDataSource.liveData,
           liveEvents: liveEvents,
-          scoreTableBuilder: _buildScoreTable,
+          scoreTableBuilder: ({
+            required BuildContext context,
+            required GameRecord game,
+            required String displayTeam,
+            required bool isHomeTeam,
+          }) =>
+              _buildScoreTable(
+            context: context,
+            game: game,
+            displayTeam: displayTeam,
+            isHomeTeam: isHomeTeam,
+            scorePanelAdapter: scorePanelAdapter,
+          ),
         ),
       ],
     );

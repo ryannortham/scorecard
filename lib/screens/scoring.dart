@@ -501,20 +501,16 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         ValueListenableBuilder<bool>(
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
-                            return Consumer<ScorePanelAdapter>(
-                              builder: (context, scorePanelAdapter, child) {
-                                return Card(
-                                  elevation: 1,
-                                  child: ScoreTable(
-                                    events: List<GameEvent>.from(gameEvents),
-                                    homeTeam: homeTeamName,
-                                    awayTeam: awayTeamName,
-                                    displayTeam: homeTeamName,
-                                    isHomeTeam: true,
-                                    enabled: timerRunning,
-                                  ),
-                                );
-                              },
+                            return Card(
+                              elevation: 1,
+                              child: ScoreTable(
+                                events: List<GameEvent>.from(gameEvents),
+                                homeTeam: homeTeamName,
+                                awayTeam: awayTeamName,
+                                displayTeam: homeTeamName,
+                                isHomeTeam: true,
+                                enabled: timerRunning,
+                              ),
                             );
                           },
                         ),
@@ -524,20 +520,16 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         ValueListenableBuilder<bool>(
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
-                            return Consumer<ScorePanelAdapter>(
-                              builder: (context, scorePanelAdapter, child) {
-                                return Card(
-                                  elevation: 1,
-                                  child: ScoreTable(
-                                    events: List<GameEvent>.from(gameEvents),
-                                    homeTeam: homeTeamName,
-                                    awayTeam: awayTeamName,
-                                    displayTeam: awayTeamName,
-                                    isHomeTeam: false,
-                                    enabled: timerRunning,
-                                  ),
-                                );
-                              },
+                            return Card(
+                              elevation: 1,
+                              child: ScoreTable(
+                                events: List<GameEvent>.from(gameEvents),
+                                homeTeam: homeTeamName,
+                                awayTeam: awayTeamName,
+                                displayTeam: awayTeamName,
+                                isHomeTeam: false,
+                                enabled: timerRunning,
+                              ),
                             );
                           },
                         ),
