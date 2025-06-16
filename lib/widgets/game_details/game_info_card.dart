@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:goalkeeper/widgets/adaptive_title.dart';
 
 /// A reusable info card widget for displaying game details
 class GameInfoCard extends StatelessWidget {
@@ -30,11 +31,16 @@ class GameInfoCard extends StatelessWidget {
                   color: iconColor ?? Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                Expanded(
+                  child: AdaptiveTitle(
+                    title: title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    textAlign: TextAlign.left,
+                    minScaleFactor:
+                        0.8, // Allow slightly more scaling for card titles
+                  ),
                 ),
               ],
             ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
+import 'package:goalkeeper/widgets/adaptive_title.dart';
 import 'package:goalkeeper/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
@@ -37,7 +38,9 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.game.homeTeam} vs ${widget.game.awayTeam}'),
+        title: AdaptiveTitle(
+          title: '${widget.game.homeTeam} vs ${widget.game.awayTeam}',
+        ),
         actions: [
           IconButton(
             icon: _isSharing

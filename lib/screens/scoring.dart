@@ -13,6 +13,7 @@ import 'package:goalkeeper/providers/game_record.dart';
 import 'package:goalkeeper/services/app_logger.dart';
 import 'package:goalkeeper/services/game_history_service.dart';
 import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:goalkeeper/widgets/adaptive_title.dart';
 import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
@@ -387,13 +388,9 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         builder: (context, scorePanelState, _) {
           return Scaffold(
             appBar: AppBar(
-              title: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.center,
-                child: Text(
-                  '$homeTeamName vs $awayTeamName',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+              title: AdaptiveTitle(
+                title: '$homeTeamName vs $awayTeamName',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
               actions: [
                 IconButton(

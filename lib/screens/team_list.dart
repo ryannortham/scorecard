@@ -114,6 +114,12 @@ class TeamList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
+                            icon: const Icon(Icons.edit_outlined),
+                            tooltip: 'Edit',
+                            onPressed: () => _showEditTeamDialog(
+                                context, teamsProvider, realIndex, teamName),
+                          ),
+                          IconButton(
                             icon: const Icon(Icons.delete_outline),
                             tooltip: 'Delete',
                             onPressed: () => _showDeleteTeamConfirmation(
@@ -127,6 +133,132 @@ class TeamList extends StatelessWidget {
               ),
             )
           : const Center(child: CircularProgressIndicator()),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddTeamDialog(context),
+        tooltip: 'Add Team',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Future<void> _showAddTeamDialog(BuildContext context) async {
+    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final TextEditingController controller = TextEditingController();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add New Team'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Team Name',
+                hintText: 'Enter team name',
+              ),
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter a team name';
+                }
+                final trimmedValue = value.trim();
+                if (teamsProvider.teams.contains(trimmedValue)) {
+                  return 'Team name already exists';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Add'),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  final teamName = controller.text.trim();
+                  await teamsProvider.addTeam(teamName);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditTeamDialog(BuildContext context,
+      TeamsProvider teamsProvider, int index, String currentTeamName) async {
+    final TextEditingController controller =
+        TextEditingController(text: currentTeamName);
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Team Name'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Team Name',
+                hintText: 'Enter team name',
+              ),
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter a team name';
+                }
+                final trimmedValue = value.trim();
+                // Don't validate against the current team name (allow keeping the same name)
+                if (trimmedValue != currentTeamName &&
+                    teamsProvider.teams.contains(trimmedValue)) {
+                  return 'Team name already exists';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  final newTeamName = controller.text.trim();
+                  if (newTeamName != currentTeamName) {
+                    await teamsProvider.editTeam(index, newTeamName);
+                  }
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
