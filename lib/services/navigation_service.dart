@@ -20,6 +20,8 @@ class AppNavigator {
   static const String scoring = '/scoring';
 
   /// Navigate to settings page
+  @Deprecated(
+      'Settings screen has been deprecated. Use AppDrawer for settings access.')
   static Future<T?> toSettings<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(

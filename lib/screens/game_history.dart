@@ -4,8 +4,8 @@ import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
 import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
+import '../widgets/app_drawer.dart';
 import 'package:goalkeeper/screens/game_details.dart' as details;
-import 'settings.dart';
 
 class GameHistoryScreen extends StatefulWidget {
   const GameHistoryScreen({super.key});
@@ -240,36 +240,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               ),
           ],
         ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              Container(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Text(
-                  'Footy Score Card',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined),
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const Settings(title: 'Settings'),
-                    ),
-                  );
-                },
-              ),
-              // Note: Game History item is omitted since we're already on the Game History screen
-            ],
-          ),
-        ),
+        drawer: const AppDrawer(currentRoute: 'game_history'),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _gameSummaries.isEmpty

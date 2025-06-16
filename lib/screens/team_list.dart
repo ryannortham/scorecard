@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/teams_provider.dart';
 import '../services/navigation_service.dart';
-import 'settings.dart';
-import 'game_history.dart';
+import '../widgets/app_drawer.dart';
 
 class TeamList extends StatelessWidget {
   const TeamList(
@@ -32,47 +31,7 @@ class TeamList extends StatelessWidget {
           ),
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                'Footy Score Card',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const Settings(title: 'Settings'),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history_outlined),
-              title: const Text('Game History'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const GameHistoryScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: const AppDrawer(currentRoute: 'team_list'),
       body: teamsProvider.loaded
           ? Padding(
               padding: const EdgeInsets.all(8.0),

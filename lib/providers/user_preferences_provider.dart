@@ -121,9 +121,17 @@ class UserPreferencesProvider extends ChangeNotifier {
       'red',
       'pink',
       'deep_orange',
+      'orange',
       'amber',
+      'yellow',
+      'lime',
+      'light_green',
       'cyan',
-      'brown'
+      'light_blue',
+      'deep_purple',
+      'brown',
+      'blue_grey',
+      'grey'
     };
 
     if (validThemes.contains(theme)) {
@@ -141,26 +149,42 @@ class UserPreferencesProvider extends ChangeNotifier {
             0xFF6750A4); // Material Purple - fallback for when dynamic colors aren't available
       case 'blue':
         return const Color(0xFF1976D2); // Material Blue 700
-      case 'teal':
-        return const Color(0xFF00695C); // Material Teal 800
-      case 'green':
-        return const Color(0xFF2E7D32); // Material Green 800
-      case 'amber':
-        return const Color(0xFFF57C00); // Material Amber 800
-      case 'deep_orange':
-        return const Color(0xFFD84315); // Material Deep Orange 800
-      case 'red':
-        return const Color(0xFFC62828); // Material Red 800
-      case 'pink':
-        return const Color(0xFFAD1457); // Material Pink 800
-      case 'purple':
-        return const Color(0xFF6A1B9A); // Material Purple 800
+      case 'light_blue':
+        return const Color(0xFF0288D1); // Material Light Blue 700
       case 'indigo':
         return const Color(0xFF283593); // Material Indigo 800
+      case 'deep_purple':
+        return const Color(0xFF512DA8); // Material Deep Purple 700
+      case 'purple':
+        return const Color(0xFF6A1B9A); // Material Purple 800
+      case 'pink':
+        return const Color(0xFFAD1457); // Material Pink 800
+      case 'red':
+        return const Color(0xFFC62828); // Material Red 800
+      case 'deep_orange':
+        return const Color(0xFFD84315); // Material Deep Orange 800
+      case 'orange':
+        return const Color(0xFFF57C00); // Material Orange 800
+      case 'amber':
+        return const Color(0xFFFF8F00); // Material Amber 800
+      case 'yellow':
+        return const Color(0xFFF9A825); // Material Yellow 800
+      case 'lime':
+        return const Color(0xFF9E9D24); // Material Lime 800
+      case 'light_green':
+        return const Color(0xFF689F38); // Material Light Green 800
+      case 'green':
+        return const Color(0xFF2E7D32); // Material Green 800
+      case 'teal':
+        return const Color(0xFF00695C); // Material Teal 800
       case 'cyan':
         return const Color(0xFF00838F); // Material Cyan 800
       case 'brown':
         return const Color(0xFF5D4037); // Material Brown 700
+      case 'blue_grey':
+        return const Color(0xFF455A64); // Material Blue Grey 700
+      case 'grey':
+        return const Color(0xFF616161); // Material Grey 600
       default:
         return const Color(0xFF1976D2); // Default to Material Blue
     }
@@ -173,26 +197,42 @@ class UserPreferencesProvider extends ChangeNotifier {
         return 'Adaptive (Device Colors)';
       case 'blue':
         return 'Ocean Blue';
-      case 'teal':
-        return 'Emerald Teal';
-      case 'green':
-        return 'Forest Green';
-      case 'amber':
-        return 'Golden Amber';
-      case 'deep_orange':
-        return 'Sunset Orange';
-      case 'red':
-        return 'Ruby Red';
-      case 'pink':
-        return 'Rose Pink';
-      case 'purple':
-        return 'Royal Purple';
+      case 'light_blue':
+        return 'Sky Blue';
       case 'indigo':
         return 'Midnight Indigo';
+      case 'deep_purple':
+        return 'Deep Purple';
+      case 'purple':
+        return 'Royal Purple';
+      case 'pink':
+        return 'Rose Pink';
+      case 'red':
+        return 'Ruby Red';
+      case 'deep_orange':
+        return 'Sunset Orange';
+      case 'orange':
+        return 'Vibrant Orange';
+      case 'amber':
+        return 'Golden Amber';
+      case 'yellow':
+        return 'Sunny Yellow';
+      case 'lime':
+        return 'Lime Green';
+      case 'light_green':
+        return 'Fresh Green';
+      case 'green':
+        return 'Forest Green';
+      case 'teal':
+        return 'Emerald Teal';
       case 'cyan':
         return 'Azure Cyan';
       case 'brown':
         return 'Earth Brown';
+      case 'blue_grey':
+        return 'Steel Blue';
+      case 'grey':
+        return 'Modern Grey';
       default:
         return 'Ocean Blue';
     }

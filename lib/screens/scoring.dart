@@ -18,10 +18,9 @@ import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:goalkeeper/widgets/scoring/scoring.dart';
 import 'package:goalkeeper/widgets/timer/timer.dart';
 import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
+import 'package:goalkeeper/widgets/app_drawer.dart';
 
 import 'game_details.dart';
-import 'game_history.dart';
-import 'settings.dart';
 
 class Scoring extends StatefulWidget {
   const Scoring({super.key, required this.title});
@@ -53,26 +52,6 @@ class ScoringState extends State<Scoring> {
   Future<bool> _onWillPop() async {
     // Always show exit confirmation when leaving an active game
     return await _showExitConfirmation();
-  }
-
-  /// Navigate to settings screen
-  void _navigateToSettings() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const Settings(title: 'Settings'),
-      ),
-    );
-    // No need to update game setup since quarter minutes and countdown timer
-    // are no longer in settings - they're managed on the game setup screen
-  }
-
-  /// Navigate to game history screen
-  void _navigateToGameHistory() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const GameHistoryScreen(),
-      ),
-    );
   }
 
   @override
@@ -416,39 +395,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                 ),
               ],
             ),
-            drawer: Drawer(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: Text(
-                      'Footy Score Card',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                  const Divider(),
-                  ListTile(
-                    leading: const Icon(Icons.settings_outlined),
-                    title: const Text('Settings'),
-                    onTap: () {
-                      Navigator.pop(context); // Close the drawer
-                      _navigateToSettings();
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.history_outlined),
-                    title: const Text('Game History'),
-                    onTap: () {
-                      Navigator.pop(context); // Close the drawer
-                      _navigateToGameHistory();
-                    },
-                  ),
-                ],
-              ),
-            ),
+            drawer: const AppDrawer(currentRoute: 'scoring'),
             body: SafeArea(
               child: Stack(
                 children: [

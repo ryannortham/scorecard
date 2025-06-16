@@ -7,10 +7,9 @@ import 'package:goalkeeper/adapters/score_panel_adapter.dart';
 import 'package:goalkeeper/providers/user_preferences_provider.dart';
 import 'package:goalkeeper/widgets/game_setup/game_settings_configuration.dart';
 import 'package:goalkeeper/widgets/game_setup/team_selection_widget.dart';
+import 'package:goalkeeper/widgets/app_drawer.dart';
 
-import 'game_history.dart';
 import 'scoring.dart';
-import 'settings.dart';
 
 class GameSetup extends StatefulWidget {
   const GameSetup({super.key, required this.title});
@@ -39,24 +38,6 @@ class _GameSetupState extends State<GameSetup> {
     bool awayTeamValid = awayTeamKey.currentState!.validate();
 
     return dateValid && homeTeamValid && awayTeamValid;
-  }
-
-  void _updateSettingsFromProvider() {
-    final userPreferences =
-        Provider.of<UserPreferencesProvider>(context, listen: false);
-    final gameSetupProvider =
-        Provider.of<GameSetupAdapter>(context, listen: false);
-
-    // Use preferences for quarter minutes and countdown timer
-    gameSetupProvider.setQuarterMinutes(userPreferences.quarterMinutes);
-    gameSetupProvider.setIsCountdownTimer(userPreferences.isCountdownTimer);
-
-    // Set favorite team as home team if home team is currently empty
-    if (gameSetupProvider.homeTeam.isEmpty &&
-        userPreferences.favoriteTeam.isNotEmpty) {
-      gameSetupProvider.setHomeTeam(userPreferences.favoriteTeam);
-      _homeTeamController.text = userPreferences.favoriteTeam;
-    }
   }
 
   @override
@@ -131,51 +112,7 @@ class _GameSetupState extends State<GameSetup> {
           ),
         ),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Text(
-                'Footy Score Card',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () async {
-                Navigator.pop(context); // Close the drawer
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const Settings(title: 'Settings'),
-                  ),
-                );
-                // Update game setup with current settings when returning
-                if (context.mounted) {
-                  _updateSettingsFromProvider();
-                }
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history_outlined),
-              title: const Text('Game History'),
-              onTap: () {
-                Navigator.pop(context); // Close the drawer
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const GameHistoryScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: const AppDrawer(currentRoute: 'game_setup'),
       body: Form(
         key: _formKey,
         child: Padding(
