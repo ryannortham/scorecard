@@ -44,6 +44,10 @@ class ScorePanelAdapter extends ChangeNotifier {
   int getCount(bool isHomeTeam, bool isGoal) =>
       _gameState.getScore(isHomeTeam, isGoal);
 
+  /// Check if there are scoring events for a specific team and score type in the current quarter
+  bool hasEventInCurrentQuarter(bool isHomeTeam, bool isGoal) =>
+      _gameState.hasEventInCurrentQuarter(isHomeTeam, isGoal);
+
   void resetGame() => _gameState.resetGame();
 
   @override

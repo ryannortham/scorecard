@@ -34,6 +34,15 @@ class GameStateService extends ChangeNotifier {
   final StreamController<int> _timerStreamController =
       StreamController<int>.broadcast();
 
+  // Save optimization variables
+  Timer? _saveTimer;
+  bool _hasPendingSave = false;
+  int _eventsSinceLastSave = 0;
+
+  // Save every 30 seconds during active play, or after 5 events (whichever comes first)
+  static const int _saveIntervalSeconds = 30;
+  static const int _eventsPerSave = 10;
+
   String? _currentGameId;
   final List<VoidCallback> _gameEventListeners = [];
   final List<VoidCallback> _timerStateListeners = [];
@@ -91,7 +100,7 @@ class GameStateService extends ChangeNotifier {
         });
 
     _notifyScoreChangeListeners();
-    _saveGameAsync();
+    _scheduleSave();
     notifyListeners();
   }
 
@@ -99,6 +108,15 @@ class GameStateService extends ChangeNotifier {
     return isHomeTeam
         ? (isGoal ? _homeGoals : _homeBehinds)
         : (isGoal ? _awayGoals : _awayBehinds);
+  }
+
+  /// Check if there are scoring events for a specific team and score type in the current quarter
+  bool hasEventInCurrentQuarter(bool isHomeTeam, bool isGoal) {
+    final team = isHomeTeam ? _homeTeam : _awayTeam;
+    final type = isGoal ? 'goal' : 'behind';
+
+    return _gameEvents.any((e) =>
+        e.quarter == _selectedQuarter && e.team == team && e.type == type);
   }
 
   void setTimerRawTime(int newTime) {
@@ -111,6 +129,9 @@ class GameStateService extends ChangeNotifier {
     if (_selectedQuarter != newQuarter) {
       AppLogger.info('Quarter changed from $_selectedQuarter to $newQuarter',
           component: 'GameState');
+
+      // Quarter changes are important milestones - save immediately
+      _performScheduledSave();
     }
     _selectedQuarter = newQuarter;
     notifyListeners();
@@ -232,7 +253,7 @@ class GameStateService extends ChangeNotifier {
   void addGameEvent(GameEvent event) {
     _gameEvents.add(event);
     _notifyGameEventListeners();
-    _saveGameAsync();
+    _scheduleSave();
     notifyListeners();
   }
 
@@ -242,7 +263,7 @@ class GameStateService extends ChangeNotifier {
     if (idx != -1) {
       _gameEvents.removeAt(idx);
       _notifyGameEventListeners();
-      _saveGameAsync();
+      _scheduleSave();
       notifyListeners();
     }
   }
@@ -282,6 +303,9 @@ class GameStateService extends ChangeNotifier {
     _isTimerRunning = false;
     _stopBackgroundTimer();
     _notifyTimerStateListeners();
+
+    // Quarter end is a critical milestone - save immediately
+    _performScheduledSave();
     notifyListeners();
   }
 
@@ -362,6 +386,12 @@ class GameStateService extends ChangeNotifier {
 
       // Only store the ID, don't save to history yet
       _currentGameId = gameRecord.id;
+
+      // Reset save tracking for new game
+      _eventsSinceLastSave = 0;
+      _hasPendingSave = false;
+      _saveTimer?.cancel();
+
       AppLogger.debug('Created game ID: ${gameRecord.id}',
           component: 'GameState',
           data: {
@@ -375,14 +405,39 @@ class GameStateService extends ChangeNotifier {
     }
   }
 
-  /// Asynchronously save the game record without blocking the UI
-  Future<void> _saveGameAsync() async {
-    // Only save if we have meaningful game data
+  /// Schedule a save operation with intelligent batching
+  void _scheduleSave() {
     if (_currentGameId == null || !_shouldSaveGame()) return;
 
-    // Run the save operation without awaiting to avoid blocking the UI
+    _eventsSinceLastSave++;
+    _hasPendingSave = true;
+
+    // Cancel existing timer if any
+    _saveTimer?.cancel();
+
+    // Save immediately if we've accumulated enough events
+    if (_eventsSinceLastSave >= _eventsPerSave) {
+      _performScheduledSave();
+      return;
+    }
+
+    // Otherwise, schedule a save after the interval
+    _saveTimer = Timer(Duration(seconds: _saveIntervalSeconds), () {
+      _performScheduledSave();
+    });
+  }
+
+  /// Execute the scheduled save operation
+  void _performScheduledSave() {
+    if (!_hasPendingSave || _currentGameId == null) return;
+
+    _eventsSinceLastSave = 0;
+    _hasPendingSave = false;
+    _saveTimer?.cancel();
+
+    // Run the save operation without awaiting
     _updateGameRecord().catchError((error) {
-      AppLogger.error('Error in async game save',
+      AppLogger.error('Error in scheduled game save',
           component: 'GameState', error: error);
     });
   }
@@ -430,7 +485,6 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
       AppLogger.info('Force saved final game record',
           component: 'GameState', data: '$_homeTeam vs $_awayTeam');
@@ -458,7 +512,6 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      await GameHistoryService.deleteGame(_currentGameId!);
       await GameHistoryService.saveGame(gameRecord);
     } catch (e) {
       AppLogger.error('Error updating game record',
@@ -480,6 +533,11 @@ class GameStateService extends ChangeNotifier {
     _gameEvents.clear();
 
     _currentGameId = null;
+
+    // Clean up save optimization state
+    _eventsSinceLastSave = 0;
+    _hasPendingSave = false;
+    _saveTimer?.cancel();
 
     _stopBackgroundTimer();
     _timerStreamController.add(_timerRawTime);
@@ -539,6 +597,7 @@ class GameStateService extends ChangeNotifier {
   @override
   void dispose() {
     _backgroundTimer?.cancel();
+    _saveTimer?.cancel();
     _timerStreamController.close();
     _gameEventListeners.clear();
     _timerStateListeners.clear();

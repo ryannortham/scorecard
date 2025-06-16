@@ -67,9 +67,6 @@ class GameHistoryService {
     stopwatch.stop();
     AppLogger.performance('Game save', stopwatch.elapsed,
         component: 'GameHistory');
-    AppLogger.info('Game saved successfully',
-        component: 'GameHistory',
-        data: '${game.homeTeam} vs ${game.awayTeam} (${game.id})');
   }
 
   /// Load game summaries with pagination for efficient list display

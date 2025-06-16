@@ -66,7 +66,10 @@ class ScoreCounterState extends State<ScoreCounter> {
                   children: [
                     // Decrease Button
                     IconButton(
-                      onPressed: widget.enabled && currentCount > 0
+                      onPressed: widget.enabled &&
+                              currentCount > 0 &&
+                              scorePanelAdapter.hasEventInCurrentQuarter(
+                                  widget.isHomeTeam, widget.isGoal)
                           ? () => _updateCount(currentCount - 1)
                           : null,
                       icon: const Icon(Icons.remove, size: 18),
