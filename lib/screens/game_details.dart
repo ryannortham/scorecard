@@ -51,7 +51,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       ),
       body: Stack(
         children: [
-          // Main content
           WidgetShotPlus(
             key: _widgetShotKey,
             child: GameDetailsWidget.fromStaticData(
@@ -59,7 +58,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
               scrollController: _scrollController,
             ),
           ),
-          // Hidden screenshot widget
+          // Screenshot widget positioned off-screen
           Positioned(
             left: -1000,
             top: -1000,

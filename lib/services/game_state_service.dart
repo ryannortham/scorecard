@@ -119,8 +119,7 @@ class GameStateService extends ChangeNotifier {
     _isCountdownTimer = isCountdownMode;
     _quarterMinutes = quarterMaxTime ~/ (60 * 1000);
 
-    // Important: Never create a game record just for timer configuration
-    // This prevents configureTimer from inadvertently creating an "active game"
+    // Never create a game record for timer configuration
     if (_currentGameId == null) {
       debugPrint('Timer configured with no active game');
     }
@@ -326,7 +325,6 @@ class GameStateService extends ChangeNotifier {
 
     try {
       // Update the game date to NOW when we actually create the game record
-      // This ensures each game has the correct start time
       _gameDate = DateTime.now();
 
       // Create a game record to get a unique ID, but don't save it yet

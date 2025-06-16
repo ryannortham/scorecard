@@ -14,11 +14,9 @@ import 'package:goalkeeper/widgets/scoring/score_table.dart';
 /// Data source types for the game details widget
 enum GameDataSource {
   /// Use a static GameRecord (for game history)
-  /// This mode uses pre-saved game data from device storage
   staticData,
 
   /// Use live data from providers (for current game)
-  /// This mode uses real-time data from ScorePanelProvider and GameSetupProvider
   liveData,
 }
 
@@ -74,26 +72,14 @@ class GameDetailsWidget extends StatelessWidget {
 
   /// Determines if the game is complete based on timer events
   static bool isGameComplete(GameRecord game) {
-    // If no events, it's definitely not complete
     if (game.events.isEmpty) return false;
-
-    // PRIMARY CHECK: A game is complete if there's a clock_end event in quarter 4
-    bool hasQ4ClockEnd =
-        game.events.any((e) => e.quarter == 4 && e.type == 'clock_end');
-    if (hasQ4ClockEnd) return true;
-
-    // Not enough evidence to consider the game complete
-    return false;
+    return game.events.any((e) => e.quarter == 4 && e.type == 'clock_end');
   }
 
   /// Gets the current quarter based on the latest events
   static int getCurrentQuarter(GameRecord game) {
     if (game.events.isEmpty) return 1;
-
-    // Find the highest quarter number with events
-    final maxQuarter =
-        game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
-    return maxQuarter;
+    return game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
   }
 
   /// Builds a GameRecord from current provider data (for live data)
@@ -124,19 +110,17 @@ class GameDetailsWidget extends StatelessWidget {
     required bool isHomeTeam,
   }) {
     if (dataSource == GameDataSource.liveData) {
-      // For live data, use the existing ScorePanelAdapter from the widget tree
-      // This ensures the score table shows real-time updates from the shared adapter
-      // Use the live events instead of static game events
+      // Use live ScorePanelAdapter for real-time updates
       return Consumer<ScorePanelAdapter>(
         builder: (context, scorePanelAdapter, child) {
           return ScoreTable(
-            events: liveEvents ?? [], // Use live events for real-time updates
+            events: liveEvents ?? [],
             homeTeam: game.homeTeam,
             awayTeam: game.awayTeam,
             displayTeam: displayTeam,
             isHomeTeam: isHomeTeam,
-            enabled: false, // Disable interactions in details view
-            showHeader: false, // Hide team header
+            enabled: false,
+            showHeader: false,
             showCounters: false, // Hide score counters
             isCompletedGame: false, // Live game is not completed
           );
@@ -190,7 +174,6 @@ class GameDetailsWidget extends StatelessWidget {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Match Info Card
         GameInfoCard(
           icon: Icons.sports_rugby,
           title: '${game.homeTeam} vs ${game.awayTeam}',
@@ -199,10 +182,7 @@ class GameDetailsWidget extends StatelessWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
-
         const SizedBox(height: 16),
-
-        // Final Score Card
         dataSource == GameDataSource.liveData
             ? Consumer<ScorePanelAdapter>(
                 builder: (context, scorePanelAdapter, child) {
@@ -219,8 +199,6 @@ class GameDetailsWidget extends StatelessWidget {
                 game: game,
                 isLiveData: false,
               ),
-
-        // Quarter Breakdown Card
         const SizedBox(height: 16),
         QuarterBreakdownSection(
           game: game,

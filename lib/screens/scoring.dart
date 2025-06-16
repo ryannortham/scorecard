@@ -32,7 +32,6 @@ class ScoringState extends State<Scoring> {
   late ScorePanelAdapter scorePanelProvider;
   late GameSetupAdapter gameSetupProvider;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
-  List<bool> isSelected = [true, false, false, false];
   final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
       GlobalKey<QuarterTimerPanelState>();
 
@@ -133,12 +132,6 @@ class ScoringState extends State<Scoring> {
     }
   }
 
-  // Public method that can be called by score counter when events change
-  void updateGameAfterEventChange() {
-    // The game state service handles automatic saving
-    // This method now does nothing as the service handles saving automatically
-  }
-
   /// Check if the game is completed (Q4 has ended)
   bool _isGameComplete() {
     return _gameStateService.isGameComplete();
@@ -181,12 +174,10 @@ class ScoringState extends State<Scoring> {
         );
 
         // Reset the game state AFTER ensuring save is complete
-        // This ensures a clean state for the next game setup
+        // Clean state for next game setup
         _gameStateService.resetGame();
 
-        // Navigate to game details page passing the saved game record
         if (!mounted) return;
-
         await Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => GameDetailsPage(game: gameRecord),
@@ -553,8 +544,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                                 return Card(
                                   elevation: 1,
                                   child: ScoreTable(
-                                    events: List<GameEvent>.from(
-                                        gameEvents), // Create a defensive copy
+                                    events: List<GameEvent>.from(gameEvents),
                                     homeTeam: homeTeamName,
                                     awayTeam: awayTeamName,
                                     displayTeam: homeTeamName,
@@ -577,8 +567,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                                 return Card(
                                   elevation: 1,
                                   child: ScoreTable(
-                                    events: List<GameEvent>.from(
-                                        gameEvents), // Create a defensive copy
+                                    events: List<GameEvent>.from(gameEvents),
                                     homeTeam: homeTeamName,
                                     awayTeam: awayTeamName,
                                     displayTeam: awayTeamName,
@@ -595,7 +584,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                     ),
                   ),
 
-                  // Hidden screenshot widget
+                  // Screenshot widget positioned off-screen
                   Positioned(
                     left: -1000,
                     top: -1000,
