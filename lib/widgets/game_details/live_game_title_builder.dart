@@ -20,6 +20,6 @@ class LiveGameTitleBuilder {
     // Remove the last character (centiseconds)
     final formattedTime = timeStr.substring(0, timeStr.length - 1);
 
-    return 'Q$currentQuarter $formattedTime';
+    return 'In Progress: Q$currentQuarter $formattedTime';
   }
 }
