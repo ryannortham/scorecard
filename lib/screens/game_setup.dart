@@ -198,6 +198,11 @@ class _GameSetupState extends State<GameSetup> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onSecondary,
+                    ),
                     onPressed: () {
                       if (isValidSetup()) {
                         final gameSetupAdapter = Provider.of<GameSetupAdapter>(

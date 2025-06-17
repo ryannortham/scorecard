@@ -95,6 +95,12 @@ class TimerControls extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondary,
+                      ),
                       onPressed: isEnabled ? onResetTimer : null,
                       icon: Icon(
                         Icons.refresh,
@@ -127,6 +133,12 @@ class TimerControls extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondary,
+                      ),
                       onPressed: onToggleTimer,
                       icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
                       label: Text(
@@ -154,6 +166,12 @@ class TimerControls extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.secondary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onSecondary,
+                      ),
                       onPressed: isEnabled ? onNextQuarter : null,
                       icon: Icon(
                         _getNextIcon(currentQuarter),

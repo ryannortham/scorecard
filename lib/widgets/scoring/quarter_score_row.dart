@@ -35,7 +35,7 @@ class QuarterScoreRow extends StatelessWidget {
         color: isCurrentQuarter
             ? Theme.of(context)
                 .colorScheme
-                .primaryContainer
+                .secondaryContainer
                 .withValues(alpha: 0.3)
             : null,
         border: Border(
@@ -58,7 +58,7 @@ class QuarterScoreRow extends StatelessWidget {
                     fontWeight:
                         isCurrentQuarter ? FontWeight.w700 : FontWeight.w600,
                     color: isCurrentQuarter
-                        ? Theme.of(context).colorScheme.primary
+                        ? Theme.of(context).colorScheme.secondary
                         : null,
                   ),
             ),
@@ -92,7 +92,7 @@ class QuarterScoreRow extends StatelessWidget {
                       color: isCurrentQuarter
                           ? Theme.of(context)
                               .colorScheme
-                              .primary
+                              .secondary
                               .withValues(alpha: 0.1)
                           : Theme.of(context)
                               .colorScheme
@@ -107,7 +107,7 @@ class QuarterScoreRow extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? Theme.of(context).colorScheme.secondary
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurface
@@ -149,7 +149,7 @@ class QuarterScoreRow extends StatelessWidget {
                       color: isCurrentQuarter
                           ? Theme.of(context)
                               .colorScheme
-                              .primary
+                              .secondary
                               .withValues(alpha: 0.1)
                           : Theme.of(context)
                               .colorScheme
@@ -164,7 +164,7 @@ class QuarterScoreRow extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? Theme.of(context).colorScheme.secondary
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurface
@@ -206,7 +206,7 @@ class QuarterScoreRow extends StatelessWidget {
                       color: isCurrentQuarter
                           ? Theme.of(context)
                               .colorScheme
-                              .primary
+                              .secondary
                               .withValues(alpha: 0.1)
                           : Theme.of(context)
                               .colorScheme
@@ -221,7 +221,7 @@ class QuarterScoreRow extends StatelessWidget {
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.primary
+                                  ? Theme.of(context).colorScheme.secondary
                                   : Theme.of(context)
                                       .colorScheme
                                       .onSurface

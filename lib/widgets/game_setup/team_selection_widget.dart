@@ -181,9 +181,13 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton.icon(
+            TextButton.icon(
               icon: const Icon(Icons.swap_vert),
               label: const Text('Swap'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: Theme.of(context).colorScheme.onSurface,
+              ),
               onPressed: (widget.homeTeam != null || widget.awayTeam != null)
                   ? _swapTeams
                   : null,

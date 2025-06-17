@@ -114,7 +114,7 @@ class TimerDisplay extends StatelessWidget {
                       .surfaceContainerHigh
                       .withValues(alpha: 0.4),
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.primary,
+                    Theme.of(context).colorScheme.secondary,
                   ),
                 );
               },
