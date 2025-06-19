@@ -1,5 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
@@ -10,6 +11,10 @@ import 'package:goalkeeper/screens/home_screen.dart';
 import 'package:goalkeeper/services/app_logger.dart';
 
 void main() {
+  // Preserve the native splash screen until the app is ready
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   // Initialize logging system
   AppLogger.initialize();
   AppLogger.info('Score Card app starting', component: 'Main');
@@ -255,11 +260,41 @@ class FootyScoreCardApp extends StatelessWidget {
                 ),
               ),
               themeMode: userPreferences.themeMode,
-              home: const HomeScreen(),
+              home: const SplashWrapper(),
             );
           },
         );
       },
     );
+  }
+}
+
+/// Wrapper widget to handle native splash screen removal with fade effect
+class SplashWrapper extends StatefulWidget {
+  const SplashWrapper({super.key});
+
+  @override
+  State<SplashWrapper> createState() => _SplashWrapperState();
+}
+
+class _SplashWrapperState extends State<SplashWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    _removeSplash();
+  }
+
+  void _removeSplash() async {
+    // Wait for the first frame to be rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Give a brief moment for the UI to settle, then remove splash with fade
+      await Future.delayed(const Duration(milliseconds: 200));
+      FlutterNativeSplash.remove();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const HomeScreen();
   }
 }
