@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Light mode launch splash screen using adaptive system colors -->
+<!-- Dark mode launch splash screen for API 21+ -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="?android:attr/colorBackground" />
+    <item android:drawable="?android:colorBackground" />
 
     <!-- You can insert your own image assets here -->
     <!-- <item>

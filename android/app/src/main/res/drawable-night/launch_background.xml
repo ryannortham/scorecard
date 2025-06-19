@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Light mode launch splash screen using adaptive system colors -->
+<!-- Dark mode launch splash screen using adaptive system colors -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="?android:attr/colorBackground" />
 

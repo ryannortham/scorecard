@@ -1,7 +1,6 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:goalkeeper/adapters/game_setup_adapter.dart';
 import 'package:goalkeeper/adapters/score_panel_adapter.dart';
@@ -13,7 +12,7 @@ import 'package:goalkeeper/services/app_logger.dart';
 void main() {
   // Initialize logging system
   AppLogger.initialize();
-  AppLogger.info('Footy Score Card app starting', component: 'Main');
+  AppLogger.info('Score Card app starting', component: 'Main');
 
   runApp(
     MultiProvider(
@@ -35,41 +34,6 @@ class FootyScoreCardApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UserPreferencesProvider>(
       builder: (context, userPreferences, child) {
-        // Show loading screen until settings are loaded
-        if (!userPreferences.loaded) {
-          return MaterialApp(
-            title: 'Footy Score Card',
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-              useMaterial3: true,
-            ),
-            home: Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icon/app_icon.svg',
-                      width: 80,
-                      height: 80,
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Footy Score Card',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const CircularProgressIndicator(),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }
-
         return DynamicColorBuilder(
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
             final seedColor = userPreferences.getThemeColor();
@@ -88,7 +52,7 @@ class FootyScoreCardApp extends StatelessWidget {
                     seedColor: seedColor, brightness: Brightness.dark);
 
             return MaterialApp(
-              title: 'Footy Score Card',
+              title: 'Score Card',
               theme: ThemeData(
                 colorScheme: lightColorScheme,
                 useMaterial3: true,

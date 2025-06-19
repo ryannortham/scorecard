@@ -36,31 +36,43 @@ class UserPreferencesProvider extends ChangeNotifier {
   bool get loaded => _loaded;
 
   UserPreferencesProvider() {
-    loadPreferences();
+    // Start loading preferences but don't block the UI
+    _loadPreferencesAsync();
   }
 
-  /// Load all preferences from SharedPreferences
+  /// Load all preferences from SharedPreferences (non-blocking)
+  Future<void> _loadPreferencesAsync() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Load app settings
+      _favoriteTeam = prefs.getString(_favoriteTeamKey) ?? '';
+
+      final themeModeString = prefs.getString(_themeModeKey) ?? 'system';
+      _themeMode = ThemeMode.values.firstWhere(
+        (mode) => mode.name == themeModeString,
+        orElse: () => ThemeMode.system,
+      );
+
+      _colorTheme = prefs.getString(_colorThemeKey) ?? 'adaptive';
+      _colorTheme = _validateColorTheme(_colorTheme);
+
+      // Load game setup preferences
+      _quarterMinutes = prefs.getInt(_quarterMinutesKey) ?? 15;
+      _isCountdownTimer = prefs.getBool(_countdownTimerKey) ?? true;
+
+      _loaded = true;
+      notifyListeners();
+    } catch (e) {
+      // If loading fails, use defaults and mark as loaded
+      _loaded = true;
+      notifyListeners();
+    }
+  }
+
+  /// Public method to manually reload preferences if needed
   Future<void> loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Load app settings
-    _favoriteTeam = prefs.getString(_favoriteTeamKey) ?? '';
-
-    final themeModeString = prefs.getString(_themeModeKey) ?? 'system';
-    _themeMode = ThemeMode.values.firstWhere(
-      (mode) => mode.name == themeModeString,
-      orElse: () => ThemeMode.system,
-    );
-
-    _colorTheme = prefs.getString(_colorThemeKey) ?? 'adaptive';
-    _colorTheme = _validateColorTheme(_colorTheme);
-
-    // Load game setup preferences
-    _quarterMinutes = prefs.getInt(_quarterMinutesKey) ?? 15;
-    _isCountdownTimer = prefs.getBool(_countdownTimerKey) ?? true;
-
-    _loaded = true;
-    notifyListeners();
+    await _loadPreferencesAsync();
   }
 
   /// Save all preferences to SharedPreferences
