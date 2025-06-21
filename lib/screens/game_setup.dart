@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/user_preferences_provider.dart';
-import 'package:goalkeeper/widgets/game_setup/game_settings_configuration.dart';
-import 'package:goalkeeper/widgets/game_setup/team_selection_widget.dart';
-import 'package:goalkeeper/widgets/app_drawer.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
+import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
+import 'package:scorecard/widgets/app_drawer.dart';
 
 import 'scoring.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
 
 /// Widget that displays the timer control buttons (Reset, Play/Pause, Next)
 class TimerControls extends StatelessWidget {

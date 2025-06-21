@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/services/game_history_service.dart';
-import 'package:goalkeeper/services/app_logger.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/app_logger.dart';
 
 class GameStateService extends ChangeNotifier {
   static GameStateService? _instance;

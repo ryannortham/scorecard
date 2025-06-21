@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/adaptive_title.dart';
 
 /// Widget for displaying the game result (win/loss/draw) as a badge
 class GameResultBadge extends StatelessWidget {

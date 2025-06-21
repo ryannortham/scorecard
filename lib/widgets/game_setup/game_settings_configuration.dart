@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/providers/user_preferences_provider.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
 
 /// Widget for configuring timer settings (quarter minutes and timer type)
 /// on the game setup screen

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'timer_widget.dart';
 import 'package:provider/provider.dart';
 

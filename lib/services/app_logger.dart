@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
-/// Centralized logging service for the GoalKeeper app
+/// Centralized logging service for the Score Card app
 /// Uses the official Dart logging package for structured, hierarchical logging
 class AppLogger {
   static late final Logger _rootLogger;
@@ -40,14 +40,14 @@ class AppLogger {
       }
     });
 
-    _rootLogger = Logger('GoalKeeper');
+    _rootLogger = Logger('ScoreCard');
     _initialized = true;
   }
 
   /// Get a logger for a specific component
   static Logger getLogger(String component) {
     if (!_initialized) initialize();
-    return Logger('GoalKeeper.$component');
+    return Logger('ScoreCard.$component');
   }
 
   // Convenience methods for the root logger
@@ -78,8 +78,12 @@ class AppLogger {
     }
   }
 
-  static void error(String message,
-      {String? component, Object? error, StackTrace? stackTrace}) {
+  static void error(
+    String message, {
+    String? component,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
     final logger = component != null ? getLogger(component) : _rootLogger;
     logger.severe(message, error, stackTrace);
   }
@@ -94,8 +98,11 @@ class AppLogger {
   }
 
   /// Log performance metrics
-  static void performance(String operation, Duration duration,
-      {String? component}) {
+  static void performance(
+    String operation,
+    Duration duration, {
+    String? component,
+  }) {
     final logger = getLogger(component ?? 'Performance');
     logger.fine('$operation took ${duration.inMilliseconds}ms');
   }

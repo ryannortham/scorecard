@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/widgets/game_details/game_info_card.dart';
 
 /// Widget that displays the quarter breakdown section of a game
 class QuarterBreakdownSection extends StatelessWidget {

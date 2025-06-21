@@ -7,18 +7,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'dart:io';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/services/app_logger.dart';
-import 'package:goalkeeper/services/game_history_service.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
-import 'package:goalkeeper/widgets/adaptive_title.dart';
-import 'package:goalkeeper/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
-import 'package:goalkeeper/widgets/scoring/scoring.dart';
-import 'package:goalkeeper/widgets/timer/timer.dart';
-import 'package:goalkeeper/widgets/game_details/game_details_widget.dart';
-import 'package:goalkeeper/widgets/app_drawer.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
+import 'package:scorecard/widgets/scoring/scoring.dart';
+import 'package:scorecard/widgets/timer/timer.dart';
+import 'package:scorecard/widgets/game_details/game_details_widget.dart';
+import 'package:scorecard/widgets/app_drawer.dart';
 
 import 'game_details.dart';
 

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 /// Widget that displays the timer value and progress indicator
 class TimerDisplay extends StatelessWidget {

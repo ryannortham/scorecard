@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "goalkeeper",
+            "name": "scorecard",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "goalkeeper (profile mode)",
+            "name": "scorecard (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "goalkeeper (release mode)",
+            "name": "scorecard (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;

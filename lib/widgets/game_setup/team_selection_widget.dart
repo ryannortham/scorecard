@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/providers/teams_provider.dart';
-import 'package:goalkeeper/screens/team_list.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/providers/teams_provider.dart';
+import 'package:scorecard/screens/team_list.dart';
 
 /// Widget for selecting home and away teams with swap functionality
 class TeamSelectionWidget extends StatefulWidget {

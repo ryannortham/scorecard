@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/adaptive_title.dart';
 
 /// A reusable info card widget for displaying game details
 class GameInfoCard extends StatelessWidget {

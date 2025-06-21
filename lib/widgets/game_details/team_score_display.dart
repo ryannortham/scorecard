@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goalkeeper/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/adaptive_title.dart';
 
 /// Widget for displaying a team's score with highlighting for the winner
 class TeamScoreDisplay extends StatelessWidget {

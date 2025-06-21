@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/services/app_logger.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/services/app_logger.dart';
 
 /// Lightweight game summary for list display
 class GameSummary {

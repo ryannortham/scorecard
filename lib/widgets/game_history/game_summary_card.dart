@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/services/game_history_service.dart';
-import 'package:goalkeeper/providers/user_preferences_provider.dart';
+import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
 
 /// Optimized widget for displaying game summary in the history list
 class GameSummaryCard extends StatelessWidget {

@@ -5,7 +5,7 @@ import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
 import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import '../widgets/app_drawer.dart';
-import 'package:goalkeeper/screens/game_details.dart' as details;
+import 'package:scorecard/screens/game_details.dart' as details;
 
 class GameHistoryScreen extends StatefulWidget {
   const GameHistoryScreen({super.key});

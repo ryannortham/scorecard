@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/screens/scoring.dart';
-import 'package:goalkeeper/services/game_state_service.dart';
-import 'package:goalkeeper/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
-import 'package:goalkeeper/widgets/timer/timer_controls.dart';
-import 'package:goalkeeper/widgets/timer/timer_display.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/screens/scoring.dart';
+import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
+import 'package:scorecard/widgets/timer/timer_controls.dart';
+import 'package:scorecard/widgets/timer/timer_display.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;

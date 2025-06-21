@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/providers/user_preferences_provider.dart';
-import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
-import 'package:goalkeeper/widgets/game_details/game_score_section.dart';
-import 'package:goalkeeper/widgets/game_details/live_game_title_builder.dart';
-import 'package:goalkeeper/widgets/game_details/quarter_breakdown_section.dart';
-import 'package:goalkeeper/widgets/scoring/score_table.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/widgets/game_details/game_info_card.dart';
+import 'package:scorecard/widgets/game_details/game_score_section.dart';
+import 'package:scorecard/widgets/game_details/live_game_title_builder.dart';
+import 'package:scorecard/widgets/game_details/quarter_breakdown_section.dart';
+import 'package:scorecard/widgets/scoring/score_table.dart';
 
 /// Data source types for the game details widget
 enum GameDataSource {

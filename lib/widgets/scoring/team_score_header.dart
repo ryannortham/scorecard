@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
 
 /// Header widget displaying team name and total score
 class TeamScoreHeader extends StatelessWidget {

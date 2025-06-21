@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/game_setup_adapter.dart';
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/teams_provider.dart';
-import 'package:goalkeeper/providers/user_preferences_provider.dart';
-import 'package:goalkeeper/screens/home_screen.dart';
-import 'package:goalkeeper/services/app_logger.dart';
+import 'package:scorecard/adapters/game_setup_adapter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/teams_provider.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/screens/home_screen.dart';
+import 'package:scorecard/services/app_logger.dart';
 
 void main() {
   // Preserve the native splash screen until the app is ready

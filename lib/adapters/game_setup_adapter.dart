@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'package:goalkeeper/services/game_state_service.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 /// Bridge between UI and GameStateService for game configuration
 class GameSetupAdapter extends ChangeNotifier {

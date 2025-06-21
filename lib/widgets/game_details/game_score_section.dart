@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/widgets/game_details/game_info_card.dart';
-import 'package:goalkeeper/widgets/game_details/game_result_badge.dart';
-import 'package:goalkeeper/widgets/game_details/team_score_display.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/widgets/game_details/game_info_card.dart';
+import 'package:scorecard/widgets/game_details/game_result_badge.dart';
+import 'package:scorecard/widgets/game_details/team_score_display.dart';
 
 /// Widget that displays the final score section of a game
 class GameScoreSection extends StatelessWidget {

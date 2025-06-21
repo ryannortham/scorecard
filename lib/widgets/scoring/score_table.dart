@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:goalkeeper/adapters/score_panel_adapter.dart';
-import 'package:goalkeeper/providers/game_record.dart';
-import 'package:goalkeeper/services/app_logger.dart';
-import 'package:goalkeeper/widgets/scoring/quarter_score_row.dart';
-import 'package:goalkeeper/widgets/scoring/score_table_header.dart';
-import 'package:goalkeeper/widgets/scoring/team_score_header.dart';
-import 'package:goalkeeper/widgets/scoring/score_counter.dart';
+import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/widgets/scoring/quarter_score_row.dart';
+import 'package:scorecard/widgets/scoring/score_table_header.dart';
+import 'package:scorecard/widgets/scoring/team_score_header.dart';
+import 'package:scorecard/widgets/scoring/score_counter.dart';
 
 /// Simplified score table widget that displays team scores by quarter
 /// Uses atomic components for better maintainability

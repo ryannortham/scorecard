@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:goalkeeper/providers/game_record.dart';
+import 'package:scorecard/providers/game_record.dart';
 
 /// A single row displaying quarter score data
 class QuarterScoreRow extends StatelessWidget {
