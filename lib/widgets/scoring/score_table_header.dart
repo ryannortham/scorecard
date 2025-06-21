@@ -11,7 +11,7 @@ class ScoreTableHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context)
             .colorScheme
-            .surfaceContainerHigh
+            .surfaceContainer
             .withValues(alpha: 0.5),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(8.0),

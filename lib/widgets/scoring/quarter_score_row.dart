@@ -72,7 +72,7 @@ class QuarterScoreRow extends StatelessWidget {
                   flex: 7,
                   child: Center(
                     child: Text(
-                      isFutureQuarter ? '-' : teamGoals.toString(),
+                      isFutureQuarter ? '' : teamGoals.toString(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isFutureQuarter
@@ -103,7 +103,7 @@ class QuarterScoreRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
-                        isFutureQuarter ? '-' : runningGoals.toString(),
+                        isFutureQuarter ? '' : runningGoals.toString(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
@@ -129,7 +129,7 @@ class QuarterScoreRow extends StatelessWidget {
                   flex: 7,
                   child: Center(
                     child: Text(
-                      isFutureQuarter ? '-' : teamBehinds.toString(),
+                      isFutureQuarter ? '' : teamBehinds.toString(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
                             color: isFutureQuarter
@@ -160,7 +160,7 @@ class QuarterScoreRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
-                        isFutureQuarter ? '-' : runningBehinds.toString(),
+                        isFutureQuarter ? '' : runningBehinds.toString(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
@@ -186,7 +186,7 @@ class QuarterScoreRow extends StatelessWidget {
                   flex: 7,
                   child: Center(
                     child: Text(
-                      isFutureQuarter ? '-' : teamPoints.toString(),
+                      isFutureQuarter ? '' : teamPoints.toString(),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: isFutureQuarter
@@ -217,7 +217,7 @@ class QuarterScoreRow extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
-                        isFutureQuarter ? '-' : runningPoints.toString(),
+                        isFutureQuarter ? '' : runningPoints.toString(),
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               color: isCurrentQuarter
