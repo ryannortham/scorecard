@@ -40,25 +40,27 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
     return Scaffold(
       appBar: AppBar(
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
         ),
         title: AdaptiveTitle(
           title: '${widget.game.homeTeam} vs ${widget.game.awayTeam}',
         ),
         actions: [
           IconButton(
-            icon: _isSharing
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.share_outlined),
+            icon:
+                _isSharing
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Icon(Icons.share_outlined),
             onPressed: _isSharing ? null : () => _shareGameDetails(context),
             tooltip: 'Share Game Details',
           ),
@@ -115,11 +117,16 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       if (kDebugMode) {
         try {
           await _saveImageInDebugMode();
-          AppLogger.debug('Image saved locally before sharing',
-              component: 'GameDetails');
+          AppLogger.debug(
+            'Image saved locally before sharing',
+            component: 'GameDetails',
+          );
         } catch (e) {
-          AppLogger.error('Failed to save image locally',
-              component: 'GameDetails', error: e);
+          AppLogger.error(
+            'Failed to save image locally',
+            component: 'GameDetails',
+            error: e,
+          );
           // Continue with sharing even if save fails in debug mode
         }
       }
@@ -131,8 +138,11 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         try {
           await _shareWithWidgetShotPlus(shareText);
         } catch (e) {
-          AppLogger.error('Error in share post-frame callback',
-              component: 'GameDetails', error: e);
+          AppLogger.error(
+            'Error in share post-frame callback',
+            component: 'GameDetails',
+            error: e,
+          );
           // Show error if sharing failed
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -152,8 +162,11 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         }
       });
     } catch (e) {
-      AppLogger.error('Error preparing share',
-          component: 'GameDetails', error: e);
+      AppLogger.error(
+        'Error preparing share',
+        component: 'GameDetails',
+        error: e,
+      );
       if (mounted) {
         setState(() {
           _isSharing = false;
@@ -184,8 +197,11 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           Navigator.of(context).pop(true);
         }
       } catch (e) {
-        AppLogger.error('Failed to delete game',
-            component: 'GameDetails', error: e);
+        AppLogger.error(
+          'Failed to delete game',
+          component: 'GameDetails',
+          error: e,
+        );
 
         // Show error message
         if (context.mounted) {
@@ -204,8 +220,9 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   /// Save image in debug mode (without UI state management)
   Future<void> _saveImageInDebugMode() async {
     try {
-      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
+      final boundary =
+          _screenshotWidgetKey.currentContext?.findRenderObject()
+              as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
@@ -226,11 +243,16 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       final fileName = _generateFileName();
       await Gal.putImageBytes(imageBytes, name: fileName);
 
-      AppLogger.debug('Game details saved to gallery',
-          component: 'GameDetails');
+      AppLogger.debug(
+        'Game details saved to gallery',
+        component: 'GameDetails',
+      );
     } catch (e) {
-      AppLogger.error('Error saving widget',
-          component: 'GameDetails', error: e);
+      AppLogger.error(
+        'Error saving widget',
+        component: 'GameDetails',
+        error: e,
+      );
       rethrow; // Re-throw to be handled by caller
     }
   }
@@ -249,8 +271,9 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
   /// Capture and share using WidgetShotPlus
   Future<void> _shareWithWidgetShotPlus(String shareText) async {
     try {
-      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
+      final boundary =
+          _screenshotWidgetKey.currentContext?.findRenderObject()
+              as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
@@ -274,18 +297,20 @@ Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}
       await file.writeAsBytes(imageBytes);
 
       // Share the image with text
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: shareText,
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: shareText),
       );
 
       // No success feedback needed - user can see share dialog
     } catch (e) {
-      AppLogger.error('Error sharing widget',
-          component: 'GameDetails', error: e);
+      AppLogger.error(
+        'Error sharing widget',
+        component: 'GameDetails',
+        error: e,
+      );
 
       // Fallback to text-only sharing
-      await Share.share(shareText);
+      await SharePlus.instance.share(ShareParams(text: shareText));
 
       // No success feedback needed for fallback sharing
     }

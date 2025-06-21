@@ -129,8 +129,9 @@ class ScoringState extends State<Scoring> {
         final String? gameId = _gameStateService.currentGameId;
         if (gameId == null) {
           AppLogger.warning(
-              'No current game ID found. Cannot navigate to game details',
-              component: 'Scoring');
+            'No current game ID found. Cannot navigate to game details',
+            component: 'Scoring',
+          );
           return;
         }
 
@@ -148,9 +149,10 @@ class ScoringState extends State<Scoring> {
             final homeTeam = gameSetupProvider.homeTeam;
             final awayTeam = gameSetupProvider.awayTeam;
             AppLogger.warning(
-                'Could not find game with ID $gameId, using fallback search',
-                component: 'Scoring',
-                data: '$homeTeam vs $awayTeam');
+              'Could not find game with ID $gameId, using fallback search',
+              component: 'Scoring',
+              data: '$homeTeam vs $awayTeam',
+            );
             return allGames.firstWhere(
               (game) => game.homeTeam == homeTeam && game.awayTeam == awayTeam,
             );
@@ -192,11 +194,16 @@ class ScoringState extends State<Scoring> {
       if (kDebugMode) {
         try {
           await _saveImageInDebugMode();
-          AppLogger.debug('Image saved locally before sharing',
-              component: 'Scoring');
+          AppLogger.debug(
+            'Image saved locally before sharing',
+            component: 'Scoring',
+          );
         } catch (e) {
-          AppLogger.error('Failed to save image locally',
-              component: 'Scoring', error: e);
+          AppLogger.error(
+            'Failed to save image locally',
+            component: 'Scoring',
+            error: e,
+          );
           // Continue with sharing even if save fails in debug mode
         }
       }
@@ -208,8 +215,11 @@ class ScoringState extends State<Scoring> {
         try {
           await _shareWithWidgetShotPlus(shareText);
         } catch (e) {
-          AppLogger.error('Error in share post-frame callback',
-              component: 'Scoring', error: e);
+          AppLogger.error(
+            'Error in share post-frame callback',
+            component: 'Scoring',
+            error: e,
+          );
           // Show error if sharing failed
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -251,8 +261,9 @@ class ScoringState extends State<Scoring> {
   /// Capture and share using WidgetShotPlus
   Future<void> _shareWithWidgetShotPlus(String shareText) async {
     try {
-      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
+      final boundary =
+          _screenshotWidgetKey.currentContext?.findRenderObject()
+              as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
@@ -276,23 +287,23 @@ class ScoringState extends State<Scoring> {
       await file.writeAsBytes(imageBytes);
 
       // Share the image with text
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: shareText,
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: shareText),
       );
     } catch (e) {
       AppLogger.error('Error sharing widget', component: 'Scoring', error: e);
 
       // Fallback to text-only sharing
-      await Share.share(shareText);
+      await SharePlus.instance.share(ShareParams(text: shareText));
     }
   }
 
   /// Save image in debug mode (without UI state management)
   Future<void> _saveImageInDebugMode() async {
     try {
-      final boundary = _screenshotWidgetKey.currentContext?.findRenderObject()
-          as WidgetShotPlusRenderRepaintBoundary?;
+      final boundary =
+          _screenshotWidgetKey.currentContext?.findRenderObject()
+              as WidgetShotPlusRenderRepaintBoundary?;
 
       if (boundary == null) {
         throw Exception('Could not find WidgetShotPlus boundary');
@@ -322,21 +333,31 @@ class ScoringState extends State<Scoring> {
 
   /// Generate a descriptive filename for the image
   String _generateFileName() {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+      context,
+      listen: false,
+    );
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final cleanHome =
-        gameSetupAdapter.homeTeam.replaceAll(RegExp(r'[^\w]'), '');
-    final cleanAway =
-        gameSetupAdapter.awayTeam.replaceAll(RegExp(r'[^\w]'), '');
+    final cleanHome = gameSetupAdapter.homeTeam.replaceAll(
+      RegExp(r'[^\w]'),
+      '',
+    );
+    final cleanAway = gameSetupAdapter.awayTeam.replaceAll(
+      RegExp(r'[^\w]'),
+      '',
+    );
     return '${cleanHome}_v_${cleanAway}_$timestamp.png';
   }
 
   String _buildShareText() {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
-    final scorePanelAdapter =
-        Provider.of<ScorePanelAdapter>(context, listen: false);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+      context,
+      listen: false,
+    );
+    final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
+      context,
+      listen: false,
+    );
 
     final homeScore =
         '${scorePanelAdapter.homeGoals}.${scorePanelAdapter.homeBehinds} (${scorePanelAdapter.homePoints})';
@@ -368,13 +389,14 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
           return Scaffold(
             appBar: AppBar(
               leading: Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  tooltip: 'Menu',
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                ),
+                builder:
+                    (context) => IconButton(
+                      icon: const Icon(Icons.menu),
+                      tooltip: 'Menu',
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
               ),
               title: AdaptiveTitle(
                 title: '$homeTeamName vs $awayTeamName',
@@ -382,13 +404,14 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
               ),
               actions: [
                 IconButton(
-                  icon: _isSharing
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.share_outlined),
+                  icon:
+                      _isSharing
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.share_outlined),
                   tooltip: 'Share Game Details',
                   onPressed:
                       _isSharing ? null : () => _shareGameDetails(context),
@@ -410,8 +433,9 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         Card(
                           elevation: 1,
                           child: QuarterTimerPanel(
-                              key: _quarterTimerKey,
-                              isTimerRunning: isTimerRunning),
+                            key: _quarterTimerKey,
+                            isTimerRunning: isTimerRunning,
+                          ),
                         ),
                         const SizedBox(height: 4),
 
