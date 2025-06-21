@@ -103,36 +103,18 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
 flutter_native_splash:
-  # Use the football image for splash screen
-  image: assets/icon/splash_icon.png
-  
-  # Adaptive colors that match system theme
-  color: "#FFFFFF"
-  color_dark: "#000000"
-  
-  # Android 12+ configuration - use proper system colors
+  color: "#c8e6c9"
+  image: assets/icon/splash_light.png
+  # branding: assets/branding-production.png
+  # branding_bottom_padding: 24
+  color_dark: "#121212"
+  image_dark: assets/icon/splash_dark.png
+  # branding_dark: assets/branding-production.png
+
   android_12:
-    # Use the football image for Android 12+ as well
-    image: assets/icon/splash_icon.png
-    # Background colors
-    color: "#FFFFFF"
-    color_dark: "#121212"
-    # Use matching background colors for icon background
-    icon_background_color: "#FFFFFF"  # Light background
-    icon_background_color_dark: "#121212"  # Dark background
-    
-  # iOS configuration
-  ios: true
-  
-  # Web disabled
+    image: assets/icon/splash_light.png
+    icon_background_color: "#c8e6c9"
+    image_dark: assets/icon/splash_dark.png
+    icon_background_color_dark: "#121212"
+
   web: false
-  
-  # Platform settings
-  android: true
-  
-  # Prevent cropping - fit entire image on screen
-  android_gravity: center
-  ios_content_mode: scaleAspectFit
-  
-  # Fullscreen
-  fullscreen: true
