@@ -12,10 +12,14 @@ class TimerDisplay extends StatelessWidget {
 
   /// Gets the appropriate color for the timer display based on current state
   Color _getTimerColor(BuildContext context) {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
-    final scorePanelAdapter =
-        Provider.of<ScorePanelAdapter>(context, listen: false);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+      context,
+      listen: false,
+    );
+    final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
+      context,
+      listen: false,
+    );
 
     final currentTime = scorePanelAdapter.timerRawTime;
     final quarterMSec = gameSetupAdapter.quarterMSec;
@@ -42,14 +46,20 @@ class TimerDisplay extends StatelessWidget {
     if (isCountdownTimer && value < 0) {
       // Handle negative time display for countdown timer
       final absValue = value.abs();
-      final timeStr = StopWatchTimer.getDisplayTime(absValue,
-          hours: false, milliSecond: true);
+      final timeStr = StopWatchTimer.getDisplayTime(
+        absValue,
+        hours: false,
+        milliSecond: true,
+      );
       final trimmedTimeStr = timeStr.substring(0, timeStr.length - 1);
       return '-$trimmedTimeStr';
     } else {
       // Standard positive time display
-      final timeStr =
-          StopWatchTimer.getDisplayTime(value, hours: false, milliSecond: true);
+      final timeStr = StopWatchTimer.getDisplayTime(
+        value,
+        hours: false,
+        milliSecond: true,
+      );
       return timeStr.substring(0, timeStr.length - 1);
     }
   }
@@ -64,13 +74,14 @@ class TimerDisplay extends StatelessWidget {
           children: [
             // Timer Display
             Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 6.0,
+                horizontal: 10.0,
+              ),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: StreamBuilder<int>(
@@ -79,14 +90,16 @@ class TimerDisplay extends StatelessWidget {
                 builder: (context, snap) {
                   final value = snap.data!;
                   final displayTime = _formatTimerDisplay(
-                      value, gameSetupAdapter.isCountdownTimer);
+                    value,
+                    gameSetupAdapter.isCountdownTimer,
+                  );
 
                   return Text(
                     displayTime,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: _getTimerColor(context),
-                          fontWeight: FontWeight.w600,
-                        ),
+                      color: _getTimerColor(context),
+                      fontWeight: FontWeight.w600,
+                    ),
                   );
                 },
               ),
@@ -109,10 +122,9 @@ class TimerDisplay extends StatelessWidget {
 
                 return LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHigh
-                      .withValues(alpha: 0.4),
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHigh.withValues(alpha: 0.4),
                   valueColor: AlwaysStoppedAnimation<Color>(
                     Theme.of(context).colorScheme.secondary,
                   ),

@@ -25,11 +25,12 @@ class EndQuarterBottomSheet extends StatefulWidget {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => EndQuarterBottomSheet(
-        currentQuarter: currentQuarter,
-        isLastQuarter: isLastQuarter,
-        onConfirm: onConfirm,
-      ),
+      builder:
+          (context) => EndQuarterBottomSheet(
+            currentQuarter: currentQuarter,
+            isLastQuarter: isLastQuarter,
+            onConfirm: onConfirm,
+          ),
     );
     return result ?? false;
   }
@@ -68,32 +69,35 @@ class _EndQuarterBottomSheetState extends State<EndQuarterBottomSheet>
       showDragHandle: true,
       enableDrag: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Action button with leading icon
-            TextButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-                widget.onConfirm();
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: Theme.of(context).colorScheme.onSurface,
-                overlayColor: Colors.transparent,
-                side: BorderSide.none,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              icon: Icon(icon),
-              label: Text(actionText),
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Action button with leading icon
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    widget.onConfirm();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
+                    overlayColor: Colors.transparent,
+                    side: BorderSide.none,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  icon: Icon(icon),
+                  label: Text(actionText),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

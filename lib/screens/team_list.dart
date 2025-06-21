@@ -6,8 +6,11 @@ import '../services/navigation_service.dart';
 import '../widgets/app_drawer.dart';
 
 class TeamList extends StatelessWidget {
-  const TeamList(
-      {super.key, required this.title, required this.onTeamSelected});
+  const TeamList({
+    super.key,
+    required this.title,
+    required this.onTeamSelected,
+  });
   final String title;
   final void Function(String) onTeamSelected;
 
@@ -22,54 +25,66 @@ class TeamList extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            tooltip: 'Menu',
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                tooltip: 'Menu',
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
         ),
       ),
       drawer: const AppDrawer(currentRoute: 'team_list'),
-      body: teamsProvider.loaded
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                itemCount: teamNames.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final teamName = teamNames[index];
-                  final realIndex = teamsProvider.teams.indexOf(teamName);
-                  return Card(
-                    child: ListTile(
-                      title: Text(teamName),
-                      onTap: () {
-                        onTeamSelected(teamName);
-                        Navigator.pop(context, teamName);
-                      },
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined),
-                            tooltip: 'Edit',
-                            onPressed: () => _showEditTeamDialog(
-                                context, teamsProvider, realIndex, teamName),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            tooltip: 'Delete',
-                            onPressed: () => _showDeleteTeamConfirmation(
-                                context, teamsProvider, realIndex, teamName),
-                          ),
-                        ],
+      body:
+          teamsProvider.loaded
+              ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  itemCount: teamNames.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final teamName = teamNames[index];
+                    final realIndex = teamsProvider.teams.indexOf(teamName);
+                    return Card(
+                      child: ListTile(
+                        title: Text(teamName),
+                        onTap: () {
+                          onTeamSelected(teamName);
+                          Navigator.pop(context, teamName);
+                        },
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined),
+                              tooltip: 'Edit',
+                              onPressed:
+                                  () => _showEditTeamDialog(
+                                    context,
+                                    teamsProvider,
+                                    realIndex,
+                                    teamName,
+                                  ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              tooltip: 'Delete',
+                              onPressed:
+                                  () => _showDeleteTeamConfirmation(
+                                    context,
+                                    teamsProvider,
+                                    realIndex,
+                                    teamName,
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
-            )
-          : const Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                ),
+              )
+              : const Center(child: CircularProgressIndicator()),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddTeamDialog(context),
         tooltip: 'Add Team',
@@ -137,10 +152,15 @@ class TeamList extends StatelessWidget {
     );
   }
 
-  Future<void> _showEditTeamDialog(BuildContext context,
-      TeamsProvider teamsProvider, int index, String currentTeamName) async {
-    final TextEditingController controller =
-        TextEditingController(text: currentTeamName);
+  Future<void> _showEditTeamDialog(
+    BuildContext context,
+    TeamsProvider teamsProvider,
+    int index,
+    String currentTeamName,
+  ) async {
+    final TextEditingController controller = TextEditingController(
+      text: currentTeamName,
+    );
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     return showDialog<void>(
@@ -201,8 +221,12 @@ class TeamList extends StatelessWidget {
     );
   }
 
-  Future<void> _showDeleteTeamConfirmation(BuildContext context,
-      TeamsProvider teamsProvider, int index, String teamName) async {
+  Future<void> _showDeleteTeamConfirmation(
+    BuildContext context,
+    TeamsProvider teamsProvider,
+    int index,
+    String teamName,
+  ) async {
     final confirmed = await AppNavigator.showConfirmationDialog(
       context: context,
       title: 'Delete Team?',

@@ -47,14 +47,18 @@ class FootyScoreCardApp extends StatelessWidget {
             final useDynamicColors = userPreferences.colorTheme == 'adaptive';
 
             // Get color schemes
-            final lightColorScheme = (useDynamicColors && lightDynamic != null)
-                ? lightDynamic
-                : ColorScheme.fromSeed(seedColor: seedColor);
+            final lightColorScheme =
+                (useDynamicColors && lightDynamic != null)
+                    ? lightDynamic
+                    : ColorScheme.fromSeed(seedColor: seedColor);
 
-            final darkColorScheme = (useDynamicColors && darkDynamic != null)
-                ? darkDynamic
-                : ColorScheme.fromSeed(
-                    seedColor: seedColor, brightness: Brightness.dark);
+            final darkColorScheme =
+                (useDynamicColors && darkDynamic != null)
+                    ? darkDynamic
+                    : ColorScheme.fromSeed(
+                      seedColor: seedColor,
+                      brightness: Brightness.dark,
+                    );
 
             return MaterialApp(
               title: 'Score Card',
@@ -66,52 +70,58 @@ class FootyScoreCardApp extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: lightColorScheme.onPrimary,
                     backgroundColor: lightColorScheme.primary,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
-                    disabledBackgroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.12),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
+                    disabledBackgroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.12),
                     elevation: 2,
                     shadowColor: lightColorScheme.shadow,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 filledButtonTheme: FilledButtonThemeData(
                   style: FilledButton.styleFrom(
                     foregroundColor: lightColorScheme.onPrimary,
                     backgroundColor: lightColorScheme.primary,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
-                    disabledBackgroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.12),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
+                    disabledBackgroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 textButtonTheme: TextButtonThemeData(
                   style: TextButton.styleFrom(
                     foregroundColor: lightColorScheme.primary,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 outlinedButtonTheme: OutlinedButtonThemeData(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: lightColorScheme.primary,
                     backgroundColor: Colors.transparent,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     side: BorderSide(
                       color: lightColorScheme.outline,
                       width: 1.5,
@@ -120,14 +130,16 @@ class FootyScoreCardApp extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 iconButtonTheme: IconButtonThemeData(
                   style: IconButton.styleFrom(
                     foregroundColor: lightColorScheme.onSurfaceVariant,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
@@ -148,8 +160,8 @@ class FootyScoreCardApp extends StatelessWidget {
                     foregroundColor: lightColorScheme.onSurface,
                     selectedBackgroundColor: lightColorScheme.primary,
                     selectedForegroundColor: lightColorScheme.onPrimary,
-                    disabledForegroundColor:
-                        lightColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: lightColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -165,55 +177,62 @@ class FootyScoreCardApp extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: darkColorScheme.onPrimary,
                     backgroundColor: darkColorScheme.primary,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
-                    disabledBackgroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.12),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
+                    disabledBackgroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.12),
                     elevation: 2,
                     shadowColor: darkColorScheme.shadow,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 filledButtonTheme: FilledButtonThemeData(
                   style: FilledButton.styleFrom(
                     foregroundColor: darkColorScheme.onPrimary,
                     backgroundColor: darkColorScheme.primary,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
-                    disabledBackgroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.12),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
+                    disabledBackgroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 textButtonTheme: TextButtonThemeData(
                   style: TextButton.styleFrom(
                     foregroundColor: darkColorScheme.primary,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     // Add subtle background for better visibility in dark mode
-                    backgroundColor:
-                        darkColorScheme.primary.withValues(alpha: 0.08),
+                    backgroundColor: darkColorScheme.primary.withValues(
+                      alpha: 0.08,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 outlinedButtonTheme: OutlinedButtonThemeData(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: darkColorScheme.primary,
                     backgroundColor: darkColorScheme.surface,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     side: BorderSide(
                       color: darkColorScheme.outline,
                       width: 1.5,
@@ -222,14 +241,16 @@ class FootyScoreCardApp extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                 ),
                 iconButtonTheme: IconButtonThemeData(
                   style: IconButton.styleFrom(
                     foregroundColor: darkColorScheme.onSurfaceVariant,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
@@ -250,8 +271,8 @@ class FootyScoreCardApp extends StatelessWidget {
                     foregroundColor: darkColorScheme.onSurface,
                     selectedBackgroundColor: darkColorScheme.primary,
                     selectedForegroundColor: darkColorScheme.onPrimary,
-                    disabledForegroundColor:
-                        darkColorScheme.onSurface.withValues(alpha: 0.38),
+                    disabledForegroundColor: darkColorScheme.onSurface
+                        .withValues(alpha: 0.38),
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),

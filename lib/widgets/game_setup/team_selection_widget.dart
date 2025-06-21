@@ -41,28 +41,33 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
     final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (context) => TeamList(
-          title: title,
-          onTeamSelected: (teamName) {
-            final gameSetupAdapter =
-                Provider.of<GameSetupAdapter>(context, listen: false);
-            if (teamType == 'home') {
-              gameSetupAdapter.setHomeTeam(teamName);
-              widget.homeTeamController.text = teamName;
-            } else {
-              gameSetupAdapter.setAwayTeam(teamName);
-              widget.awayTeamController.text = teamName;
-            }
-          },
-        ),
+        builder:
+            (context) => TeamList(
+              title: title,
+              onTeamSelected: (teamName) {
+                final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+                  context,
+                  listen: false,
+                );
+                if (teamType == 'home') {
+                  gameSetupAdapter.setHomeTeam(teamName);
+                  widget.homeTeamController.text = teamName;
+                } else {
+                  gameSetupAdapter.setAwayTeam(teamName);
+                  widget.awayTeamController.text = teamName;
+                }
+              },
+            ),
         settings: RouteSettings(arguments: excludeTeam),
       ),
     );
 
     if (result != null && mounted) {
       final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-      final gameSetupAdapter =
-          Provider.of<GameSetupAdapter>(context, listen: false);
+      final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+        context,
+        listen: false,
+      );
 
       // Handle team deletion or reselection
       if (teamType == 'home') {
@@ -105,8 +110,10 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
   }
 
   void _swapTeams() {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+      context,
+      listen: false,
+    );
 
     final tempTeam = widget.homeTeam;
     widget.onHomeTeamChanged(widget.awayTeam);
@@ -136,20 +143,19 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
                 child: TextFormField(
                   readOnly: true,
                   controller: widget.homeTeamController,
-                  decoration: const InputDecoration(
-                    labelText: 'Home Team',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Home Team'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select Home Team';
                     }
                     return null;
                   },
-                  onTap: () => _selectTeam(
-                    title: 'Select Home Team',
-                    teamType: 'home',
-                    excludeTeam: widget.awayTeam,
-                  ),
+                  onTap:
+                      () => _selectTeam(
+                        title: 'Select Home Team',
+                        teamType: 'home',
+                        excludeTeam: widget.awayTeam,
+                      ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -158,20 +164,19 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
                 child: TextFormField(
                   readOnly: true,
                   controller: widget.awayTeamController,
-                  decoration: const InputDecoration(
-                    labelText: 'Away Team',
-                  ),
+                  decoration: const InputDecoration(labelText: 'Away Team'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select Away Team';
                     }
                     return null;
                   },
-                  onTap: () => _selectTeam(
-                    title: 'Select Away Team',
-                    teamType: 'away',
-                    excludeTeam: widget.homeTeam,
-                  ),
+                  onTap:
+                      () => _selectTeam(
+                        title: 'Select Away Team',
+                        teamType: 'away',
+                        excludeTeam: widget.homeTeam,
+                      ),
                 ),
               ),
             ],
@@ -188,9 +193,10 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
                 backgroundColor: Colors.transparent,
                 foregroundColor: Theme.of(context).colorScheme.onSurface,
               ),
-              onPressed: (widget.homeTeam != null || widget.awayTeam != null)
-                  ? _swapTeams
-                  : null,
+              onPressed:
+                  (widget.homeTeam != null || widget.awayTeam != null)
+                      ? _swapTeams
+                      : null,
             ),
           ],
         ),

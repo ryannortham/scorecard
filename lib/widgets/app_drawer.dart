@@ -9,10 +9,7 @@ import 'package:scorecard/screens/game_history.dart';
 class AppDrawer extends StatelessWidget {
   final String currentRoute;
 
-  const AppDrawer({
-    super.key,
-    required this.currentRoute,
-  });
+  const AppDrawer({super.key, required this.currentRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +24,9 @@ class AppDrawer extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
             child: Text(
               'Score Card',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           const Divider(),
@@ -43,24 +40,26 @@ class AppDrawer extends StatelessWidget {
                   ? 'Not set'
                   : userPreferences.favoriteTeam,
             ),
-            trailing: userPreferences.favoriteTeam.isNotEmpty
-                ? IconButton(
-                    onPressed: () => userPreferences.setFavoriteTeam(''),
-                    icon: const Icon(Icons.clear_outlined),
-                    tooltip: 'Clear favorite team',
-                  )
-                : null,
+            trailing:
+                userPreferences.favoriteTeam.isNotEmpty
+                    ? IconButton(
+                      onPressed: () => userPreferences.setFavoriteTeam(''),
+                      icon: const Icon(Icons.clear_outlined),
+                      tooltip: 'Clear favorite team',
+                    )
+                    : null,
             onTap: () async {
               Navigator.pop(context);
               await Navigator.push<String>(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TeamList(
-                    title: 'Select Favorite Team',
-                    onTeamSelected: (teamName) {
-                      userPreferences.setFavoriteTeam(teamName);
-                    },
-                  ),
+                  builder:
+                      (context) => TeamList(
+                        title: 'Select Favorite Team',
+                        onTeamSelected: (teamName) {
+                          userPreferences.setFavoriteTeam(teamName);
+                        },
+                      ),
                 ),
               );
             },
@@ -83,8 +82,12 @@ class AppDrawer extends StatelessWidget {
 
           // Theme Mode
           GestureDetector(
-            onTapDown: (TapDownDetails details) => _showThemeModeMenu(
-                context, userPreferences, details.globalPosition),
+            onTapDown:
+                (TapDownDetails details) => _showThemeModeMenu(
+                  context,
+                  userPreferences,
+                  details.globalPosition,
+                ),
             child: ListTile(
               leading: Icon(_getThemeModeIcon(userPreferences.themeMode)),
               title: Text(_getThemeModeText(userPreferences.themeMode)),
@@ -94,14 +97,19 @@ class AppDrawer extends StatelessWidget {
 
           // Color Theme
           GestureDetector(
-            onTapDown: (TapDownDetails details) => _showColorThemeMenu(
-                context, userPreferences, details.globalPosition),
+            onTapDown:
+                (TapDownDetails details) => _showColorThemeMenu(
+                  context,
+                  userPreferences,
+                  details.globalPosition,
+                ),
             child: ListTile(
               leading: Icon(
                 Icons.palette_outlined,
-                color: userPreferences.colorTheme == 'adaptive'
-                    ? Theme.of(context).colorScheme.primary
-                    : userPreferences.getThemeColor(),
+                color:
+                    userPreferences.colorTheme == 'adaptive'
+                        ? Theme.of(context).colorScheme.primary
+                        : userPreferences.getThemeColor(),
               ),
               title: Text(_getColorThemeText(userPreferences.colorTheme)),
               trailing: const Icon(Icons.keyboard_arrow_down),
@@ -181,16 +189,16 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  void _showThemeModeMenu(BuildContext context,
-      UserPreferencesProvider provider, Offset tapPosition) {
+  void _showThemeModeMenu(
+    BuildContext context,
+    UserPreferencesProvider provider,
+    Offset tapPosition,
+  ) {
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
     final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        tapPosition,
-        tapPosition,
-      ),
+      Rect.fromPoints(tapPosition, tapPosition),
       Offset.zero & overlay.size,
     );
 
@@ -248,16 +256,16 @@ class AppDrawer extends StatelessWidget {
     });
   }
 
-  void _showColorThemeMenu(BuildContext context,
-      UserPreferencesProvider provider, Offset tapPosition) {
+  void _showColorThemeMenu(
+    BuildContext context,
+    UserPreferencesProvider provider,
+    Offset tapPosition,
+  ) {
     final RenderBox overlay =
         Overlay.of(context).context.findRenderObject() as RenderBox;
 
     final RelativeRect position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        tapPosition,
-        tapPosition,
-      ),
+      Rect.fromPoints(tapPosition, tapPosition),
       Offset.zero & overlay.size,
     );
 
@@ -265,27 +273,27 @@ class AppDrawer extends StatelessWidget {
       {
         'value': 'adaptive',
         'label': 'Adaptive',
-        'color': const Color(0xFF6750A4)
+        'color': const Color(0xFF6750A4),
       },
       {'value': 'blue', 'label': 'Blue', 'color': const Color(0xFF1565C0)},
       {
         'value': 'light_blue',
         'label': 'Light Blue',
-        'color': const Color(0xFF0277BD)
+        'color': const Color(0xFF0277BD),
       },
       {'value': 'indigo', 'label': 'Indigo', 'color': const Color(0xFF3F51B5)},
       {'value': 'purple', 'label': 'Purple', 'color': const Color(0xFF9C27B0)},
       {
         'value': 'deep_purple',
         'label': 'Deep Purple',
-        'color': const Color(0xFF673AB7)
+        'color': const Color(0xFF673AB7),
       },
       {'value': 'pink', 'label': 'Pink', 'color': const Color(0xFFE91E63)},
       {'value': 'red', 'label': 'Red', 'color': const Color(0xFFD32F2F)},
       {
         'value': 'deep_orange',
         'label': 'Deep Orange',
-        'color': const Color(0xFFFF5722)
+        'color': const Color(0xFFFF5722),
       },
       {'value': 'orange', 'label': 'Orange', 'color': const Color(0xFFFF9800)},
       {'value': 'amber', 'label': 'Amber', 'color': const Color(0xFFFFC107)},
@@ -294,7 +302,7 @@ class AppDrawer extends StatelessWidget {
       {
         'value': 'light_green',
         'label': 'Light Green',
-        'color': const Color(0xFF8BC34A)
+        'color': const Color(0xFF8BC34A),
       },
       {'value': 'green', 'label': 'Green', 'color': const Color(0xFF4CAF50)},
       {'value': 'teal', 'label': 'Teal', 'color': const Color(0xFF009688)},
@@ -303,7 +311,7 @@ class AppDrawer extends StatelessWidget {
       {
         'value': 'blue_grey',
         'label': 'Blue Grey',
-        'color': const Color(0xFF607D8B)
+        'color': const Color(0xFF607D8B),
       },
       {'value': 'grey', 'label': 'Grey', 'color': const Color(0xFF9E9E9E)},
     ];
@@ -311,28 +319,33 @@ class AppDrawer extends StatelessWidget {
     showMenu<String>(
       context: context,
       position: position,
-      items: colorOptions.map((option) {
-        return PopupMenuItem<String>(
-          value: option['value'] as String,
-          child: Row(
-            children: [
-              Icon(
-                Icons.palette_outlined,
-                size: 16,
-                color: option['value'] == 'adaptive'
-                    ? Theme.of(context).colorScheme.primary
-                    : option['color'] as Color,
+      items:
+          colorOptions.map((option) {
+            return PopupMenuItem<String>(
+              value: option['value'] as String,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.palette_outlined,
+                    size: 16,
+                    color:
+                        option['value'] == 'adaptive'
+                            ? Theme.of(context).colorScheme.primary
+                            : option['color'] as Color,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(child: Text(option['label'] as String)),
+                  if (provider.colorTheme == option['value']) ...[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.check,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(option['label'] as String)),
-              if (provider.colorTheme == option['value']) ...[
-                const SizedBox(width: 8),
-                Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
-              ],
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     ).then((String? result) {
       if (result != null) {
         provider.setColorTheme(result);

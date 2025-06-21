@@ -45,12 +45,18 @@ class _GameSetupState extends State<GameSetup> {
     super.initState();
     // Completely reset and initialize game state on startup
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gameSetupAdapter =
-          Provider.of<GameSetupAdapter>(context, listen: false);
-      final userPreferences =
-          Provider.of<UserPreferencesProvider>(context, listen: false);
-      final scorePanelAdapter =
-          Provider.of<ScorePanelAdapter>(context, listen: false);
+      final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+        context,
+        listen: false,
+      );
+      final userPreferences = Provider.of<UserPreferencesProvider>(
+        context,
+        listen: false,
+      );
+      final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
+        context,
+        listen: false,
+      );
 
       // First, completely reset the game state
       gameSetupAdapter.reset(
@@ -77,8 +83,9 @@ class _GameSetupState extends State<GameSetup> {
 
       _homeTeamController.text = homeTeamValue;
       _awayTeamController.text = '';
-      _dateController.text =
-          DateFormat('EEEE dd/MM/yyyy').format(DateTime.now());
+      _dateController.text = DateFormat(
+        'EEEE dd/MM/yyyy',
+      ).format(DateTime.now());
 
       setState(() {
         homeTeam = homeTeamValue.isNotEmpty ? homeTeamValue : null;
@@ -103,13 +110,14 @@ class _GameSetupState extends State<GameSetup> {
       appBar: AppBar(
         title: Text(widget.title),
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu),
-            tooltip: 'Menu',
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                tooltip: 'Menu',
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
         ),
       ),
       drawer: const AppDrawer(currentRoute: 'game_setup'),
@@ -123,10 +131,9 @@ class _GameSetupState extends State<GameSetup> {
               const Spacer(flex: 1),
               Card(
                 elevation: 1,
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.9),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.9),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),
@@ -152,17 +159,19 @@ class _GameSetupState extends State<GameSetup> {
                             final DateTime? pickedDate = await showDatePicker(
                               context: context,
                               initialDate: DateTime.now(),
-                              firstDate: DateTime.now()
-                                  .subtract(const Duration(days: 365)),
-                              lastDate:
-                                  DateTime.now().add(const Duration(days: 365)),
+                              firstDate: DateTime.now().subtract(
+                                const Duration(days: 365),
+                              ),
+                              lastDate: DateTime.now().add(
+                                const Duration(days: 365),
+                              ),
                             );
 
                             if (pickedDate != null) {
                               gameSetupAdapter.setGameDate(pickedDate);
-                              _dateController.text =
-                                  DateFormat('EEEE dd/MM/yyyy')
-                                      .format(pickedDate);
+                              _dateController.text = DateFormat(
+                                'EEEE dd/MM/yyyy',
+                              ).format(pickedDate);
                             }
                             dateKey.currentState!.validate();
                           },
@@ -206,11 +215,14 @@ class _GameSetupState extends State<GameSetup> {
                     onPressed: () {
                       if (isValidSetup()) {
                         final gameSetupAdapter = Provider.of<GameSetupAdapter>(
-                            context,
-                            listen: false);
+                          context,
+                          listen: false,
+                        );
                         final scorePanelAdapter =
-                            Provider.of<ScorePanelAdapter>(context,
-                                listen: false);
+                            Provider.of<ScorePanelAdapter>(
+                              context,
+                              listen: false,
+                            );
 
                         // First configure the game with current setup data
                         gameSetupAdapter.setHomeTeam(homeTeam ?? '');
@@ -228,8 +240,8 @@ class _GameSetupState extends State<GameSetup> {
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const Scoring(title: 'Scoring'),
+                            builder:
+                                (context) => const Scoring(title: 'Scoring'),
                           ),
                         );
                       }

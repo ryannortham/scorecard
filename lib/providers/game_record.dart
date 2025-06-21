@@ -93,9 +93,10 @@ class GameRecord {
       awayTeam: json['awayTeam'] as String,
       quarterMinutes: json['quarterMinutes'] as int,
       isCountdownTimer: json['isCountdownTimer'] as bool,
-      events: (json['events'] as List)
-          .map((e) => GameEvent.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      events:
+          (json['events'] as List)
+              .map((e) => GameEvent.fromJson(e as Map<String, dynamic>))
+              .toList(),
       homeGoals: json['homeGoals'] as int,
       homeBehinds: json['homeBehinds'] as int,
       awayGoals: json['awayGoals'] as int,

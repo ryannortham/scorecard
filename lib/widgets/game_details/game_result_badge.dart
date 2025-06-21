@@ -60,19 +60,21 @@ class GameResultBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isDraw
-              ? Theme.of(context).colorScheme.secondaryContainer
-              : Theme.of(context).colorScheme.primaryContainer,
+          color:
+              isDraw
+                  ? Theme.of(context).colorScheme.secondaryContainer
+                  : Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(20),
         ),
         child: AdaptiveTitle(
           title: resultText,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: isDraw
+            color:
+                isDraw
                     ? Theme.of(context).colorScheme.onSecondaryContainer
                     : Theme.of(context).colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.w600,
-              ),
+            fontWeight: FontWeight.w600,
+          ),
           textAlign: TextAlign.center,
           maxLines: 1,
           minScaleFactor: 0.6, // Allow aggressive scaling for long team names

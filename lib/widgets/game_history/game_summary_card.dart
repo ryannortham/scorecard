@@ -24,7 +24,9 @@ class GameSummaryCard extends StatelessWidget {
 
   /// Determines if the trophy icon should be shown (favorite team won)
   bool _shouldShowTrophyIcon(
-      GameSummary gameSummary, UserPreferencesProvider userPrefs) {
+    GameSummary gameSummary,
+    UserPreferencesProvider userPrefs,
+  ) {
     // Must have a favorite team set
     if (userPrefs.favoriteTeam.isEmpty) return false;
 
@@ -58,46 +60,54 @@ class GameSummaryCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       elevation: isSelected ? 4.0 : 1.0,
-      color: isSelected
-          ? Theme.of(context)
-              .colorScheme
-              .primaryContainer
-              .withValues(alpha: 0.3)
-          : null,
+      color:
+          isSelected
+              ? Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : null,
       child: ListTile(
-        leading: isSelectionMode
-            ? Icon(
-                isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outline,
-              )
-            : null,
+        leading:
+            isSelectionMode
+                ? Icon(
+                  isSelected
+                      ? Icons.check_circle
+                      : Icons.radio_button_unchecked,
+                  color:
+                      isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.outline,
+                )
+                : null,
         title: Text(
           '${gameSummary.homeTeam} vs ${gameSummary.awayTeam}',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
             Text(
-                '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}'),
+              '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}',
+            ),
             const SizedBox(height: 4),
             Text(
               'Score: ${gameSummary.homeGoals}.${gameSummary.homeBehinds} (${gameSummary.homePoints}) - ${gameSummary.awayGoals}.${gameSummary.awayBehinds} (${gameSummary.awayPoints})',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ],
         ),
-        trailing: shouldShowTrophy
-            ? Icon(Icons.emoji_events_outlined,
-                color: Theme.of(context).colorScheme.secondary)
-            : null,
+        trailing:
+            shouldShowTrophy
+                ? Icon(
+                  Icons.emoji_events_outlined,
+                  color: Theme.of(context).colorScheme.secondary,
+                )
+                : null,
         onTap: onTap,
         onLongPress: onLongPress,
       ),

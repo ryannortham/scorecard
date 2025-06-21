@@ -7,10 +7,7 @@ import 'package:provider/provider.dart';
 class QuarterTimerPanel extends StatefulWidget {
   final ValueNotifier<bool> isTimerRunning;
 
-  const QuarterTimerPanel({
-    super.key,
-    required this.isTimerRunning,
-  });
+  const QuarterTimerPanel({super.key, required this.isTimerRunning});
 
   @override
   State<QuarterTimerPanel> createState() => QuarterTimerPanelState();
@@ -53,7 +50,9 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: TimerWidget(
-                      key: _timerKey, isRunning: widget.isTimerRunning),
+                    key: _timerKey,
+                    isRunning: widget.isTimerRunning,
+                  ),
                 ),
               ),
             ],
@@ -81,15 +80,19 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
 
           return Expanded(
             child: Container(
-              margin: index < 3
-                  ? const EdgeInsets.only(right: 4.0)
-                  : EdgeInsets.zero,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+              margin:
+                  index < 3
+                      ? const EdgeInsets.only(right: 4.0)
+                      : EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6.0,
+                vertical: 4.0,
+              ),
               decoration: BoxDecoration(
-                color: isCurrentQuarter
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : isCompleted
+                color:
+                    isCurrentQuarter
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : isCompleted
                         ? Theme.of(context).colorScheme.secondaryContainer
                         : Colors.transparent,
                 borderRadius: BorderRadius.circular(8.0),
@@ -98,19 +101,17 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
                 'Q$quarterNumber',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: isCurrentQuarter
+                  color:
+                      isCurrentQuarter
                           ? Theme.of(context).colorScheme.onPrimaryContainer
                           : isCompleted
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .onSecondaryContainer
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.6),
-                      fontWeight:
-                          isCurrentQuarter ? FontWeight.w600 : FontWeight.w500,
-                    ),
+                          ? Theme.of(context).colorScheme.onSecondaryContainer
+                          : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  fontWeight:
+                      isCurrentQuarter ? FontWeight.w600 : FontWeight.w500,
+                ),
               ),
             ),
           );

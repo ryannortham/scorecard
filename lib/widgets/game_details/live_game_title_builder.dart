@@ -8,15 +8,20 @@ import 'package:scorecard/services/game_state_service.dart';
 class LiveGameTitleBuilder {
   /// Builds the title for live games showing quarter and elapsed time
   static String buildTitle(
-      BuildContext context, ScorePanelAdapter scorePanelAdapter) {
+    BuildContext context,
+    ScorePanelAdapter scorePanelAdapter,
+  ) {
     final gameStateService = GameStateService.instance;
 
     final currentQuarter = scorePanelAdapter.selectedQuarter;
     final elapsedTimeMs = gameStateService.getElapsedTimeInQuarter();
 
     // Format elapsed time using the same method as timer widget
-    final timeStr = StopWatchTimer.getDisplayTime(elapsedTimeMs,
-        hours: false, milliSecond: true);
+    final timeStr = StopWatchTimer.getDisplayTime(
+      elapsedTimeMs,
+      hours: false,
+      milliSecond: true,
+    );
     // Remove the last character (centiseconds)
     final formattedTime = timeStr.substring(0, timeStr.length - 1);
 

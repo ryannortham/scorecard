@@ -29,13 +29,9 @@ class ScorePanel extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Expanded(
-            child: _buildScoreCounter('Goals', true),
-          ),
+          Expanded(child: _buildScoreCounter('Goals', true)),
           const SizedBox(width: 12),
-          Expanded(
-            child: _buildScoreCounter('Behinds', false),
-          ),
+          Expanded(child: _buildScoreCounter('Behinds', false)),
         ],
       ),
     );

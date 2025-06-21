@@ -14,9 +14,7 @@ class GameSettingsConfiguration extends StatelessWidget {
     return Consumer2<GameSetupAdapter, UserPreferencesProvider>(
       builder: (context, gameSetupAdapter, userPreferences, child) {
         if (!userPreferences.loaded) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         return Column(
@@ -24,7 +22,10 @@ class GameSettingsConfiguration extends StatelessWidget {
           children: [
             // Quarter Minutes Setting
             _buildQuarterMinutesSection(
-                context, gameSetupAdapter, userPreferences),
+              context,
+              gameSetupAdapter,
+              userPreferences,
+            ),
 
             const SizedBox(height: 20),
 
@@ -49,9 +50,9 @@ class GameSettingsConfiguration extends StatelessWidget {
           children: [
             Text(
               'Quarter Minutes',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -62,9 +63,9 @@ class GameSettingsConfiguration extends StatelessWidget {
               child: Text(
                 '${gameSetupAdapter.quarterMinutes}',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -73,9 +74,7 @@ class GameSettingsConfiguration extends StatelessWidget {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: 10,
-            ),
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
           ),
           child: Slider(
             value: gameSetupAdapter.quarterMinutes.toDouble(),
@@ -107,16 +106,16 @@ class GameSettingsConfiguration extends StatelessWidget {
           children: [
             Text(
               'Timer Type',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
               gameSetupAdapter.isCountdownTimer ? 'Countdown' : 'Count Up',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

@@ -47,9 +47,10 @@ class GameDetailsWidget extends StatelessWidget {
     this.scrollController,
     this.enableScrolling = true,
   }) : assert(
-            (dataSource == GameDataSource.staticData && staticGame != null) ||
-                (dataSource == GameDataSource.liveData && liveEvents != null),
-            'Must provide staticGame when using staticData or liveEvents when using liveData');
+         (dataSource == GameDataSource.staticData && staticGame != null) ||
+             (dataSource == GameDataSource.liveData && liveEvents != null),
+         'Must provide staticGame when using staticData or liveEvents when using liveData',
+       );
 
   /// Factory constructor for static data (game history)
   const GameDetailsWidget.fromStaticData({
@@ -57,9 +58,9 @@ class GameDetailsWidget extends StatelessWidget {
     required GameRecord game,
     this.scrollController,
     this.enableScrolling = true,
-  })  : dataSource = GameDataSource.staticData,
-        staticGame = game,
-        liveEvents = null;
+  }) : dataSource = GameDataSource.staticData,
+       staticGame = game,
+       liveEvents = null;
 
   /// Factory constructor for live data (current game)
   const GameDetailsWidget.fromLiveData({
@@ -67,9 +68,9 @@ class GameDetailsWidget extends StatelessWidget {
     required List<GameEvent> events,
     this.scrollController,
     this.enableScrolling = true,
-  })  : dataSource = GameDataSource.liveData,
-        staticGame = null,
-        liveEvents = events;
+  }) : dataSource = GameDataSource.liveData,
+       staticGame = null,
+       liveEvents = events;
 
   /// Determines if the game is complete based on timer events
   static bool isGameComplete(GameRecord game) {
@@ -79,7 +80,9 @@ class GameDetailsWidget extends StatelessWidget {
 
   /// Determines if the trophy icon should be shown (game complete and favorite team won)
   bool _shouldShowTrophyIcon(
-      GameRecord game, UserPreferencesProvider userPrefs) {
+    GameRecord game,
+    UserPreferencesProvider userPrefs,
+  ) {
     // Game must be complete
     if (!isGameComplete(game)) return false;
 
@@ -175,7 +178,9 @@ class GameDetailsWidget extends StatelessWidget {
 
   /// Builds the title for live games showing quarter and elapsed time
   String _buildLiveGameTitle(
-      BuildContext context, ScorePanelAdapter scorePanelAdapter) {
+    BuildContext context,
+    ScorePanelAdapter scorePanelAdapter,
+  ) {
     return LiveGameTitleBuilder.buildTitle(context, scorePanelAdapter);
   }
 
@@ -196,8 +201,11 @@ class GameDetailsWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildGameDetailsContent(BuildContext context, GameRecord game,
-      ScorePanelAdapter? scorePanelAdapter) {
+  Widget _buildGameDetailsContent(
+    BuildContext context,
+    GameRecord game,
+    ScorePanelAdapter? scorePanelAdapter,
+  ) {
     final userPrefs = Provider.of<UserPreferencesProvider>(context);
     final bool shouldShowTrophy = _shouldShowTrophyIcon(game, userPrefs);
 
@@ -205,9 +213,10 @@ class GameDetailsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GameInfoCard(
-          icon: shouldShowTrophy
-              ? Icons.emoji_events_outlined
-              : Icons.event_outlined,
+          icon:
+              shouldShowTrophy
+                  ? Icons.emoji_events_outlined
+                  : Icons.event_outlined,
           title: '${game.homeTeam} vs ${game.awayTeam}',
           content: Text(
             DateFormat('EEEE, MMM d, yyyy').format(game.date),
@@ -217,36 +226,32 @@ class GameDetailsWidget extends StatelessWidget {
         const SizedBox(height: 16),
         dataSource == GameDataSource.liveData && scorePanelAdapter != null
             ? (() {
-                final liveTitle =
-                    _buildLiveGameTitle(context, scorePanelAdapter);
-                return GameScoreSection(
-                  game: game,
-                  isLiveData: true,
-                  liveTitleOverride: liveTitle,
-                );
-              })()
-            : GameScoreSection(
+              final liveTitle = _buildLiveGameTitle(context, scorePanelAdapter);
+              return GameScoreSection(
                 game: game,
-                isLiveData: false,
-              ),
+                isLiveData: true,
+                liveTitleOverride: liveTitle,
+              );
+            })()
+            : GameScoreSection(game: game, isLiveData: false),
         const SizedBox(height: 16),
         QuarterBreakdownSection(
           game: game,
           isLiveData: dataSource == GameDataSource.liveData,
           liveEvents: liveEvents,
-          scoreTableBuilder: ({
-            required BuildContext context,
-            required GameRecord game,
-            required String displayTeam,
-            required bool isHomeTeam,
-          }) =>
-              _buildScoreTable(
-            context: context,
-            game: game,
-            displayTeam: displayTeam,
-            isHomeTeam: isHomeTeam,
-            scorePanelAdapter: scorePanelAdapter,
-          ),
+          scoreTableBuilder:
+              ({
+                required BuildContext context,
+                required GameRecord game,
+                required String displayTeam,
+                required bool isHomeTeam,
+              }) => _buildScoreTable(
+                context: context,
+                game: game,
+                displayTeam: displayTeam,
+                isHomeTeam: isHomeTeam,
+                scorePanelAdapter: scorePanelAdapter,
+              ),
         ),
       ],
     );
@@ -258,10 +263,7 @@ class GameDetailsWidget extends StatelessWidget {
         child: content,
       );
     } else {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: content,
-      );
+      return Padding(padding: const EdgeInsets.all(16.0), child: content);
     }
   }
 }

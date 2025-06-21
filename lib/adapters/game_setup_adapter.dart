@@ -48,8 +48,10 @@ class GameSetupAdapter extends ChangeNotifier {
     );
   }
 
-  void initializeWithDefaults(
-      {int? defaultQuarterMinutes, bool? defaultIsCountdownTimer}) {
+  void initializeWithDefaults({
+    int? defaultQuarterMinutes,
+    bool? defaultIsCountdownTimer,
+  }) {
     _updateConfig(
       quarterMinutes: defaultQuarterMinutes ?? 15,
       isCountdownTimer: defaultIsCountdownTimer ?? true,

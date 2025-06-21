@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 // All settings are now accessible through the app drawer
 
 @Deprecated(
-    'Settings screen has been deprecated. Use AppDrawer for settings access.')
+  'Settings screen has been deprecated. Use AppDrawer for settings access.',
+)
 class Settings extends StatelessWidget {
   const Settings({super.key, required this.title});
   final String title;

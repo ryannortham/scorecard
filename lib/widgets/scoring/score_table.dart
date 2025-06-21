@@ -42,17 +42,22 @@ class ScoreTable extends StatelessWidget {
       if (events.isEmpty) {
         return {'team': []};
       }
-      final teamEvents = events
-          .where((e) =>
-              e.quarter == quarter &&
-              e.team == displayTeam &&
-              (e.type == 'goal' || e.type == 'behind'))
-          .toList();
+      final teamEvents =
+          events
+              .where(
+                (e) =>
+                    e.quarter == quarter &&
+                    e.team == displayTeam &&
+                    (e.type == 'goal' || e.type == 'behind'),
+              )
+              .toList();
       return {'team': teamEvents};
     } catch (e) {
-      AppLogger.warning('Error calculating quarter scores',
-          component: 'ScoreTable',
-          data: 'Quarter $quarter, Team: $displayTeam');
+      AppLogger.warning(
+        'Error calculating quarter scores',
+        component: 'ScoreTable',
+        data: 'Quarter $quarter, Team: $displayTeam',
+      );
       return {'team': []};
     }
   }
@@ -86,10 +91,7 @@ class ScoreTable extends StatelessWidget {
           children: [
             // Team header with total score
             if (showHeader)
-              TeamScoreHeader(
-                teamName: displayTeam,
-                isHomeTeam: isHomeTeam,
-              ),
+              TeamScoreHeader(teamName: displayTeam, isHomeTeam: isHomeTeam),
 
             // Score counters - Show above the table when enabled
             if (showCounters && !isCompletedGame) ...[

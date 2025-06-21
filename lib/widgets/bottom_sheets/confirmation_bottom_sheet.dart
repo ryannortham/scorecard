@@ -28,12 +28,13 @@ class ConfirmationBottomSheet extends StatefulWidget {
       context: context,
       useRootNavigator: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ConfirmationBottomSheet(
-        actionText: actionText,
-        actionIcon: actionIcon,
-        onConfirm: onConfirm,
-        isDestructive: isDestructive,
-      ),
+      builder:
+          (context) => ConfirmationBottomSheet(
+            actionText: actionText,
+            actionIcon: actionIcon,
+            onConfirm: onConfirm,
+            isDestructive: isDestructive,
+          ),
     );
     return result ?? false;
   }
@@ -69,39 +70,45 @@ class _ConfirmationBottomSheetState extends State<ConfirmationBottomSheet>
       showDragHandle: true,
       enableDrag: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Action button with leading icon
-            TextButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-                widget.onConfirm();
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                foregroundColor: widget.isDestructive
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).colorScheme.onSurface,
-                overlayColor: widget.isDestructive
-                    ? Theme.of(context).colorScheme.error.withValues(alpha: 0.1)
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.1),
-                side: BorderSide.none,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              ),
-              icon: Icon(widget.actionIcon),
-              label: Text(widget.actionText),
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Action button with leading icon
+                TextButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                    widget.onConfirm();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor:
+                        widget.isDestructive
+                            ? Theme.of(context).colorScheme.error
+                            : Theme.of(context).colorScheme.onSurface,
+                    overlayColor:
+                        widget.isDestructive
+                            ? Theme.of(
+                              context,
+                            ).colorScheme.error.withValues(alpha: 0.1)
+                            : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.1),
+                    side: BorderSide.none,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  icon: Icon(widget.actionIcon),
+                  label: Text(widget.actionText),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

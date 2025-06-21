@@ -27,22 +27,23 @@ class GameHistoryCard extends StatelessWidget {
       child: ListTile(
         title: Text(
           '${game.homeTeam} vs ${game.awayTeam}',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
             Text(
-                '${dateFormat.format(game.date)} at ${timeFormat.format(game.date)}'),
+              '${dateFormat.format(game.date)} at ${timeFormat.format(game.date)}',
+            ),
             const SizedBox(height: 4),
             Text(
               'Score: ${game.homeGoals}.${game.homeBehinds} (${game.homeGoals * 6 + game.homeBehinds}) - ${game.awayGoals}.${game.awayBehinds} (${game.awayGoals * 6 + game.awayBehinds})',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ],
         ),

@@ -65,8 +65,11 @@ class GameHistoryService {
     await prefs.setStringList(_gamesKey, gamesJson);
 
     stopwatch.stop();
-    AppLogger.performance('Game save', stopwatch.elapsed,
-        component: 'GameHistory');
+    AppLogger.performance(
+      'Game save',
+      stopwatch.elapsed,
+      component: 'GameHistory',
+    );
   }
 
   /// Load game summaries with pagination for efficient list display
@@ -107,8 +110,11 @@ class GameHistoryService {
         final summary = GameSummary.fromJson(gameJson);
         summaries.add(summary);
       } catch (e) {
-        AppLogger.warning('Skipping corrupted game summary data',
-            component: 'GameHistory', data: e.toString());
+        AppLogger.warning(
+          'Skipping corrupted game summary data',
+          component: 'GameHistory',
+          data: e.toString(),
+        );
         continue;
       }
     }
@@ -226,27 +232,36 @@ class GameHistoryService {
     final List<String> gamesJson = prefs.getStringList(_gamesKey) ?? [];
 
     // Parse all games and filter out empty ones
-    List<GameRecord> games = gamesJson
-        .map((gameJson) {
-          try {
-            return GameRecord.fromJson(jsonDecode(gameJson));
-          } catch (e) {
-            AppLogger.warning('Skipping corrupted game data',
-                component: 'GameHistory', data: e.toString());
-            return null; // Skip corrupted games
-          }
-        })
-        .where((game) => game != null)
-        .cast<GameRecord>()
-        .where((game) =>
-            // Show games with any team names or events
-            (game.homeTeam.isNotEmpty && game.awayTeam.isNotEmpty) ||
-            game.events.isNotEmpty)
-        .toList();
+    List<GameRecord> games =
+        gamesJson
+            .map((gameJson) {
+              try {
+                return GameRecord.fromJson(jsonDecode(gameJson));
+              } catch (e) {
+                AppLogger.warning(
+                  'Skipping corrupted game data',
+                  component: 'GameHistory',
+                  data: e.toString(),
+                );
+                return null; // Skip corrupted games
+              }
+            })
+            .where((game) => game != null)
+            .cast<GameRecord>()
+            .where(
+              (game) =>
+                  // Show games with any team names or events
+                  (game.homeTeam.isNotEmpty && game.awayTeam.isNotEmpty) ||
+                  game.events.isNotEmpty,
+            )
+            .toList();
 
     stopwatch.stop();
-    AppLogger.performance('Load games', stopwatch.elapsed,
-        component: 'GameHistory');
+    AppLogger.performance(
+      'Load games',
+      stopwatch.elapsed,
+      component: 'GameHistory',
+    );
     AppLogger.info('Loaded ${games.length} games', component: 'GameHistory');
 
     return games;

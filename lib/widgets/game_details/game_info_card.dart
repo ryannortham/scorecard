@@ -35,8 +35,8 @@ class GameInfoCard extends StatelessWidget {
                   child: AdaptiveTitle(
                     title: title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                     textAlign: TextAlign.left,
                     minScaleFactor:
                         0.8, // Allow slightly more scaling for card titles

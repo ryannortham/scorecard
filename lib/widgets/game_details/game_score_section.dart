@@ -32,8 +32,12 @@ class GameScoreSection extends StatelessWidget {
           return GameInfoCard(
             icon: Icons.outlined_flag,
             title: liveTitleOverride ?? 'Current Score',
-            content:
-                _buildScoreContent(context, homeWins, awayWins, isComplete),
+            content: _buildScoreContent(
+              context,
+              homeWins,
+              awayWins,
+              isComplete,
+            ),
           );
         },
       );
@@ -49,7 +53,11 @@ class GameScoreSection extends StatelessWidget {
   }
 
   Widget _buildScoreContent(
-      BuildContext context, bool homeWins, bool awayWins, bool isComplete) {
+    BuildContext context,
+    bool homeWins,
+    bool awayWins,
+    bool isComplete,
+  ) {
     return Column(
       children: [
         Row(
@@ -67,8 +75,9 @@ class GameScoreSection extends StatelessWidget {
             Container(
               width: 2,
               height: 80,
-              color:
-                  Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.3),
             ),
             Expanded(
               child: TeamScoreDisplay(
@@ -98,8 +107,9 @@ class GameScoreSection extends StatelessWidget {
   /// Determines if the game is complete based on timer events
   bool _isGameComplete(GameRecord game) {
     if (game.events.isEmpty) return false;
-    bool hasQ4ClockEnd =
-        game.events.any((e) => e.quarter == 4 && e.type == 'clock_end');
+    bool hasQ4ClockEnd = game.events.any(
+      (e) => e.quarter == 4 && e.type == 'clock_end',
+    );
     return hasQ4ClockEnd;
   }
 
@@ -109,15 +119,17 @@ class GameScoreSection extends StatelessWidget {
     int currentQuarter = 1;
     if (game.events.isNotEmpty) {
       // Get the highest quarter with events, but not if it has a clock_end
-      final activeQuarters = game.events
-          .where((e) => e.type != 'clock_end')
-          .map((e) => e.quarter)
-          .toSet();
+      final activeQuarters =
+          game.events
+              .where((e) => e.type != 'clock_end')
+              .map((e) => e.quarter)
+              .toSet();
 
-      final endedQuarters = game.events
-          .where((e) => e.type == 'clock_end')
-          .map((e) => e.quarter)
-          .toSet();
+      final endedQuarters =
+          game.events
+              .where((e) => e.type == 'clock_end')
+              .map((e) => e.quarter)
+              .toSet();
 
       if (activeQuarters.isNotEmpty) {
         currentQuarter = activeQuarters.reduce((a, b) => a > b ? a : b);

@@ -6,15 +6,10 @@ class ScoreData {
   final int behinds;
   final int points;
 
-  const ScoreData({
-    required this.goals,
-    required this.behinds,
-  }) : points = goals * 6 + behinds;
+  const ScoreData({required this.goals, required this.behinds})
+    : points = goals * 6 + behinds;
 
-  ScoreData copyWith({
-    int? goals,
-    int? behinds,
-  }) {
+  ScoreData copyWith({int? goals, int? behinds}) {
     return ScoreData(
       goals: goals ?? this.goals,
       behinds: behinds ?? this.behinds,
@@ -48,11 +43,7 @@ class TeamScore {
     this.isWinner = false,
   });
 
-  TeamScore copyWith({
-    String? name,
-    ScoreData? score,
-    bool? isWinner,
-  }) {
+  TeamScore copyWith({String? name, ScoreData? score, bool? isWinner}) {
     return TeamScore(
       name: name ?? this.name,
       score: score ?? this.score,
@@ -82,24 +73,25 @@ class CompactScoreDisplay extends StatelessWidget {
         Text(
           teamScore.name,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: teamScore.isWinner
+            color:
+                teamScore.isWinner
                     ? Theme.of(context).colorScheme.primary
                     : null,
-                fontWeight:
-                    teamScore.isWinner ? FontWeight.w600 : FontWeight.w500,
-              ),
+            fontWeight: teamScore.isWinner ? FontWeight.w600 : FontWeight.w500,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 4),
         Text(
           '${teamScore.score.goals}.${teamScore.score.behinds}',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                color: teamScore.isWinner
+            color:
+                teamScore.isWinner
                     ? Theme.of(context).colorScheme.primary
                     : null,
-                fontWeight: FontWeight.w700,
-                fontSize: fontSize,
-              ),
+            fontWeight: FontWeight.w700,
+            fontSize: fontSize,
+          ),
           textAlign: TextAlign.center,
         ),
         if (showPoints) ...[
@@ -107,11 +99,12 @@ class CompactScoreDisplay extends StatelessWidget {
           Text(
             '(${teamScore.score.points})',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: teamScore.isWinner
+              color:
+                  teamScore.isWinner
                       ? Theme.of(context).colorScheme.primary
                       : null,
-                  fontWeight: teamScore.isWinner ? FontWeight.w600 : null,
-                ),
+              fontWeight: teamScore.isWinner ? FontWeight.w600 : null,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -181,12 +174,11 @@ class MatchSummary extends StatelessWidget {
           Text(
             'vs',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.6),
-                  fontWeight: FontWeight.w500,
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 16, width: 16),
         ],

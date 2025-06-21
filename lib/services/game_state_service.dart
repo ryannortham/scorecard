@@ -90,14 +90,16 @@ class GameStateService extends ChangeNotifier {
       isHomeTeam ? _homeBehinds = count : _awayBehinds = count;
     }
 
-    AppLogger.gameEvent('Score update: $team $scoreType set to $count',
-        details: {
-          'quarter': _selectedQuarter,
-          'homeScore': '$_homeGoals.$_homeBehinds',
-          'awayScore': '$_awayGoals.$_awayBehinds',
-          'isGoal': isGoal,
-          'isHome': isHomeTeam,
-        });
+    AppLogger.gameEvent(
+      'Score update: $team $scoreType set to $count',
+      details: {
+        'quarter': _selectedQuarter,
+        'homeScore': '$_homeGoals.$_homeBehinds',
+        'awayScore': '$_awayGoals.$_awayBehinds',
+        'isGoal': isGoal,
+        'isHome': isHomeTeam,
+      },
+    );
 
     _notifyScoreChangeListeners();
     _scheduleSave();
@@ -115,8 +117,9 @@ class GameStateService extends ChangeNotifier {
     final team = isHomeTeam ? _homeTeam : _awayTeam;
     final type = isGoal ? 'goal' : 'behind';
 
-    return _gameEvents.any((e) =>
-        e.quarter == _selectedQuarter && e.team == team && e.type == type);
+    return _gameEvents.any(
+      (e) => e.quarter == _selectedQuarter && e.team == team && e.type == type,
+    );
   }
 
   void setTimerRawTime(int newTime) {
@@ -127,8 +130,10 @@ class GameStateService extends ChangeNotifier {
 
   void setSelectedQuarter(int newQuarter) {
     if (_selectedQuarter != newQuarter) {
-      AppLogger.info('Quarter changed from $_selectedQuarter to $newQuarter',
-          component: 'GameState');
+      AppLogger.info(
+        'Quarter changed from $_selectedQuarter to $newQuarter',
+        component: 'GameState',
+      );
 
       // Quarter changes are important milestones - save immediately
       _performScheduledSave();
@@ -153,15 +158,19 @@ class GameStateService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void configureTimer(
-      {required bool isCountdownMode, required int quarterMaxTime}) {
+  void configureTimer({
+    required bool isCountdownMode,
+    required int quarterMaxTime,
+  }) {
     _isCountdownTimer = isCountdownMode;
     _quarterMinutes = quarterMaxTime ~/ (60 * 1000);
 
     // Never create a game record for timer configuration
     if (_currentGameId == null) {
-      AppLogger.debug('Timer configured with no active game',
-          component: 'GameState');
+      AppLogger.debug(
+        'Timer configured with no active game',
+        component: 'GameState',
+      );
     }
   }
 
@@ -180,8 +189,9 @@ class GameStateService extends ChangeNotifier {
     _timeWhenStarted = _timerRawTime;
 
     _backgroundTimer?.cancel();
-    _backgroundTimer =
-        Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _backgroundTimer = Timer.periodic(const Duration(milliseconds: 100), (
+      timer,
+    ) {
       if (_timerStartTime != null) {
         final elapsed =
             DateTime.now().difference(_timerStartTime!).inMilliseconds;
@@ -259,7 +269,8 @@ class GameStateService extends ChangeNotifier {
 
   void removeLastGameEvent(String team, String type, int quarter) {
     final idx = _gameEvents.lastIndexWhere(
-        (e) => e.quarter == quarter && e.team == team && e.type == type);
+      (e) => e.quarter == quarter && e.team == team && e.type == type,
+    );
     if (idx != -1) {
       _gameEvents.removeAt(idx);
       _notifyGameEventListeners();
@@ -392,16 +403,21 @@ class GameStateService extends ChangeNotifier {
       _hasPendingSave = false;
       _saveTimer?.cancel();
 
-      AppLogger.debug('Created game ID: ${gameRecord.id}',
-          component: 'GameState',
-          data: {
-            'homeTeam': _homeTeam,
-            'awayTeam': _awayTeam,
-            'gameDate': _gameDate
-          });
+      AppLogger.debug(
+        'Created game ID: ${gameRecord.id}',
+        component: 'GameState',
+        data: {
+          'homeTeam': _homeTeam,
+          'awayTeam': _awayTeam,
+          'gameDate': _gameDate,
+        },
+      );
     } catch (e) {
-      AppLogger.error('Error creating initial game record',
-          component: 'GameState', error: e);
+      AppLogger.error(
+        'Error creating initial game record',
+        component: 'GameState',
+        error: e,
+      );
     }
   }
 
@@ -437,8 +453,11 @@ class GameStateService extends ChangeNotifier {
 
     // Run the save operation without awaiting
     _updateGameRecord().catchError((error) {
-      AppLogger.error('Error in scheduled game save',
-          component: 'GameState', error: error);
+      AppLogger.error(
+        'Error in scheduled game save',
+        component: 'GameState',
+        error: error,
+      );
     });
   }
 
@@ -462,8 +481,9 @@ class GameStateService extends ChangeNotifier {
       // Game has no meaningful data, just clear the current game ID
       _currentGameId = null;
       AppLogger.info(
-          'Game completed with no meaningful data, not saving to history',
-          component: 'GameState');
+        'Game completed with no meaningful data, not saving to history',
+        component: 'GameState',
+      );
     }
   }
 
@@ -486,11 +506,17 @@ class GameStateService extends ChangeNotifier {
       );
 
       await GameHistoryService.saveGame(gameRecord);
-      AppLogger.info('Force saved final game record',
-          component: 'GameState', data: '$_homeTeam vs $_awayTeam');
+      AppLogger.info(
+        'Force saved final game record',
+        component: 'GameState',
+        data: '$_homeTeam vs $_awayTeam',
+      );
     } catch (e) {
-      AppLogger.error('Error force saving game record',
-          component: 'GameState', error: e);
+      AppLogger.error(
+        'Error force saving game record',
+        component: 'GameState',
+        error: e,
+      );
     }
   }
 
@@ -514,8 +540,11 @@ class GameStateService extends ChangeNotifier {
 
       await GameHistoryService.saveGame(gameRecord);
     } catch (e) {
-      AppLogger.error('Error updating game record',
-          component: 'GameState', error: e);
+      AppLogger.error(
+        'Error updating game record',
+        component: 'GameState',
+        error: e,
+      );
     }
   }
 

@@ -13,7 +13,8 @@ class QuarterBreakdownSection extends StatelessWidget {
     required GameRecord game,
     required String displayTeam,
     required bool isHomeTeam,
-  }) scoreTableBuilder;
+  })
+  scoreTableBuilder;
 
   const QuarterBreakdownSection({
     super.key,
@@ -68,9 +69,9 @@ class QuarterBreakdownSection extends StatelessWidget {
       child: Text(
         teamName,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isWinner ? Theme.of(context).colorScheme.primary : null,
-            ),
+          fontWeight: FontWeight.w600,
+          color: isWinner ? Theme.of(context).colorScheme.primary : null,
+        ),
       ),
     );
   }

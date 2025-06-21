@@ -32,9 +32,9 @@ class TeamScoreDisplay extends StatelessWidget {
         AdaptiveTitle(
           title: teamName,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: isWinner ? Theme.of(context).colorScheme.primary : null,
-                fontWeight: isWinner ? FontWeight.w600 : null,
-              ),
+            color: isWinner ? Theme.of(context).colorScheme.primary : null,
+            fontWeight: isWinner ? FontWeight.w600 : null,
+          ),
           textAlign: centerAlign ? TextAlign.center : TextAlign.start,
           maxLines: 1,
           minScaleFactor: 0.6, // Allow more aggressive scaling for screenshots
@@ -43,17 +43,17 @@ class TeamScoreDisplay extends StatelessWidget {
         Text(
           '$points',
           style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: isWinner ? Theme.of(context).colorScheme.primary : null,
-                fontWeight: FontWeight.bold,
-              ),
+            color: isWinner ? Theme.of(context).colorScheme.primary : null,
+            fontWeight: FontWeight.bold,
+          ),
           textAlign: textAlign,
         ),
         Text(
           '$goals.$behinds',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: isWinner ? Theme.of(context).colorScheme.primary : null,
-                fontWeight: isWinner ? FontWeight.w600 : null,
-              ),
+            color: isWinner ? Theme.of(context).colorScheme.primary : null,
+            fontWeight: isWinner ? FontWeight.w600 : null,
+          ),
           textAlign: textAlign,
         ),
       ],

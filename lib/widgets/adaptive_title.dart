@@ -35,9 +35,10 @@ class AdaptiveTitle extends StatelessWidget {
     // This avoids the LayoutBuilder infinite loop issue
     return FittedBox(
       fit: BoxFit.scaleDown,
-      alignment: textAlign == TextAlign.center
-          ? Alignment.center
-          : textAlign == TextAlign.left
+      alignment:
+          textAlign == TextAlign.center
+              ? Alignment.center
+              : textAlign == TextAlign.left
               ? Alignment.centerLeft
               : Alignment.centerRight,
       child: Text(

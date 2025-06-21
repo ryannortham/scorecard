@@ -25,8 +25,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (!_hasInitialized) {
       _hasInitialized = true;
-      final userPreferences =
-          Provider.of<UserPreferencesProvider>(context, listen: false);
+      final userPreferences = Provider.of<UserPreferencesProvider>(
+        context,
+        listen: false,
+      );
 
       // Only initialize if preferences are loaded and there's no active game
       if (userPreferences.loaded) {
@@ -50,17 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
         // Show loading screen until settings are loaded
         if (!userPreferences.loaded) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         // BUGFIX: Always start with game setup, regardless of game state
         // This prevents unintended navigation when timer settings change
         // The only way to get to scoring should be through the Start Game button
-        AppLogger.debug('HomeScreen: Showing GameSetup screen',
-            component: 'HomeScreen');
+        AppLogger.debug(
+          'HomeScreen: Showing GameSetup screen',
+          component: 'HomeScreen',
+        );
         return const GameSetup(title: 'Game Setup');
       },
     );
@@ -68,8 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Initialize game setup with user preferences
   void _initializeGameSetup(UserPreferencesProvider userPreferences) {
-    final gameSetupAdapter =
-        Provider.of<GameSetupAdapter>(context, listen: false);
+    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
+      context,
+      listen: false,
+    );
 
     // Reset the game setup adapter with user preferences
     gameSetupAdapter.reset(

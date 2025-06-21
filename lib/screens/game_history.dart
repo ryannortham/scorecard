@@ -94,8 +94,11 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         });
       }
     } catch (e) {
-      AppLogger.error('Error loading game summaries',
-          component: 'GameHistory', error: e);
+      AppLogger.error(
+        'Error loading game summaries',
+        component: 'GameHistory',
+        error: e,
+      );
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -165,7 +168,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                    '${gameIdsToDelete.length} games deleted successfully'),
+                  '${gameIdsToDelete.length} games deleted successfully',
+                ),
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 duration: const Duration(seconds: 2),
               ),
@@ -214,23 +218,26 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: _isSelectionMode
-              ? Text('${_selectedGameIds.length} selected')
-              : const Text('Game History'),
-          leading: _isSelectionMode
-              ? IconButton(
-                  icon: const Icon(Icons.close_outlined),
-                  onPressed: _exitSelectionMode,
-                )
-              : Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
-                    tooltip: 'Menu',
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    },
+          title:
+              _isSelectionMode
+                  ? Text('${_selectedGameIds.length} selected')
+                  : const Text('Game History'),
+          leading:
+              _isSelectionMode
+                  ? IconButton(
+                    icon: const Icon(Icons.close_outlined),
+                    onPressed: _exitSelectionMode,
+                  )
+                  : Builder(
+                    builder:
+                        (context) => IconButton(
+                          icon: const Icon(Icons.menu),
+                          tooltip: 'Menu',
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                        ),
                   ),
-                ),
           actions: [
             if (_isSelectionMode)
               IconButton(
@@ -241,82 +248,81 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'game_history'),
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _gameSummaries.isEmpty
+        body:
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _gameSummaries.isEmpty
                 ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.history,
-                          size: 64,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.6),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 64,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No games yet',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No games yet',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.6),
-                                  ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Games are automatically saved when you start scoring',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Games are automatically saved when you start scoring',
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.6),
-                                  ),
-                        ),
-                      ],
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadGames,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: _gameSummaries.length +
-                          (_hasMoreGames || _isLoadingMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show loading indicator at the bottom
-                        if (index == _gameSummaries.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-
-                        final gameSummary = _gameSummaries[index];
-                        return GameSummaryCard(
-                          gameSummary: gameSummary,
-                          isSelectionMode: _isSelectionMode,
-                          isSelected: _selectedGameIds.contains(gameSummary.id),
-                          onTap: () {
-                            if (_isSelectionMode) {
-                              _toggleGameSelection(gameSummary.id);
-                            } else {
-                              _showGameDetails(gameSummary.id);
-                            }
-                          },
-                          onLongPress: () {
-                            if (!_isSelectionMode) {
-                              _enterSelectionMode(gameSummary.id);
-                            }
-                          },
-                        );
-                      },
-                    ),
+                      ),
+                    ],
                   ),
+                )
+                : RefreshIndicator(
+                  onRefresh: _loadGames,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount:
+                        _gameSummaries.length +
+                        (_hasMoreGames || _isLoadingMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      // Show loading indicator at the bottom
+                      if (index == _gameSummaries.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final gameSummary = _gameSummaries[index];
+                      return GameSummaryCard(
+                        gameSummary: gameSummary,
+                        isSelectionMode: _isSelectionMode,
+                        isSelected: _selectedGameIds.contains(gameSummary.id),
+                        onTap: () {
+                          if (_isSelectionMode) {
+                            _toggleGameSelection(gameSummary.id);
+                          } else {
+                            _showGameDetails(gameSummary.id);
+                          }
+                        },
+                        onLongPress: () {
+                          if (!_isSelectionMode) {
+                            _enterSelectionMode(gameSummary.id);
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
       ),
     );
   }

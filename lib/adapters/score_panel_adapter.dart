@@ -36,10 +36,13 @@ class ScorePanelAdapter extends ChangeNotifier {
 
   void setTimerRunning(bool isRunning) => _gameState.setTimerRunning(isRunning);
 
-  void configureTimer(
-          {required bool isCountdownMode, required int quarterMaxTime}) =>
-      _gameState.configureTimer(
-          isCountdownMode: isCountdownMode, quarterMaxTime: quarterMaxTime);
+  void configureTimer({
+    required bool isCountdownMode,
+    required int quarterMaxTime,
+  }) => _gameState.configureTimer(
+    isCountdownMode: isCountdownMode,
+    quarterMaxTime: quarterMaxTime,
+  );
 
   int getCount(bool isHomeTeam, bool isGoal) =>
       _gameState.getScore(isHomeTeam, isGoal);

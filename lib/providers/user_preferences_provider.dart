@@ -143,7 +143,7 @@ class UserPreferencesProvider extends ChangeNotifier {
       'deep_purple',
       'brown',
       'blue_grey',
-      'grey'
+      'grey',
     };
 
     if (validThemes.contains(theme)) {

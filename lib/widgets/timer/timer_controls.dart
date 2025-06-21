@@ -21,7 +21,9 @@ class TimerControls extends StatelessWidget {
 
   /// Determines if the reset button should be enabled
   bool _isResetEnabled(
-      GameSetupAdapter gameSetupAdapter, ScorePanelAdapter scorePanelAdapter) {
+    GameSetupAdapter gameSetupAdapter,
+    ScorePanelAdapter scorePanelAdapter,
+  ) {
     if (scorePanelAdapter.isTimerRunning) {
       return false; // Disable while timer is running
     }
@@ -39,7 +41,9 @@ class TimerControls extends StatelessWidget {
 
   /// Determines if the next button should be enabled
   bool _isNextEnabled(
-      GameSetupAdapter gameSetupAdapter, ScorePanelAdapter scorePanelAdapter) {
+    GameSetupAdapter gameSetupAdapter,
+    ScorePanelAdapter scorePanelAdapter,
+  ) {
     if (scorePanelAdapter.isTimerRunning) {
       return false; // Disable while timer is running
     }
@@ -84,11 +88,14 @@ class TimerControls extends StatelessWidget {
           children: [
             // Reset Button
             ValueListenableBuilder<bool>(
-              valueListenable: isRunningNotifier ??
+              valueListenable:
+                  isRunningNotifier ??
                   ValueNotifier(scorePanelAdapter.isTimerRunning),
               builder: (context, isTimerRunning, _) {
-                final isEnabled =
-                    _isResetEnabled(gameSetupAdapter, scorePanelAdapter);
+                final isEnabled = _isResetEnabled(
+                  gameSetupAdapter,
+                  scorePanelAdapter,
+                );
 
                 return Expanded(
                   flex: 2,
@@ -105,12 +112,12 @@ class TimerControls extends StatelessWidget {
                       icon: Icon(
                         Icons.refresh,
                         size: 16,
-                        color: !isEnabled
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.38)
-                            : null,
+                        color:
+                            !isEnabled
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38)
+                                : null,
                       ),
                       label: const Text(
                         'Reset',
@@ -125,7 +132,8 @@ class TimerControls extends StatelessWidget {
 
             // Play/Pause Button
             ValueListenableBuilder<bool>(
-              valueListenable: isRunningNotifier ??
+              valueListenable:
+                  isRunningNotifier ??
                   ValueNotifier(scorePanelAdapter.isTimerRunning),
               builder: (context, isTimerRunning, _) {
                 return Expanded(
@@ -154,11 +162,14 @@ class TimerControls extends StatelessWidget {
 
             // Next Button
             ValueListenableBuilder<bool>(
-              valueListenable: isRunningNotifier ??
+              valueListenable:
+                  isRunningNotifier ??
                   ValueNotifier(scorePanelAdapter.isTimerRunning),
               builder: (context, isTimerRunning, _) {
-                final isEnabled =
-                    _isNextEnabled(gameSetupAdapter, scorePanelAdapter);
+                final isEnabled = _isNextEnabled(
+                  gameSetupAdapter,
+                  scorePanelAdapter,
+                );
                 final currentQuarter = scorePanelAdapter.selectedQuarter;
 
                 return Expanded(
@@ -176,12 +187,12 @@ class TimerControls extends StatelessWidget {
                       icon: Icon(
                         _getNextIcon(currentQuarter),
                         size: 16,
-                        color: !isEnabled
-                            ? Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.38)
-                            : null,
+                        color:
+                            !isEnabled
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38)
+                                : null,
                       ),
                       label: Text(
                         _getNextLabel(currentQuarter),

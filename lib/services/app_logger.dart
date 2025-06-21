@@ -91,9 +91,10 @@ class AppLogger {
   /// Log game events specifically
   static void gameEvent(String action, {Map<String, dynamic>? details}) {
     final logger = getLogger('GameEvents');
-    final detailsStr = details != null
-        ? ' | ${details.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
-        : '';
+    final detailsStr =
+        details != null
+            ? ' | ${details.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
+            : '';
     logger.fine('$action$detailsStr');
   }
 

@@ -21,7 +21,8 @@ class AppNavigator {
 
   /// Navigate to settings page
   @Deprecated(
-      'Settings screen has been deprecated. Use AppDrawer for settings access.')
+    'Settings screen has been deprecated. Use AppDrawer for settings access.',
+  )
   static Future<T?> toSettings<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(
@@ -39,10 +40,8 @@ class AppNavigator {
   }) {
     return Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (context) => TeamList(
-          title: title,
-          onTeamSelected: onTeamSelected,
-        ),
+        builder:
+            (context) => TeamList(title: title, onTeamSelected: onTeamSelected),
         settings: RouteSettings(arguments: excludeTeam),
       ),
     );
@@ -60,9 +59,7 @@ class AppNavigator {
   /// Navigate to game history
   static Future<T?> toGameHistory<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(
-        builder: (context) => const GameHistoryScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const GameHistoryScreen()),
     );
   }
 
@@ -81,9 +78,7 @@ class AppNavigator {
   /// Navigate to active scoring screen
   static Future<T?> toScoring<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(
-        builder: (context) => const Scoring(title: 'Scoring'),
-      ),
+      MaterialPageRoute(builder: (context) => const Scoring(title: 'Scoring')),
     );
   }
 
