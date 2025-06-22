@@ -1,0 +1,92 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Flutter SDK
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.1'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Verify formatting
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      # Consider passing '--fatal-infos' for slightly stricter analysis.
+      - name: Analyze project source
+        run: flutter analyze
+
+      # Run tests if any exist
+      - name: Run tests
+        run: flutter test
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    # Only run on main branch pushes (not PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Flutter SDK
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.1'
+          channel: 'stable'
+
+      # Setup Java for Android builds
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Setup Android signing
+      - name: Setup Android signing
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/keystore.jks
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      # Build release AAB
+      - name: Build release AAB
+        run: flutter build appbundle --release
+
+      # Store the built AAB as an artifact
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      # Upload to Google Play Store
+      - name: Upload to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ secrets.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: production
+          status: completed
+          inAppUpdatePriority: 2
+          whatsNewDirectory: android/whatsnew
