@@ -13,6 +13,15 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
+# Google Play Core Library
+-keep class com.google.android.play.core.** { *; }
+-keep interface com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# Keep Flutter's Play Store split compatibility classes
+-keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.PlayStoreDeferredComponentManager** { *; }
+
 # Firebase/Crashlytics rules (if using Firebase)
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception

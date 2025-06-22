@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  release:
+    types: [published]
 
 jobs:
   test:
@@ -47,8 +49,8 @@ jobs:
   build-and-deploy:
     needs: test
     runs-on: ubuntu-latest
-    # Only run on main branch pushes (not PRs)
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Run on main branch pushes OR on releases
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
     
     steps:
       - uses: actions/checkout@v4
@@ -68,6 +70,31 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Extract version information
+      - name: Extract version info
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            # Use release tag (e.g., v1.2.3 -> 1.2.3)
+            VERSION_NAME="${{ github.event.release.tag_name }}"
+            VERSION_NAME="${VERSION_NAME#v}"  # Remove 'v' prefix if present
+            # Generate version code from semantic version (1.2.3 -> 10203)
+            IFS='.' read -ra VERSION_PARTS <<< "$VERSION_NAME"
+            VERSION_CODE=$((${VERSION_PARTS[0]} * 10000 + ${VERSION_PARTS[1]} * 100 + ${VERSION_PARTS[2]}))
+            TRACK="internal"
+          else
+            # Use commit SHA for dev builds
+            VERSION_NAME="dev-${GITHUB_SHA::8}"
+            VERSION_CODE="${GITHUB_RUN_NUMBER}"
+            TRACK="internal"
+          fi
+          
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "track=$TRACK" >> $GITHUB_OUTPUT
+          echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
+          echo "🚀 Track: $TRACK"
+
       # Setup Android signing
       - name: Setup Android signing
         run: |
@@ -79,15 +106,41 @@ jobs:
 
       # Build release AAB
       - name: Build release AAB
-        run: flutter build appbundle --release
+        run: |
+          flutter build appbundle --release \
+            --build-name=${{ steps.version.outputs.version_name }} \
+            --build-number=${{ steps.version.outputs.version_code }}
 
       # Store the built AAB as an artifact
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-aab
+          name: release-aab-${{ steps.version.outputs.version_name }}
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
+
+      # Create GitHub release for tagged versions
+      - name: Create GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/app/outputs/bundle/release/app-release.aab
+          tag_name: ${{ github.event.release.tag_name }}
+          name: Release ${{ steps.version.outputs.version_name }}
+          body: |
+            🚀 **Release ${{ steps.version.outputs.version_name }}**
+            
+            **Build Information:**
+            - Version Name: `${{ steps.version.outputs.version_name }}`
+            - Version Code: `${{ steps.version.outputs.version_code }}`
+            - Build Date: `${{ github.event.head_commit.timestamp }}`
+            - Commit SHA: `${{ github.sha }}`
+            
+            **Downloads:**
+            - Android App Bundle (AAB) attached below
+            - Available on Google Play Internal Testing
+            
+            See the [changelog](./android/whatsnew/whatsnew-en-US) for details.
 
       # Upload to Google Play Store
       - name: Upload to Play Store
@@ -96,7 +149,8 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: production
+          track: ${{ steps.version.outputs.track }}
           status: completed
           inAppUpdatePriority: 2
           whatsNewDirectory: android/whatsnew
+          releaseName: ${{ steps.version.outputs.version_name }}
