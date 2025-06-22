@@ -31,7 +31,17 @@ jobs:
         run: flutter analyze
 
       # Run tests if any exist
+      - name: Check if tests exist
+        id: check_tests
+        run: |
+          if [ -d "test" ]; then
+            echo "tests_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests_exist=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run tests
+        if: steps.check_tests.outputs.tests_exist == 'true'
         run: flutter test
 
   build-and-deploy:
