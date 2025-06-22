@@ -15,11 +15,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Cache Flutter SDK
+      - name: Cache Flutter SDK
+        uses: actions/cache@v4
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: flutter-sdk-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-sdk-${{ runner.os }}-
+
       # Setup Flutter SDK
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.32.1'
           channel: 'stable'
+          cache: true
+
+      # Cache Pub dependencies
+      - name: Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            ~/.pub-cache
+          key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-cache-${{ runner.os }}-
 
       - name: Install dependencies
         run: flutter pub get
@@ -55,11 +76,56 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Cache Flutter SDK
+      - name: Cache Flutter SDK
+        uses: actions/cache@v4
+        with:
+          path: /opt/hostedtoolcache/flutter
+          key: flutter-sdk-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-sdk-${{ runner.os }}-
+
       # Setup Flutter SDK
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.32.1'
           channel: 'stable'
+          cache: true
+
+      # Cache Pub dependencies
+      - name: Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            $HOME/.pub-cache
+          key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            pub-cache-${{ runner.os }}-
+
+      # Cache Gradle dependencies
+      - name: Cache Gradle dependencies
+        id: gradle-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # Cache Android SDK
+      - name: Cache Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk
+            ~/.android
+          key: android-sdk-${{ runner.os }}-${{ hashFiles('android/app/build.gradle') }}
+          restore-keys: |
+            android-sdk-${{ runner.os }}-
 
       # Setup Java for Android builds
       - uses: actions/setup-java@v4
@@ -69,6 +135,18 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      # Selective clean - only if Gradle cache missed or we have memory pressure
+      - name: Clean build environment (if needed)
+        if: steps.gradle-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "🧹 Gradle cache miss detected - cleaning selectively"
+          # Only clean Flutter build, preserve Gradle caches
+          flutter clean
+          # Remove only corrupted local Gradle files, keep global cache
+          rm -rf android/app/build/
+          rm -rf android/.gradle/configuration-cache/
+        continue-on-error: true
 
       # Extract version information
       - name: Extract version info
@@ -106,6 +184,9 @@ jobs:
 
       # Build release AAB
       - name: Build release AAB
+        env:
+          JAVA_OPTS: -Xmx4g -XX:MaxMetaspaceSize=512m
+          GRADLE_OPTS: -Xmx4g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false
         run: |
           flutter build appbundle --release \
             --build-name=${{ steps.version.outputs.version_name }} \
