@@ -5,31 +5,17 @@ import 'package:scorecard/screens/game_details.dart' as details;
 import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/game_setup.dart';
 import 'package:scorecard/screens/scoring.dart';
-import 'package:scorecard/screens/settings.dart';
 import 'package:scorecard/screens/team_list.dart';
 import 'package:scorecard/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 
 /// Centralized navigation service following Flutter best practices
 /// Reduces code duplication and provides type-safe navigation
 class AppNavigator {
-  static const String settings = '/settings';
   static const String teamList = '/team-list';
   static const String gameSetup = '/game-setup';
   static const String gameHistory = '/game-history';
   static const String gameDetails = '/game-details';
   static const String scoring = '/scoring';
-
-  /// Navigate to settings page
-  @Deprecated(
-    'Settings screen has been deprecated. Use AppDrawer for settings access.',
-  )
-  static Future<T?> toSettings<T extends Object?>(BuildContext context) {
-    return Navigator.of(context).push<T>(
-      MaterialPageRoute(
-        builder: (context) => const Settings(title: 'Settings'),
-      ),
-    );
-  }
 
   /// Navigate to team selection with callback
   static Future<String?> toTeamSelection({
