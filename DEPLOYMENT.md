@@ -53,7 +53,7 @@ Set these secrets in GitHub:
 
 Set these secrets in GitHub:
 - `SERVICE_ACCOUNT_JSON`: The entire content of the JSON file downloaded in step 3
-- `PACKAGE_NAME`: Your app's package name (e.g., "com.example.scorecard")
+- `PACKAGE_NAME`: Your app's package name (`blog.ryannortham.scorecard`)
 
 ## Setting GitHub Secrets
 
