@@ -144,6 +144,25 @@ class _GameSetupState extends State<GameSetup> {
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
+                      TeamSelectionWidget(
+                        homeTeamKey: homeTeamKey,
+                        awayTeamKey: awayTeamKey,
+                        homeTeamController: _homeTeamController,
+                        awayTeamController: _awayTeamController,
+                        homeTeam: homeTeam,
+                        awayTeam: awayTeam,
+                        onHomeTeamChanged: (newTeam) {
+                          setState(() {
+                            homeTeam = newTeam;
+                          });
+                        },
+                        onAwayTeamChanged: (newTeam) {
+                          setState(() {
+                            awayTeam = newTeam;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
                       Form(
                         key: dateKey,
                         child: TextFormField(
@@ -179,25 +198,6 @@ class _GameSetupState extends State<GameSetup> {
                             dateKey.currentState!.validate();
                           },
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      TeamSelectionWidget(
-                        homeTeamKey: homeTeamKey,
-                        awayTeamKey: awayTeamKey,
-                        homeTeamController: _homeTeamController,
-                        awayTeamController: _awayTeamController,
-                        homeTeam: homeTeam,
-                        awayTeam: awayTeam,
-                        onHomeTeamChanged: (newTeam) {
-                          setState(() {
-                            homeTeam = newTeam;
-                          });
-                        },
-                        onAwayTeamChanged: (newTeam) {
-                          setState(() {
-                            awayTeam = newTeam;
-                          });
-                        },
                       ),
                       const SizedBox(height: 24),
                       const GameSettingsConfiguration(),
