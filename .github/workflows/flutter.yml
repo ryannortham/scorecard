@@ -67,11 +67,16 @@ jobs:
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: flutter test
 
-  build-and-deploy:
+  build:
     needs: test
     runs-on: ubuntu-latest
     # Run on main branch pushes OR on releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
+    
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
+      track: ${{ steps.version.outputs.track }}
     
     steps:
       - uses: actions/checkout@v4
@@ -200,6 +205,22 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # Run on main branch pushes OR on releases
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      # Download the built AAB artifact
+      - name: Download AAB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-aab-${{ needs.build.outputs.version_name }}
+          path: build/app/outputs/bundle/release/
+
       # Create GitHub release for tagged versions
       - name: Create GitHub Release
         if: github.event_name == 'release'
@@ -207,13 +228,13 @@ jobs:
         with:
           files: build/app/outputs/bundle/release/app-release.aab
           tag_name: ${{ github.event.release.tag_name }}
-          name: Release ${{ steps.version.outputs.version_name }}
+          name: Release ${{ needs.build.outputs.version_name }}
           body: |
-            🚀 **Release ${{ steps.version.outputs.version_name }}**
+            🚀 **Release ${{ needs.build.outputs.version_name }}**
             
             **Build Information:**
-            - Version Name: `${{ steps.version.outputs.version_name }}`
-            - Version Code: `${{ steps.version.outputs.version_code }}`
+            - Version Name: `${{ needs.build.outputs.version_name }}`
+            - Version Code: `${{ needs.build.outputs.version_code }}`
             - Build Date: `${{ github.event.head_commit.timestamp }}`
             - Commit SHA: `${{ github.sha }}`
             
@@ -223,15 +244,37 @@ jobs:
             
             See the [changelog](./android/whatsnew/whatsnew-en-US) for details.
 
-      # Upload to Google Play Store
+      # Upload to Google Play Store with retry logic
       - name: Upload to Play Store
+        id: upload-play-store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: ${{ steps.version.outputs.track }}
+          track: ${{ needs.build.outputs.track }}
           status: draft
           inAppUpdatePriority: 2
           whatsNewDirectory: android/whatsnew
-          releaseName: ${{ steps.version.outputs.version_name }}
+          releaseName: ${{ needs.build.outputs.version_name }}
+        continue-on-error: true
+
+      # Retry Play Store upload if it failed due to concurrent edits
+      - name: Wait before retry
+        if: steps.upload-play-store.outcome == 'failure'
+        run: |
+          echo "⏳ Waiting 30 seconds before retrying Play Store upload..."
+          sleep 30
+
+      - name: Retry Play Store Upload (if needed)
+        if: steps.upload-play-store.outcome == 'failure'
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ secrets.PACKAGE_NAME }}
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ needs.build.outputs.track }}
+          status: draft
+          inAppUpdatePriority: 2
+          whatsNewDirectory: android/whatsnew
+          releaseName: ${{ needs.build.outputs.version_name }}-retry
