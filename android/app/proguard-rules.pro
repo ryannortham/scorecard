@@ -13,7 +13,9 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
-# Note: Removed Play Core rules as we've removed the dependency for Android 14 compatibility
+# Ignore missing Play Core classes (we don't use these features)
+-dontwarn com.google.android.play.core.**
+-ignorewarnings
 
 # Keep Flutter's Play Store split compatibility classes (these are built-in)
 -keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
