@@ -121,17 +121,6 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      # Cache Android SDK
-      - name: Cache Android SDK
-        uses: actions/cache@v4
-        with:
-          path: |
-            /usr/local/lib/android/sdk
-            ~/.android
-          key: android-sdk-${{ runner.os }}-${{ hashFiles('android/app/build.gradle') }}
-          restore-keys: |
-            android-sdk-${{ runner.os }}-
-
       # Setup Java for Android builds
       - uses: actions/setup-java@v4
         with:
