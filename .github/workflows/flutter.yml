@@ -231,7 +231,7 @@ jobs:
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: ${{ steps.version.outputs.track }}
-          status: completed
+          status: draft
           inAppUpdatePriority: 2
           whatsNewDirectory: android/whatsnew
           releaseName: ${{ steps.version.outputs.version_name }}
