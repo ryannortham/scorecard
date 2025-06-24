@@ -107,10 +107,7 @@ class TimerDisplay extends StatelessWidget {
                   progress = progress.clamp(0.0, 1.0);
                 }
 
-                return LinearProgressIndicator(
-                  value: progress,
-                  year2023: false,
-                );
+                return LinearProgressIndicator(value: progress);
               },
             ),
           ],
