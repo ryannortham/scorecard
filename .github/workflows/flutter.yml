@@ -242,7 +242,7 @@ jobs:
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: ${{ needs.build.outputs.track }}
-          status: draft
+          status: completed
           inAppUpdatePriority: 2
           whatsNewDirectory: android/whatsnew
           releaseName: ${{ needs.build.outputs.version_name }}
@@ -263,7 +263,7 @@ jobs:
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: ${{ needs.build.outputs.track }}
-          status: draft
+          status: completed
           inAppUpdatePriority: 2
           whatsNewDirectory: android/whatsnew
           releaseName: ${{ needs.build.outputs.version_name }}-retry
