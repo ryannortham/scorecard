@@ -465,6 +465,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                             );
                           },
                         ),
+
                         const SizedBox(height: 4),
 
                         // Away Team Score Table

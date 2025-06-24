@@ -62,91 +62,84 @@ class ScoreCounterState extends State<ScoreCounter> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 3.0,
-                  vertical: 3.0,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Decrease Button
-                    IconButton(
-                      onPressed:
-                          widget.enabled &&
-                                  currentCount > 0 &&
-                                  scorePanelAdapter.hasEventInCurrentQuarter(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Decrease Button
+                  IconButton(
+                    onPressed:
+                        widget.enabled &&
+                                currentCount > 0 &&
+                                scorePanelAdapter.hasEventInCurrentQuarter(
+                                  widget.isHomeTeam,
+                                  widget.isGoal,
+                                )
+                            ? () => _updateCount(currentCount - 1)
+                            : null,
+                    icon: Icon(
+                      Icons.remove_outlined,
+                      size: 18,
+                      color:
+                          !widget.enabled ||
+                                  currentCount <= 0 ||
+                                  !scorePanelAdapter.hasEventInCurrentQuarter(
                                     widget.isHomeTeam,
                                     widget.isGoal,
                                   )
-                              ? () => _updateCount(currentCount - 1)
-                              : null,
-                      icon: Icon(
-                        Icons.remove_outlined,
-                        size: 18,
-                        color:
-                            !widget.enabled ||
-                                    currentCount <= 0 ||
-                                    !scorePanelAdapter.hasEventInCurrentQuarter(
-                                      widget.isHomeTeam,
-                                      widget.isGoal,
-                                    )
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.38)
-                                : Theme.of(context).colorScheme.onSecondary,
-                      ),
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
-                      ),
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.38)
+                              : Theme.of(context).colorScheme.onSecondary,
                     ),
+                    padding: const EdgeInsets.all(8.0),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
 
-                    // Count Display
-                    Container(
-                      constraints: const BoxConstraints(minWidth: 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        currentCount.toString(),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleMedium?.copyWith(
-                          color:
-                              widget.enabled
-                                  ? Theme.of(context).colorScheme.onSecondary
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.38),
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-
-                    // Increase Button
-                    IconButton(
-                      onPressed:
-                          widget.enabled && currentCount < 99
-                              ? () => _updateCount(currentCount + 1)
-                              : null,
-                      icon: Icon(
-                        Icons.add_outlined,
-                        size: 18,
+                  // Count Display
+                  Container(
+                    constraints: const BoxConstraints(minWidth: 44),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      currentCount.toString(),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color:
-                            !widget.enabled || currentCount >= 99
-                                ? Theme.of(
+                            widget.enabled
+                                ? Theme.of(context).colorScheme.onSecondary
+                                : Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.38)
-                                : Theme.of(context).colorScheme.onSecondary,
-                      ),
-                      padding: const EdgeInsets.all(8.0),
-                      constraints: const BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38),
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Increase Button
+                  IconButton(
+                    onPressed:
+                        widget.enabled && currentCount < 99
+                            ? () => _updateCount(currentCount + 1)
+                            : null,
+                    icon: Icon(
+                      Icons.add_outlined,
+                      size: 18,
+                      color:
+                          !widget.enabled || currentCount >= 99
+                              ? Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.38)
+                              : Theme.of(context).colorScheme.onSecondary,
+                    ),
+                    padding: const EdgeInsets.all(8.0),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
