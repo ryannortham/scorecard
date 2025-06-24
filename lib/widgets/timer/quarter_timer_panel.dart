@@ -54,8 +54,11 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(12.0),
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(8.0),
+          topRight: Radius.circular(8.0),
+        ),
       ),
       child: Row(
         children: List.generate(4, (index) {

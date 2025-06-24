@@ -34,7 +34,7 @@ class QuarterScoreRow extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             isCurrentQuarter
-                ? Theme.of(context).colorScheme.primaryContainer
+                ? Theme.of(context).colorScheme.secondaryContainer
                 : Theme.of(context).colorScheme.surfaceContainerHigh,
         borderRadius:
             quarter ==
