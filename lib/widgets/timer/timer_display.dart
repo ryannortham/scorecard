@@ -78,12 +78,6 @@ class TimerDisplay extends StatelessWidget {
                 vertical: 6.0,
                 horizontal: 10.0,
               ),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
               child: StreamBuilder<int>(
                 stream: gameStateService.timerStream,
                 initialData: scorePanelAdapter.timerRawTime,
@@ -122,11 +116,10 @@ class TimerDisplay extends StatelessWidget {
 
                 return LinearProgressIndicator(
                   value: progress,
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerHigh.withValues(alpha: 0.4),
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHigh,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.secondary,
+                    Theme.of(context).colorScheme.onPrimary,
                   ),
                 );
               },

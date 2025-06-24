@@ -432,18 +432,6 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Timer Panel Card
-                        Card(
-                          elevation: 0,
-                          color:
-                              Theme.of(context).colorScheme.surfaceContainerLow,
-                          child: QuarterTimerPanel(
-                            key: _quarterTimerKey,
-                            isTimerRunning: isTimerRunning,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-
                         // Home Team Score Table
                         ValueListenableBuilder<bool>(
                           valueListenable: isTimerRunning,
@@ -488,7 +476,18 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                             );
                           },
                         ),
-                        const SizedBox(height: 8),
+
+                        const SizedBox(height: 4),
+
+                        // Timer Panel Card
+                        Card(
+                          elevation: 0,
+                          color: Theme.of(context).colorScheme.surface,
+                          child: QuarterTimerPanel(
+                            key: _quarterTimerKey,
+                            isTimerRunning: isTimerRunning,
+                          ),
+                        ),
                       ],
                     ),
                   ),

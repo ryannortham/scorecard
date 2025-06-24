@@ -42,17 +42,11 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
               const SizedBox(height: 6.0),
 
               // Timer Widget
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: TimerWidget(
-                    key: _timerKey,
-                    isRunning: widget.isTimerRunning,
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: TimerWidget(
+                  key: _timerKey,
+                  isRunning: widget.isTimerRunning,
                 ),
               ),
             ],
@@ -67,7 +61,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12.0),
@@ -82,7 +76,7 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
             child: Container(
               margin:
                   index < 3
-                      ? const EdgeInsets.only(right: 4.0)
+                      ? const EdgeInsets.only(right: 8.0)
                       : EdgeInsets.zero,
               padding: const EdgeInsets.symmetric(
                 horizontal: 6.0,
