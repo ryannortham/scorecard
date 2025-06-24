@@ -107,9 +107,8 @@ class _GameSetupState extends State<GameSetup> {
     final gameSetupAdapter = Provider.of<GameSetupAdapter>(context);
 
     return Scaffold(
-      drawerEdgeDragWidth:
-          MediaQuery.of(context).size.width * 0.25, // 75% of screen width
-      drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
+      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
+      drawerEnableOpenDragGesture: true,
       appBar: AppBar(
         title: Text(widget.title),
         leading: Builder(
@@ -207,12 +206,7 @@ class _GameSetupState extends State<GameSetup> {
               Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.secondary,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onSecondary,
-                    ),
+                  child: FilledButton.tonal(
                     onPressed: () {
                       if (isValidSetup()) {
                         final gameSetupAdapter = Provider.of<GameSetupAdapter>(

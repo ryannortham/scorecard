@@ -99,31 +99,15 @@ class TimerControls extends StatelessWidget {
 
                 return Expanded(
                   flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: FilledButton.tonalIcon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSecondary,
-                      ),
-                      onPressed: isEnabled ? onResetTimer : null,
-                      icon: Icon(
-                        Icons.refresh,
-                        size: 16,
-                        color:
-                            !isEnabled
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.38)
-                                : null,
-                      ),
-                      label: const Text(
-                        'Reset',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
+                  // child: Padding(
+                  // padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: FilledButton.tonalIcon(
+                    onPressed: isEnabled ? onResetTimer : null,
+                    icon: Icon(Icons.refresh, size: 16),
+                    label: const Text(
+                      'Reset',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 );
@@ -139,14 +123,8 @@ class TimerControls extends StatelessWidget {
                 return Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSecondary,
-                      ),
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: FilledButton.tonalIcon(
                       onPressed: onToggleTimer,
                       icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
                       label: Text(
@@ -174,31 +152,13 @@ class TimerControls extends StatelessWidget {
 
                 return Expanded(
                   flex: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                    child: FilledButton.tonalIcon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.secondary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onSecondary,
-                      ),
-                      onPressed: isEnabled ? onNextQuarter : null,
-                      icon: Icon(
-                        _getNextIcon(currentQuarter),
-                        size: 16,
-                        color:
-                            !isEnabled
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.38)
-                                : null,
-                      ),
-                      label: Text(
-                        _getNextLabel(currentQuarter),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
+                  child: FilledButton.tonalIcon(
+                    onPressed: isEnabled ? onNextQuarter : null,
+                    icon: Icon(_getNextIcon(currentQuarter), size: 16),
+                    label: Text(
+                      _getNextLabel(currentQuarter),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 );

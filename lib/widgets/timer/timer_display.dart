@@ -73,30 +73,24 @@ class TimerDisplay extends StatelessWidget {
         return Column(
           children: [
             // Timer Display
-            Container(
-              padding: const EdgeInsets.symmetric(
-                vertical: 6.0,
-                horizontal: 10.0,
-              ),
-              child: StreamBuilder<int>(
-                stream: gameStateService.timerStream,
-                initialData: scorePanelAdapter.timerRawTime,
-                builder: (context, snap) {
-                  final value = snap.data!;
-                  final displayTime = _formatTimerDisplay(
-                    value,
-                    gameSetupAdapter.isCountdownTimer,
-                  );
+            StreamBuilder<int>(
+              stream: gameStateService.timerStream,
+              initialData: scorePanelAdapter.timerRawTime,
+              builder: (context, snap) {
+                final value = snap.data!;
+                final displayTime = _formatTimerDisplay(
+                  value,
+                  gameSetupAdapter.isCountdownTimer,
+                );
 
-                  return Text(
-                    displayTime,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: _getTimerColor(context),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  );
-                },
-              ),
+                return Text(
+                  displayTime,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: _getTimerColor(context),
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 6),
@@ -116,11 +110,7 @@ class TimerDisplay extends StatelessWidget {
 
                 return LinearProgressIndicator(
                   value: progress,
-                  backgroundColor:
-                      Theme.of(context).colorScheme.surfaceContainerHigh,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Theme.of(context).colorScheme.onPrimary,
-                  ),
+                  year2023: false,
                 );
               },
             ),
