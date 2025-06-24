@@ -7,7 +7,7 @@ import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
 import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
-import 'package:scorecard/widgets/app_drawer.dart';
+import 'package:scorecard/widgets/game_setup/app_drawer.dart';
 
 import 'scoring.dart';
 
@@ -107,6 +107,9 @@ class _GameSetupState extends State<GameSetup> {
     final gameSetupAdapter = Provider.of<GameSetupAdapter>(context);
 
     return Scaffold(
+      drawerEdgeDragWidth:
+          MediaQuery.of(context).size.width * 0.75, // 75% of screen width
+      drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
       appBar: AppBar(
         title: Text(widget.title),
         leading: Builder(

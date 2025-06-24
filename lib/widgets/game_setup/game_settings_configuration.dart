@@ -20,17 +20,17 @@ class GameSettingsConfiguration extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Timer Type Setting
+            _buildTimerTypeSection(context, gameSetupAdapter, userPreferences),
+
+            const SizedBox(height: 20),
+
             // Quarter Minutes Setting
             _buildQuarterMinutesSection(
               context,
               gameSetupAdapter,
               userPreferences,
             ),
-
-            const SizedBox(height: 20),
-
-            // Timer Type Setting
-            _buildTimerTypeSection(context, gameSetupAdapter, userPreferences),
           ],
         );
       },

@@ -18,7 +18,7 @@ import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
-import 'package:scorecard/widgets/app_drawer.dart';
+import 'package:scorecard/widgets/game_setup/app_drawer.dart';
 
 import 'game_details.dart';
 
@@ -387,6 +387,9 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
       child: Consumer<GameSetupAdapter>(
         builder: (context, scorePanelState, _) {
           return Scaffold(
+            drawerEdgeDragWidth:
+                MediaQuery.of(context).size.width * 0.75, // 75% of screen width
+            drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
             appBar: AppBar(
               leading: Builder(
                 builder:

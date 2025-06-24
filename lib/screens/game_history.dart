@@ -4,7 +4,7 @@ import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
 import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
-import '../widgets/app_drawer.dart';
+import '../widgets/game_setup/app_drawer.dart';
 import 'package:scorecard/screens/game_details.dart' as details;
 
 class GameHistoryScreen extends StatefulWidget {
@@ -217,6 +217,9 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         }
       },
       child: Scaffold(
+        drawerEdgeDragWidth:
+            MediaQuery.of(context).size.width * 0.75, // 75% of screen width
+        drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
         appBar: AppBar(
           title:
               _isSelectionMode

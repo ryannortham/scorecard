@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/teams_provider.dart';
 import '../services/navigation_service.dart';
-import '../widgets/app_drawer.dart';
+import '../widgets/game_setup/app_drawer.dart';
 
 class TeamList extends StatelessWidget {
   const TeamList({
@@ -22,6 +22,9 @@ class TeamList extends StatelessWidget {
         teamsProvider.teams.where((team) => team != teamToExclude).toList();
 
     return Scaffold(
+      drawerEdgeDragWidth:
+          MediaQuery.of(context).size.width * 0.75, // 75% of screen width
+      drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
       appBar: AppBar(
         title: Text(title),
         leading: Builder(

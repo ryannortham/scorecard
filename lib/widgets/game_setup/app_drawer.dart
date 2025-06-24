@@ -21,15 +21,37 @@ class AppDrawer extends StatelessWidget {
         children: [
           // App Header
           Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              'Score Card',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            height: 120,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Score Card',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.onPrimary,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'assets/icon/app_icon_masked.png',
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ],
             ),
           ),
-          const Divider(),
 
           // Favorite Team
           ListTile(
