@@ -33,7 +33,17 @@ class QuarterScoreRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
       decoration: BoxDecoration(
         color:
-            isCurrentQuarter ? Theme.of(context).colorScheme.onPrimary : null,
+            isCurrentQuarter
+                ? Theme.of(context).colorScheme.primaryContainer
+                : Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius:
+            quarter ==
+                    3 // Only for fourth quarter (0-based index)
+                ? const BorderRadius.only(
+                  bottomLeft: Radius.circular(8.0),
+                  bottomRight: Radius.circular(8.0),
+                )
+                : null,
       ),
       child: Row(
         children: [
@@ -45,10 +55,6 @@ class QuarterScoreRow extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight:
                     isCurrentQuarter ? FontWeight.w700 : FontWeight.w600,
-                color:
-                    isCurrentQuarter
-                        ? Theme.of(context).colorScheme.secondary
-                        : null,
               ),
             ),
           ),
@@ -76,10 +82,10 @@ class QuarterScoreRow extends StatelessWidget {
                           isCurrentQuarter
                               ? Theme.of(
                                 context,
-                              ).colorScheme.secondary.withValues(alpha: 0.1)
+                              ).colorScheme.surfaceContainerHighest
                               : Theme.of(
                                 context,
-                              ).colorScheme.surface.withValues(alpha: 0.8),
+                              ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
@@ -90,9 +96,10 @@ class QuarterScoreRow extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color:
                               isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer
+                                  : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -131,10 +138,10 @@ class QuarterScoreRow extends StatelessWidget {
                           isCurrentQuarter
                               ? Theme.of(
                                 context,
-                              ).colorScheme.secondary.withValues(alpha: 0.1)
+                              ).colorScheme.surfaceContainerHighest
                               : Theme.of(
                                 context,
-                              ).colorScheme.surface.withValues(alpha: 0.8),
+                              ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
@@ -145,9 +152,10 @@ class QuarterScoreRow extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color:
                               isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer
+                                  : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -186,10 +194,10 @@ class QuarterScoreRow extends StatelessWidget {
                           isCurrentQuarter
                               ? Theme.of(
                                 context,
-                              ).colorScheme.secondary.withValues(alpha: 0.1)
+                              ).colorScheme.surfaceContainerHighest
                               : Theme.of(
                                 context,
-                              ).colorScheme.surface.withValues(alpha: 0.8),
+                              ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
@@ -200,9 +208,10 @@ class QuarterScoreRow extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                           color:
                               isCurrentQuarter
-                                  ? Theme.of(context).colorScheme.secondary
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.7),
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer
+                                  : Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),

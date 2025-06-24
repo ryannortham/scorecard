@@ -122,35 +122,39 @@ class ScoreTable extends StatelessWidget {
             const SizedBox(height: 8),
 
             // Score table
-            Card(
-              elevation: 0,
-              child: Column(
-                children: [
-                  // Table header
-                  const ScoreTableHeader(),
+            Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Card(
+                elevation: 0,
+                child: Column(
+                  children: [
+                    // Table header
+                    const ScoreTableHeader(),
 
-                  // Quarter rows - Always show all 4 quarters
-                  ...List.generate(
-                    4, // Always show all 4 quarters
-                    (index) {
-                      final quarter = index + 1;
-                      final quarterEvents =
-                          _eventsByQuarter(quarter)['team'] ?? [];
-                      final runningTotals = _calculateRunningTotals(quarter);
+                    // Quarter rows - Always show all 4 quarters
+                    ...List.generate(
+                      4, // Always show all 4 quarters
+                      (index) {
+                        final quarter = index + 1;
+                        final quarterEvents =
+                            _eventsByQuarter(quarter)['team'] ?? [];
+                        final runningTotals = _calculateRunningTotals(quarter);
 
-                      return QuarterScoreRow(
-                        quarter: index, // 0-based index
-                        quarterEvents: quarterEvents,
-                        isCurrentQuarter:
-                            quarter == currentQ && !isCompletedGame,
-                        isFutureQuarter: quarter > currentQ && !isCompletedGame,
-                        runningGoals: runningTotals['goals']!,
-                        runningBehinds: runningTotals['behinds']!,
-                        runningPoints: runningTotals['points']!,
-                      );
-                    },
-                  ),
-                ],
+                        return QuarterScoreRow(
+                          quarter: index, // 0-based index
+                          quarterEvents: quarterEvents,
+                          isCurrentQuarter:
+                              quarter == currentQ && !isCompletedGame,
+                          isFutureQuarter:
+                              quarter > currentQ && !isCompletedGame,
+                          runningGoals: runningTotals['goals']!,
+                          runningBehinds: runningTotals['behinds']!,
+                          runningPoints: runningTotals['points']!,
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
             // ),
