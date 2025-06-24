@@ -85,9 +85,8 @@ class TimerDisplay extends StatelessWidget {
 
                 return Text(
                   displayTime,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: _getTimerColor(context),
-                    fontWeight: FontWeight.w600,
                   ),
                 );
               },
