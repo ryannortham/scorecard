@@ -23,6 +23,8 @@ class GameHistoryCard extends StatelessWidget {
     final timeFormat = DateFormat('HH:mm');
 
     return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
         title: Text(

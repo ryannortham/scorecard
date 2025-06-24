@@ -434,7 +434,9 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                       children: [
                         // Timer Panel Card
                         Card(
-                          elevation: 1,
+                          elevation: 0,
+                          color:
+                              Theme.of(context).colorScheme.surfaceContainerLow,
                           child: QuarterTimerPanel(
                             key: _quarterTimerKey,
                             isTimerRunning: isTimerRunning,
@@ -447,7 +449,11 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
                             return Card(
-                              elevation: 1,
+                              elevation: 0,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainer,
                               child: ScoreTable(
                                 events: List<GameEvent>.from(gameEvents),
                                 homeTeam: homeTeamName,
@@ -466,7 +472,11 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
                             return Card(
-                              elevation: 1,
+                              elevation: 0,
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainer,
                               child: ScoreTable(
                                 events: List<GameEvent>.from(gameEvents),
                                 homeTeam: homeTeamName,

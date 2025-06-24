@@ -52,10 +52,13 @@ class ScoreCounterState extends State<ScoreCounter> {
 
             // Unified Counter Widget
             Card(
-              elevation: 2,
-              color: Theme.of(
-                context,
-              ).colorScheme.surface.withValues(alpha: 0.9),
+              elevation: 0, // md.sys.elevation.level0 for disabled
+              color:
+                  widget.enabled
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.onSurface.withValues(
+                        alpha: 0.1,
+                      ), // 0.1 opacity for disabled
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
@@ -78,7 +81,21 @@ class ScoreCounterState extends State<ScoreCounter> {
                                   )
                               ? () => _updateCount(currentCount - 1)
                               : null,
-                      icon: const Icon(Icons.remove_outlined, size: 18),
+                      icon: Icon(
+                        Icons.remove_outlined,
+                        size: 18,
+                        color:
+                            !widget.enabled ||
+                                    currentCount <= 0 ||
+                                    !scorePanelAdapter.hasEventInCurrentQuarter(
+                                      widget.isHomeTeam,
+                                      widget.isGoal,
+                                    )
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38)
+                                : Theme.of(context).colorScheme.onSecondary,
+                      ),
                       padding: const EdgeInsets.all(8.0),
                       constraints: const BoxConstraints(
                         minWidth: 40,
@@ -98,9 +115,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                         ).textTheme.titleMedium?.copyWith(
                           color:
                               widget.enabled
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant
+                                  ? Theme.of(context).colorScheme.onSecondary
                                   : Theme.of(context).colorScheme.onSurface
                                       .withValues(alpha: 0.38),
                           fontWeight: FontWeight.w700,
@@ -114,7 +129,16 @@ class ScoreCounterState extends State<ScoreCounter> {
                           widget.enabled && currentCount < 99
                               ? () => _updateCount(currentCount + 1)
                               : null,
-                      icon: const Icon(Icons.add_outlined, size: 18),
+                      icon: Icon(
+                        Icons.add_outlined,
+                        size: 18,
+                        color:
+                            !widget.enabled || currentCount >= 99
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.38)
+                                : Theme.of(context).colorScheme.onSecondary,
+                      ),
                       padding: const EdgeInsets.all(8.0),
                       constraints: const BoxConstraints(
                         minWidth: 40,

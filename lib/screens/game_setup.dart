@@ -133,10 +133,8 @@ class _GameSetupState extends State<GameSetup> {
             children: [
               const Spacer(flex: 1),
               Card(
-                elevation: 1,
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.9),
+                elevation: 0,
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0),
                 ),

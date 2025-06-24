@@ -45,7 +45,7 @@ class _ExitGameBottomSheetState extends State<ExitGameBottomSheet>
       },
       showDragHandle: true,
       enableDrag: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       builder:
           (context) => Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),

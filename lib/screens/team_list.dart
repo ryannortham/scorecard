@@ -49,6 +49,8 @@ class TeamList extends StatelessWidget {
                     final teamName = teamNames[index];
                     final realIndex = teamsProvider.teams.indexOf(teamName);
                     return Card(
+                      elevation: 0,
+                      color: Theme.of(context).colorScheme.surfaceContainer,
                       child: ListTile(
                         title: Text(teamName),
                         onTap: () {

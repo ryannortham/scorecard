@@ -59,13 +59,11 @@ class GameSummaryCard extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      elevation: isSelected ? 4.0 : 1.0,
+      elevation: 0,
       color:
           isSelected
-              ? Theme.of(
-                context,
-              ).colorScheme.primaryContainer.withValues(alpha: 0.3)
-              : null,
+              ? Theme.of(context).colorScheme.primaryContainer
+              : Theme.of(context).colorScheme.surfaceContainer,
       child: ListTile(
         leading:
             isSelectionMode
