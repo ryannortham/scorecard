@@ -52,15 +52,15 @@ class ScoreCounterState extends State<ScoreCounter> {
 
             // Unified Counter Widget
             Card(
-              elevation: 0, // md.sys.elevation.level0 for disabled
+              elevation: 0,
               color:
                   widget.enabled
-                      ? Theme.of(context).colorScheme.secondary
+                      ? Theme.of(context).colorScheme.secondaryContainer
                       : Theme.of(context).colorScheme.onSurface.withValues(
-                        alpha: 0.1,
-                      ), // 0.1 opacity for disabled
+                        alpha: 0.12,
+                      ), // Material 3 disabled surface opacity
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(32.0),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -89,7 +89,9 @@ class ScoreCounterState extends State<ScoreCounter> {
                               ? Theme.of(
                                 context,
                               ).colorScheme.onSurface.withValues(alpha: 0.38)
-                              : Theme.of(context).colorScheme.onSecondary,
+                              : Theme.of(
+                                context,
+                              ).colorScheme.onSecondaryContainer,
                     ),
                     padding: const EdgeInsets.all(8.0),
                     constraints: const BoxConstraints(
@@ -108,7 +110,9 @@ class ScoreCounterState extends State<ScoreCounter> {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color:
                             widget.enabled
-                                ? Theme.of(context).colorScheme.onSecondary
+                                ? Theme.of(
+                                  context,
+                                ).colorScheme.onSecondaryContainer
                                 : Theme.of(
                                   context,
                                 ).colorScheme.onSurface.withValues(alpha: 0.38),
@@ -131,7 +135,9 @@ class ScoreCounterState extends State<ScoreCounter> {
                               ? Theme.of(
                                 context,
                               ).colorScheme.onSurface.withValues(alpha: 0.38)
-                              : Theme.of(context).colorScheme.onSecondary,
+                              : Theme.of(
+                                context,
+                              ).colorScheme.onSecondaryContainer,
                     ),
                     padding: const EdgeInsets.all(8.0),
                     constraints: const BoxConstraints(

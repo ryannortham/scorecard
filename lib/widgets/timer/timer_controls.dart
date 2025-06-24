@@ -123,7 +123,7 @@ class TimerControls extends StatelessWidget {
                 return Expanded(
                   flex: 3,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: FilledButton.tonalIcon(
                       onPressed: onToggleTimer,
                       icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
