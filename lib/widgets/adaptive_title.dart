@@ -29,7 +29,7 @@ class AdaptiveTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveStyle = style ?? Theme.of(context).textTheme.titleLarge;
+    final effectiveStyle = style ?? Theme.of(context).textTheme.headlineSmall;
 
     // Simple and safe approach: just use FittedBox with scaleDown
     // This avoids the LayoutBuilder infinite loop issue
