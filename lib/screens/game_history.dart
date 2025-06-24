@@ -218,7 +218,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       },
       child: Scaffold(
         drawerEdgeDragWidth:
-            MediaQuery.of(context).size.width * 0.75, // 75% of screen width
+            MediaQuery.of(context).size.width * 0.25, // 75% of screen width
         drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
         appBar: AppBar(
           title:

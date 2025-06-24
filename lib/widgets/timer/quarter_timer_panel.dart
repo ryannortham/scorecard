@@ -31,28 +31,25 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(6.0),
-      child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-        builder: (context, gameSetupProvider, scorePanelProvider, _) {
-          return Column(
-            children: [
-              // Quarter Progress Indicator
-              _buildQuarterProgressIndicator(scorePanelProvider),
-              const SizedBox(height: 6.0),
+    return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
+      builder: (context, gameSetupProvider, scorePanelProvider, _) {
+        return Column(
+          children: [
+            // Quarter Progress Indicator
+            _buildQuarterProgressIndicator(scorePanelProvider),
+            const SizedBox(height: 6.0),
 
-              // Timer Widget
-              Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: TimerWidget(
-                  key: _timerKey,
-                  isRunning: widget.isTimerRunning,
-                ),
+            // Timer Widget
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: TimerWidget(
+                key: _timerKey,
+                isRunning: widget.isTimerRunning,
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
