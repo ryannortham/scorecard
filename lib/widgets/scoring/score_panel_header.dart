@@ -4,11 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/adapters/score_panel_adapter.dart';
 
 /// Header widget displaying team name and total score
-class TeamScoreHeader extends StatelessWidget {
+class ScorePanelHeader extends StatelessWidget {
   final String teamName;
   final bool isHomeTeam;
 
-  const TeamScoreHeader({
+  const ScorePanelHeader({
     super.key,
     required this.teamName,
     required this.isHomeTeam,

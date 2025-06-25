@@ -7,8 +7,8 @@ import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
 /// Widget that displays the timer value and progress indicator
-class TimerDisplay extends StatelessWidget {
-  const TimerDisplay({super.key});
+class TimerClock extends StatelessWidget {
+  const TimerClock({super.key});
 
   /// Gets the appropriate color for the timer display based on current state
   Color _getTimerColor(BuildContext context) {
@@ -42,7 +42,7 @@ class TimerDisplay extends StatelessWidget {
   }
 
   /// Formats the timer display string
-  String _formatTimerDisplay(int value, bool isCountdownTimer) {
+  String _formatTimerClock(int value, bool isCountdownTimer) {
     if (isCountdownTimer && value < 0) {
       // Handle negative time display for countdown timer
       final absValue = value.abs();
@@ -78,7 +78,7 @@ class TimerDisplay extends StatelessWidget {
               initialData: scorePanelAdapter.timerRawTime,
               builder: (context, snap) {
                 final value = snap.data!;
-                final displayTime = _formatTimerDisplay(
+                final displayTime = _formatTimerClock(
                   value,
                   gameSetupAdapter.isCountdownTimer,
                 );

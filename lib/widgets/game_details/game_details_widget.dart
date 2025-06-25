@@ -151,7 +151,6 @@ class GameDetailsWidget extends StatelessWidget {
         displayTeam: displayTeam,
         isHomeTeam: isHomeTeam,
         enabled: false,
-        showHeader: false,
         showCounters: false, // Hide score counters
         isCompletedGame: false, // Live game is not completed
       );
@@ -166,7 +165,6 @@ class GameDetailsWidget extends StatelessWidget {
         displayTeam: displayTeam,
         isHomeTeam: isHomeTeam,
         enabled: false, // Disable interactions in details view
-        showHeader: false, // Hide team header
         showCounters: false, // Hide score counters
         currentQuarter:
             currentQuarter, // Pass quarter directly to avoid provider listening

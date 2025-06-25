@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:scorecard/providers/game_record.dart';
 
 /// A single row displaying quarter score data
-class QuarterScoreRow extends StatelessWidget {
+class ScoreTableRow extends StatelessWidget {
   final int quarter; // 0-based quarter index
   final List<GameEvent> quarterEvents;
   final bool isCurrentQuarter;
@@ -12,7 +12,7 @@ class QuarterScoreRow extends StatelessWidget {
   final int runningBehinds;
   final int runningPoints;
 
-  const QuarterScoreRow({
+  const ScoreTableRow({
     super.key,
     required this.quarter,
     required this.quarterEvents,

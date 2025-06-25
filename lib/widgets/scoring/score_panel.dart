@@ -24,16 +24,12 @@ class ScorePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Expanded(child: _buildScoreCounter('Goals', true)),
-          const SizedBox(width: 12),
-          Expanded(child: _buildScoreCounter('Behinds', false)),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(child: _buildScoreCounter('Goals', true)),
+        Expanded(child: _buildScoreCounter('Behinds', false)),
+      ],
     );
   }
 }

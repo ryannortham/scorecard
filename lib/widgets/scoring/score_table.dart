@@ -4,9 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
-import 'package:scorecard/widgets/scoring/quarter_score_row.dart';
+import 'package:scorecard/widgets/scoring/score_table_row.dart';
 import 'package:scorecard/widgets/scoring/score_table_header.dart';
-import 'package:scorecard/widgets/scoring/team_score_header.dart';
+import 'package:scorecard/widgets/scoring/score_panel_header.dart';
 import 'package:scorecard/widgets/scoring/score_counter.dart';
 
 /// Simplified score table widget that displays team scores by quarter
@@ -18,7 +18,6 @@ class ScoreTable extends StatelessWidget {
   final String displayTeam;
   final bool isHomeTeam;
   final bool enabled;
-  final bool showHeader;
   final bool showCounters;
   final int? currentQuarter;
   final bool isCompletedGame;
@@ -31,7 +30,6 @@ class ScoreTable extends StatelessWidget {
     required this.displayTeam,
     required this.isHomeTeam,
     this.enabled = true,
-    this.showHeader = true,
     this.showCounters = true,
     this.currentQuarter,
     this.isCompletedGame = false,
@@ -90,12 +88,11 @@ class ScoreTable extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Team header with total score
-            if (showHeader)
-              TeamScoreHeader(teamName: displayTeam, isHomeTeam: isHomeTeam),
+            ScorePanelHeader(teamName: displayTeam, isHomeTeam: isHomeTeam),
 
             // Score counters - Show above the table when enabled
             if (showCounters && !isCompletedGame) ...[
-              const SizedBox(height: 8),
+              // const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
@@ -106,7 +103,7 @@ class ScoreTable extends StatelessWidget {
                       enabled: enabled, // Pass the enabled state to the counter
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  // const SizedBox(width: 12),
                   Expanded(
                     child: ScoreCounter(
                       label: 'Behinds',
@@ -119,11 +116,9 @@ class ScoreTable extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 8),
-
             // Score table
             Padding(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(8),
               child: Card(
                 elevation: 0,
                 child: Column(
@@ -140,7 +135,7 @@ class ScoreTable extends StatelessWidget {
                             _eventsByQuarter(quarter)['team'] ?? [];
                         final runningTotals = _calculateRunningTotals(quarter);
 
-                        return QuarterScoreRow(
+                        return ScoreTableRow(
                           quarter: index, // 0-based index
                           quarterEvents: quarterEvents,
                           isCurrentQuarter:
