@@ -63,12 +63,7 @@ class QuarterScoreRow extends StatelessWidget {
                 Expanded(
                   flex: 7,
                   child: Center(
-                    child: Text(
-                      isFutureQuarter ? '' : teamGoals.toString(),
-                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      //   fontWeight: FontWeight.w600,
-                      // ),
-                    ),
+                    child: Text(isFutureQuarter ? '' : teamGoals.toString()),
                   ),
                 ),
                 Expanded(
@@ -83,15 +78,6 @@ class QuarterScoreRow extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningGoals.toString(),
-                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        //   fontWeight: FontWeight.w700,
-                        //   color:
-                        //       isCurrentQuarter
-                        //           ? Theme.of(
-                        //             context,
-                        //           ).colorScheme.onSecondaryContainer
-                        //           : Theme.of(context).colorScheme.onSurface,
-                        // ),
                       ),
                     ),
                   ),
@@ -107,18 +93,7 @@ class QuarterScoreRow extends StatelessWidget {
                 Expanded(
                   flex: 7,
                   child: Center(
-                    child: Text(
-                      isFutureQuarter ? '' : teamBehinds.toString(),
-                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      //   fontWeight: FontWeight.w600,
-                      //   color:
-                      //       isFutureQuarter
-                      //           ? Theme.of(
-                      //             context,
-                      //           ).colorScheme.onSurface.withValues(alpha: 0.4)
-                      //           : null,
-                      // ),
-                    ),
+                    child: Text(isFutureQuarter ? '' : teamBehinds.toString()),
                   ),
                 ),
                 Expanded(
@@ -139,15 +114,6 @@ class QuarterScoreRow extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningBehinds.toString(),
-                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        //   fontWeight: FontWeight.w700,
-                        //   color:
-                        //       isCurrentQuarter
-                        //           ? Theme.of(
-                        //             context,
-                        //           ).colorScheme.onSecondaryContainer
-                        //           : Theme.of(context).colorScheme.onSurface,
-                        // ),
                       ),
                     ),
                   ),
@@ -163,18 +129,7 @@ class QuarterScoreRow extends StatelessWidget {
                 Expanded(
                   flex: 7,
                   child: Center(
-                    child: Text(
-                      isFutureQuarter ? '' : teamPoints.toString(),
-                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      //   fontWeight: FontWeight.w700,
-                      //   color:
-                      //       isFutureQuarter
-                      //           ? Theme.of(
-                      //             context,
-                      //           ).colorScheme.onSurface.withValues(alpha: 0.4)
-                      //           : null,
-                      // ),
-                    ),
+                    child: Text(isFutureQuarter ? '' : teamPoints.toString()),
                   ),
                 ),
                 Expanded(
@@ -195,15 +150,6 @@ class QuarterScoreRow extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningPoints.toString(),
-                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        //   fontWeight: FontWeight.w700,
-                        //   color:
-                        //       isCurrentQuarter
-                        //           ? Theme.of(
-                        //             context,
-                        //           ).colorScheme.onSecondaryContainer
-                        //           : Theme.of(context).colorScheme.onSurface,
-                        // ),
                       ),
                     ),
                   ),
