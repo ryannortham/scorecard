@@ -69,11 +69,9 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
           return Expanded(
             child: Container(
               margin:
-                  index < 3
-                      ? const EdgeInsets.only(right: 8.0)
-                      : EdgeInsets.zero,
+                  index < 3 ? const EdgeInsets.only(right: 4) : EdgeInsets.zero,
               padding: const EdgeInsets.symmetric(
-                horizontal: 6.0,
+                horizontal: 4.0,
                 vertical: 4.0,
               ),
               decoration: BoxDecoration(
@@ -83,7 +81,18 @@ class QuarterTimerPanelState extends State<QuarterTimerPanel> {
                         : isCompleted
                         ? Theme.of(context).colorScheme.secondaryContainer
                         : Colors.transparent,
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius:
+                    quarterNumber == 1
+                        ? const BorderRadius.only(
+                          topLeft: Radius.circular(12.0),
+                          bottomLeft: Radius.circular(12.0),
+                        )
+                        : quarterNumber == 4
+                        ? const BorderRadius.only(
+                          topRight: Radius.circular(12.0),
+                          bottomRight: Radius.circular(12.0),
+                        )
+                        : BorderRadius.zero,
               ),
               child: Text(
                 'Q$quarterNumber',

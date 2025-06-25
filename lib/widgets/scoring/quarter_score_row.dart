@@ -52,10 +52,7 @@ class QuarterScoreRow extends StatelessWidget {
             width: 32,
             child: Text(
               'Q${quarter + 1}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight:
-                    isCurrentQuarter ? FontWeight.w700 : FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.labelMedium,
             ),
           ),
 
@@ -68,9 +65,9 @@ class QuarterScoreRow extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '' : teamGoals.toString(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //   fontWeight: FontWeight.w600,
+                      // ),
                     ),
                   ),
                 ),
@@ -79,28 +76,22 @@ class QuarterScoreRow extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color:
-                          isCurrentQuarter
-                              ? Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest
-                              : Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningGoals.toString(),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isCurrentQuarter
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.onSecondaryContainer
-                                  : Theme.of(context).colorScheme.onSurface,
-                        ),
+                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        //   fontWeight: FontWeight.w700,
+                        //   color:
+                        //       isCurrentQuarter
+                        //           ? Theme.of(
+                        //             context,
+                        //           ).colorScheme.onSecondaryContainer
+                        //           : Theme.of(context).colorScheme.onSurface,
+                        // ),
                       ),
                     ),
                   ),
@@ -118,15 +109,15 @@ class QuarterScoreRow extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '' : teamBehinds.toString(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color:
-                            isFutureQuarter
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.4)
-                                : null,
-                      ),
+                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //   fontWeight: FontWeight.w600,
+                      //   color:
+                      //       isFutureQuarter
+                      //           ? Theme.of(
+                      //             context,
+                      //           ).colorScheme.onSurface.withValues(alpha: 0.4)
+                      //           : null,
+                      // ),
                     ),
                   ),
                 ),
@@ -148,15 +139,15 @@ class QuarterScoreRow extends StatelessWidget {
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningBehinds.toString(),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isCurrentQuarter
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.onSecondaryContainer
-                                  : Theme.of(context).colorScheme.onSurface,
-                        ),
+                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        //   fontWeight: FontWeight.w700,
+                        //   color:
+                        //       isCurrentQuarter
+                        //           ? Theme.of(
+                        //             context,
+                        //           ).colorScheme.onSecondaryContainer
+                        //           : Theme.of(context).colorScheme.onSurface,
+                        // ),
                       ),
                     ),
                   ),
@@ -174,15 +165,15 @@ class QuarterScoreRow extends StatelessWidget {
                   child: Center(
                     child: Text(
                       isFutureQuarter ? '' : teamPoints.toString(),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color:
-                            isFutureQuarter
-                                ? Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.4)
-                                : null,
-                      ),
+                      // style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      //   fontWeight: FontWeight.w700,
+                      //   color:
+                      //       isFutureQuarter
+                      //           ? Theme.of(
+                      //             context,
+                      //           ).colorScheme.onSurface.withValues(alpha: 0.4)
+                      //           : null,
+                      // ),
                     ),
                   ),
                 ),
@@ -198,21 +189,21 @@ class QuarterScoreRow extends StatelessWidget {
                               : Theme.of(
                                 context,
                               ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(2.0),
+                      borderRadius: BorderRadius.circular(4.0),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 1.5),
                     child: Center(
                       child: Text(
                         isFutureQuarter ? '' : runningPoints.toString(),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isCurrentQuarter
-                                  ? Theme.of(
-                                    context,
-                                  ).colorScheme.onSecondaryContainer
-                                  : Theme.of(context).colorScheme.onSurface,
-                        ),
+                        // style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        //   fontWeight: FontWeight.w700,
+                        //   color:
+                        //       isCurrentQuarter
+                        //           ? Theme.of(
+                        //             context,
+                        //           ).colorScheme.onSecondaryContainer
+                        //           : Theme.of(context).colorScheme.onSurface,
+                        // ),
                       ),
                     ),
                   ),

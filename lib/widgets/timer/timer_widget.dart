@@ -140,14 +140,15 @@ class TimerWidgetState extends State<TimerWidget> {
         // Timer Display Component
         const TimerDisplay(),
 
-        const SizedBox(height: 8),
-
         // Timer Controls Component
-        TimerControls(
-          onToggleTimer: toggleTimer,
-          onResetTimer: resetTimer,
-          onNextQuarter: _handleNextQuarter,
-          isRunningNotifier: widget.isRunning,
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TimerControls(
+            onToggleTimer: toggleTimer,
+            onResetTimer: resetTimer,
+            onNextQuarter: _handleNextQuarter,
+            isRunningNotifier: widget.isRunning,
+          ),
         ),
       ],
     );
