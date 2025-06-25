@@ -92,7 +92,7 @@ class ScoreTable extends StatelessWidget {
 
             // Score counters - Show above the table when enabled
             if (showCounters && !isCompletedGame) ...[
-              // const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -103,7 +103,6 @@ class ScoreTable extends StatelessWidget {
                       enabled: enabled, // Pass the enabled state to the counter
                     ),
                   ),
-                  // const SizedBox(width: 12),
                   Expanded(
                     child: ScoreCounter(
                       label: 'Behinds',

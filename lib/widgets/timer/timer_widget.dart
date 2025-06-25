@@ -8,6 +8,7 @@ import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
+import 'quarter_progress.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -137,18 +138,19 @@ class TimerWidgetState extends State<TimerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        QuarterProgress(scorePanelProvider: scorePanelProvider),
+
+        SizedBox(height: 8),
+
         // Timer Display Component
         const TimerClock(),
 
         // Timer Controls Component
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TimerControls(
-            onToggleTimer: toggleTimer,
-            onResetTimer: resetTimer,
-            onNextQuarter: _handleNextQuarter,
-            isRunningNotifier: widget.isRunning,
-          ),
+        TimerControls(
+          onToggleTimer: toggleTimer,
+          onResetTimer: resetTimer,
+          onNextQuarter: _handleNextQuarter,
+          isRunningNotifier: widget.isRunning,
         ),
       ],
     );

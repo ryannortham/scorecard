@@ -81,92 +81,95 @@ class TimerControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-      builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Reset Button
-            ValueListenableBuilder<bool>(
-              valueListenable:
-                  isRunningNotifier ??
-                  ValueNotifier(scorePanelAdapter.isTimerRunning),
-              builder: (context, isTimerRunning, _) {
-                final isEnabled = _isResetEnabled(
-                  gameSetupAdapter,
-                  scorePanelAdapter,
-                );
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
+        builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Reset Button
+              ValueListenableBuilder<bool>(
+                valueListenable:
+                    isRunningNotifier ??
+                    ValueNotifier(scorePanelAdapter.isTimerRunning),
+                builder: (context, isTimerRunning, _) {
+                  final isEnabled = _isResetEnabled(
+                    gameSetupAdapter,
+                    scorePanelAdapter,
+                  );
 
-                return Expanded(
-                  flex: 2,
-                  // child: Padding(
-                  // padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: FilledButton.tonalIcon(
-                    onPressed: isEnabled ? onResetTimer : null,
-                    icon: Icon(Icons.refresh, size: 16),
-                    label: const Text(
-                      'Reset',
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            // Play/Pause Button
-            ValueListenableBuilder<bool>(
-              valueListenable:
-                  isRunningNotifier ??
-                  ValueNotifier(scorePanelAdapter.isTimerRunning),
-              builder: (context, isTimerRunning, _) {
-                return Expanded(
-                  flex: 3,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  return Expanded(
+                    flex: 2,
+                    // child: Padding(
+                    // padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: FilledButton.tonalIcon(
-                      onPressed: onToggleTimer,
-                      icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
-                      label: Text(
-                        _getPlayPauseLabel(isTimerRunning),
+                      onPressed: isEnabled ? onResetTimer : null,
+                      icon: Icon(Icons.refresh, size: 16),
+                      label: const Text(
+                        'Reset',
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              ),
 
-            // Next Button
-            ValueListenableBuilder<bool>(
-              valueListenable:
-                  isRunningNotifier ??
-                  ValueNotifier(scorePanelAdapter.isTimerRunning),
-              builder: (context, isTimerRunning, _) {
-                final isEnabled = _isNextEnabled(
-                  gameSetupAdapter,
-                  scorePanelAdapter,
-                );
-                final currentQuarter = scorePanelAdapter.selectedQuarter;
-
-                return Expanded(
-                  flex: 2,
-                  child: FilledButton.tonalIcon(
-                    onPressed: isEnabled ? onNextQuarter : null,
-                    icon: Icon(_getNextIcon(currentQuarter), size: 16),
-                    label: Text(
-                      _getNextLabel(currentQuarter),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+              // Play/Pause Button
+              ValueListenableBuilder<bool>(
+                valueListenable:
+                    isRunningNotifier ??
+                    ValueNotifier(scorePanelAdapter.isTimerRunning),
+                builder: (context, isTimerRunning, _) {
+                  return Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: FilledButton.tonalIcon(
+                        onPressed: onToggleTimer,
+                        icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
+                        label: Text(
+                          _getPlayPauseLabel(isTimerRunning),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
+                  );
+                },
+              ),
+
+              // Next Button
+              ValueListenableBuilder<bool>(
+                valueListenable:
+                    isRunningNotifier ??
+                    ValueNotifier(scorePanelAdapter.isTimerRunning),
+                builder: (context, isTimerRunning, _) {
+                  final isEnabled = _isNextEnabled(
+                    gameSetupAdapter,
+                    scorePanelAdapter,
+                  );
+                  final currentQuarter = scorePanelAdapter.selectedQuarter;
+
+                  return Expanded(
+                    flex: 2,
+                    child: FilledButton.tonalIcon(
+                      onPressed: isEnabled ? onNextQuarter : null,
+                      icon: Icon(_getNextIcon(currentQuarter), size: 16),
+                      label: Text(
+                        _getNextLabel(currentQuarter),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

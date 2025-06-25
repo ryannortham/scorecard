@@ -16,7 +16,7 @@ import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
 import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
-import 'package:scorecard/widgets/timer/timer.dart';
+import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
 
@@ -34,8 +34,8 @@ class ScoringState extends State<Scoring> {
   late ScorePanelAdapter scorePanelProvider;
   late GameSetupAdapter gameSetupProvider;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
-  final GlobalKey<QuarterTimerPanelState> _quarterTimerKey =
-      GlobalKey<QuarterTimerPanelState>();
+  final GlobalKey<TimerWidgetState> _quarterTimerKey =
+      GlobalKey<TimerWidgetState>();
 
   // Use the game state service directly
   final GameStateService _gameStateService = GameStateService.instance;
@@ -98,7 +98,7 @@ class ScoringState extends State<Scoring> {
   }
 
   /// Record end of quarter event
-  /// This method is called from the QuarterTimerPanel when quarters change
+  /// This method is called from the TimerWidget when quarters change
   /// and from the timer widget when a quarter's time expires
   void recordQuarterEnd(int quarter) {
     _gameStateService.recordQuarterEnd(quarter);
@@ -388,7 +388,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
         builder: (context, scorePanelState, _) {
           return Scaffold(
             drawerEdgeDragWidth:
-                MediaQuery.of(context).size.width * 0.25, // 75% of screen width
+                MediaQuery.of(context).size.width * 0.25, // 25% of screen width
             drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
             appBar: AppBar(
               leading: Builder(
@@ -435,9 +435,9 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                         // Timer Panel Card
                         Card(
                           elevation: 0,
-                          child: QuarterTimerPanel(
+                          child: TimerWidget(
                             key: _quarterTimerKey,
-                            isTimerRunning: isTimerRunning,
+                            isRunning: isTimerRunning,
                           ),
                         ),
 
