@@ -62,7 +62,10 @@ class GameDetailsWidget extends StatelessWidget {
     }
   }
 
-  GameRecord _buildLiveGame(GameSetupAdapter gameSetup, ScorePanelAdapter scorePanel) {
+  GameRecord _buildLiveGame(
+    GameSetupAdapter gameSetup,
+    ScorePanelAdapter scorePanel,
+  ) {
     return GameRecord(
       id: 'current-game',
       date: gameSetup.gameDate,
@@ -78,15 +81,25 @@ class GameDetailsWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, GameRecord game, ScorePanelAdapter? scorePanel) {
+  Widget _buildContent(
+    BuildContext context,
+    GameRecord game,
+    ScorePanelAdapter? scorePanel,
+  ) {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _GameInfoSection(game: game, isLiveData: isLiveData, scorePanel: scorePanel),
+        _ScoreSection(
+          game: game,
+          isLiveData: isLiveData,
+          scorePanel: scorePanel,
+        ),
         const SizedBox(height: 16),
-        _ScoreSection(game: game, isLiveData: isLiveData, scorePanel: scorePanel),
-        const SizedBox(height: 16),
-        _QuarterBreakdownSection(game: game, liveEvents: liveEvents, scorePanel: scorePanel),
+        _QuarterBreakdownSection(
+          game: game,
+          liveEvents: liveEvents,
+          scorePanel: scorePanel,
+        ),
       ],
     );
 
@@ -97,10 +110,7 @@ class GameDetailsWidget extends StatelessWidget {
         child: content,
       );
     } else {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: content,
-      );
+      return Padding(padding: const EdgeInsets.all(16.0), child: content);
     }
   }
 }
@@ -152,34 +162,6 @@ class _GameCard extends StatelessWidget {
   }
 }
 
-/// Game info section (title, date, trophy)
-class _GameInfoSection extends StatelessWidget {
-  final GameRecord game;
-  final bool isLiveData;
-  final ScorePanelAdapter? scorePanel;
-
-  const _GameInfoSection({
-    required this.game,
-    required this.isLiveData,
-    this.scorePanel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final userPrefs = Provider.of<UserPreferencesProvider>(context);
-    final shouldShowTrophy = GameAnalysisService.shouldShowTrophyIcon(game, userPrefs);
-
-    return _GameCard(
-      icon: shouldShowTrophy ? Icons.emoji_events_outlined : Icons.event_outlined,
-      title: '${game.homeTeam} vs ${game.awayTeam}',
-      child: Text(
-        DateFormat('EEEE, MMM d, yyyy').format(game.date),
-        style: Theme.of(context).textTheme.titleMedium,
-      ),
-    );
-  }
-}
-
 /// Score section
 class _ScoreSection extends StatelessWidget {
   final GameRecord game;
@@ -197,14 +179,40 @@ class _ScoreSection extends StatelessWidget {
     final isComplete = GameAnalysisService.isGameComplete(game);
     final title = _getScoreTitle(isComplete);
 
+    // Get trophy icon if game is complete and favorite team won
+    final userPrefs = Provider.of<UserPreferencesProvider>(context);
+    final shouldShowTrophy = GameAnalysisService.shouldShowTrophyIcon(
+      game,
+      userPrefs,
+    );
+    final icon =
+        shouldShowTrophy ? Icons.emoji_events_outlined : Icons.outlined_flag;
+
     return _GameCard(
-      icon: Icons.outlined_flag,
-      title: title,
+      icon: icon,
+      title: '${game.homeTeam} vs ${game.awayTeam}',
       child: Column(
         children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
           _TeamScoresRow(game: game),
           const SizedBox(height: 16),
           _GameResultBadge(game: game, isComplete: isComplete),
+          const SizedBox(height: 12),
+          Text(
+            DateFormat('EEEE, MMM d, yyyy').format(game.date),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -215,13 +223,17 @@ class _ScoreSection extends StatelessWidget {
       final gameState = GameStateService.instance;
       final quarter = scorePanel!.selectedQuarter;
       final timeMs = gameState.getElapsedTimeInQuarter();
-      final timeStr = StopWatchTimer.getDisplayTime(timeMs, hours: false, milliSecond: true);
+      final timeStr = StopWatchTimer.getDisplayTime(
+        timeMs,
+        hours: false,
+        milliSecond: true,
+      );
       final formattedTime = timeStr.substring(0, timeStr.length - 1);
       return 'In Progress: Q$quarter $formattedTime';
     }
-    
+
     if (isComplete) return 'Final Score';
-    
+
     // For static incomplete games, build title from events
     return GameAnalysisService.buildStaticGameTitle(game);
   }
@@ -241,25 +253,29 @@ class _TeamScoresRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Expanded(child: _TeamScore(
-          teamName: game.homeTeam,
-          goals: game.homeGoals,
-          behinds: game.homeBehinds,
-          points: game.homePoints,
-          isWinner: homeWins,
-        )),
+        Expanded(
+          child: _TeamScore(
+            teamName: game.homeTeam,
+            goals: game.homeGoals,
+            behinds: game.homeBehinds,
+            points: game.homePoints,
+            isWinner: homeWins,
+          ),
+        ),
         Container(
           width: 2,
           height: 80,
           color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
         ),
-        Expanded(child: _TeamScore(
-          teamName: game.awayTeam,
-          goals: game.awayGoals,
-          behinds: game.awayBehinds,
-          points: game.awayPoints,
-          isWinner: awayWins,
-        )),
+        Expanded(
+          child: _TeamScore(
+            teamName: game.awayTeam,
+            goals: game.awayGoals,
+            behinds: game.awayBehinds,
+            points: game.awayPoints,
+            isWinner: awayWins,
+          ),
+        ),
       ],
     );
   }
@@ -325,10 +341,7 @@ class _GameResultBadge extends StatelessWidget {
   final GameRecord game;
   final bool isComplete;
 
-  const _GameResultBadge({
-    required this.game,
-    required this.isComplete,
-  });
+  const _GameResultBadge({required this.game, required this.isComplete});
 
   @override
   Widget build(BuildContext context) {
@@ -343,13 +356,15 @@ class _GameResultBadge extends StatelessWidget {
       if (!isComplete) return const SizedBox.shrink();
       resultText = 'Draw';
     } else if (isComplete) {
-      resultText = homeWins 
-        ? '${game.homeTeam} won by $margin'
-        : '${game.awayTeam} won by $margin';
+      resultText =
+          homeWins
+              ? '${game.homeTeam} won by $margin'
+              : '${game.awayTeam} won by $margin';
     } else {
-      resultText = homeWins 
-        ? '${game.homeTeam} leads by $margin'
-        : '${game.awayTeam} leads by $margin';
+      resultText =
+          homeWins
+              ? '${game.homeTeam} leads by $margin'
+              : '${game.awayTeam} leads by $margin';
     }
 
     return Container(
@@ -399,7 +414,11 @@ class _QuarterBreakdownSection extends StatelessWidget {
     );
   }
 
-  Widget _buildTeamBreakdown(BuildContext context, String teamName, bool isHome) {
+  Widget _buildTeamBreakdown(
+    BuildContext context,
+    String teamName,
+    bool isHome,
+  ) {
     final homeWins = game.homePoints > game.awayPoints;
     final awayWins = game.awayPoints > game.homePoints;
     final isWinner = isHome ? homeWins : awayWins;
