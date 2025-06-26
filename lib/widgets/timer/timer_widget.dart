@@ -98,18 +98,21 @@ class TimerWidgetState extends State<TimerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        QuarterProgress(scorePanelProvider: scorePanelProvider),
-        const SizedBox(height: 8),
-        const TimerClock(),
-        TimerControls(
-          onToggleTimer: toggleTimer,
-          onResetTimer: resetTimer,
-          onNextQuarter: _handleNextQuarter,
-          isRunningNotifier: widget.isRunning,
-        ),
-      ],
+    return Card(
+      elevation: 0,
+      child: Column(
+        children: [
+          QuarterProgress(scorePanelProvider: scorePanelProvider),
+          const SizedBox(height: 8),
+          const TimerClock(),
+          TimerControls(
+            onToggleTimer: toggleTimer,
+            onResetTimer: resetTimer,
+            onNextQuarter: _handleNextQuarter,
+            isRunningNotifier: widget.isRunning,
+          ),
+        ],
+      ),
     );
   }
 }
