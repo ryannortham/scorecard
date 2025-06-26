@@ -224,74 +224,88 @@ class ScoringState extends State<Scoring> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'scoring'),
-        body: SafeArea(
-          child: Stack(
-            children: [
-              // Main content
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(4.0),
-                child: Column(
-                  children: [
-                    // Timer Panel
-                    TimerWidget(
-                      key: _quarterTimerKey,
-                      isRunning: isTimerRunning,
-                    ),
+        body: Stack(
+          children: [
+            // Main content
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final availableHeight =
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    kToolbarHeight -
+                    8.0;
 
-                    // Home Team Score Table
-                    ValueListenableBuilder<bool>(
-                      valueListenable: isTimerRunning,
-                      builder: (context, timerRunning, child) {
-                        return ScorePanel(
-                          events: List<GameEvent>.from(gameEvents),
-                          homeTeam: gameSetupProvider.homeTeam,
-                          awayTeam: gameSetupProvider.awayTeam,
-                          displayTeam: gameSetupProvider.homeTeam,
-                          isHomeTeam: true,
-                          enabled: timerRunning,
-                        );
-                      },
-                    ),
-
-                    // Away Team Score Table
-                    ValueListenableBuilder<bool>(
-                      valueListenable: isTimerRunning,
-                      builder: (context, timerRunning, child) {
-                        return ScorePanel(
-                          events: List<GameEvent>.from(gameEvents),
-                          homeTeam: gameSetupProvider.homeTeam,
-                          awayTeam: gameSetupProvider.awayTeam,
-                          displayTeam: gameSetupProvider.awayTeam,
-                          isHomeTeam: false,
-                          enabled: timerRunning,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              // Screenshot widget positioned off-screen
-              Positioned(
-                left: -1000,
-                top: -1000,
-                child: WidgetShotPlus(
-                  key: _screenshotWidgetKey,
-                  child: Material(
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(4.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: availableHeight),
                     child: IntrinsicHeight(
-                      child: SizedBox(
-                        width: 400,
-                        child: GameDetailsWidget.fromLiveData(
-                          events: gameEvents,
-                          enableScrolling: false,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Timer Panel
+                          TimerWidget(
+                            key: _quarterTimerKey,
+                            isRunning: isTimerRunning,
+                          ),
+
+                          // Home Team Score Table
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isTimerRunning,
+                            builder: (context, timerRunning, child) {
+                              return ScorePanel(
+                                events: List<GameEvent>.from(gameEvents),
+                                homeTeam: gameSetupProvider.homeTeam,
+                                awayTeam: gameSetupProvider.awayTeam,
+                                displayTeam: gameSetupProvider.homeTeam,
+                                isHomeTeam: true,
+                                enabled: timerRunning,
+                              );
+                            },
+                          ),
+
+                          // Away Team Score Table
+                          ValueListenableBuilder<bool>(
+                            valueListenable: isTimerRunning,
+                            builder: (context, timerRunning, child) {
+                              return ScorePanel(
+                                events: List<GameEvent>.from(gameEvents),
+                                homeTeam: gameSetupProvider.homeTeam,
+                                awayTeam: gameSetupProvider.awayTeam,
+                                displayTeam: gameSetupProvider.awayTeam,
+                                isHomeTeam: false,
+                                enabled: timerRunning,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // Screenshot widget positioned off-screen
+            Positioned(
+              left: -1000,
+              top: -1000,
+              child: WidgetShotPlus(
+                key: _screenshotWidgetKey,
+                child: Material(
+                  child: IntrinsicHeight(
+                    child: SizedBox(
+                      width: 400,
+                      child: GameDetailsWidget.fromLiveData(
+                        events: gameEvents,
+                        enableScrolling: false,
                       ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
