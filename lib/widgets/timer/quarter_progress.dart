@@ -40,7 +40,7 @@ class QuarterProgress extends StatelessWidget {
                         ? Theme.of(context).colorScheme.primaryContainer
                         : isCompleted
                         ? Theme.of(context).colorScheme.secondaryContainer
-                        : Colors.transparent,
+                        : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius:
                     quarterNumber == 1
                         ? const BorderRadius.only(
