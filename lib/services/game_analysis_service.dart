@@ -83,8 +83,12 @@ class GameAnalysisService {
     int quarter,
   ) {
     final quarterEvents =
-        events.where((event) => event.quarter == quarter).toList();
-    return {teamName: quarterEvents};
+        events
+            .where(
+              (event) => event.quarter == quarter && event.team == teamName,
+            )
+            .toList();
+    return {'team': quarterEvents};
   }
 
   /// Builds the title for in-progress games using static game data
