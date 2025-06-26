@@ -51,8 +51,8 @@ class UserPreferencesProvider extends ChangeNotifier {
     // First, check if device supports dynamic colors
     _dynamicColorsSupported = await _checkDynamicColorSupport();
 
-    // Set default color theme based on device support
-    _colorTheme = _dynamicColorsSupported! ? 'adaptive' : 'blue';
+    // Set default color theme to blue for consistency across all devices
+    _colorTheme = 'blue';
 
     // Then load preferences
     await _loadPreferencesAsync();
@@ -72,9 +72,7 @@ class UserPreferencesProvider extends ChangeNotifier {
         orElse: () => ThemeMode.system,
       );
 
-      _colorTheme =
-          prefs.getString(_colorThemeKey) ??
-          (_dynamicColorsSupported ?? false ? 'adaptive' : 'blue');
+      _colorTheme = prefs.getString(_colorThemeKey) ?? 'blue';
       _colorTheme = _validateColorTheme(_colorTheme);
 
       // Load game setup preferences
@@ -161,8 +159,8 @@ class UserPreferencesProvider extends ChangeNotifier {
       if (theme == 'adaptive' && !supportsDynamicColors) {
         return 'blue';
       }
-      // For other invalid themes, default to 'adaptive' if supported, otherwise 'blue'
-      return supportsDynamicColors ? 'adaptive' : 'blue';
+      // For other invalid themes, default to blue
+      return 'blue';
     }
   }
 

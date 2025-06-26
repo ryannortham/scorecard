@@ -229,16 +229,15 @@ class ScoringState extends State<Scoring> {
             // Main content
             LayoutBuilder(
               builder: (context, constraints) {
-                final availableHeight =
-                    MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.top -
-                    kToolbarHeight -
-                    8.0;
+                // Use the constraints from LayoutBuilder which already accounts for AppBar
+                final availableHeight = constraints.maxHeight;
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(4.0),
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: availableHeight),
+                    constraints: BoxConstraints(
+                      minHeight: availableHeight - 8.0,
+                    ),
                     child: IntrinsicHeight(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
