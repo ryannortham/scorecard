@@ -427,7 +427,7 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                 children: [
                   // Main content
                   SingleChildScrollView(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(4.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -441,15 +441,13 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           ),
                         ),
 
-                        const SizedBox(height: 4),
-
                         // Home Team Score Table
                         ValueListenableBuilder<bool>(
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
                             return Card(
                               elevation: 0,
-                              child: ScoreTable(
+                              child: ScorePanel(
                                 events: List<GameEvent>.from(gameEvents),
                                 homeTeam: homeTeamName,
                                 awayTeam: awayTeamName,
@@ -461,15 +459,13 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
                           },
                         ),
 
-                        const SizedBox(height: 4),
-
                         // Away Team Score Table
                         ValueListenableBuilder<bool>(
                           valueListenable: isTimerRunning,
                           builder: (context, timerRunning, child) {
                             return Card(
                               elevation: 0,
-                              child: ScoreTable(
+                              child: ScorePanel(
                                 events: List<GameEvent>.from(gameEvents),
                                 homeTeam: homeTeamName,
                                 awayTeam: awayTeamName,

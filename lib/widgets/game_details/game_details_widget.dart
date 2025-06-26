@@ -10,7 +10,7 @@ import 'package:scorecard/widgets/game_details/game_info_card.dart';
 import 'package:scorecard/widgets/game_details/game_score_section.dart';
 import 'package:scorecard/widgets/game_details/live_game_title_builder.dart';
 import 'package:scorecard/widgets/game_details/quarter_breakdown_section.dart';
-import 'package:scorecard/widgets/scoring/score_table.dart';
+import 'package:scorecard/widgets/scoring/score_panel.dart';
 
 /// Data source types for the game details widget
 enum GameDataSource {
@@ -144,7 +144,7 @@ class GameDetailsWidget extends StatelessWidget {
   }) {
     if (dataSource == GameDataSource.liveData && scorePanelAdapter != null) {
       // Use provided ScorePanelAdapter for real-time updates (no Consumer needed)
-      return ScoreTable(
+      return ScorePanel(
         events: liveEvents ?? [],
         homeTeam: game.homeTeam,
         awayTeam: game.awayTeam,
@@ -158,7 +158,7 @@ class GameDetailsWidget extends StatelessWidget {
       // For static data, pass the current quarter directly to avoid provider listening
       final int currentQuarter = getCurrentQuarter(game);
       final bool isCompleted = isGameComplete(game);
-      return ScoreTable(
+      return ScorePanel(
         events: game.events,
         homeTeam: game.homeTeam,
         awayTeam: game.awayTeam,
