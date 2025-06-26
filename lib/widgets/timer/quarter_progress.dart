@@ -11,7 +11,6 @@ class QuarterProgress extends StatelessWidget {
     final currentQuarter = scorePanelProvider.selectedQuarter;
 
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHigh,

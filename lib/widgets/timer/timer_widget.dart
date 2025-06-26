@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
 import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/services/game_state_service.dart';
@@ -19,22 +18,16 @@ class TimerWidget extends StatefulWidget {
 }
 
 class TimerWidgetState extends State<TimerWidget> {
-  late GameSetupAdapter gameSetupProvider;
   late ScorePanelAdapter scorePanelProvider;
   final GameStateService _gameStateService = GameStateService.instance;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize providers from context
-    gameSetupProvider = Provider.of<GameSetupAdapter>(context, listen: false);
     scorePanelProvider = Provider.of<ScorePanelAdapter>(context, listen: false);
 
-    // Listen to timer state changes to sync with widget.isRunning
     _gameStateService.addListener(_onTimerStateChanged);
 
-    // Set initial state
     if (widget.isRunning != null) {
       widget.isRunning!.value = _gameStateService.isTimerRunning;
     }
@@ -61,7 +54,6 @@ class TimerWidgetState extends State<TimerWidget> {
   }
 
   void resetTimer() {
-    // Reset timer through the centralized service
     _gameStateService.resetTimer();
 
     if (widget.isRunning != null) {
@@ -69,69 +61,39 @@ class TimerWidgetState extends State<TimerWidget> {
     }
   }
 
-  // Method to handle next quarter transition
-  void _handleNextQuarter() async {
+  Future<void> _handleNextQuarter() async {
     final currentQuarter = scorePanelProvider.selectedQuarter;
     final isLastQuarter = currentQuarter == 4;
+    final remainingTime = _gameStateService.getRemainingTimeInQuarter();
+    final shouldSkipConfirmation = remainingTime <= 30000; // 30 seconds
 
-    // Check if there are 30 seconds or less remaining in the quarter
-    // Use actual elapsed time for business logic, not display time
-    final thirtySecondsInMs = 30 * 1000; // 30 seconds in milliseconds
-    final remainingTimeInQuarter =
-        _gameStateService.getRemainingTimeInQuarter();
-    // Skip confirmation if 30 seconds or less remaining, OR if in overtime (negative time)
-    final shouldSkipConfirmation = remainingTimeInQuarter <= thirtySecondsInMs;
+    bool confirmed = shouldSkipConfirmation;
 
-    bool confirmed = true; // Default to confirmed if skipping dialog
-
-    // Show confirmation bottom sheet only if more than 30 seconds remaining
     if (!shouldSkipConfirmation) {
       confirmed = await EndQuarterBottomSheet.show(
         context: context,
         currentQuarter: currentQuarter,
         isLastQuarter: isLastQuarter,
-        onConfirm: () {}, // The bottom sheet handles navigation internally
+        onConfirm: () {},
       );
     }
 
-    // If user cancelled dialog, don't proceed
-    if (!confirmed) return;
+    if (!confirmed || !mounted) return;
 
-    // Check if widget is still mounted after async operation
-    if (!mounted) return;
-
-    // Find parent ScoringState to record quarter end event
     final scoringState = context.findAncestorStateOfType<ScoringState>();
-    if (scoringState != null) {
-      // Record clock_end event for the current quarter
-      scoringState.recordQuarterEnd(currentQuarter);
+    if (scoringState == null) return;
 
-      // If it's the last quarter (Q4), end the game
-      if (currentQuarter == 4) {
-        // Game completion is handled in recordQuarterEnd
-        return;
-      }
+    scoringState.recordQuarterEnd(currentQuarter);
 
-      // Otherwise, transition to the next quarter
-      final nextQuarter = currentQuarter + 1;
+    if (currentQuarter == 4) return; // Game complete
 
-      // If timer is running, pause it before changing quarters
-      if (scorePanelProvider.isTimerRunning) {
-        scorePanelProvider.setTimerRunning(false);
-      }
-
-      // Switch to the next quarter
-      scorePanelProvider.setSelectedQuarter(nextQuarter);
-
-      // Reset the timer for the new quarter
-      resetTimer();
+    // Transition to next quarter
+    if (scorePanelProvider.isTimerRunning) {
+      scorePanelProvider.setTimerRunning(false);
     }
-  }
 
-  bool get isTimerActuallyRunning => scorePanelProvider.isTimerRunning;
-
-  IconData getIcon() {
-    return scorePanelProvider.isTimerRunning ? Icons.pause : Icons.play_arrow;
+    scorePanelProvider.setSelectedQuarter(currentQuarter + 1);
+    resetTimer();
   }
 
   @override
@@ -139,13 +101,8 @@ class TimerWidgetState extends State<TimerWidget> {
     return Column(
       children: [
         QuarterProgress(scorePanelProvider: scorePanelProvider),
-
-        SizedBox(height: 8),
-
-        // Timer Display Component
+        const SizedBox(height: 8),
         const TimerClock(),
-
-        // Timer Controls Component
         TimerControls(
           onToggleTimer: toggleTimer,
           onResetTimer: resetTimer,

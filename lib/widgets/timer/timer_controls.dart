@@ -19,154 +19,97 @@ class TimerControls extends StatelessWidget {
     this.isRunningNotifier,
   });
 
-  /// Determines if the reset button should be enabled
-  bool _isResetEnabled(
+  /// Determines if reset/next buttons should be enabled
+  bool _isButtonEnabled(
     GameSetupAdapter gameSetupAdapter,
     ScorePanelAdapter scorePanelAdapter,
   ) {
-    if (scorePanelAdapter.isTimerRunning) {
-      return false; // Disable while timer is running
-    }
+    if (scorePanelAdapter.isTimerRunning) return false;
 
     final currentTime = scorePanelAdapter.timerRawTime;
     final quarterMSec = gameSetupAdapter.quarterMSec;
 
-    if (gameSetupAdapter.isCountdownTimer) {
-      return currentTime !=
-          quarterMSec; // Enable if not at default countdown value
-    } else {
-      return currentTime != 0; // Enable if not at default count-up value
-    }
-  }
-
-  /// Determines if the next button should be enabled
-  bool _isNextEnabled(
-    GameSetupAdapter gameSetupAdapter,
-    ScorePanelAdapter scorePanelAdapter,
-  ) {
-    if (scorePanelAdapter.isTimerRunning) {
-      return false; // Disable while timer is running
-    }
-
-    final currentTime = scorePanelAdapter.timerRawTime;
-    final quarterMSec = gameSetupAdapter.quarterMSec;
-
-    if (gameSetupAdapter.isCountdownTimer) {
-      return currentTime !=
-          quarterMSec; // Enable if not at default countdown value
-    } else {
-      return currentTime != 0; // Enable if not at default count-up value
-    }
-  }
-
-  /// Gets the appropriate icon for the play/pause button
-  IconData _getPlayPauseIcon(bool isRunning) {
-    return isRunning ? Icons.pause : Icons.play_arrow;
-  }
-
-  /// Gets the appropriate label for the play/pause button
-  String _getPlayPauseLabel(bool isRunning) {
-    return isRunning ? 'Pause' : 'Start';
-  }
-
-  /// Gets the appropriate icon for the next button based on quarter
-  IconData _getNextIcon(int currentQuarter) {
-    return currentQuarter == 4 ? Icons.outlined_flag : Icons.arrow_forward;
-  }
-
-  /// Gets the appropriate label for the next button based on quarter
-  String _getNextLabel(int currentQuarter) {
-    return currentQuarter == 4 ? 'End' : 'Next';
+    return gameSetupAdapter.isCountdownTimer
+        ? currentTime != quarterMSec
+        : currentTime != 0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
         builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Reset Button
-              ValueListenableBuilder<bool>(
-                valueListenable:
-                    isRunningNotifier ??
-                    ValueNotifier(scorePanelAdapter.isTimerRunning),
-                builder: (context, isTimerRunning, _) {
-                  final isEnabled = _isResetEnabled(
-                    gameSetupAdapter,
-                    scorePanelAdapter,
-                  );
+          return ValueListenableBuilder<bool>(
+            valueListenable:
+                isRunningNotifier ??
+                ValueNotifier(scorePanelAdapter.isTimerRunning),
+            builder: (context, isTimerRunning, _) {
+              final isEnabled = _isButtonEnabled(
+                gameSetupAdapter,
+                scorePanelAdapter,
+              );
+              final currentQuarter = scorePanelAdapter.selectedQuarter;
+              final isLastQuarter = currentQuarter == 4;
 
-                  return Expanded(
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Reset Button
+                  Expanded(
                     flex: 2,
-                    // child: Padding(
-                    // padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: FilledButton.tonalIcon(
                       onPressed: isEnabled ? onResetTimer : null,
-                      icon: Icon(Icons.refresh, size: 16),
+                      icon: const Icon(Icons.refresh, size: 16),
                       label: const Text(
                         'Reset',
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              // Play/Pause Button
-              ValueListenableBuilder<bool>(
-                valueListenable:
-                    isRunningNotifier ??
-                    ValueNotifier(scorePanelAdapter.isTimerRunning),
-                builder: (context, isTimerRunning, _) {
-                  return Expanded(
+                  // Play/Pause Button
+                  Expanded(
                     flex: 3,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: FilledButton.tonalIcon(
                         onPressed: onToggleTimer,
-                        icon: Icon(_getPlayPauseIcon(isTimerRunning), size: 18),
+                        icon: Icon(
+                          isTimerRunning ? Icons.pause : Icons.play_arrow,
+                          size: 18,
+                        ),
                         label: Text(
-                          _getPlayPauseLabel(isTimerRunning),
+                          isTimerRunning ? 'Pause' : 'Start',
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
 
-              // Next Button
-              ValueListenableBuilder<bool>(
-                valueListenable:
-                    isRunningNotifier ??
-                    ValueNotifier(scorePanelAdapter.isTimerRunning),
-                builder: (context, isTimerRunning, _) {
-                  final isEnabled = _isNextEnabled(
-                    gameSetupAdapter,
-                    scorePanelAdapter,
-                  );
-                  final currentQuarter = scorePanelAdapter.selectedQuarter;
-
-                  return Expanded(
+                  // Next Button
+                  Expanded(
                     flex: 2,
                     child: FilledButton.tonalIcon(
                       onPressed: isEnabled ? onNextQuarter : null,
-                      icon: Icon(_getNextIcon(currentQuarter), size: 16),
+                      icon: Icon(
+                        isLastQuarter
+                            ? Icons.outlined_flag
+                            : Icons.arrow_forward,
+                        size: 16,
+                      ),
                       label: Text(
-                        _getNextLabel(currentQuarter),
+                        isLastQuarter ? 'End' : 'Next',
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

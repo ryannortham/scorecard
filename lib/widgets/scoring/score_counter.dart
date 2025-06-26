@@ -34,7 +34,6 @@ class ScoreCounterState extends State<ScoreCounter> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Label
             Text(
               widget.label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -44,15 +43,13 @@ class ScoreCounterState extends State<ScoreCounter> {
                         : Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.38),
-                fontWeight: FontWeight.w600,
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 6),
 
-            // Unified Counter Widget
             Card(
               elevation: 0,
+              margin: const EdgeInsets.only(top: 8),
               color:
                   widget.enabled
                       ? Theme.of(context).colorScheme.secondaryContainer
@@ -66,44 +63,39 @@ class ScoreCounterState extends State<ScoreCounter> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Decrease Button
-                  IconButton(
-                    onPressed:
-                        widget.enabled &&
-                                currentCount > 0 &&
-                                scorePanelAdapter.hasEventInCurrentQuarter(
-                                  widget.isHomeTeam,
-                                  widget.isGoal,
-                                )
-                            ? () => _updateCount(currentCount - 1)
-                            : null,
-                    icon: Icon(
-                      Icons.remove_outlined,
-                      size: 18,
-                      color:
-                          !widget.enabled ||
-                                  currentCount <= 0 ||
-                                  !scorePanelAdapter.hasEventInCurrentQuarter(
-                                    widget.isHomeTeam,
-                                    widget.isGoal,
-                                  )
-                              ? Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.38)
-                              : Theme.of(
-                                context,
-                              ).colorScheme.onSecondaryContainer,
-                    ),
-                    padding: const EdgeInsets.all(8.0),
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final canDecrease =
+                          widget.enabled &&
+                          currentCount > 0 &&
+                          scorePanelAdapter.hasEventInCurrentQuarter(
+                            widget.isHomeTeam,
+                            widget.isGoal,
+                          );
+
+                      return IconButton(
+                        onPressed:
+                            canDecrease
+                                ? () => _updateCount(currentCount - 1)
+                                : null,
+                        icon: Icon(
+                          Icons.remove_outlined,
+                          size: 18,
+                          color:
+                              canDecrease
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer
+                                  : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.38),
+                        ),
+                      );
+                    },
                   ),
 
                   // Count Display
                   Container(
-                    constraints: const BoxConstraints(minWidth: 44),
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    constraints: const BoxConstraints(minWidth: 48),
                     child: Text(
                       currentCount.toString(),
                       textAlign: TextAlign.center,
@@ -116,34 +108,33 @@ class ScoreCounterState extends State<ScoreCounter> {
                                 : Theme.of(
                                   context,
                                 ).colorScheme.onSurface.withValues(alpha: 0.38),
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
 
                   // Increase Button
-                  IconButton(
-                    onPressed:
-                        widget.enabled && currentCount < 99
-                            ? () => _updateCount(currentCount + 1)
-                            : null,
-                    icon: Icon(
-                      Icons.add_outlined,
-                      size: 18,
-                      color:
-                          !widget.enabled || currentCount >= 99
-                              ? Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.38)
-                              : Theme.of(
-                                context,
-                              ).colorScheme.onSecondaryContainer,
-                    ),
-                    padding: const EdgeInsets.all(8.0),
-                    constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final canIncrease = widget.enabled && currentCount < 99;
+
+                      return IconButton(
+                        onPressed:
+                            canIncrease
+                                ? () => _updateCount(currentCount + 1)
+                                : null,
+                        icon: Icon(
+                          Icons.add_outlined,
+                          size: 18,
+                          color:
+                              canIncrease
+                                  ? Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer
+                                  : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.38),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

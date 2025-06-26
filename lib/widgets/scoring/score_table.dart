@@ -24,76 +24,80 @@ class ScoreTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4),
-      child: Card(
-        elevation: 0,
-        child: Column(
-          children: [
-            // Table header
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 6.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8.0),
-                  topRight: Radius.circular(8.0),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const SizedBox(width: 32), // Quarter column
-                  Expanded(
-                    child: Text(
-                      'Goals',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Behinds',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Points',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelMedium,
-                    ),
-                  ),
-                ],
+    return Card(
+      elevation: 0,
+      child: Column(
+        children: [
+          // Table header
+          Container(
+            // Top border and padding
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8.0),
+                topRight: Radius.circular(8.0),
               ),
             ),
-            ...List.generate(4, (index) {
-              final quarter = index + 1;
-              final quarterEvents = eventsByQuarter(quarter)['team'] ?? [];
-              final runningTotals = calculateRunningTotals(quarter);
 
-              return ScoreTableRow(
-                quarter: index, // 0-based index
-                quarterEvents: quarterEvents,
-                isCurrentQuarter: quarter == currentQuarter && !isCompletedGame,
-                isFutureQuarter: quarter > currentQuarter && !isCompletedGame,
-                runningGoals: runningTotals['goals']!,
-                runningBehinds: runningTotals['behinds']!,
-                runningPoints: runningTotals['points']!,
-              );
-            }),
-            Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(8.0),
-                  bottomRight: Radius.circular(8.0),
+            // Table header row
+            child: Row(
+              children: [
+                const SizedBox(width: 32), // Quarter column
+                Expanded(
+                  child: Text(
+                    'Goals',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+                Expanded(
+                  child: Text(
+                    'Behinds',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Points',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // Table rows for each quarter
+          ...List.generate(4, (index) {
+            final quarter = index + 1;
+            final quarterEvents = eventsByQuarter(quarter)['team'] ?? [];
+            final runningTotals = calculateRunningTotals(quarter);
+
+            return ScoreTableRow(
+              quarter: index, // 0-based index
+              quarterEvents: quarterEvents,
+              isCurrentQuarter: quarter == currentQuarter && !isCompletedGame,
+              isFutureQuarter: quarter > currentQuarter && !isCompletedGame,
+              runningGoals: runningTotals['goals']!,
+              runningBehinds: runningTotals['behinds']!,
+              runningPoints: runningTotals['points']!,
+            );
+          }),
+
+          // Bottom border
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(8.0),
+                bottomRight: Radius.circular(8.0),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

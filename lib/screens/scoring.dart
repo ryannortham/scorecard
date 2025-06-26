@@ -34,34 +34,23 @@ class ScoringState extends State<Scoring> {
   late ScorePanelAdapter scorePanelProvider;
   late GameSetupAdapter gameSetupProvider;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
-  final GlobalKey<TimerWidgetState> _quarterTimerKey =
-      GlobalKey<TimerWidgetState>();
-
-  // Use the game state service directly
   final GameStateService _gameStateService = GameStateService.instance;
-  bool _isClockRunning = false;
 
   // Screenshot functionality
   final GlobalKey _screenshotWidgetKey = GlobalKey();
   bool _isSharing = false;
 
-  Future<bool> _showExitConfirmation() async {
-    return await ExitGameBottomSheet.show(context);
-  }
+  // Timer key for TimerWidget
+  final GlobalKey _quarterTimerKey = GlobalKey();
 
-  Future<bool> _onWillPop() async {
-    // Always show exit confirmation when leaving an active game
-    return await _showExitConfirmation();
-  }
+  // Game events list
+  List<GameEvent> get gameEvents => _gameStateService.gameEvents;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     gameSetupProvider = Provider.of<GameSetupAdapter>(context);
     scorePanelProvider = Provider.of<ScorePanelAdapter>(context);
-
-    // Sync local clock state with provider state
-    _isClockRunning = scorePanelProvider.isTimerRunning;
 
     // Initialize the game if not already started
     if (_gameStateService.currentGameId == null) {
@@ -72,109 +61,74 @@ class ScoringState extends State<Scoring> {
   @override
   void initState() {
     super.initState();
-
-    // Add listener to the timer running state to track clock events
-    isTimerRunning.addListener(() {
-      _onTimerRunningChanged(isTimerRunning.value);
-    });
+    isTimerRunning.addListener(_onTimerRunningChanged);
   }
 
-  /// Track timer state changes
-  void _onTimerRunningChanged(bool isRunning) {
-    // Use post-frame callback to avoid setState during build phase
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      if (isRunning && !_isClockRunning) {
-        // Timer started
-        _isClockRunning = true;
-        scorePanelProvider.setTimerRunning(true);
-      } else if (!isRunning && _isClockRunning) {
-        // Timer paused
-        _isClockRunning = false;
-        scorePanelProvider.setTimerRunning(false);
-      }
-    });
+  void _onTimerRunningChanged() {
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scorePanelProvider.setTimerRunning(isTimerRunning.value);
+      });
+    }
   }
 
   /// Record end of quarter event
-  /// This method is called from the TimerWidget when quarters change
-  /// and from the timer widget when a quarter's time expires
   void recordQuarterEnd(int quarter) {
     _gameStateService.recordQuarterEnd(quarter);
-
-    // Stop the timer and update provider state
-    _isClockRunning = false;
     scorePanelProvider.setTimerRunning(false);
 
-    // If this is the end of quarter 4, handle game completion
     if (quarter == 4) {
       _handleGameCompletion();
     }
   }
 
-  /// Check if the game is completed (Q4 has ended)
-  bool _isGameComplete() {
-    return _gameStateService.isGameComplete();
-  }
-
   /// Handle game completion by navigating to game details screen
   void _handleGameCompletion() {
-    // Only navigate once when game is complete
-    if (_isGameComplete()) {
-      // Use post-frame callback to avoid during-build navigation issues
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
+    if (!_gameStateService.isGameComplete()) return;
 
-        final String? gameId = _gameStateService.currentGameId;
-        if (gameId == null) {
-          AppLogger.warning(
-            'No current game ID found. Cannot navigate to game details',
-            component: 'Scoring',
-          );
-          return;
-        }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
 
-        // CRITICAL FIX: Ensure final save completes before resetting
-        // Force immediate save of the completed game before resetting state
-        await _gameStateService.forceFinalSave();
-
-        // Load all saved games and find the one with the matching ID
-        // Since we now preserve the game ID, it should be found reliably
-        final allGames = await GameHistoryService.loadGames();
-        final gameRecord = allGames.firstWhere(
-          (game) => game.id == gameId,
-          orElse: () {
-            // Fallback: find the most recent game with matching teams
-            final homeTeam = gameSetupProvider.homeTeam;
-            final awayTeam = gameSetupProvider.awayTeam;
-            AppLogger.warning(
-              'Could not find game with ID $gameId, using fallback search',
-              component: 'Scoring',
-              data: '$homeTeam vs $awayTeam',
-            );
-            return allGames.firstWhere(
-              (game) => game.homeTeam == homeTeam && game.awayTeam == awayTeam,
-            );
-          },
+      final gameId = _gameStateService.currentGameId;
+      if (gameId == null) {
+        AppLogger.warning(
+          'No current game ID found. Cannot navigate to game details',
+          component: 'Scoring',
         );
+        return;
+      }
 
-        // Reset the game state AFTER ensuring save is complete
-        // Clean state for next game setup
-        _gameStateService.resetGame();
+      await _gameStateService.forceFinalSave();
 
-        if (!mounted) return;
+      final allGames = await GameHistoryService.loadGames();
+      final gameRecord = allGames.firstWhere(
+        (game) => game.id == gameId,
+        orElse: () {
+          AppLogger.warning(
+            'Could not find game with ID $gameId, using fallback search',
+            component: 'Scoring',
+            data:
+                '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+          );
+          return allGames.firstWhere(
+            (game) =>
+                game.homeTeam == gameSetupProvider.homeTeam &&
+                game.awayTeam == gameSetupProvider.awayTeam,
+          );
+        },
+      );
+
+      _gameStateService.resetGame();
+
+      if (mounted) {
         await Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (context) => GameDetailsPage(game: gameRecord),
           ),
         );
-      });
-    }
+      }
+    });
   }
-
-  // Access game events from the game state service
-  List<GameEvent> get gameEvents => _gameStateService.gameEvents;
 
   @override
   void dispose() {
@@ -182,103 +136,92 @@ class ScoringState extends State<Scoring> {
     super.dispose();
   }
 
-  void _shareGameDetails(BuildContext context) async {
+  /// Handle back button behavior with confirmation dialog
+  Future<bool> _onWillPop() async {
+    if (!mounted) return false;
+
+    final result = await ExitGameBottomSheet.show(context);
+    return result;
+  }
+
+  /// Show error message to user
+  void _showErrorMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _shareGameDetails() async {
     if (_isSharing) return;
 
-    setState(() {
-      _isSharing = true;
-    });
+    setState(() => _isSharing = true);
 
     try {
-      // In debug mode, save image locally first
       if (kDebugMode) {
         try {
           await _saveImageInDebugMode();
-          AppLogger.debug(
-            'Image saved locally before sharing',
-            component: 'Scoring',
-          );
         } catch (e) {
           AppLogger.error(
             'Failed to save image locally',
             component: 'Scoring',
             error: e,
           );
-          // Continue with sharing even if save fails in debug mode
         }
       }
 
       final shareText = _buildShareText();
 
-      // Use post-frame callback to ensure UI is fully rendered
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         try {
           await _shareWithWidgetShotPlus(shareText);
         } catch (e) {
-          AppLogger.error(
-            'Error in share post-frame callback',
-            component: 'Scoring',
-            error: e,
-          );
-          // Show error if sharing failed
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to share: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
+          AppLogger.error('Error sharing', component: 'Scoring', error: e);
+          _showErrorMessage('Failed to share: $e');
         } finally {
-          if (mounted) {
-            setState(() {
-              _isSharing = false;
-            });
-          }
+          if (mounted) setState(() => _isSharing = false);
         }
       });
     } catch (e) {
       AppLogger.error('Error preparing share', component: 'Scoring', error: e);
       if (mounted) {
-        setState(() {
-          _isSharing = false;
-        });
-      }
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to prepare share: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        setState(() => _isSharing = false);
+        _showErrorMessage('Failed to prepare share: $e');
       }
     }
+  }
+
+  /// Capture screenshot from widget
+  Future<Uint8List> _captureScreenshot() async {
+    final boundary =
+        _screenshotWidgetKey.currentContext?.findRenderObject()
+            as WidgetShotPlusRenderRepaintBoundary?;
+
+    if (boundary == null) {
+      throw Exception('Could not find WidgetShotPlus boundary');
+    }
+
+    final imageBytes = await boundary.screenshot(
+      format: ShotFormat.png,
+      quality: 100,
+      pixelRatio: 2.0,
+    );
+
+    if (imageBytes == null) {
+      throw Exception('Failed to capture image');
+    }
+
+    return imageBytes;
   }
 
   /// Capture and share using WidgetShotPlus
   Future<void> _shareWithWidgetShotPlus(String shareText) async {
     try {
-      final boundary =
-          _screenshotWidgetKey.currentContext?.findRenderObject()
-              as WidgetShotPlusRenderRepaintBoundary?;
-
-      if (boundary == null) {
-        throw Exception('Could not find WidgetShotPlus boundary');
-      }
-
-      // Capture the screenshot widget
-      final imageBytes = await boundary.screenshot(
-        format: ShotFormat.png,
-        quality: 100,
-        pixelRatio: 2.0,
-      );
-
-      if (imageBytes == null) {
-        throw Exception('Failed to capture image');
-      }
+      final imageBytes = await _captureScreenshot();
 
       // Create a temporary file for sharing
       final directory = await getTemporaryDirectory();
@@ -301,24 +244,7 @@ class ScoringState extends State<Scoring> {
   /// Save image in debug mode (without UI state management)
   Future<void> _saveImageInDebugMode() async {
     try {
-      final boundary =
-          _screenshotWidgetKey.currentContext?.findRenderObject()
-              as WidgetShotPlusRenderRepaintBoundary?;
-
-      if (boundary == null) {
-        throw Exception('Could not find WidgetShotPlus boundary');
-      }
-
-      // Capture the screenshot widget
-      final imageBytes = await boundary.screenshot(
-        format: ShotFormat.png,
-        quality: 100,
-        pixelRatio: 2.0,
-      );
-
-      if (imageBytes == null) {
-        throw Exception('Failed to capture image');
-      }
+      final imageBytes = await _captureScreenshot();
 
       // Save to gallery using gal
       final fileName = _generateFileName();
@@ -333,16 +259,12 @@ class ScoringState extends State<Scoring> {
 
   /// Generate a descriptive filename for the image
   String _generateFileName() {
-    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
-      context,
-      listen: false,
-    );
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final cleanHome = gameSetupAdapter.homeTeam.replaceAll(
+    final cleanHome = gameSetupProvider.homeTeam.replaceAll(
       RegExp(r'[^\w]'),
       '',
     );
-    final cleanAway = gameSetupAdapter.awayTeam.replaceAll(
+    final cleanAway = gameSetupProvider.awayTeam.replaceAll(
       RegExp(r'[^\w]'),
       '',
     );
@@ -350,30 +272,18 @@ class ScoringState extends State<Scoring> {
   }
 
   String _buildShareText() {
-    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
-      context,
-      listen: false,
-    );
-    final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
-      context,
-      listen: false,
-    );
-
     final homeScore =
-        '${scorePanelAdapter.homeGoals}.${scorePanelAdapter.homeBehinds} (${scorePanelAdapter.homePoints})';
+        '${scorePanelProvider.homeGoals}.${scorePanelProvider.homeBehinds} (${scorePanelProvider.homePoints})';
     final awayScore =
-        '${scorePanelAdapter.awayGoals}.${scorePanelAdapter.awayBehinds} (${scorePanelAdapter.awayPoints})';
+        '${scorePanelProvider.awayGoals}.${scorePanelProvider.awayBehinds} (${scorePanelProvider.awayPoints})';
 
-    return '''${gameSetupAdapter.homeTeam} vs ${gameSetupAdapter.awayTeam}
+    return '''${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}
 Score: $homeScore - $awayScore
-Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${gameSetupAdapter.gameDate.year}''';
+Date: ${gameSetupProvider.gameDate.day}/${gameSetupProvider.gameDate.month}/${gameSetupProvider.gameDate.year}''';
   }
 
   @override
   Widget build(BuildContext context) {
-    String homeTeamName = gameSetupProvider.homeTeam;
-    String awayTeamName = gameSetupProvider.awayTeam;
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, dynamic result) async {
@@ -384,126 +294,113 @@ Date: ${gameSetupAdapter.gameDate.day}/${gameSetupAdapter.gameDate.month}/${game
           Navigator.of(context).pop();
         }
       },
-      child: Consumer<GameSetupAdapter>(
-        builder: (context, scorePanelState, _) {
-          return Scaffold(
-            drawerEdgeDragWidth:
-                MediaQuery.of(context).size.width * 0.25, // 25% of screen width
-            drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
-            appBar: AppBar(
-              leading: Builder(
-                builder:
-                    (context) => IconButton(
-                      icon: const Icon(Icons.menu),
-                      tooltip: 'Menu',
-                      onPressed: () {
-                        Scaffold.of(context).openDrawer();
+      child: Scaffold(
+        drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
+        drawerEnableOpenDragGesture: true,
+        appBar: AppBar(
+          leading: Builder(
+            builder:
+                (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  tooltip: 'Menu',
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+          ),
+          title: AdaptiveTitle(
+            title:
+                '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          actions: [
+            IconButton(
+              icon:
+                  _isSharing
+                      ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                      : const Icon(Icons.share_outlined),
+              tooltip: 'Share Game Details',
+              onPressed: _isSharing ? null : _shareGameDetails,
+            ),
+          ],
+        ),
+        drawer: const AppDrawer(currentRoute: 'scoring'),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              // Main content
+              SingleChildScrollView(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Timer Panel Card
+                    Card(
+                      elevation: 0,
+                      child: TimerWidget(
+                        key: _quarterTimerKey,
+                        isRunning: isTimerRunning,
+                      ),
+                    ),
+
+                    // Home Team Score Table
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return ScorePanel(
+                          events: List<GameEvent>.from(gameEvents),
+                          homeTeam: gameSetupProvider.homeTeam,
+                          awayTeam: gameSetupProvider.awayTeam,
+                          displayTeam: gameSetupProvider.homeTeam,
+                          isHomeTeam: true,
+                          enabled: timerRunning,
+                        );
                       },
                     ),
-              ),
-              title: AdaptiveTitle(
-                title: '$homeTeamName vs $awayTeamName',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              actions: [
-                IconButton(
-                  icon:
-                      _isSharing
-                          ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                          : const Icon(Icons.share_outlined),
-                  tooltip: 'Share Game Details',
-                  onPressed:
-                      _isSharing ? null : () => _shareGameDetails(context),
-                ),
-              ],
-            ),
-            drawer: const AppDrawer(currentRoute: 'scoring'),
-            body: SafeArea(
-              child: Stack(
-                children: [
-                  // Main content
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Timer Panel Card
-                        Card(
-                          elevation: 0,
-                          child: TimerWidget(
-                            key: _quarterTimerKey,
-                            isRunning: isTimerRunning,
-                          ),
-                        ),
 
-                        // Home Team Score Table
-                        ValueListenableBuilder<bool>(
-                          valueListenable: isTimerRunning,
-                          builder: (context, timerRunning, child) {
-                            return Card(
-                              elevation: 0,
-                              child: ScorePanel(
-                                events: List<GameEvent>.from(gameEvents),
-                                homeTeam: homeTeamName,
-                                awayTeam: awayTeamName,
-                                displayTeam: homeTeamName,
-                                isHomeTeam: true,
-                                enabled: timerRunning,
-                              ),
-                            );
-                          },
-                        ),
-
-                        // Away Team Score Table
-                        ValueListenableBuilder<bool>(
-                          valueListenable: isTimerRunning,
-                          builder: (context, timerRunning, child) {
-                            return Card(
-                              elevation: 0,
-                              child: ScorePanel(
-                                events: List<GameEvent>.from(gameEvents),
-                                homeTeam: homeTeamName,
-                                awayTeam: awayTeamName,
-                                displayTeam: awayTeamName,
-                                isHomeTeam: false,
-                                enabled: timerRunning,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                    // Away Team Score Table
+                    ValueListenableBuilder<bool>(
+                      valueListenable: isTimerRunning,
+                      builder: (context, timerRunning, child) {
+                        return ScorePanel(
+                          events: List<GameEvent>.from(gameEvents),
+                          homeTeam: gameSetupProvider.homeTeam,
+                          awayTeam: gameSetupProvider.awayTeam,
+                          displayTeam: gameSetupProvider.awayTeam,
+                          isHomeTeam: false,
+                          enabled: timerRunning,
+                        );
+                      },
                     ),
-                  ),
+                  ],
+                ),
+              ),
 
-                  // Screenshot widget positioned off-screen
-                  Positioned(
-                    left: -1000,
-                    top: -1000,
-                    child: WidgetShotPlus(
-                      key: _screenshotWidgetKey,
-                      child: Material(
-                        child: IntrinsicHeight(
-                          child: SizedBox(
-                            width: 400,
-                            child: GameDetailsWidget.fromLiveData(
-                              events: gameEvents,
-                              enableScrolling: false,
-                            ),
-                          ),
+              // Screenshot widget positioned off-screen
+              Positioned(
+                left: -1000,
+                top: -1000,
+                child: WidgetShotPlus(
+                  key: _screenshotWidgetKey,
+                  child: Material(
+                    child: IntrinsicHeight(
+                      child: SizedBox(
+                        width: 400,
+                        child: GameDetailsWidget.fromLiveData(
+                          events: gameEvents,
+                          enableScrolling: false,
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -83,41 +83,55 @@ class ScorePanel extends StatelessWidget {
       builder: (context, scorePanelAdapter, _) {
         final currentQ = currentQuarter ?? scorePanelAdapter.selectedQuarter;
 
-        return Column(
-          children: [
-            // Team header with total score
-            ScorePanelHeader(teamName: displayTeam, isHomeTeam: isHomeTeam),
+        return Card(
+          elevation: 0,
+          child: Column(
+            children: [
+              // Team header with total score (no padding)
+              ScorePanelHeader(teamName: displayTeam, isHomeTeam: isHomeTeam),
 
-            const SizedBox(height: 8),
+              // Content with padding
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 4),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ScoreCounter(
-                  label: 'Goals',
-                  isGoal: true,
-                  isHomeTeam: isHomeTeam,
-                  enabled: enabled, // Pass the enabled state to the counter
+                    // Goal and behind counters
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ScoreCounter(
+                          label: 'Goals',
+                          isGoal: true,
+                          isHomeTeam: isHomeTeam,
+                          enabled: enabled,
+                        ),
+                        ScoreCounter(
+                          label: 'Behinds',
+                          isGoal: false,
+                          isHomeTeam: isHomeTeam,
+                          enabled: enabled,
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    // Score table
+                    ScoreTable(
+                      events: events,
+                      displayTeam: displayTeam,
+                      currentQuarter: currentQ,
+                      isCompletedGame: isCompletedGame,
+                      eventsByQuarter: _eventsByQuarter,
+                      calculateRunningTotals: _calculateRunningTotals,
+                    ),
+                  ],
                 ),
-                ScoreCounter(
-                  label: 'Behinds',
-                  isGoal: false,
-                  isHomeTeam: isHomeTeam,
-                  enabled: enabled, // Pass the enabled state to the counter
-                ),
-              ],
-            ),
-
-            // Score table
-            ScoreTable(
-              events: events,
-              displayTeam: displayTeam,
-              currentQuarter: currentQ,
-              isCompletedGame: isCompletedGame,
-              eventsByQuarter: _eventsByQuarter,
-              calculateRunningTotals: _calculateRunningTotals,
-            ),
-          ],
+              ),
+            ],
+          ),
         );
       },
     );

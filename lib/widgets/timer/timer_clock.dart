@@ -11,106 +11,67 @@ class TimerClock extends StatelessWidget {
   const TimerClock({super.key});
 
   /// Gets the appropriate color for the timer display based on current state
-  Color _getTimerColor(BuildContext context) {
-    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
-      context,
-      listen: false,
-    );
-    final scorePanelAdapter = Provider.of<ScorePanelAdapter>(
-      context,
-      listen: false,
-    );
-
-    final currentTime = scorePanelAdapter.timerRawTime;
-    final quarterMSec = gameSetupAdapter.quarterMSec;
-
-    if (gameSetupAdapter.isCountdownTimer) {
-      // Countdown timer - show error color when in negative time
-      if (currentTime <= 0) {
-        return Theme.of(context).colorScheme.error;
-      }
-    } else {
-      // Count-up timer
-      if (!scorePanelAdapter.isTimerRunning) {
-        return Theme.of(context).colorScheme.onSurface;
-      }
-      if (currentTime > quarterMSec) {
-        return Theme.of(context).colorScheme.error;
-      }
-    }
-    return Theme.of(context).colorScheme.onSurface;
+  Color _getTimerColor(
+    BuildContext context,
+    int currentTime,
+    int quarterMSec,
+    bool isCountdownTimer,
+  ) {
+    final isOvertime =
+        isCountdownTimer ? currentTime <= 0 : currentTime > quarterMSec;
+    return isOvertime
+        ? Theme.of(context).colorScheme.error
+        : Theme.of(context).colorScheme.onSurface;
   }
 
   /// Formats the timer display string
   String _formatTimerClock(int value, bool isCountdownTimer) {
-    if (isCountdownTimer && value < 0) {
-      // Handle negative time display for countdown timer
-      final absValue = value.abs();
-      final timeStr = StopWatchTimer.getDisplayTime(
-        absValue,
-        hours: false,
-        milliSecond: true,
-      );
-      final trimmedTimeStr = timeStr.substring(0, timeStr.length - 1);
-      return '-$trimmedTimeStr';
-    } else {
-      // Standard positive time display
-      final timeStr = StopWatchTimer.getDisplayTime(
-        value,
-        hours: false,
-        milliSecond: true,
-      );
-      return timeStr.substring(0, timeStr.length - 1);
-    }
+    final absValue = isCountdownTimer && value < 0 ? value.abs() : value;
+    final timeStr = StopWatchTimer.getDisplayTime(
+      absValue,
+      hours: false,
+      milliSecond: true,
+    );
+    final trimmedTime = timeStr.substring(0, timeStr.length - 1);
+
+    return (isCountdownTimer && value < 0) ? '-$trimmedTime' : trimmedTime;
   }
 
   @override
   Widget build(BuildContext context) {
-    final gameStateService = GameStateService.instance;
-
     return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
       builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
-        return Column(
-          children: [
-            // Timer Display
-            StreamBuilder<int>(
-              stream: gameStateService.timerStream,
-              initialData: scorePanelAdapter.timerRawTime,
-              builder: (context, snap) {
-                final value = snap.data!;
-                final displayTime = _formatTimerClock(
-                  value,
-                  gameSetupAdapter.isCountdownTimer,
-                );
+        return StreamBuilder<int>(
+          stream: GameStateService.instance.timerStream,
+          initialData: scorePanelAdapter.timerRawTime,
+          builder: (context, snapshot) {
+            final timerValue = snapshot.data ?? scorePanelAdapter.timerRawTime;
+            final quarterMSec = gameSetupAdapter.quarterMSec;
+            final isCountdownTimer = gameSetupAdapter.isCountdownTimer;
 
-                return Text(
-                  displayTime,
+            final progress =
+                quarterMSec > 0 && timerValue >= 0
+                    ? (timerValue / quarterMSec).clamp(0.0, 1.0)
+                    : 0.0;
+
+            return Column(
+              children: [
+                Text(
+                  _formatTimerClock(timerValue, isCountdownTimer),
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: _getTimerColor(context),
+                    color: _getTimerColor(
+                      context,
+                      timerValue,
+                      quarterMSec,
+                      isCountdownTimer,
+                    ),
                   ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 6),
-
-            // Progress Indicator
-            StreamBuilder<int>(
-              stream: gameStateService.timerStream,
-              initialData: scorePanelAdapter.timerRawTime,
-              builder: (context, snapshot) {
-                final timerValue =
-                    snapshot.data ?? scorePanelAdapter.timerRawTime;
-                double progress = 0.0;
-                if (gameSetupAdapter.quarterMSec > 0 && timerValue >= 0) {
-                  progress = timerValue / gameSetupAdapter.quarterMSec;
-                  progress = progress.clamp(0.0, 1.0);
-                }
-
-                return LinearProgressIndicator(value: progress);
-              },
-            ),
-          ],
+                ),
+                const SizedBox(height: 6),
+                LinearProgressIndicator(value: progress),
+              ],
+            );
+          },
         );
       },
     );
