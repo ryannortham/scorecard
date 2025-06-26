@@ -43,6 +43,7 @@ dependencies:
   widget_screenshot_plus: ^0.0.6
   gal: ^2.3.0
   flutter_native_splash: ^2.4.1
+  device_info_plus: ^11.2.0
 
 dev_dependencies:
   flutter_test:

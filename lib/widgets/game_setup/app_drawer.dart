@@ -170,42 +170,12 @@ class AppDrawer extends StatelessWidget {
         return 'Adaptive';
       case 'blue':
         return 'Blue';
-      case 'light_blue':
-        return 'Light Blue';
-      case 'indigo':
-        return 'Indigo';
-      case 'deep_purple':
-        return 'Deep Purple';
-      case 'purple':
-        return 'Purple';
-      case 'pink':
-        return 'Pink';
-      case 'red':
-        return 'Red';
-      case 'deep_orange':
-        return 'Deep Orange';
-      case 'orange':
-        return 'Orange';
-      case 'amber':
-        return 'Amber';
-      case 'yellow':
-        return 'Yellow';
-      case 'lime':
-        return 'Lime';
-      case 'light_green':
-        return 'Light Green';
       case 'green':
         return 'Green';
-      case 'teal':
-        return 'Teal';
-      case 'cyan':
-        return 'Cyan';
-      case 'brown':
-        return 'Brown';
-      case 'blue_grey':
-        return 'Blue Grey';
-      case 'grey':
-        return 'Grey';
+      case 'purple':
+        return 'Purple';
+      case 'orange':
+        return 'Orange';
       default:
         return 'Adaptive';
     }
@@ -291,51 +261,18 @@ class AppDrawer extends StatelessWidget {
       Offset.zero & overlay.size,
     );
 
-    final colorOptions = [
-      {
-        'value': 'adaptive',
-        'label': 'Adaptive',
-        'color': const Color(0xFF6750A4),
-      },
+    final colorOptions = <Map<String, dynamic>>[
+      // Show adaptive only if device supports it
+      if (provider.supportsDynamicColors)
+        {
+          'value': 'adaptive',
+          'label': 'Adaptive',
+          'color': const Color(0xFF6750A4), // Material 3 baseline for adaptive
+        },
       {'value': 'blue', 'label': 'Blue', 'color': const Color(0xFF1565C0)},
-      {
-        'value': 'light_blue',
-        'label': 'Light Blue',
-        'color': const Color(0xFF0277BD),
-      },
-      {'value': 'indigo', 'label': 'Indigo', 'color': const Color(0xFF3F51B5)},
-      {'value': 'purple', 'label': 'Purple', 'color': const Color(0xFF9C27B0)},
-      {
-        'value': 'deep_purple',
-        'label': 'Deep Purple',
-        'color': const Color(0xFF673AB7),
-      },
-      {'value': 'pink', 'label': 'Pink', 'color': const Color(0xFFE91E63)},
-      {'value': 'red', 'label': 'Red', 'color': const Color(0xFFD32F2F)},
-      {
-        'value': 'deep_orange',
-        'label': 'Deep Orange',
-        'color': const Color(0xFFFF5722),
-      },
-      {'value': 'orange', 'label': 'Orange', 'color': const Color(0xFFFF9800)},
-      {'value': 'amber', 'label': 'Amber', 'color': const Color(0xFFFFC107)},
-      {'value': 'yellow', 'label': 'Yellow', 'color': const Color(0xFFFFEB3B)},
-      {'value': 'lime', 'label': 'Lime', 'color': const Color(0xFFCDDC39)},
-      {
-        'value': 'light_green',
-        'label': 'Light Green',
-        'color': const Color(0xFF8BC34A),
-      },
       {'value': 'green', 'label': 'Green', 'color': const Color(0xFF4CAF50)},
-      {'value': 'teal', 'label': 'Teal', 'color': const Color(0xFF009688)},
-      {'value': 'cyan', 'label': 'Cyan', 'color': const Color(0xFF00BCD4)},
-      {'value': 'brown', 'label': 'Brown', 'color': const Color(0xFF795548)},
-      {
-        'value': 'blue_grey',
-        'label': 'Blue Grey',
-        'color': const Color(0xFF607D8B),
-      },
-      {'value': 'grey', 'label': 'Grey', 'color': const Color(0xFF9E9E9E)},
+      {'value': 'purple', 'label': 'Purple', 'color': const Color(0xFF9C27B0)},
+      {'value': 'orange', 'label': 'Orange', 'color': const Color(0xFFFF9800)},
     ];
 
     showMenu<String>(

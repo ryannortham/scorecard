@@ -41,8 +41,6 @@ class FootyScoreCardApp extends StatelessWidget {
       builder: (context, userPreferences, child) {
         return DynamicColorBuilder(
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-            final seedColor = userPreferences.getThemeColor();
-
             // Use dynamic colors if user selected 'adaptive' theme
             final useDynamicColors = userPreferences.colorTheme == 'adaptive';
 
@@ -50,13 +48,15 @@ class FootyScoreCardApp extends StatelessWidget {
             final lightColorScheme =
                 (useDynamicColors && lightDynamic != null)
                     ? lightDynamic
-                    : ColorScheme.fromSeed(seedColor: seedColor);
+                    : ColorScheme.fromSeed(
+                      seedColor: userPreferences.getThemeColor(),
+                    );
 
             final darkColorScheme =
                 (useDynamicColors && darkDynamic != null)
                     ? darkDynamic
                     : ColorScheme.fromSeed(
-                      seedColor: seedColor,
+                      seedColor: userPreferences.getThemeColor(),
                       brightness: Brightness.dark,
                     );
 
