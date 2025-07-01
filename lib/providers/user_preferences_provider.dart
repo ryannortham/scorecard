@@ -141,22 +141,22 @@ class UserPreferencesProvider extends ChangeNotifier {
 
   /// Validate color theme and return a valid one
   String _validateColorTheme(String theme) {
-    // Check if device supports dynamic colors for adaptive theme
+    // Check if device supports dynamic colors for dynamic theme
     final supportsDynamicColors = _dynamicColorsSupported ?? false;
 
     const validThemes = {'blue', 'green', 'purple', 'orange'};
 
-    // Add adaptive to valid themes only if supported
+    // Add dynamic to valid themes only if supported
     final allValidThemes = {
-      if (supportsDynamicColors) 'adaptive',
+      if (supportsDynamicColors) 'dynamic',
       ...validThemes,
     };
 
     if (allValidThemes.contains(theme)) {
       return theme;
     } else {
-      // If user had 'adaptive' but device doesn't support it, fall back to 'blue'
-      if (theme == 'adaptive' && !supportsDynamicColors) {
+      // If user had 'dynamic' but device doesn't support it, fall back to 'blue'
+      if (theme == 'dynamic' && !supportsDynamicColors) {
         return 'blue';
       }
       // For other invalid themes, default to blue
@@ -196,8 +196,8 @@ class UserPreferencesProvider extends ChangeNotifier {
   /// Get color from theme name using Material Design 3 seed colors
   Color getThemeColor() {
     switch (_colorTheme) {
-      case 'adaptive':
-        // For adaptive theme, return Material 3 baseline for fallback
+      case 'dynamic':
+        // For dynamic theme, return Material 3 baseline for fallback
         // The actual dynamic colors are handled in main.dart via DynamicColorBuilder
         return const Color(0xFF6750A4); // Material 3 baseline purple
       case 'blue':

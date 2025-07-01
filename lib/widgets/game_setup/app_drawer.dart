@@ -129,7 +129,7 @@ class AppDrawer extends StatelessWidget {
               leading: Icon(
                 Icons.palette_outlined,
                 color:
-                    userPreferences.colorTheme == 'adaptive'
+                    userPreferences.colorTheme == 'dynamic'
                         ? Theme.of(context).colorScheme.primary
                         : userPreferences.getThemeColor(),
               ),
@@ -166,8 +166,8 @@ class AppDrawer extends StatelessWidget {
 
   String _getColorThemeText(String theme) {
     switch (theme) {
-      case 'adaptive':
-        return 'Adaptive';
+      case 'dynamic':
+        return 'Dynamic';
       case 'blue':
         return 'Blue';
       case 'green':
@@ -177,7 +177,7 @@ class AppDrawer extends StatelessWidget {
       case 'orange':
         return 'Orange';
       default:
-        return 'Adaptive';
+        return 'Dynamic';
     }
   }
 
@@ -262,12 +262,12 @@ class AppDrawer extends StatelessWidget {
     );
 
     final colorOptions = <Map<String, dynamic>>[
-      // Show adaptive only if device supports it
+      // Show dynamic only if device supports it
       if (provider.supportsDynamicColors)
         {
-          'value': 'adaptive',
-          'label': 'Adaptive',
-          'color': const Color(0xFF6750A4), // Material 3 baseline for adaptive
+          'value': 'dynamic',
+          'label': 'Dynamic',
+          'color': const Color(0xFF6750A4), // Material 3 baseline for dynamic
         },
       {'value': 'blue', 'label': 'Blue', 'color': const Color(0xFF1565C0)},
       {'value': 'green', 'label': 'Green', 'color': const Color(0xFF4CAF50)},
@@ -288,7 +288,7 @@ class AppDrawer extends StatelessWidget {
                     Icons.palette_outlined,
                     size: 16,
                     color:
-                        option['value'] == 'adaptive'
+                        option['value'] == 'dynamic'
                             ? Theme.of(context).colorScheme.primary
                             : option['color'] as Color,
                   ),
