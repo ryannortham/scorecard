@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/screens/team_list.dart';
 import 'package:scorecard/screens/game_history.dart';
+import 'package:scorecard/screens/team_list.dart';
 
 /// A shared app drawer widget that includes navigation and settings
 class AppDrawer extends StatelessWidget {

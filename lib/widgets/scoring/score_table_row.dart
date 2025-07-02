@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/widgets/tally_display.dart';
 
 /// A single row displaying quarter score data
 class ScoreTableRow extends StatelessWidget {
@@ -30,7 +31,8 @@ class ScoreTableRow extends StatelessWidget {
     final teamPoints = teamGoals * 6 + teamBehinds;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 3.0),
+      height: 32.0, // Fixed height to prevent jumping
+      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
       decoration: BoxDecoration(
         color:
             isCurrentQuarter
@@ -41,21 +43,33 @@ class ScoreTableRow extends StatelessWidget {
         children: [
           // Quarter label
           SizedBox(
-            width: 32,
-            child: Text(
-              'Q${quarter + 1}',
-              style: Theme.of(context).textTheme.labelMedium,
+            width: 18,
+            child: Center(
+              child: Text(
+                'Q${quarter + 1}',
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
             ),
           ),
 
           // Goals (Quarter + Total)
-          _buildScoreColumn(context, teamGoals, runningGoals),
+          _buildScoreColumn(context, teamGoals, runningGoals, useTally: true),
 
           // Behinds (Quarter + Total)
-          _buildScoreColumn(context, teamBehinds, runningBehinds),
+          _buildScoreColumn(
+            context,
+            teamBehinds,
+            runningBehinds,
+            useTally: true,
+          ),
 
           // Points (Quarter + Total)
-          _buildScoreColumn(context, teamPoints, runningPoints),
+          _buildScoreColumn(
+            context,
+            teamPoints,
+            runningPoints,
+            useTally: false,
+          ),
         ],
       ),
     );
@@ -65,45 +79,53 @@ class ScoreTableRow extends StatelessWidget {
   Widget _buildScoreColumn(
     BuildContext context,
     int quarterScore,
-    int runningTotal,
-  ) {
+    int runningTotal, {
+    required bool useTally,
+  }) {
     return Expanded(
-      child: Row(
-        children: [
-          Expanded(
-            flex: 7,
-            child: Center(
-              child: Text(
-                isFutureQuarter ? '' : quarterScore.toString(),
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(
-                  color:
-                      isFutureQuarter
-                          ? Colors.transparent
-                          : Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHighest,
-                  width: 1.5,
-                ),
-                borderRadius: BorderRadius.circular(4.0),
-              ),
+      child: SizedBox(
+        height: double.infinity, // Take full available height
+        child: Row(
+          children: [
+            Expanded(
+              flex: 7,
               child: Center(
-                child: Text(
-                  isFutureQuarter ? '' : runningTotal.toString(),
-                  style: Theme.of(context).textTheme.labelSmall,
+                child:
+                    isFutureQuarter
+                        ? const SizedBox.shrink()
+                        : TallyDisplay(
+                          value: quarterScore,
+                          textStyle: Theme.of(context).textTheme.labelMedium,
+                          useTally: useTally,
+                        ),
+              ),
+            ),
+            Expanded(
+              flex: 3,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(
+                    color:
+                        isFutureQuarter
+                            ? Colors.transparent
+                            : Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                    width: 1.5,
+                  ),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: Center(
+                  child: Text(
+                    isFutureQuarter ? '' : runningTotal.toString(),
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
