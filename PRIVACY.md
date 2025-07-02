@@ -42,9 +42,7 @@ If our data practices change in the future, we will update this Privacy Policy a
 
 If you have any questions about this Privacy Policy, please contact us at:
 
-**Email:** ryan.northam@gmail.com
-**App:** Score Card
-**Developer:** Ryan Northam
+**Email:** [ryan.northam@gmail.com](mailto:ryan.northam@gmail.com)
 
 ---
 
