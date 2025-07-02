@@ -106,11 +106,11 @@ class GameDetailsWidget extends StatelessWidget {
     if (enableScrolling) {
       return SingleChildScrollView(
         controller: scrollController,
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: content,
       );
     } else {
-      return Padding(padding: const EdgeInsets.all(16.0), child: content);
+      return Padding(padding: const EdgeInsets.all(8.0), child: content);
     }
   }
 }
@@ -133,7 +133,7 @@ class _GameCard extends StatelessWidget {
       elevation: 0,
       color: Theme.of(context).colorScheme.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

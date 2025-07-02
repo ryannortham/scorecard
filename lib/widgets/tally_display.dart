@@ -5,7 +5,7 @@ import '../services/tally_icon_service.dart';
 /// Can be forced to show text instead of tally icons
 class TallyDisplay extends StatelessWidget {
   /// The threshold above which to display numbers as text instead of tally icons
-  static const int _textDisplayThreshold = 15;
+  static const int _textDisplayThreshold = 10;
 
   final int value;
   final double? iconSize;

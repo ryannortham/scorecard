@@ -43,7 +43,7 @@ class ScoreTable extends StatelessWidget {
             // Table header row
             child: Row(
               children: [
-                const SizedBox(width: 32), // Quarter column
+                const SizedBox(width: 18), // Quarter column
                 Expanded(
                   child: Text(
                     'Goals',
