@@ -26,7 +26,7 @@ class TallyDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final baseColor = color ?? theme.colorScheme.onSurface;
-    final effectiveColor = baseColor.withValues(alpha: 0.6); // Dim by one step
+    final effectiveColor = baseColor.withValues(alpha: 0.7);
     final effectiveIconSize = iconSize ?? 24.0;
 
     // Handle zero or negative values - show nothing (blank)
