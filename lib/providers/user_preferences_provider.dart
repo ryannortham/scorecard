@@ -144,7 +144,7 @@ class UserPreferencesProvider extends ChangeNotifier {
     // Check if device supports dynamic colors for dynamic theme
     final supportsDynamicColors = _dynamicColorsSupported ?? false;
 
-    const validThemes = {'blue', 'green', 'purple', 'orange'};
+    const validThemes = {'blue', 'green', 'purple', 'orange', 'pink'};
 
     // Add dynamic to valid themes only if supported
     final allValidThemes = {
@@ -199,17 +199,19 @@ class UserPreferencesProvider extends ChangeNotifier {
       case 'dynamic':
         // For dynamic theme, return Material 3 baseline for fallback
         // The actual dynamic colors are handled in main.dart via DynamicColorBuilder
-        return const Color(0xFF6750A4); // Material 3 baseline purple
+        return const Color.fromRGBO(0, 145, 234, 1);
       case 'blue':
-        return const Color(0xFF1565C0); // Material 3 Blue seed
+        return const Color.fromRGBO(0, 145, 234, 1);
       case 'green':
-        return const Color(0xFF4CAF50); // Material 3 Green seed
+        return const Color.fromRGBO(21, 183, 109, 1);
       case 'purple':
-        return const Color(0xFF9C27B0); // Material 3 Purple seed
+        return const Color.fromRGBO(128, 100, 244, 1);
       case 'orange':
-        return const Color(0xFFFF9800); // Material 3 Orange seed
+        return const Color.fromRGBO(255, 158, 0, 1);
+      case 'pink':
+        return const Color.fromRGBO(238, 33, 114, 1);
       default:
-        return const Color(0xFF1565C0); // Default to Blue
+        return const Color.fromRGBO(0, 145, 234, 1); // Default to Blue
     }
   }
 }

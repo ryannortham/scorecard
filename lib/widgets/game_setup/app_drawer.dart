@@ -176,6 +176,8 @@ class AppDrawer extends StatelessWidget {
         return 'Purple';
       case 'orange':
         return 'Orange';
+      case 'pink':
+        return 'Pink';
       default:
         return 'Dynamic';
     }
@@ -267,12 +269,33 @@ class AppDrawer extends StatelessWidget {
         {
           'value': 'dynamic',
           'label': 'Dynamic',
-          'color': const Color(0xFF6750A4), // Material 3 baseline for dynamic
+          'color': const Color.fromRGBO(0, 145, 234, 1), // Fallback color
         },
-      {'value': 'blue', 'label': 'Blue', 'color': const Color(0xFF1565C0)},
-      {'value': 'green', 'label': 'Green', 'color': const Color(0xFF4CAF50)},
-      {'value': 'purple', 'label': 'Purple', 'color': const Color(0xFF9C27B0)},
-      {'value': 'orange', 'label': 'Orange', 'color': const Color(0xFFFF9800)},
+      {
+        'value': 'blue',
+        'label': 'Blue',
+        'color': const Color.fromRGBO(0, 145, 234, 1),
+      },
+      {
+        'value': 'green',
+        'label': 'Green',
+        'color': const Color.fromRGBO(21, 183, 109, 1),
+      },
+      {
+        'value': 'purple',
+        'label': 'Purple',
+        'color': const Color.fromRGBO(128, 100, 244, 1),
+      },
+      {
+        'value': 'orange',
+        'label': 'Orange',
+        'color': const Color.fromRGBO(255, 158, 0, 1),
+      },
+      {
+        'value': 'pink',
+        'label': 'Pink',
+        'color': const Color.fromRGBO(238, 33, 114, 1),
+      },
     ];
 
     showMenu<String>(

@@ -98,18 +98,13 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
 flutter_native_splash:
-  color: "#0E7A0D"
-  image: assets/icon/splash_light.png
-  # branding: assets/branding-production.png
-  # branding_bottom_padding: 24
-  color_dark: "#121212"
-  image_dark: assets/icon/splash_dark.png
-  # branding_dark: assets/branding-production.png
+  color: "#F9F9FF"
+  image: assets/icon/splash.png
+  color_dark: "#151515"
+  image_dark: assets/icon/splash.png
 
   android_12:
-    image: assets/icon/splash_light.png
-    icon_background_color: "#0E7A0D"
-    image_dark: assets/icon/splash_dark.png
-    icon_background_color_dark: "#121212"
+    image: assets/icon/splash.png
+    image_dark: assets/icon/splash.png
 
   web: false
