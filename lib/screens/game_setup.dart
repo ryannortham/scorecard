@@ -111,6 +111,8 @@ class _GameSetupState extends State<GameSetup> {
       drawerEnableOpenDragGesture: true,
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         leading: Builder(
           builder:
               (context) => IconButton(

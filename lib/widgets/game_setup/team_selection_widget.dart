@@ -72,7 +72,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
       // Handle team deletion or reselection
       if (teamType == 'home') {
         if (result == widget.homeTeam) {
-          if (!teamsProvider.teams.contains(result)) {
+          if (!teamsProvider.hasTeamWithName(result)) {
             widget.onHomeTeamChanged(null);
             widget.homeTeamController.text = '';
             gameSetupAdapter.setHomeTeam('');
@@ -89,7 +89,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
         widget.homeTeamKey.currentState?.validate();
       } else {
         if (result == widget.awayTeam) {
-          if (!teamsProvider.teams.contains(result)) {
+          if (!teamsProvider.hasTeamWithName(result)) {
             widget.onAwayTeamChanged(null);
             widget.awayTeamController.text = '';
             gameSetupAdapter.setAwayTeam('');

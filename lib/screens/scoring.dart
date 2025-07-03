@@ -9,7 +9,6 @@ import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
-import 'package:scorecard/widgets/adaptive_title.dart';
 import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
@@ -195,6 +194,8 @@ class ScoringState extends State<Scoring> {
         drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
         drawerEnableOpenDragGesture: true,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
           leading: Builder(
             builder:
                 (context) => IconButton(
@@ -203,9 +204,8 @@ class ScoringState extends State<Scoring> {
                   onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
           ),
-          title: AdaptiveTitle(
-            title:
-                '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+          title: Text(
+            "Score Card",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           actions: [

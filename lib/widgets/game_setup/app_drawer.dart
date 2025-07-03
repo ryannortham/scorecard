@@ -30,7 +30,7 @@ class AppDrawer extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Score Card',
+                    'Footy Score Card',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).colorScheme.onPrimary,
@@ -86,6 +86,26 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+
+          if (currentRoute != 'team_list')
+            ListTile(
+              leading: const Icon(Icons.diversity_3),
+              title: const Text('Manage Teams'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder:
+                        (context) => TeamList(
+                          title: 'Manage Teams',
+                          onTeamSelected: (teamName) {
+                            // No action needed when selecting from manage teams
+                          },
+                        ),
+                  ),
+                );
+              },
+            ),
 
           // Navigation Items
           if (currentRoute != 'game_history')

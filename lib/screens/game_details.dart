@@ -42,6 +42,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           MediaQuery.of(context).size.width * 0.25, // 75% of screen width
       drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         leading: Builder(
           builder:
               (context) => IconButton(
