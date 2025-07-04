@@ -170,17 +170,18 @@ class AppDrawer extends StatelessWidget {
             ),
           ),
 
-          // Countdown Timer Toggle
-          ListTile(
-            leading: const Icon(Icons.timer_outlined),
-            title: const Text('Countdown Timer'),
-            trailing: Switch(
-              value: userPreferences.isCountdownTimer,
-              onChanged: (bool value) {
-                userPreferences.setIsCountdownTimer(value);
-              },
+          // Countdown Timer Toggle - hide on scoring screen to prevent issues during active game
+          if (currentRoute != 'scoring')
+            ListTile(
+              leading: const Icon(Icons.timer_outlined),
+              title: const Text('Countdown Timer'),
+              trailing: Switch(
+                value: userPreferences.isCountdownTimer,
+                onChanged: (bool value) {
+                  userPreferences.setIsCountdownTimer(value);
+                },
+              ),
             ),
-          ),
 
           // Theme Mode
           GestureDetector(
