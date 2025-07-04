@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/widgets/tally_display.dart';
+import 'package:scorecard/widgets/scoring/tally_display.dart';
 
 /// A single row displaying quarter score data
 class ScoreTableRow extends StatelessWidget {

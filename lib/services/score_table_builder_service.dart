@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
+import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/scoring/score_table.dart';
 
 /// Service for building score table widgets with proper data handling
@@ -15,12 +15,11 @@ class ScoreTableBuilderService {
     required bool isHomeTeam,
     required bool isLiveData,
     List<GameEvent>? liveEvents,
-    ScorePanelAdapter? scorePanelAdapter,
   }) {
     // Determine current quarter and completion status
     final int currentQuarter =
-        isLiveData && scorePanelAdapter != null
-            ? scorePanelAdapter.selectedQuarter
+        isLiveData
+            ? GameStateService.instance.selectedQuarter
             : GameAnalysisService.getCurrentQuarter(game);
 
     final bool isCompleted =

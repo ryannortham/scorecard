@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_history_service.dart';
-import 'package:scorecard/widgets/adaptive_title.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
 import 'package:scorecard/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
@@ -42,6 +41,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           MediaQuery.of(context).size.width * 0.25, // 75% of screen width
       drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         leading: Builder(
           builder:
               (context) => IconButton(
@@ -51,9 +52,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                 },
               ),
         ),
-        title: AdaptiveTitle(
-          title: '${widget.game.homeTeam} vs ${widget.game.awayTeam}',
-        ),
+        title: Text("Game Results"),
         actions: [
           IconButton(
             icon:

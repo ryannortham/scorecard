@@ -1,0 +1,18 @@
+{
+  "filter": {
+    "meta": {
+      "limit": 8,
+      "page": 1
+    },
+    "organisation": {
+      "query": "chelsea",
+      "types": [
+        "ASSOCIATION",
+        "CLUB"
+      ],
+      "sports": [
+        "AFL"
+      ]
+    }
+  }
+}

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
 /// Widget that displays the timer value and progress indicator
@@ -39,15 +37,15 @@ class TimerClock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-      builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
+    return Consumer<GameStateService>(
+      builder: (context, gameState, _) {
         return StreamBuilder<int>(
           stream: GameStateService.instance.timerStream,
-          initialData: scorePanelAdapter.timerRawTime,
+          initialData: gameState.timerRawTime,
           builder: (context, snapshot) {
-            final timerValue = snapshot.data ?? scorePanelAdapter.timerRawTime;
-            final quarterMSec = gameSetupAdapter.quarterMSec;
-            final isCountdownTimer = gameSetupAdapter.isCountdownTimer;
+            final timerValue = snapshot.data ?? gameState.timerRawTime;
+            final quarterMSec = gameState.quarterMSec;
+            final isCountdownTimer = gameState.isCountdownTimer;
 
             final progress =
                 quarterMSec > 0 && timerValue >= 0

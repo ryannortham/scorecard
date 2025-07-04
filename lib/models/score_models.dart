@@ -1,5 +1,37 @@
 import 'package:flutter/material.dart';
 
+/// Team data with optional logo
+class Team {
+  final String name;
+  final String? logoUrl;
+
+  const Team({required this.name, this.logoUrl});
+
+  Team copyWith({String? name, String? logoUrl}) {
+    return Team(name: name ?? this.name, logoUrl: logoUrl ?? this.logoUrl);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'logoUrl': logoUrl};
+  }
+
+  factory Team.fromJson(Map<String, dynamic> json) {
+    return Team(name: json['name'] ?? '', logoUrl: json['logoUrl']);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Team && other.name == name && other.logoUrl == logoUrl;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, logoUrl);
+
+  @override
+  String toString() => 'Team(name: $name, logoUrl: $logoUrl)';
+}
+
 /// Base class for score-related data
 class ScoreData {
   final int goals;

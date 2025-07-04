@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
-import 'package:scorecard/widgets/adaptive_title.dart';
 import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
@@ -27,8 +24,7 @@ class Scoring extends StatefulWidget {
 }
 
 class ScoringState extends State<Scoring> {
-  late ScorePanelAdapter scorePanelProvider;
-  late GameSetupAdapter gameSetupProvider;
+  late GameStateService gameStateService;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
   final GameStateService _gameStateService = GameStateService.instance;
 
@@ -46,14 +42,12 @@ class ScoringState extends State<Scoring> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    gameSetupProvider = Provider.of<GameSetupAdapter>(context);
-    scorePanelProvider = Provider.of<ScorePanelAdapter>(context);
+    gameStateService = Provider.of<GameStateService>(context);
 
     // Initialize sharing service
     _gameSharingService = GameSharingService(
       screenshotWidgetKey: _screenshotWidgetKey,
-      gameSetupProvider: gameSetupProvider,
-      scorePanelProvider: scorePanelProvider,
+      gameStateService: gameStateService,
     );
 
     // Initialize the game if not already started
@@ -71,7 +65,7 @@ class ScoringState extends State<Scoring> {
   void _onTimerRunningChanged() {
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        scorePanelProvider.setTimerRunning(isTimerRunning.value);
+        gameStateService.setTimerRunning(isTimerRunning.value);
       });
     }
   }
@@ -79,7 +73,7 @@ class ScoringState extends State<Scoring> {
   /// Record end of quarter event
   void recordQuarterEnd(int quarter) {
     _gameStateService.recordQuarterEnd(quarter);
-    scorePanelProvider.setTimerRunning(false);
+    gameStateService.setTimerRunning(false);
 
     if (quarter == 4) {
       _handleGameCompletion();
@@ -112,12 +106,12 @@ class ScoringState extends State<Scoring> {
             'Could not find game with ID $gameId, using fallback search',
             component: 'Scoring',
             data:
-                '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+                '${gameStateService.homeTeam} vs ${gameStateService.awayTeam}',
           );
           return allGames.firstWhere(
             (game) =>
-                game.homeTeam == gameSetupProvider.homeTeam &&
-                game.awayTeam == gameSetupProvider.awayTeam,
+                game.homeTeam == gameStateService.homeTeam &&
+                game.awayTeam == gameStateService.awayTeam,
           );
         },
       );
@@ -195,6 +189,8 @@ class ScoringState extends State<Scoring> {
         drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
         drawerEnableOpenDragGesture: true,
         appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
           leading: Builder(
             builder:
                 (context) => IconButton(
@@ -203,9 +199,8 @@ class ScoringState extends State<Scoring> {
                   onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
           ),
-          title: AdaptiveTitle(
-            title:
-                '${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}',
+          title: Text(
+            "Score Card",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           actions: [
@@ -254,9 +249,9 @@ class ScoringState extends State<Scoring> {
                             builder: (context, timerRunning, child) {
                               return ScorePanel(
                                 events: List<GameEvent>.from(gameEvents),
-                                homeTeam: gameSetupProvider.homeTeam,
-                                awayTeam: gameSetupProvider.awayTeam,
-                                displayTeam: gameSetupProvider.homeTeam,
+                                homeTeam: gameStateService.homeTeam,
+                                awayTeam: gameStateService.awayTeam,
+                                displayTeam: gameStateService.homeTeam,
                                 isHomeTeam: true,
                                 enabled: timerRunning,
                               );
@@ -269,9 +264,9 @@ class ScoringState extends State<Scoring> {
                             builder: (context, timerRunning, child) {
                               return ScorePanel(
                                 events: List<GameEvent>.from(gameEvents),
-                                homeTeam: gameSetupProvider.homeTeam,
-                                awayTeam: gameSetupProvider.awayTeam,
-                                displayTeam: gameSetupProvider.awayTeam,
+                                homeTeam: gameStateService.homeTeam,
+                                awayTeam: gameStateService.awayTeam,
+                                displayTeam: gameStateService.awayTeam,
                                 isHomeTeam: false,
                                 enabled: timerRunning,
                               );

@@ -80,9 +80,9 @@ class ScoreTable extends StatelessWidget {
               quarterEvents: quarterEvents,
               isCurrentQuarter: quarter == currentQuarter && !isCompletedGame,
               isFutureQuarter: quarter > currentQuarter && !isCompletedGame,
-              runningGoals: runningTotals['goals']!,
-              runningBehinds: runningTotals['behinds']!,
-              runningPoints: runningTotals['points']!,
+              runningGoals: runningTotals['goals'] ?? 0,
+              runningBehinds: runningTotals['behinds'] ?? 0,
+              runningPoints: runningTotals['points'] ?? 0,
             );
           }),
 

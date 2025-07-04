@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 /// Widget that displays the timer control buttons (Reset, Play/Pause, Next)
 class TimerControls extends StatelessWidget {
@@ -20,16 +19,13 @@ class TimerControls extends StatelessWidget {
   });
 
   /// Determines if reset/next buttons should be enabled
-  bool _isButtonEnabled(
-    GameSetupAdapter gameSetupAdapter,
-    ScorePanelAdapter scorePanelAdapter,
-  ) {
-    if (scorePanelAdapter.isTimerRunning) return false;
+  bool _isButtonEnabled(GameStateService gameState) {
+    if (gameState.isTimerRunning) return false;
 
-    final currentTime = scorePanelAdapter.timerRawTime;
-    final quarterMSec = gameSetupAdapter.quarterMSec;
+    final currentTime = gameState.timerRawTime;
+    final quarterMSec = gameState.quarterMSec;
 
-    return gameSetupAdapter.isCountdownTimer
+    return gameState.isCountdownTimer
         ? currentTime != quarterMSec
         : currentTime != 0;
   }
@@ -38,18 +34,14 @@ class TimerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-        builder: (context, gameSetupAdapter, scorePanelAdapter, _) {
+      child: Consumer<GameStateService>(
+        builder: (context, gameState, _) {
           return ValueListenableBuilder<bool>(
             valueListenable:
-                isRunningNotifier ??
-                ValueNotifier(scorePanelAdapter.isTimerRunning),
+                isRunningNotifier ?? ValueNotifier(gameState.isTimerRunning),
             builder: (context, isTimerRunning, _) {
-              final isEnabled = _isButtonEnabled(
-                gameSetupAdapter,
-                scorePanelAdapter,
-              );
-              final currentQuarter = scorePanelAdapter.selectedQuarter;
+              final isEnabled = _isButtonEnabled(gameState);
+              final currentQuarter = gameState.selectedQuarter;
               final isLastQuarter = currentQuarter == 4;
 
               return Row(

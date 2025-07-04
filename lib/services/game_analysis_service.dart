@@ -143,6 +143,6 @@ class GameAnalysisService {
     final timeStr =
         '${totalMinutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    return 'Q$currentQuarter $timeStr';
+    return 'In Progress: Q$currentQuarter $timeStr';
   }
 }

@@ -1,0 +1,51 @@
+query search($filter: SearchFilter!) {
+  search(filter: $filter) {
+    meta {
+      page
+      totalPages
+      totalRecords
+      __typename
+    }
+    results {
+      ... on Organisation {
+        id
+        routingCode
+        name
+        type
+        logo {
+          sizes {
+            url
+            dimensions {
+              width
+              height
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        tenant {
+          id
+          name
+          logo {
+            sizes {
+              url
+              dimensions {
+                width
+                height
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          slug
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}

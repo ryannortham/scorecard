@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/home_screen.dart';
 import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 void main() {
   // Preserve the native splash screen until the app is ready
@@ -23,8 +22,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
-        ChangeNotifierProvider(create: (_) => GameSetupAdapter()),
-        ChangeNotifierProvider(create: (_) => ScorePanelAdapter()),
+        ChangeNotifierProvider.value(value: GameStateService.instance),
         ChangeNotifierProvider(create: (_) => TeamsProvider()),
       ],
       child: const FootyScoreCardApp(),

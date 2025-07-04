@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_state_service.dart';
@@ -70,16 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Initialize game setup with user preferences
   void _initializeGameSetup(UserPreferencesProvider userPreferences) {
-    final gameSetupAdapter = Provider.of<GameSetupAdapter>(
-      context,
-      listen: false,
-    );
+    final gameState = GameStateService.instance;
 
-    // Reset the game setup adapter with user preferences
-    gameSetupAdapter.reset(
-      defaultQuarterMinutes: userPreferences.quarterMinutes,
-      defaultIsCountdownTimer: userPreferences.isCountdownTimer,
-      favoriteTeam: userPreferences.favoriteTeam,
+    // Reset the game state with user preferences
+    gameState.configureGame(
+      homeTeam:
+          userPreferences.favoriteTeam.isNotEmpty
+              ? userPreferences.favoriteTeam
+              : '',
+      awayTeam: '',
+      gameDate: DateTime.now(),
+      quarterMinutes: userPreferences.quarterMinutes,
+      isCountdownTimer: userPreferences.isCountdownTimer,
     );
   }
 }

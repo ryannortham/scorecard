@@ -3,8 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
@@ -51,55 +49,40 @@ class GameDetailsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLiveData) {
-      return Consumer2<GameSetupAdapter, ScorePanelAdapter>(
-        builder: (context, gameSetup, scorePanel, child) {
-          final game = _buildLiveGame(gameSetup, scorePanel);
-          return _buildContent(context, game, scorePanel);
+      return Consumer<GameStateService>(
+        builder: (context, gameState, child) {
+          final game = _buildLiveGame(gameState);
+          return _buildContent(context, game);
         },
       );
     } else {
-      return _buildContent(context, staticGame!, null);
+      return _buildContent(context, staticGame!);
     }
   }
 
-  GameRecord _buildLiveGame(
-    GameSetupAdapter gameSetup,
-    ScorePanelAdapter scorePanel,
-  ) {
+  GameRecord _buildLiveGame(GameStateService gameState) {
     return GameRecord(
       id: 'current-game',
-      date: gameSetup.gameDate,
-      homeTeam: gameSetup.homeTeam,
-      awayTeam: gameSetup.awayTeam,
-      quarterMinutes: gameSetup.quarterMinutes,
-      isCountdownTimer: gameSetup.isCountdownTimer,
+      date: gameState.gameDate,
+      homeTeam: gameState.homeTeam,
+      awayTeam: gameState.awayTeam,
+      quarterMinutes: gameState.quarterMinutes,
+      isCountdownTimer: gameState.isCountdownTimer,
       events: liveEvents ?? [],
-      homeGoals: scorePanel.homeGoals,
-      homeBehinds: scorePanel.homeBehinds,
-      awayGoals: scorePanel.awayGoals,
-      awayBehinds: scorePanel.awayBehinds,
+      homeGoals: gameState.homeGoals,
+      homeBehinds: gameState.homeBehinds,
+      awayGoals: gameState.awayGoals,
+      awayBehinds: gameState.awayBehinds,
     );
   }
 
-  Widget _buildContent(
-    BuildContext context,
-    GameRecord game,
-    ScorePanelAdapter? scorePanel,
-  ) {
+  Widget _buildContent(BuildContext context, GameRecord game) {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ScoreSection(
-          game: game,
-          isLiveData: isLiveData,
-          scorePanel: scorePanel,
-        ),
+        _ScoreSection(game: game, isLiveData: isLiveData),
         const SizedBox(height: 16),
-        _QuarterBreakdownSection(
-          game: game,
-          liveEvents: liveEvents,
-          scorePanel: scorePanel,
-        ),
+        _QuarterBreakdownSection(game: game, liveEvents: liveEvents),
       ],
     );
 
@@ -166,13 +149,8 @@ class _GameCard extends StatelessWidget {
 class _ScoreSection extends StatelessWidget {
   final GameRecord game;
   final bool isLiveData;
-  final ScorePanelAdapter? scorePanel;
 
-  const _ScoreSection({
-    required this.game,
-    required this.isLiveData,
-    this.scorePanel,
-  });
+  const _ScoreSection({required this.game, required this.isLiveData});
 
   @override
   Widget build(BuildContext context) {
@@ -190,18 +168,9 @@ class _ScoreSection extends StatelessWidget {
 
     return _GameCard(
       icon: icon,
-      title: '${game.homeTeam} vs ${game.awayTeam}',
+      title: title,
       child: Column(
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
           _TeamScoresRow(game: game),
           const SizedBox(height: 16),
           _GameResultBadge(game: game, isComplete: isComplete),
@@ -219,9 +188,9 @@ class _ScoreSection extends StatelessWidget {
   }
 
   String _getScoreTitle(bool isComplete) {
-    if (isLiveData && scorePanel != null) {
+    if (isLiveData) {
       final gameState = GameStateService.instance;
-      final quarter = scorePanel!.selectedQuarter;
+      final quarter = gameState.selectedQuarter;
       final timeMs = gameState.getElapsedTimeInQuarter();
       final timeStr = StopWatchTimer.getDisplayTime(
         timeMs,
@@ -390,13 +359,8 @@ class _GameResultBadge extends StatelessWidget {
 class _QuarterBreakdownSection extends StatelessWidget {
   final GameRecord game;
   final List<GameEvent>? liveEvents;
-  final ScorePanelAdapter? scorePanel;
 
-  const _QuarterBreakdownSection({
-    required this.game,
-    this.liveEvents,
-    this.scorePanel,
-  });
+  const _QuarterBreakdownSection({required this.game, this.liveEvents});
 
   @override
   Widget build(BuildContext context) {
@@ -443,7 +407,6 @@ class _QuarterBreakdownSection extends StatelessWidget {
           isHomeTeam: isHome,
           isLiveData: liveEvents != null,
           liveEvents: liveEvents,
-          scorePanelAdapter: scorePanel,
         ),
       ],
     );
