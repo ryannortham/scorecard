@@ -10,6 +10,7 @@ class UserPreferencesProvider extends ChangeNotifier {
   String _favoriteTeam = '';
   ThemeMode _themeMode = ThemeMode.system;
   String _colorTheme = ''; // Will be set to default in constructor
+  bool _useTallys = true; // Default to showing tally icons
 
   // Game Setup Preferences
   int _quarterMinutes = 15;
@@ -23,6 +24,7 @@ class UserPreferencesProvider extends ChangeNotifier {
   static const String _favoriteTeamKey = 'favorite_team';
   static const String _themeModeKey = 'theme_mode';
   static const String _colorThemeKey = 'color_theme';
+  static const String _useTallysKey = 'use_tallys';
   static const String _quarterMinutesKey = 'game_setup_quarter_minutes';
   static const String _countdownTimerKey = 'game_setup_countdown_timer';
 
@@ -30,6 +32,7 @@ class UserPreferencesProvider extends ChangeNotifier {
   String get favoriteTeam => _favoriteTeam;
   ThemeMode get themeMode => _themeMode;
   String get colorTheme => _validateColorTheme(_colorTheme);
+  bool get useTallys => _useTallys;
 
   // Game Setup Preferences Getters
   int get quarterMinutes => _quarterMinutes;
@@ -75,6 +78,8 @@ class UserPreferencesProvider extends ChangeNotifier {
       _colorTheme = prefs.getString(_colorThemeKey) ?? 'blue';
       _colorTheme = _validateColorTheme(_colorTheme);
 
+      _useTallys = prefs.getBool(_useTallysKey) ?? true;
+
       // Load game setup preferences
       _quarterMinutes = prefs.getInt(_quarterMinutesKey) ?? 15;
       _isCountdownTimer = prefs.getBool(_countdownTimerKey) ?? true;
@@ -101,6 +106,7 @@ class UserPreferencesProvider extends ChangeNotifier {
     await prefs.setString(_favoriteTeamKey, _favoriteTeam);
     await prefs.setString(_themeModeKey, _themeMode.name);
     await prefs.setString(_colorThemeKey, _colorTheme);
+    await prefs.setBool(_useTallysKey, _useTallys);
 
     // Save game setup preferences
     await prefs.setInt(_quarterMinutesKey, _quarterMinutes);
@@ -122,6 +128,12 @@ class UserPreferencesProvider extends ChangeNotifier {
 
   Future<void> setColorTheme(String theme) async {
     _colorTheme = _validateColorTheme(theme);
+    await _savePreferences();
+    notifyListeners();
+  }
+
+  Future<void> setUseTallys(bool useTallys) async {
+    _useTallys = useTallys;
     await _savePreferences();
     notifyListeners();
   }

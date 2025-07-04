@@ -4,6 +4,7 @@ import 'package:scorecard/models/playhq_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
+import '../widgets/football_icon.dart';
 
 /// Constants for the AddTeamScreen
 class _AddTeamConstants {
@@ -283,8 +284,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.sports_football,
+            FootballIcon(
               size: _AddTeamConstants.largeIconSize,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -383,8 +383,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         color: colorScheme.primaryContainer,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.sports_football,
+      child: FootballIcon(
         size: _AddTeamConstants.defaultLogoIconSize,
         color: colorScheme.onPrimaryContainer,
       ),

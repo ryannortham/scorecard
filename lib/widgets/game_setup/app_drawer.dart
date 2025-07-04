@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/team_list.dart';
+import '../football_icon.dart';
 
 /// A shared app drawer widget that includes navigation and settings
 class AppDrawer extends StatelessWidget {
@@ -48,8 +49,7 @@ class AppDrawer extends StatelessWidget {
                     height: 64,
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.sports_football,
+                      return FootballIcon(
                         size: 64,
                         color: Theme.of(context).colorScheme.onPrimary,
                       );
@@ -147,6 +147,40 @@ class AppDrawer extends StatelessWidget {
                 );
               },
             ),
+
+          // Use Tallys Toggle
+          ListTile(
+            leading: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                Theme.of(context).colorScheme.onSurfaceVariant,
+                BlendMode.srcIn,
+              ),
+              child: Image.asset(
+                'assets/tally/tally5.ico',
+                width: 24,
+                height: 24,
+              ),
+            ),
+            title: const Text('Tally Marks'),
+            trailing: Switch(
+              value: userPreferences.useTallys,
+              onChanged: (bool value) {
+                userPreferences.setUseTallys(value);
+              },
+            ),
+          ),
+
+          // Countdown Timer Toggle
+          ListTile(
+            leading: const Icon(Icons.timer_outlined),
+            title: const Text('Countdown Timer'),
+            trailing: Switch(
+              value: userPreferences.isCountdownTimer,
+              onChanged: (bool value) {
+                userPreferences.setIsCountdownTimer(value);
+              },
+            ),
+          ),
 
           // Theme Mode
           GestureDetector(

@@ -20,11 +20,6 @@ class GameSettingsConfiguration extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Timer Type Setting
-            _buildTimerTypeSection(context, gameState, userPreferences),
-
-            const SizedBox(height: 20),
-
             // Quarter Minutes Setting
             _buildQuarterMinutesSection(context, gameState, userPreferences),
           ],
@@ -90,49 +85,6 @@ class GameSettingsConfiguration extends StatelessWidget {
               userPreferences.setQuarterMinutes(minutes);
             },
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimerTypeSection(
-    BuildContext context,
-    GameStateService gameState,
-    UserPreferencesProvider userPreferences,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Timer Type',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              gameState.isCountdownTimer ? 'Countdown' : 'Count Up',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        Switch(
-          value: gameState.isCountdownTimer,
-          onChanged: (value) {
-            gameState.configureGame(
-              homeTeam: gameState.homeTeam,
-              awayTeam: gameState.awayTeam,
-              gameDate: gameState.gameDate,
-              quarterMinutes: gameState.quarterMinutes,
-              isCountdownTimer: value,
-            );
-            userPreferences.setIsCountdownTimer(value);
-          },
         ),
       ],
     );

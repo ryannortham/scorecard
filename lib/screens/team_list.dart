@@ -7,6 +7,7 @@ import '../providers/user_preferences_provider.dart';
 import '../services/navigation_service.dart';
 import '../screens/add_team.dart';
 import '../widgets/game_setup/app_drawer.dart';
+import '../widgets/football_icon.dart';
 
 class TeamList extends StatefulWidget {
   const TeamList({
@@ -352,8 +353,7 @@ class _TeamListState extends State<TeamList> {
               color: Theme.of(context).colorScheme.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.sports_football,
+            child: FootballIcon(
               size: 28,
               color: Theme.of(context).colorScheme.onPrimaryContainer,
             ),

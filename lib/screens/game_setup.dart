@@ -215,38 +215,41 @@ class _GameSetupState extends State<GameSetup> {
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.6,
                   child: FilledButton.tonal(
-                    onPressed: () {
-                      if (isValidSetup()) {
-                        final gameState = Provider.of<GameStateService>(
-                          context,
-                          listen: false,
-                        );
-                        // First configure the game with current setup data
-                        gameState.configureGame(
-                          homeTeam: homeTeam ?? '',
-                          awayTeam: awayTeam ?? '',
-                          gameDate: gameState.gameDate,
-                          quarterMinutes: gameState.quarterMinutes,
-                          isCountdownTimer: gameState.isCountdownTimer,
-                        );
+                    onPressed:
+                        isValidSetup()
+                            ? () {
+                              final gameState = Provider.of<GameStateService>(
+                                context,
+                                listen: false,
+                              );
+                              // First configure the game with current setup data
+                              gameState.configureGame(
+                                homeTeam: homeTeam ?? '',
+                                awayTeam: awayTeam ?? '',
+                                gameDate: gameState.gameDate,
+                                quarterMinutes: gameState.quarterMinutes,
+                                isCountdownTimer: gameState.isCountdownTimer,
+                              );
 
-                        // Configure timer settings using current game state values
-                        gameState.configureTimer(
-                          isCountdownMode: gameState.isCountdownTimer,
-                          quarterMaxTime: gameState.quarterMinutes * 60 * 1000,
-                        );
+                              // Configure timer settings using current game state values
+                              gameState.configureTimer(
+                                isCountdownMode: gameState.isCountdownTimer,
+                                quarterMaxTime:
+                                    gameState.quarterMinutes * 60 * 1000,
+                              );
 
-                        // Then reset the score state for a new game
-                        gameState.resetGame();
+                              // Then reset the score state for a new game
+                              gameState.resetGame();
 
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder:
-                                (context) => const Scoring(title: 'Scoring'),
-                          ),
-                        );
-                      }
-                    },
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) =>
+                                          const Scoring(title: 'Scoring'),
+                                ),
+                              );
+                            }
+                            : null,
                     child: const Text('Start Scoring'),
                   ),
                 ),

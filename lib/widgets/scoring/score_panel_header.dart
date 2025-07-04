@@ -5,6 +5,7 @@ import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/models/score_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
+import '../football_icon.dart';
 
 /// Header widget displaying team name and total score
 class ScorePanelHeader extends StatelessWidget {
@@ -57,9 +58,7 @@ class ScorePanelHeader extends StatelessWidget {
 
                   return Text(
                     points.toString(),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      // color: Theme.of(context).colorScheme.primary,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                   );
                 },
               ),
@@ -117,8 +116,7 @@ class ScorePanelHeader extends StatelessWidget {
               color: Theme.of(context).colorScheme.primaryContainer,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.diversity_3,
+            child: FootballIcon(
               size: 20,
               color: Theme.of(context).colorScheme.onPrimaryContainer,
             ),

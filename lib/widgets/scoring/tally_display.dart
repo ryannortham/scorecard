@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../services/tally_icon_service.dart';
+import 'package:provider/provider.dart';
+import '../../services/tally_icon_service.dart';
+import '../../providers/user_preferences_provider.dart';
 
 /// A widget that displays tally icons for a given numeric value
 /// Can be forced to show text instead of tally icons
@@ -26,16 +28,20 @@ class TallyDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final baseColor = color ?? theme.colorScheme.onSurface;
-    final effectiveColor = baseColor.withValues(alpha: 0.7);
+    final effectiveColor = baseColor.withValues(alpha: 0.9);
     final effectiveIconSize = iconSize ?? 24.0;
+
+    // Get the user preference for using tallys
+    final userPreferences = Provider.of<UserPreferencesProvider>(context);
+    final shouldUseTally = useTally && userPreferences.useTallys;
 
     // Handle zero or negative values - show nothing (blank)
     if (value <= 0) {
       return const SizedBox.shrink();
     }
 
-    // Show number as text if useTally is false or value is above threshold
-    if (!useTally || value > _textDisplayThreshold) {
+    // Show number as text if shouldUseTally is false or value is above threshold
+    if (!shouldUseTally || value > _textDisplayThreshold) {
       return _buildCenteredContent(_buildTextDisplay(theme, effectiveColor));
     }
 

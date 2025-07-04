@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/screens/team_list.dart';
+import '../football_icon.dart';
 
 /// Widget for selecting home and away teams with drag-and-drop reordering
 class TeamSelectionWidget extends StatefulWidget {
@@ -263,13 +264,12 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Show drag handle when both teams are selected
-          if (widget.homeTeam != null && widget.awayTeam != null)
-            Icon(
-              Icons.drag_handle,
-              color: colorScheme.onSurfaceVariant,
-              size: 20,
-            ),
+          // Show drag handle when this team is selected (so it can be dragged)
+          Icon(
+            Icons.drag_handle,
+            color: colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
           if (onClear != null) ...[
             const SizedBox(width: 8),
             IconButton(
@@ -327,8 +327,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
         color: Theme.of(context).colorScheme.primaryContainer,
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.sports_football,
+      child: FootballIcon(
         size: 28,
         color: Theme.of(context).colorScheme.onPrimaryContainer,
       ),
