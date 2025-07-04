@@ -36,8 +36,8 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
             (context) => TeamList(
               title: title,
               onTeamSelected: (teamName) {
-                // The TeamList will handle the navigation back via Navigator.pop(context, team.name)
-                // We don't need to do anything here except maybe log
+                // This callback gets called when a team is selected
+                // We don't need to do anything here since Navigator.pop will handle the return
               },
             ),
         settings: RouteSettings(arguments: excludeTeam),
@@ -58,7 +58,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
     final teamsProvider = Provider.of<TeamsProvider>(context);
 
     final team =
-        teamName != null
+        teamName != null && teamsProvider.loaded
             ? teamsProvider.teams.cast<dynamic>().firstWhere(
               (t) => t.name == teamName,
               orElse: () => null,
@@ -131,18 +131,23 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
             feedback: Material(
               elevation: 8,
               borderRadius: BorderRadius.circular(12),
-              child: Container(
-                width: 300,
-                decoration: BoxDecoration(
-                  color: colorScheme.secondaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: _buildSelectedState(
-                  team,
-                  teamName,
-                  null,
-                  true,
-                  colorScheme,
+              child: SizedBox(
+                width:
+                    MediaQuery.of(context).size.width -
+                    40, // Reduce by 44px to match original card width
+                child: Card(
+                  elevation: 0,
+                  color: colorScheme.surfaceContainerHigh,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    child: _buildSelectedState(
+                      team,
+                      teamName,
+                      onClear, // Keep the actual onClear function
+                      true,
+                      colorScheme,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -224,17 +229,29 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
   Widget _buildEmptyState(String label, ColorScheme colorScheme) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
+        horizontal: 8.0,
         vertical: 8.0,
       ),
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(Icons.add, size: 24, color: colorScheme.onSurfaceVariant),
+      horizontalTitleGap: 8.0, // Consistent gap with selected state
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Add spacing to align with drag handle + logo when present
+          const SizedBox(width: 28), // 20px (drag handle) + 8px (spacing)
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.add,
+              size: 24,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
       title: Text(
         label,
@@ -253,11 +270,31 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
     ColorScheme colorScheme,
   ) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 8.0,
+      contentPadding: EdgeInsets.only(
+        left: 8.0,
+        right:
+            onClear != null
+                ? 4.0
+                : 8.0, // 4px from right edge when X icon is present
+        top: 8.0,
+        bottom: 8.0,
       ),
-      leading: _buildTeamLogo(team),
+      horizontalTitleGap: 8.0, // Reduce gap between leading and title
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Show drag handle when this team is selected (so it can be dragged)
+          if (showDragHandle) ...[
+            Icon(
+              Icons.drag_handle,
+              color: colorScheme.onSecondaryContainer,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+          ],
+          _buildTeamLogo(team),
+        ],
+      ),
       title: Text(
         teamName,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -265,26 +302,15 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           color: colorScheme.onSecondaryContainer,
         ),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Show drag handle when this team is selected (so it can be dragged)
-          Icon(
-            Icons.drag_handle,
-            color: colorScheme.onSecondaryContainer,
-            size: 20,
-          ),
-          if (onClear != null) ...[
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: onClear,
-              icon: const Icon(Icons.close),
-              iconSize: 20,
-              visualDensity: VisualDensity.compact,
-            ),
-          ],
-        ],
-      ),
+      trailing:
+          onClear != null
+              ? IconButton(
+                onPressed: onClear,
+                icon: const Icon(Icons.close),
+                iconSize: 20,
+                visualDensity: VisualDensity.compact,
+              )
+              : null,
     );
   }
 

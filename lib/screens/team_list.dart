@@ -62,9 +62,7 @@ class _TeamListState extends State<TeamList> {
     if (shouldAutoNavigate) {
       _hasNavigatedToAddTeam = true;
 
-      final addedTeamName = await Navigator.of(
-        context,
-      ).pushReplacement<String, dynamic>(
+      final addedTeamName = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (context) => const AddTeamScreen()),
       );
 
@@ -72,7 +70,7 @@ class _TeamListState extends State<TeamList> {
       if (addedTeamName != null && widget.title != 'Manage Teams') {
         widget.onTeamSelected(addedTeamName);
         if (mounted) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(addedTeamName);
         }
       }
     }
@@ -296,7 +294,9 @@ class _TeamListState extends State<TeamList> {
             if (addedTeamName != null && widget.title != 'Manage Teams') {
               widget.onTeamSelected(addedTeamName);
               if (mounted) {
-                navigator.pop();
+                navigator.pop(
+                  addedTeamName,
+                ); // Return the team name when popping
               }
             }
           },
