@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/models/score_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
@@ -49,10 +49,10 @@ class ScorePanelHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              Consumer<ScorePanelAdapter>(
-                builder: (context, scorePanelAdapter, _) {
-                  final goals = scorePanelAdapter.getCount(isHomeTeam, true);
-                  final behinds = scorePanelAdapter.getCount(isHomeTeam, false);
+              Consumer<GameStateService>(
+                builder: (context, gameStateService, _) {
+                  final goals = gameStateService.getScore(isHomeTeam, true);
+                  final behinds = gameStateService.getScore(isHomeTeam, false);
                   final points = goals * 6 + behinds;
 
                   return Text(

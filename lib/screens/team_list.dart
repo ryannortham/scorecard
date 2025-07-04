@@ -286,7 +286,8 @@ class _TeamListState extends State<TeamList> {
                 : const Center(child: CircularProgressIndicator()),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
-            final addedTeamName = await Navigator.of(context).push<String>(
+            final navigator = Navigator.of(context);
+            final addedTeamName = await navigator.push<String>(
               MaterialPageRoute(builder: (context) => const AddTeamScreen()),
             );
 
@@ -294,7 +295,7 @@ class _TeamListState extends State<TeamList> {
             if (addedTeamName != null && widget.title != 'Manage Teams') {
               widget.onTeamSelected(addedTeamName);
               if (mounted) {
-                Navigator.of(context).pop();
+                navigator.pop();
               }
             }
           },

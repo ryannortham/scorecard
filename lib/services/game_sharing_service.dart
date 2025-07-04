@@ -6,21 +6,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'dart:io';
 
-import 'package:scorecard/adapters/game_setup_adapter.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/game_state_service.dart';
 
 /// Service responsible for handling game sharing functionality
 /// including screenshot capture, image sharing, and debug mode image saving
 class GameSharingService {
   final GlobalKey screenshotWidgetKey;
-  final GameSetupAdapter gameSetupProvider;
-  final ScorePanelAdapter scorePanelProvider;
+  final GameStateService gameStateService;
 
   GameSharingService({
     required this.screenshotWidgetKey,
-    required this.gameSetupProvider,
-    required this.scorePanelProvider,
+    required this.gameStateService,
   });
 
   /// Share game details with screenshot
@@ -127,11 +124,11 @@ class GameSharingService {
   /// Generate a descriptive filename for the image
   String _generateFileName() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final cleanHome = gameSetupProvider.homeTeam.replaceAll(
+    final cleanHome = gameStateService.homeTeam.replaceAll(
       RegExp(r'[^\w]'),
       '',
     );
-    final cleanAway = gameSetupProvider.awayTeam.replaceAll(
+    final cleanAway = gameStateService.awayTeam.replaceAll(
       RegExp(r'[^\w]'),
       '',
     );
@@ -141,12 +138,12 @@ class GameSharingService {
   /// Build share text with game details
   String _buildShareText() {
     final homeScore =
-        '${scorePanelProvider.homeGoals}.${scorePanelProvider.homeBehinds} (${scorePanelProvider.homePoints})';
+        '${gameStateService.homeGoals}.${gameStateService.homeBehinds} (${gameStateService.homePoints})';
     final awayScore =
-        '${scorePanelProvider.awayGoals}.${scorePanelProvider.awayBehinds} (${scorePanelProvider.awayPoints})';
+        '${gameStateService.awayGoals}.${gameStateService.awayBehinds} (${gameStateService.awayPoints})';
 
-    return '''${gameSetupProvider.homeTeam} vs ${gameSetupProvider.awayTeam}
+    return '''${gameStateService.homeTeam} vs ${gameStateService.awayTeam}
 Score: $homeScore - $awayScore
-Date: ${gameSetupProvider.gameDate.day}/${gameSetupProvider.gameDate.month}/${gameSetupProvider.gameDate.year}''';
+Date: ${gameStateService.gameDate.day}/${gameStateService.gameDate.month}/${gameStateService.gameDate.year}''';
   }
 }

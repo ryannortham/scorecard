@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/adapters/score_panel_adapter.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
 class ScoreCounter extends StatefulWidget {
@@ -24,9 +23,9 @@ class ScoreCounter extends StatefulWidget {
 class ScoreCounterState extends State<ScoreCounter> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<ScorePanelAdapter>(
-      builder: (context, scorePanelAdapter, _) {
-        final currentCount = scorePanelAdapter.getCount(
+    return Consumer<GameStateService>(
+      builder: (context, gameStateService, _) {
+        final currentCount = gameStateService.getScore(
           widget.isHomeTeam,
           widget.isGoal,
         );
@@ -68,7 +67,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                       final canDecrease =
                           widget.enabled &&
                           currentCount > 0 &&
-                          scorePanelAdapter.hasEventInCurrentQuarter(
+                          gameStateService.hasEventInCurrentQuarter(
                             widget.isHomeTeam,
                             widget.isGoal,
                           );

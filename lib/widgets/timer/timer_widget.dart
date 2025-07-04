@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/score_panel_adapter.dart';
-import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
@@ -18,13 +16,11 @@ class TimerWidget extends StatefulWidget {
 }
 
 class TimerWidgetState extends State<TimerWidget> {
-  late ScorePanelAdapter scorePanelProvider;
   final GameStateService _gameStateService = GameStateService.instance;
 
   @override
   void initState() {
     super.initState();
-    scorePanelProvider = Provider.of<ScorePanelAdapter>(context, listen: false);
 
     _gameStateService.addListener(_onTimerStateChanged);
 
@@ -35,7 +31,7 @@ class TimerWidgetState extends State<TimerWidget> {
 
   void _onTimerStateChanged() {
     if (mounted && widget.isRunning != null) {
-      widget.isRunning!.value = scorePanelProvider.isTimerRunning;
+      widget.isRunning!.value = _gameStateService.isTimerRunning;
     }
   }
 
@@ -46,10 +42,10 @@ class TimerWidgetState extends State<TimerWidget> {
   }
 
   void toggleTimer() {
-    scorePanelProvider.setTimerRunning(!scorePanelProvider.isTimerRunning);
+    _gameStateService.setTimerRunning(!_gameStateService.isTimerRunning);
 
     if (widget.isRunning != null) {
-      widget.isRunning!.value = scorePanelProvider.isTimerRunning;
+      widget.isRunning!.value = _gameStateService.isTimerRunning;
     }
   }
 
@@ -62,7 +58,7 @@ class TimerWidgetState extends State<TimerWidget> {
   }
 
   Future<void> _handleNextQuarter() async {
-    final currentQuarter = scorePanelProvider.selectedQuarter;
+    final currentQuarter = _gameStateService.selectedQuarter;
     final isLastQuarter = currentQuarter == 4;
     final remainingTime = _gameStateService.getRemainingTimeInQuarter();
     final shouldSkipConfirmation = remainingTime <= 30000; // 30 seconds
@@ -88,11 +84,11 @@ class TimerWidgetState extends State<TimerWidget> {
     if (currentQuarter == 4) return; // Game complete
 
     // Transition to next quarter
-    if (scorePanelProvider.isTimerRunning) {
-      scorePanelProvider.setTimerRunning(false);
+    if (_gameStateService.isTimerRunning) {
+      _gameStateService.setTimerRunning(false);
     }
 
-    scorePanelProvider.setSelectedQuarter(currentQuarter + 1);
+    _gameStateService.setSelectedQuarter(currentQuarter + 1);
     resetTimer();
   }
 
@@ -102,7 +98,7 @@ class TimerWidgetState extends State<TimerWidget> {
       elevation: 0,
       child: Column(
         children: [
-          QuarterProgress(scorePanelProvider: scorePanelProvider),
+          QuarterProgress(),
           const SizedBox(height: 8),
           const TimerClock(),
           TimerControls(

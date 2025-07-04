@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/adapters/score_panel_adapter.dart';
+import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/widgets/scoring/score_panel_header.dart';
@@ -79,9 +79,9 @@ class ScorePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ScorePanelAdapter>(
-      builder: (context, scorePanelAdapter, _) {
-        final currentQ = currentQuarter ?? scorePanelAdapter.selectedQuarter;
+    return Consumer<GameStateService>(
+      builder: (context, gameStateService, _) {
+        final currentQ = currentQuarter ?? gameStateService.selectedQuarter;
 
         return Card(
           elevation: 0,
