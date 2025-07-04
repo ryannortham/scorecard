@@ -71,10 +71,11 @@ class ScorePanelHeader extends StatelessWidget {
 
   /// Build team logo widget (32x32 size for compact header)
   Widget _buildTeamLogo(Team? team) {
-    if (team?.logoUrl != null && team!.logoUrl!.isNotEmpty) {
+    final logoUrl = team?.logoUrl;
+    if (logoUrl != null && logoUrl.isNotEmpty) {
       return ClipOval(
         child: Image.network(
-          team.logoUrl!,
+          logoUrl,
           width: 32,
           height: 32,
           fit: BoxFit.cover,

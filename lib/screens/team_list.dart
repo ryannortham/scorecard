@@ -309,10 +309,11 @@ class _TeamListState extends State<TeamList> {
   }
 
   Widget _buildTeamLogo(Team team) {
-    if (team.logoUrl != null && team.logoUrl!.isNotEmpty) {
+    final logoUrl = team.logoUrl;
+    if (logoUrl != null && logoUrl.isNotEmpty) {
       return ClipOval(
         child: Image.network(
-          team.logoUrl!,
+          logoUrl,
           width: 48,
           height: 48,
           fit: BoxFit.cover,
@@ -413,7 +414,7 @@ class _TeamListState extends State<TeamList> {
             TextButton(
               child: const Text('Save'),
               onPressed: () async {
-                if (formKey.currentState!.validate()) {
+                if (formKey.currentState?.validate() ?? false) {
                   final newTeamName = controller.text.trim();
                   if (newTeamName != currentTeam.name) {
                     await teamsProvider.editTeam(

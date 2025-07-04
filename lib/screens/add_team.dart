@@ -75,10 +75,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
           // Filter to only include teams with logos
           _searchResults =
               response.results
-                  .where(
-                    (team) =>
-                        team.logoUrl48 != null && team.logoUrl48!.isNotEmpty,
-                  )
+                  .where((team) => team.logoUrl48?.isNotEmpty ?? false)
                   .toList();
           _errorMessage = null;
         } else {
@@ -469,7 +466,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
             TextButton(
               child: const Text('Add'),
               onPressed: () async {
-                if (formKey.currentState!.validate()) {
+                if (formKey.currentState?.validate() ?? false) {
                   final teamName = controller.text.trim();
                   await teamsProvider.addTeam(teamName);
                   if (context.mounted) {

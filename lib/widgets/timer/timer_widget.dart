@@ -24,14 +24,12 @@ class TimerWidgetState extends State<TimerWidget> {
 
     _gameStateService.addListener(_onTimerStateChanged);
 
-    if (widget.isRunning != null) {
-      widget.isRunning!.value = _gameStateService.isTimerRunning;
-    }
+    widget.isRunning?.value = _gameStateService.isTimerRunning;
   }
 
   void _onTimerStateChanged() {
-    if (mounted && widget.isRunning != null) {
-      widget.isRunning!.value = _gameStateService.isTimerRunning;
+    if (mounted) {
+      widget.isRunning?.value = _gameStateService.isTimerRunning;
     }
   }
 
@@ -44,17 +42,13 @@ class TimerWidgetState extends State<TimerWidget> {
   void toggleTimer() {
     _gameStateService.setTimerRunning(!_gameStateService.isTimerRunning);
 
-    if (widget.isRunning != null) {
-      widget.isRunning!.value = _gameStateService.isTimerRunning;
-    }
+    widget.isRunning?.value = _gameStateService.isTimerRunning;
   }
 
   void resetTimer() {
     _gameStateService.resetTimer();
 
-    if (widget.isRunning != null) {
-      widget.isRunning!.value = false;
-    }
+    widget.isRunning?.value = false;
   }
 
   Future<void> _handleNextQuarter() async {

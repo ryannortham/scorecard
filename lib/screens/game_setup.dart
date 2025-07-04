@@ -29,8 +29,8 @@ class _GameSetupState extends State<GameSetup> {
 
   bool isValidSetup() {
     bool dateValid = dateKey.currentState?.validate() ?? false;
-    bool homeTeamValid = homeTeam != null && homeTeam!.isNotEmpty;
-    bool awayTeamValid = awayTeam != null && awayTeam!.isNotEmpty;
+    bool homeTeamValid = homeTeam?.isNotEmpty ?? false;
+    bool awayTeamValid = awayTeam?.isNotEmpty ?? false;
 
     return dateValid && homeTeamValid && awayTeamValid;
   }

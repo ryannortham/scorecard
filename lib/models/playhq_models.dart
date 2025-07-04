@@ -67,14 +67,14 @@ class Organisation {
 
   /// Get the most appropriate logo URL for 48x48 display
   String? get logoUrl48 {
-    if (logo?.sizes.isNotEmpty == true) {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
       // Find the smallest logo that's at least 48x48, or the largest available
-      final sortedSizes =
-          logo!.sizes..sort((a, b) {
-            final aSize = a.dimensions.width * a.dimensions.height;
-            final bSize = b.dimensions.width * b.dimensions.height;
-            return aSize.compareTo(bSize);
-          });
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
 
       // Find first size >= 48x48, or use the largest available
       final appropriateSize = sortedSizes.firstWhere(
@@ -91,14 +91,14 @@ class Organisation {
 
   /// Get the most appropriate logo URL for 32x32 display
   String? get logoUrl32 {
-    if (logo?.sizes.isNotEmpty == true) {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
       // Find the smallest logo that's at least 32x32, or the largest available
-      final sortedSizes =
-          logo!.sizes..sort((a, b) {
-            final aSize = a.dimensions.width * a.dimensions.height;
-            final bSize = b.dimensions.width * b.dimensions.height;
-            return aSize.compareTo(bSize);
-          });
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
 
       // Find first size >= 32x32, or use the largest available
       final appropriateSize = sortedSizes.firstWhere(
@@ -173,13 +173,13 @@ class Tenant {
 
   /// Get the most appropriate logo URL for 48x48 display
   String? get logoUrl48 {
-    if (logo?.sizes.isNotEmpty == true) {
-      final sortedSizes =
-          logo!.sizes..sort((a, b) {
-            final aSize = a.dimensions.width * a.dimensions.height;
-            final bSize = b.dimensions.width * b.dimensions.height;
-            return aSize.compareTo(bSize);
-          });
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
 
       final appropriateSize = sortedSizes.firstWhere(
         (size) => size.dimensions.width >= 48 && size.dimensions.height >= 48,
@@ -193,13 +193,13 @@ class Tenant {
 
   /// Get the most appropriate logo URL for 32x32 display
   String? get logoUrl32 {
-    if (logo?.sizes.isNotEmpty == true) {
-      final sortedSizes =
-          logo!.sizes..sort((a, b) {
-            final aSize = a.dimensions.width * a.dimensions.height;
-            final bSize = b.dimensions.width * b.dimensions.height;
-            return aSize.compareTo(bSize);
-          });
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
 
       final appropriateSize = sortedSizes.firstWhere(
         (size) => size.dimensions.width >= 32 && size.dimensions.height >= 32,
