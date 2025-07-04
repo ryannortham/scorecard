@@ -168,18 +168,9 @@ class _ScoreSection extends StatelessWidget {
 
     return _GameCard(
       icon: icon,
-      title: '${game.homeTeam} vs ${game.awayTeam}',
+      title: title,
       child: Column(
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
           _TeamScoresRow(game: game),
           const SizedBox(height: 16),
           _GameResultBadge(game: game, isComplete: isComplete),

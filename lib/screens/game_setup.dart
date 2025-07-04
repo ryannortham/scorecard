@@ -28,7 +28,7 @@ class _GameSetupState extends State<GameSetup> {
   final TextEditingController _dateController = TextEditingController();
 
   bool isValidSetup() {
-    bool dateValid = dateKey.currentState!.validate();
+    bool dateValid = dateKey.currentState?.validate() ?? false;
     bool homeTeamValid = homeTeam != null && homeTeam!.isNotEmpty;
     bool awayTeamValid = awayTeam != null && awayTeam!.isNotEmpty;
 
@@ -113,151 +113,236 @@ class _GameSetupState extends State<GameSetup> {
         ),
       ),
       drawer: const AppDrawer(currentRoute: 'game_setup'),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 1),
-              Card(
-                elevation: 0,
-                color: Theme.of(context).colorScheme.surfaceContainerLow,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      TeamSelectionWidget(
-                        homeTeam: homeTeam,
-                        awayTeam: awayTeam,
-                        onHomeTeamChanged: (newTeam) {
-                          setState(() {
-                            homeTeam = newTeam;
-                          });
-                          // Also update the game state immediately
-                          gameState.configureGame(
-                            homeTeam: newTeam ?? '',
-                            awayTeam: gameState.awayTeam,
-                            gameDate: gameState.gameDate,
-                            quarterMinutes: gameState.quarterMinutes,
-                            isCountdownTimer: gameState.isCountdownTimer,
-                          );
-                        },
-                        onAwayTeamChanged: (newTeam) {
-                          setState(() {
-                            awayTeam = newTeam;
-                          });
-                          // Also update the game state immediately
-                          gameState.configureGame(
-                            homeTeam: gameState.homeTeam,
-                            awayTeam: newTeam ?? '',
-                            gameDate: gameState.gameDate,
-                            quarterMinutes: gameState.quarterMinutes,
-                            isCountdownTimer: gameState.isCountdownTimer,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      Form(
-                        key: dateKey,
-                        child: TextFormField(
-                          readOnly: true,
-                          controller: _dateController,
-                          decoration: const InputDecoration(
-                            labelText: 'Game Date',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please select Game Date';
-                            }
-                            return null;
-                          },
-                          onTap: () async {
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now().subtract(
-                                const Duration(days: 365),
-                              ),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
-                              ),
-                            );
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final availableHeight = constraints.maxHeight;
 
-                            if (pickedDate != null) {
-                              gameState.configureGame(
-                                homeTeam: gameState.homeTeam,
-                                awayTeam: gameState.awayTeam,
-                                gameDate: pickedDate,
-                                quarterMinutes: gameState.quarterMinutes,
-                                isCountdownTimer: gameState.isCountdownTimer,
-                              );
-                              _dateController.text = DateFormat(
-                                'EEEE dd/MM/yyyy',
-                              ).format(pickedDate);
-                            }
-                            dateKey.currentState!.validate();
-                          },
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(8.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: availableHeight - 16.0),
+              child: IntrinsicHeight(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Teams Section
+                      Card(
+                        elevation: 0,
+                        color:
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
+                                  child: Text(
+                                    'Teams',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium?.copyWith(
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              TeamSelectionWidget(
+                                homeTeam: homeTeam,
+                                awayTeam: awayTeam,
+                                onHomeTeamChanged: (newTeam) {
+                                  setState(() {
+                                    homeTeam = newTeam;
+                                  });
+                                  // Also update the game state immediately
+                                  gameState.configureGame(
+                                    homeTeam: newTeam ?? '',
+                                    awayTeam: gameState.awayTeam,
+                                    gameDate: gameState.gameDate,
+                                    quarterMinutes: gameState.quarterMinutes,
+                                    isCountdownTimer:
+                                        gameState.isCountdownTimer,
+                                  );
+                                },
+                                onAwayTeamChanged: (newTeam) {
+                                  setState(() {
+                                    awayTeam = newTeam;
+                                  });
+                                  // Also update the game state immediately
+                                  gameState.configureGame(
+                                    homeTeam: gameState.homeTeam,
+                                    awayTeam: newTeam ?? '',
+                                    gameDate: gameState.gameDate,
+                                    quarterMinutes: gameState.quarterMinutes,
+                                    isCountdownTimer:
+                                        gameState.isCountdownTimer,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+
+                      const SizedBox(height: 8),
+
+                      // Game Date Section
+                      Card(
+                        elevation: 0,
+                        color:
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Game Date',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Form(
+                                key: dateKey,
+                                child: TextFormField(
+                                  readOnly: true,
+                                  controller: _dateController,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please select Game Date';
+                                    }
+                                    return null;
+                                  },
+                                  onTap: () async {
+                                    final DateTime? pickedDate =
+                                        await showDatePicker(
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime.now().subtract(
+                                            const Duration(days: 365),
+                                          ),
+                                          lastDate: DateTime.now().add(
+                                            const Duration(days: 365),
+                                          ),
+                                        );
+
+                                    if (pickedDate != null) {
+                                      gameState.configureGame(
+                                        homeTeam: gameState.homeTeam,
+                                        awayTeam: gameState.awayTeam,
+                                        gameDate: pickedDate,
+                                        quarterMinutes:
+                                            gameState.quarterMinutes,
+                                        isCountdownTimer:
+                                            gameState.isCountdownTimer,
+                                      );
+                                      _dateController.text = DateFormat(
+                                        'EEEE dd/MM/yyyy',
+                                      ).format(pickedDate);
+                                    }
+                                    dateKey.currentState?.validate();
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Quarter Minutes Section
+                      Card(
+                        elevation: 0,
+                        color:
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: GameSettingsConfiguration(),
+                        ),
+                      ),
+
                       const SizedBox(height: 24),
-                      const GameSettingsConfiguration(),
+
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: FilledButton.tonal(
+                          onPressed:
+                              isValidSetup()
+                                  ? () {
+                                    final gameState =
+                                        Provider.of<GameStateService>(
+                                          context,
+                                          listen: false,
+                                        );
+                                    // First configure the game with current setup data
+                                    gameState.configureGame(
+                                      homeTeam: homeTeam ?? '',
+                                      awayTeam: awayTeam ?? '',
+                                      gameDate: gameState.gameDate,
+                                      quarterMinutes: gameState.quarterMinutes,
+                                      isCountdownTimer:
+                                          gameState.isCountdownTimer,
+                                    );
+
+                                    // Configure timer settings using current game state values
+                                    gameState.configureTimer(
+                                      isCountdownMode:
+                                          gameState.isCountdownTimer,
+                                      quarterMaxTime:
+                                          gameState.quarterMinutes * 60 * 1000,
+                                    );
+
+                                    // Then reset the score state for a new game
+                                    gameState.resetGame();
+
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) =>
+                                                const Scoring(title: 'Scoring'),
+                                      ),
+                                    );
+                                  }
+                                  : null,
+                          child: const Text('Start Scoring'),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: FilledButton.tonal(
-                    onPressed:
-                        isValidSetup()
-                            ? () {
-                              final gameState = Provider.of<GameStateService>(
-                                context,
-                                listen: false,
-                              );
-                              // First configure the game with current setup data
-                              gameState.configureGame(
-                                homeTeam: homeTeam ?? '',
-                                awayTeam: awayTeam ?? '',
-                                gameDate: gameState.gameDate,
-                                quarterMinutes: gameState.quarterMinutes,
-                                isCountdownTimer: gameState.isCountdownTimer,
-                              );
-
-                              // Configure timer settings using current game state values
-                              gameState.configureTimer(
-                                isCountdownMode: gameState.isCountdownTimer,
-                                quarterMaxTime:
-                                    gameState.quarterMinutes * 60 * 1000,
-                              );
-
-                              // Then reset the score state for a new game
-                              gameState.resetGame();
-
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) =>
-                                          const Scoring(title: 'Scoring'),
-                                ),
-                              );
-                            }
-                            : null,
-                    child: const Text('Start Scoring'),
-                  ),
-                ),
-              ),
-              const Spacer(flex: 1),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

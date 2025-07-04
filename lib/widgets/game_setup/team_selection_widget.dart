@@ -69,7 +69,10 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
 
     Widget cardContent = Card(
       elevation: 0,
-      color: colorScheme.surfaceContainer,
+      color:
+          teamName == null
+              ? colorScheme.surfaceContainer
+              : colorScheme.surfaceContainerHigh,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -131,7 +134,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
               child: Container(
                 width: 300,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
+                  color: colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: _buildSelectedState(
@@ -257,9 +260,10 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
       leading: _buildTeamLogo(team),
       title: Text(
         teamName,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+          color: colorScheme.onSecondaryContainer,
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -267,7 +271,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           // Show drag handle when this team is selected (so it can be dragged)
           Icon(
             Icons.drag_handle,
-            color: colorScheme.onSurfaceVariant,
+            color: colorScheme.onSecondaryContainer,
             size: 20,
           ),
           if (onClear != null) ...[
@@ -359,7 +363,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           isHomeTeam: true,
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
 
         // Away Team Card
         _buildTeamCard(
