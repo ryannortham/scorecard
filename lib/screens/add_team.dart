@@ -71,7 +71,14 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
       setState(() {
         _isLoading = false;
         if (response != null) {
-          _searchResults = response.results;
+          // Filter to only include teams with logos
+          _searchResults =
+              response.results
+                  .where(
+                    (team) =>
+                        team.logoUrl48 != null && team.logoUrl48!.isNotEmpty,
+                  )
+                  .toList();
           _errorMessage = null;
         } else {
           _searchResults = [];
@@ -97,9 +104,16 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         title: const Text('Add Team'),
         backgroundColor: colorScheme.primaryContainer,
         foregroundColor: colorScheme.onPrimaryContainer,
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => Scaffold.of(context).openDrawer(),
+        leading: Builder(
+          builder:
+              (context) => IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  // Unfocus search bar before opening drawer to prevent potential conflicts
+                  _searchFocusNode.unfocus();
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
         ),
       ),
       drawer: const AppDrawer(currentRoute: 'add_team'),
@@ -391,6 +405,8 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
             backgroundColor: colorScheme.error,
           ),
         );
+        // Still return the team name for potential selection
+        Navigator.of(context).pop(team.name);
       }
       return;
     }
@@ -398,9 +414,9 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     // Add team with logo
     await teamsProvider.addTeam(team.name, logoUrl: team.logoUrl48);
 
-    // Navigate back to manage teams
+    // Navigate back and return the team name for potential selection
     if (mounted) {
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(team.name);
     }
   }
 
@@ -461,7 +477,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     Navigator.of(context).pop(); // Close dialog
                     Navigator.of(
                       context,
-                    ).pop(); // Navigate back to manage teams
+                    ).pop(teamName); // Navigate back and return team name
                   }
                 }
               },

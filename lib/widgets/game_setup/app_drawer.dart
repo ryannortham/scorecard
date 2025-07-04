@@ -47,59 +47,47 @@ class AppDrawer extends StatelessWidget {
                     width: 64,
                     height: 64,
                     fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(
+                        Icons.sports_football,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      );
+                    },
                   ),
                 ),
               ],
             ),
           ),
 
-          // Favorite Team
-          ListTile(
-            leading: const Icon(Icons.star_outline),
-            title: const Text('Favorite Team'),
-            subtitle: Text(
-              userPreferences.favoriteTeam.isEmpty
-                  ? 'Not set'
-                  : userPreferences.favoriteTeam,
-            ),
-            trailing:
-                userPreferences.favoriteTeam.isNotEmpty
-                    ? IconButton(
-                      onPressed: () => userPreferences.setFavoriteTeam(''),
-                      icon: const Icon(Icons.clear_outlined),
-                      tooltip: 'Clear favorite team',
-                    )
-                    : null,
-            onTap: () async {
-              Navigator.pop(context);
-              await Navigator.push<String>(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (context) => TeamList(
-                        title: 'Select Favorite Team',
-                        onTeamSelected: (teamName) {
-                          userPreferences.setFavoriteTeam(teamName);
-                        },
-                      ),
-                ),
-              );
-            },
-          ),
-
-          if (currentRoute != 'team_list')
+          // Favorite Team - hide on team-related screens to prevent navigation conflicts
+          if (currentRoute != 'add_team' && currentRoute != 'team_list')
             ListTile(
-              leading: const Icon(Icons.diversity_3),
-              title: const Text('Manage Teams'),
-              onTap: () {
+              leading: const Icon(Icons.star_outline),
+              title: const Text('Favorite Team'),
+              subtitle: Text(
+                userPreferences.favoriteTeam.isEmpty
+                    ? 'Not set'
+                    : userPreferences.favoriteTeam,
+              ),
+              trailing:
+                  userPreferences.favoriteTeam.isNotEmpty
+                      ? IconButton(
+                        onPressed: () => userPreferences.setFavoriteTeam(''),
+                        icon: const Icon(Icons.clear_outlined),
+                        tooltip: 'Clear favorite team',
+                      )
+                      : null,
+              onTap: () async {
                 Navigator.pop(context);
-                Navigator.of(context).push(
+                await Navigator.push<String>(
+                  context,
                   MaterialPageRoute(
                     builder:
                         (context) => TeamList(
-                          title: 'Manage Teams',
+                          title: 'Select Favorite Team',
                           onTeamSelected: (teamName) {
-                            // No action needed when selecting from manage teams
+                            userPreferences.setFavoriteTeam(teamName);
                           },
                         ),
                   ),
@@ -107,8 +95,46 @@ class AppDrawer extends StatelessWidget {
               },
             ),
 
-          // Navigation Items
-          if (currentRoute != 'game_history')
+          // Manage Teams - hide on team-related screens to prevent navigation conflicts
+          if (currentRoute != 'team_list' && currentRoute != 'add_team')
+            ListTile(
+              leading: const Icon(Icons.diversity_3),
+              title: const Text('Manage Teams'),
+              onTap: () {
+                Navigator.pop(context);
+                // Use pushReplacement when coming from add_team to prevent stack buildup
+                if (currentRoute == 'add_team') {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => TeamList(
+                            title: 'Manage Teams',
+                            onTeamSelected: (teamName) {
+                              // No action needed when selecting from manage teams
+                            },
+                          ),
+                    ),
+                  );
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (context) => TeamList(
+                            title: 'Manage Teams',
+                            onTeamSelected: (teamName) {
+                              // No action needed when selecting from manage teams
+                            },
+                          ),
+                    ),
+                  );
+                }
+              },
+            ),
+
+          // Navigation Items - hide Game History on team-related screens to prevent navigation conflicts
+          if (currentRoute != 'game_history' &&
+              currentRoute != 'add_team' &&
+              currentRoute != 'team_list')
             ListTile(
               leading: const Icon(Icons.history_outlined),
               title: const Text('Game History'),
@@ -208,8 +234,14 @@ class AppDrawer extends StatelessWidget {
     UserPreferencesProvider provider,
     Offset tapPosition,
   ) {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    if (!context.mounted) return;
+
+    final RenderObject? overlayRenderObject =
+        Overlay.of(context).context.findRenderObject();
+
+    if (overlayRenderObject is! RenderBox) return;
+
+    final RenderBox overlay = overlayRenderObject;
 
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(tapPosition, tapPosition),
@@ -275,8 +307,14 @@ class AppDrawer extends StatelessWidget {
     UserPreferencesProvider provider,
     Offset tapPosition,
   ) {
-    final RenderBox overlay =
-        Overlay.of(context).context.findRenderObject() as RenderBox;
+    if (!context.mounted) return;
+
+    final RenderObject? overlayRenderObject =
+        Overlay.of(context).context.findRenderObject();
+
+    if (overlayRenderObject is! RenderBox) return;
+
+    final RenderBox overlay = overlayRenderObject;
 
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(tapPosition, tapPosition),

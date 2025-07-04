@@ -23,6 +23,7 @@ class TeamList extends StatefulWidget {
 
 class _TeamListState extends State<TeamList> {
   bool _hasNavigatedToAddTeam = false;
+  bool _hasInitiallyLoaded = false; // Track if we've completed initial load
 
   // Selection mode state
   bool _isSelectionMode = false;
@@ -37,23 +38,47 @@ class _TeamListState extends State<TeamList> {
     });
   }
 
-  void _checkForEmptyTeamsList() {
+  void _checkForEmptyTeamsList() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamToExclude = ModalRoute.of(context)?.settings.arguments as String?;
+    final filteredTeams =
+        teamsProvider.teams
+            .where((team) => team.name != teamToExclude)
+            .toList();
 
     // Only auto-navigate if:
     // 1. Teams are loaded
-    // 2. Teams list is empty
+    // 2. Either the full teams list is empty (for Manage Teams) OR the filtered teams list is empty (for team selection)
     // 3. We haven't already navigated
-    // 4. This is the manage teams screen (we don't want to auto-navigate for team selection)
-    if (teamsProvider.loaded &&
-        teamsProvider.teams.isEmpty &&
+    // 4. This is the initial load (not after user deletions)
+    final shouldAutoNavigate =
+        teamsProvider.loaded &&
         !_hasNavigatedToAddTeam &&
-        widget.title == 'Manage Teams') {
+        !_hasInitiallyLoaded &&
+        ((widget.title == 'Manage Teams' && teamsProvider.teams.isEmpty) ||
+            (widget.title != 'Manage Teams' && filteredTeams.isEmpty));
+
+    if (shouldAutoNavigate) {
       _hasNavigatedToAddTeam = true;
 
-      Navigator.of(context).pushReplacement(
+      final addedTeamName = await Navigator.of(
+        context,
+      ).pushReplacement<String, dynamic>(
         MaterialPageRoute(builder: (context) => const AddTeamScreen()),
       );
+
+      // If a team was added and this is a team selection screen, auto-select it
+      if (addedTeamName != null && widget.title != 'Manage Teams') {
+        widget.onTeamSelected(addedTeamName);
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      }
+    }
+
+    // Mark that we've completed initial loading AFTER checking for auto-navigation
+    if (teamsProvider.loaded && !_hasInitiallyLoaded) {
+      _hasInitiallyLoaded = true;
     }
   }
 
@@ -260,10 +285,18 @@ class _TeamListState extends State<TeamList> {
                 )
                 : const Center(child: CircularProgressIndicator()),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.of(context).push(
+          onPressed: () async {
+            final addedTeamName = await Navigator.of(context).push<String>(
               MaterialPageRoute(builder: (context) => const AddTeamScreen()),
             );
+
+            // If a team was added and this is a team selection screen, auto-select it
+            if (addedTeamName != null && widget.title != 'Manage Teams') {
+              widget.onTeamSelected(addedTeamName);
+              if (mounted) {
+                Navigator.of(context).pop();
+              }
+            }
           },
           tooltip: 'Add Team',
           icon: const Icon(Icons.add_outlined),
