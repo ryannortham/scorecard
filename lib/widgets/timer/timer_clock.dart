@@ -75,7 +75,7 @@ class TimerClock extends StatelessWidget {
                                 timerValue,
                                 quarterMSec,
                                 isCountdownTimer,
-                              ).withOpacity(0.7),
+                              ).withValues(alpha: 0.7),
                             ),
                           ),
                         ),
