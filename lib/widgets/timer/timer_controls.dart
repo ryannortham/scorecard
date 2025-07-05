@@ -18,12 +18,35 @@ class TimerControls extends StatelessWidget {
     this.isRunningNotifier,
   });
 
-  /// Determines if reset/next buttons should be enabled
-  bool _isButtonEnabled(GameStateService gameState) {
+  /// Determines if reset button should be enabled
+  bool _isResetEnabled(GameStateService gameState) {
+    // Reset button should never be enabled while timer is running
     if (gameState.isTimerRunning) return false;
 
     final currentTime = gameState.timerRawTime;
     final quarterMSec = gameState.quarterMSec;
+
+    return gameState.isCountdownTimer
+        ? currentTime != quarterMSec
+        : currentTime != 0;
+  }
+
+  /// Determines if next button should be enabled
+  bool _isNextEnabled(GameStateService gameState) {
+    final currentTime = gameState.timerRawTime;
+    final quarterMSec = gameState.quarterMSec;
+
+    // Check if we're in overtime
+    final isOvertime =
+        gameState.isCountdownTimer
+            ? currentTime <= 0
+            : currentTime > quarterMSec;
+
+    // Enable if in overtime, regardless of timer state
+    if (isOvertime) return true;
+
+    // Otherwise, only enable if timer is stopped and time has changed
+    if (gameState.isTimerRunning) return false;
 
     return gameState.isCountdownTimer
         ? currentTime != quarterMSec
@@ -40,9 +63,18 @@ class TimerControls extends StatelessWidget {
             valueListenable:
                 isRunningNotifier ?? ValueNotifier(gameState.isTimerRunning),
             builder: (context, isTimerRunning, _) {
-              final isEnabled = _isButtonEnabled(gameState);
+              final isResetEnabled = _isResetEnabled(gameState);
+              final isNextEnabled = _isNextEnabled(gameState);
               final currentQuarter = gameState.selectedQuarter;
               final isLastQuarter = currentQuarter == 4;
+
+              // Check if we're in overtime for button styling
+              final currentTime = gameState.timerRawTime;
+              final quarterMSec = gameState.quarterMSec;
+              final isOvertime =
+                  gameState.isCountdownTimer
+                      ? currentTime <= 0
+                      : currentTime > quarterMSec;
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -51,7 +83,7 @@ class TimerControls extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: FilledButton.tonalIcon(
-                      onPressed: isEnabled ? onResetTimer : null,
+                      onPressed: isResetEnabled ? onResetTimer : null,
                       icon: const Icon(Icons.refresh, size: 16),
                       label: const Text(
                         'Reset',
@@ -66,38 +98,78 @@ class TimerControls extends StatelessWidget {
                     flex: 3,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: FilledButton.tonalIcon(
-                        onPressed: onToggleTimer,
-                        icon: Icon(
-                          isTimerRunning ? Icons.pause : Icons.play_arrow,
-                          size: 18,
-                        ),
-                        label: Text(
-                          isTimerRunning ? 'Pause' : 'Start',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
+                      child:
+                          isTimerRunning
+                              ? FilledButton.tonalIcon(
+                                onPressed: onToggleTimer,
+                                icon: const Icon(Icons.pause, size: 18),
+                                label: const Text(
+                                  'Pause',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              )
+                              : (isOvertime
+                                  ? FilledButton.tonalIcon(
+                                    onPressed: onToggleTimer,
+                                    icon: const Icon(
+                                      Icons.play_arrow,
+                                      size: 18,
+                                    ),
+                                    label: const Text(
+                                      'Start',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  )
+                                  : FilledButton.icon(
+                                    onPressed: onToggleTimer,
+                                    icon: const Icon(
+                                      Icons.play_arrow,
+                                      size: 18,
+                                    ),
+                                    label: const Text(
+                                      'Start',
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  )),
                     ),
                   ),
 
                   // Next Button
                   Expanded(
                     flex: 2,
-                    child: FilledButton.tonalIcon(
-                      onPressed: isEnabled ? onNextQuarter : null,
-                      icon: Icon(
-                        isLastQuarter
-                            ? Icons.outlined_flag
-                            : Icons.arrow_forward,
-                        size: 16,
-                      ),
-                      label: Text(
-                        isLastQuarter ? 'End' : 'Next',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
+                    child:
+                        isOvertime
+                            ? FilledButton.icon(
+                              onPressed: isNextEnabled ? onNextQuarter : null,
+                              icon: Icon(
+                                isLastQuarter
+                                    ? Icons.outlined_flag
+                                    : Icons.arrow_forward,
+                                size: 16,
+                              ),
+                              label: Text(
+                                isLastQuarter ? 'End' : 'Next',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            )
+                            : FilledButton.tonalIcon(
+                              onPressed: isNextEnabled ? onNextQuarter : null,
+                              icon: Icon(
+                                isLastQuarter
+                                    ? Icons.outlined_flag
+                                    : Icons.arrow_forward,
+                                size: 16,
+                              ),
+                              label: Text(
+                                isLastQuarter ? 'End' : 'Next',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
                   ),
                 ],
               );
