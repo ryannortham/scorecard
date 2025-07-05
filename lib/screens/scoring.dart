@@ -140,11 +140,9 @@ class ScoringState extends State<Scoring> {
 
     final result = await DialogService.showConfirmationDialog(
       context: context,
-      title: 'Exit Game',
-      content:
-          'Are you sure you want to exit the game? Any unsaved progress will be lost.',
-      confirmText: 'Exit',
-      icon: Icons.exit_to_app_outlined,
+      title: '',
+      content: '',
+      confirmText: 'Exit Game?',
       isDestructive: true,
     );
     return result;

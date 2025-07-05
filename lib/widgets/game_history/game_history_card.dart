@@ -27,18 +27,39 @@ class GameHistoryCard extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainer,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
-        title: Text(
-          '${game.homeTeam} vs ${game.awayTeam}',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        title: Column(
+          children: [
+            Text(
+              game.homeTeam,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              'vs',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              game.awayTeam,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
         subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 4),
             Text(
               '${dateFormat.format(game.date)} at ${timeFormat.format(game.date)}',
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             Text(
@@ -46,6 +67,7 @@ class GameHistoryCard extends StatelessWidget {
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -59,14 +81,11 @@ class GameHistoryCard extends StatelessWidget {
   }
 
   Future<void> _showDeleteConfirmation(BuildContext context) async {
-    final dateFormat = DateFormat('dd/MM/yyyy');
-
     final confirmed = await AppNavigator.showConfirmationDialog(
       context: context,
-      title: 'Delete Game?',
-      content:
-          '${game.homeTeam} vs ${game.awayTeam}\n${dateFormat.format(game.date)}',
-      confirmText: 'Delete',
+      title: '',
+      content: '',
+      confirmText: 'Delete Game?',
       cancelText: 'Cancel',
       isDestructive: true,
     );

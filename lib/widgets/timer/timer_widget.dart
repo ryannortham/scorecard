@@ -59,19 +59,13 @@ class TimerWidgetState extends State<TimerWidget> {
     bool confirmed = shouldSkipConfirmation;
 
     if (!shouldSkipConfirmation) {
-      final actionText = isLastQuarter ? 'End Game' : 'Next Quarter';
-      final icon = isLastQuarter ? Icons.outlined_flag : Icons.arrow_forward;
-      final content =
-          isLastQuarter
-              ? 'Are you sure you want to end the game?'
-              : 'Are you sure you want to proceed to the next quarter?';
+      final actionText = isLastQuarter ? 'End Game?' : 'End Quarter?';
 
       confirmed = await DialogService.showConfirmationDialog(
         context: context,
-        title: actionText,
-        content: content,
+        title: '',
+        content: '',
         confirmText: actionText,
-        icon: icon,
       );
     }
 

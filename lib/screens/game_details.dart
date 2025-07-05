@@ -196,11 +196,9 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
     // Show confirmation dialog
     final shouldDelete = await DialogService.showConfirmationDialog(
       context: context,
-      title: 'Delete Game',
-      content:
-          'Are you sure you want to delete this game? This action cannot be undone.',
-      confirmText: 'Delete',
-      icon: Icons.delete_outline,
+      title: '',
+      content: '',
+      confirmText: 'Delete Game?',
       isDestructive: true,
     );
 

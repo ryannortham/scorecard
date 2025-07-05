@@ -148,13 +148,14 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   Future<void> _deleteSelectedGames() async {
     if (_selectedGameIds.isEmpty) return;
 
+    final count = _selectedGameIds.length;
+    final confirmText = count == 1 ? 'Delete Game?' : 'Delete $count Games?';
+
     final shouldDelete = await DialogService.showConfirmationDialog(
       context: context,
-      title: 'Delete Games',
-      content:
-          'Are you sure you want to delete ${_selectedGameIds.length} games? This action cannot be undone.',
-      confirmText: 'Delete',
-      icon: Icons.delete_outline,
+      title: '',
+      content: '',
+      confirmText: confirmText,
       isDestructive: true,
     );
 

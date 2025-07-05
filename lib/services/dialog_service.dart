@@ -13,14 +13,17 @@ class DialogService {
     IconData? icon,
     bool isDestructive = false,
   }) async {
+    // Use confirmText as title if title is empty, otherwise use provided title
+    final dialogTitle = title.isEmpty ? confirmText : title;
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           icon: icon != null ? Icon(icon) : null,
-          title: Text(title),
-          content: Text(content),
+          title: Text(dialogTitle),
+          content: content.isNotEmpty ? Text(content) : null,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -35,7 +38,7 @@ class DialogService {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       )
                       : null,
-              child: Text(confirmText),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -54,14 +57,17 @@ class DialogService {
     IconData? icon,
     bool isDestructive = false,
   }) async {
+    // Use actionText as title if title is empty, otherwise use provided title
+    final dialogTitle = title.isEmpty ? actionText : title;
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           icon: icon != null ? Icon(icon) : null,
-          title: Text(title),
-          content: Text(content),
+          title: Text(dialogTitle),
+          content: content.isNotEmpty ? Text(content) : null,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -76,7 +82,7 @@ class DialogService {
                         foregroundColor: Theme.of(context).colorScheme.onError,
                       )
                       : null,
-              child: Text(actionText),
+              child: const Text('OK'),
             ),
           ],
         );
