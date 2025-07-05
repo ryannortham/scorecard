@@ -126,7 +126,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         leading: Builder(
           builder:
               (context) => IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.menu_outlined),
                 onPressed: () {
                   // Unfocus search bar before opening drawer to prevent potential conflicts
                   _searchFocusNode.unfocus();
@@ -165,12 +165,12 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                   controller: _materialSearchController,
                   focusNode: _searchFocusNode,
                   hintText: 'Search for teams...',
-                  leading: const Icon(Icons.search),
+                  leading: const Icon(Icons.search_outlined),
                   trailing:
                       _materialSearchController.text.isNotEmpty
                           ? [
                             IconButton(
-                              icon: const Icon(Icons.clear),
+                              icon: const Icon(Icons.clear_outlined),
                               onPressed: () {
                                 _materialSearchController.clear();
                                 _performSearch('');
@@ -224,7 +224,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                                             .circularProgressStrokeWidth,
                                   ),
                                 )
-                                : const Icon(Icons.search),
+                                : const Icon(Icons.search_outlined),
                         label: Text(_isLoading ? 'Searching...' : 'Search'),
                       ),
                     ),
@@ -262,7 +262,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.search,
+              Icons.search_outlined,
               size: _AddTeamConstants.largeIconSize,
               color: colorScheme.onSurfaceVariant,
             ),

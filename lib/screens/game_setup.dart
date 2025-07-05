@@ -102,7 +102,7 @@ class _GameSetupState extends State<GameSetup> {
         leading: Builder(
           builder:
               (context) => IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.menu_outlined),
                 tooltip: 'Menu',
                 onPressed: () {
                   Scaffold.of(context).openDrawer();

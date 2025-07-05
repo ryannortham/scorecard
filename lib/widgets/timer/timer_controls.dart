@@ -84,7 +84,7 @@ class TimerControls extends StatelessWidget {
                     flex: 2,
                     child: FilledButton.tonalIcon(
                       onPressed: isResetEnabled ? onResetTimer : null,
-                      icon: const Icon(Icons.refresh, size: 16),
+                      icon: const Icon(Icons.refresh_outlined, size: 16),
                       label: const Text(
                         'Reset',
                         overflow: TextOverflow.ellipsis,
@@ -102,7 +102,10 @@ class TimerControls extends StatelessWidget {
                           isTimerRunning
                               ? FilledButton.tonalIcon(
                                 onPressed: onToggleTimer,
-                                icon: const Icon(Icons.pause, size: 18),
+                                icon: const Icon(
+                                  Icons.pause_outlined,
+                                  size: 18,
+                                ),
                                 label: const Text(
                                   'Pause',
                                   overflow: TextOverflow.ellipsis,
@@ -113,7 +116,7 @@ class TimerControls extends StatelessWidget {
                                   ? FilledButton.tonalIcon(
                                     onPressed: onToggleTimer,
                                     icon: const Icon(
-                                      Icons.play_arrow,
+                                      Icons.play_arrow_outlined,
                                       size: 18,
                                     ),
                                     label: const Text(
@@ -125,7 +128,7 @@ class TimerControls extends StatelessWidget {
                                   : FilledButton.icon(
                                     onPressed: onToggleTimer,
                                     icon: const Icon(
-                                      Icons.play_arrow,
+                                      Icons.play_arrow_outlined,
                                       size: 18,
                                     ),
                                     label: const Text(
@@ -147,7 +150,7 @@ class TimerControls extends StatelessWidget {
                               icon: Icon(
                                 isLastQuarter
                                     ? Icons.outlined_flag
-                                    : Icons.arrow_forward,
+                                    : Icons.arrow_forward_outlined,
                                 size: 16,
                               ),
                               label: Text(
@@ -161,7 +164,7 @@ class TimerControls extends StatelessWidget {
                               icon: Icon(
                                 isLastQuarter
                                     ? Icons.outlined_flag
-                                    : Icons.arrow_forward,
+                                    : Icons.arrow_forward_outlined,
                                 size: 16,
                               ),
                               label: Text(

@@ -223,7 +223,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           title:
               _isSelectionMode
                   ? Text('${_selectedGameIds.length} selected')
-                  : const Text('Game History'),
+                  : const Text('Game Results'),
           leading:
               _isSelectionMode
                   ? IconButton(
@@ -233,7 +233,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   : Builder(
                     builder:
                         (context) => IconButton(
-                          icon: const Icon(Icons.menu),
+                          icon: const Icon(Icons.menu_outlined),
                           tooltip: 'Menu',
                           onPressed: () {
                             Scaffold.of(context).openDrawer();
@@ -278,7 +278,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.history,
+                        Icons.flag_outlined,
                         size: 64,
                         color: Theme.of(
                           context,

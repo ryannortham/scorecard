@@ -69,7 +69,7 @@ class GameSummaryCard extends StatelessWidget {
             isSelectionMode
                 ? Icon(
                   isSelected
-                      ? Icons.check_circle
+                      ? Icons.check_circle_outlined
                       : Icons.radio_button_unchecked,
                   color:
                       isSelected

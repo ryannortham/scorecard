@@ -246,7 +246,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.add,
+              Icons.add_outlined,
               size: 24,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -306,7 +306,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           onClear != null
               ? IconButton(
                 onPressed: onClear,
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.close_outlined),
                 iconSize: 20,
                 visualDensity: VisualDensity.compact,
               )

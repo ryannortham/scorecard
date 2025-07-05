@@ -98,7 +98,7 @@ class AppDrawer extends StatelessWidget {
           // Manage Teams - hide on team-related screens to prevent navigation conflicts
           if (currentRoute != 'team_list' && currentRoute != 'add_team')
             ListTile(
-              leading: const Icon(Icons.diversity_3),
+              leading: const Icon(Icons.diversity_3_outlined),
               title: const Text('Manage Teams'),
               onTap: () {
                 Navigator.pop(context);
@@ -131,13 +131,13 @@ class AppDrawer extends StatelessWidget {
               },
             ),
 
-          // Navigation Items - hide Game History on team-related screens to prevent navigation conflicts
+          // Navigation Items - hide Game Results on team-related screens to prevent navigation conflicts
           if (currentRoute != 'game_history' &&
               currentRoute != 'add_team' &&
               currentRoute != 'team_list')
             ListTile(
-              leading: const Icon(Icons.history_outlined),
-              title: const Text('Game History'),
+              leading: const Icon(Icons.flag_outlined),
+              title: const Text('Game Results'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(

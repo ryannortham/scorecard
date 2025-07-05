@@ -122,7 +122,7 @@ class _TeamListState extends State<TeamList> {
                   : Builder(
                     builder:
                         (context) => IconButton(
-                          icon: const Icon(Icons.menu),
+                          icon: const Icon(Icons.menu_outlined),
                           tooltip: 'Menu',
                           onPressed: () {
                             Scaffold.of(context).openDrawer();
@@ -193,8 +193,9 @@ class _TeamListState extends State<TeamList> {
                                     children: [
                                       Icon(
                                         isSelected
-                                            ? Icons.check_circle
-                                            : Icons.radio_button_unchecked,
+                                            ? Icons.check_circle_outlined
+                                            : Icons
+                                                .radio_button_unchecked_outlined,
                                         color:
                                             isSelected
                                                 ? Theme.of(
@@ -239,8 +240,8 @@ class _TeamListState extends State<TeamList> {
                                         icon: Icon(
                                           userPreferences.favoriteTeam ==
                                                   team.name
-                                              ? Icons.star
-                                              : Icons.star_border,
+                                              ? Icons.star_outlined
+                                              : Icons.star_border_outlined,
                                           color:
                                               userPreferences.favoriteTeam ==
                                                       team.name

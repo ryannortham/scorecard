@@ -43,7 +43,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         leading: Builder(
           builder:
               (context) => IconButton(
-                icon: const Icon(Icons.menu),
+                icon: const Icon(Icons.menu_outlined),
                 onPressed: () {
                   Scaffold.of(context).openDrawer();
                 },
