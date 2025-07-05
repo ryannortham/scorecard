@@ -134,7 +134,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
               child: SizedBox(
                 width:
                     MediaQuery.of(context).size.width -
-                    40, // Reduce by 44px to match original card width
+                    40, // Reduce by 40px to match original card width
                 child: Card(
                   elevation: 0,
                   color: colorScheme.surfaceContainerHigh,

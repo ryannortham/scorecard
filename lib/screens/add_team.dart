@@ -21,6 +21,9 @@ class _AddTeamConstants {
   static const double paddingMedium = 12.0;
   static const double paddingLarge = 16.0;
   static const double paddingExtraLarge = 32.0;
+
+  // Excluded words for team filtering (case insensitive)
+  static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
 }
 
 /// Screen for adding teams from PlayHQ search or custom entry
@@ -72,10 +75,28 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
       setState(() {
         _isLoading = false;
         if (response != null) {
-          // Filter to only include teams with logos
+          final teamsProvider = Provider.of<TeamsProvider>(
+            context,
+            listen: false,
+          );
+
+          // Filter to only include teams with logos and exclude certain words/existing teams
           _searchResults =
               response.results
                   .where((team) => team.logoUrl48?.isNotEmpty ?? false)
+                  .where((team) {
+                    final nameLower = team.name.toLowerCase();
+                    // Exclude teams with excluded words
+                    final hasExcludedWord = _AddTeamConstants.excludedWords.any(
+                      (word) => nameLower.contains(word),
+                    );
+                    // Exclude teams that already exist in our list
+                    final alreadyExists = teamsProvider.hasTeamWithName(
+                      team.name,
+                    );
+
+                    return !hasExcludedWord && !alreadyExists;
+                  })
                   .toList();
           _errorMessage = null;
         } else {
