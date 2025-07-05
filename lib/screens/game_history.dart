@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/app_logger.dart';
+import '../services/dialog_service.dart';
 import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
-import '../widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import '../widgets/game_setup/app_drawer.dart';
 import 'package:scorecard/screens/game_details.dart' as details;
 
@@ -148,46 +148,56 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   Future<void> _deleteSelectedGames() async {
     if (_selectedGameIds.isEmpty) return;
 
-    await ConfirmationBottomSheet.show(
+    final shouldDelete = await DialogService.showConfirmationDialog(
       context: context,
-      actionText: 'Delete ${_selectedGameIds.length} games',
-      actionIcon: Icons.delete_outline,
+      title: 'Delete Games',
+      content:
+          'Are you sure you want to delete ${_selectedGameIds.length} games? This action cannot be undone.',
+      confirmText: 'Delete',
+      icon: Icons.delete_outline,
       isDestructive: true,
-      onConfirm: () async {
-        try {
-          // Delete all selected games
-          final gameIdsToDelete = List<String>.from(_selectedGameIds);
-          for (final gameId in gameIdsToDelete) {
-            await GameHistoryService.deleteGame(gameId);
-          }
-
-          _exitSelectionMode();
-          await _loadGames(); // Refresh the list
-
-          if (mounted && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${gameIdsToDelete.length} games deleted successfully',
-                ),
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-        } catch (e) {
-          if (mounted && context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error deleting games: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        }
-      },
     );
+
+    if (shouldDelete) {
+      try {
+        // Delete all selected games
+        final gameIdsToDelete = List<String>.from(_selectedGameIds);
+        for (final gameId in gameIdsToDelete) {
+          await GameHistoryService.deleteGame(gameId);
+        }
+
+        _exitSelectionMode();
+        await _loadGames(); // Refresh the list
+
+        if (mounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '${gameIdsToDelete.length} games deleted successfully',
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        AppLogger.error(
+          'Failed to delete games from history',
+          error: e,
+          component: 'GameHistory',
+        );
+
+        if (mounted && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error deleting games: $e'),
+              backgroundColor: Theme.of(context).colorScheme.error,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _showGameDetails(String gameId) async {
