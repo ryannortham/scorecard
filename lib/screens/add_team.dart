@@ -136,91 +136,116 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         ),
       ),
       drawer: const AppDrawer(currentRoute: 'add_team'),
-      body: Column(
+      body: Stack(
         children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
-            child: SearchBar(
-              controller: _materialSearchController,
-              focusNode: _searchFocusNode,
-              hintText: 'Search for teams...',
-              leading: const Icon(Icons.search),
-              trailing:
-                  _materialSearchController.text.isNotEmpty
-                      ? [
-                        IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _materialSearchController.clear();
-                            _performSearch('');
-                          },
-                        ),
-                      ]
-                      : null,
-              onSubmitted: _performSearch,
-              onChanged: (value) {
-                setState(() {}); // Rebuild to show/hide clear button
+          // Gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.25],
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer,
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                ),
+              ),
+            ),
+          ),
 
-                // Perform search after a short delay to avoid too many requests
-                Future.delayed(
-                  const Duration(milliseconds: _AddTeamConstants.searchDelayMs),
-                  () {
-                    if (_materialSearchController.text == value) {
-                      _performSearch(value);
-                    }
+          // Main content
+          Column(
+            children: [
+              // Search bar
+              Padding(
+                padding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
+                child: SearchBar(
+                  controller: _materialSearchController,
+                  focusNode: _searchFocusNode,
+                  hintText: 'Search for teams...',
+                  leading: const Icon(Icons.search),
+                  trailing:
+                      _materialSearchController.text.isNotEmpty
+                          ? [
+                            IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _materialSearchController.clear();
+                                _performSearch('');
+                              },
+                            ),
+                          ]
+                          : null,
+                  onSubmitted: _performSearch,
+                  onChanged: (value) {
+                    setState(() {}); // Rebuild to show/hide clear button
+
+                    // Perform search after a short delay to avoid too many requests
+                    Future.delayed(
+                      const Duration(
+                        milliseconds: _AddTeamConstants.searchDelayMs,
+                      ),
+                      () {
+                        if (_materialSearchController.text == value) {
+                          _performSearch(value);
+                        }
+                      },
+                    );
                   },
-                );
-              },
-            ),
-          ),
-
-          // Button group for search and custom entry
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: _AddTeamConstants.paddingLarge,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: FilledButton.icon(
-                    onPressed:
-                        _isLoading
-                            ? null
-                            : () =>
-                                _performSearch(_materialSearchController.text),
-                    icon:
-                        _isLoading
-                            ? const SizedBox(
-                              width: _AddTeamConstants.paddingLarge,
-                              height: _AddTeamConstants.paddingLarge,
-                              child: CircularProgressIndicator(
-                                strokeWidth:
-                                    _AddTeamConstants
-                                        .circularProgressStrokeWidth,
-                              ),
-                            )
-                            : const Icon(Icons.search),
-                    label: Text(_isLoading ? 'Searching...' : 'Search'),
-                  ),
                 ),
-                const SizedBox(width: _AddTeamConstants.paddingMedium),
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    onPressed: _isLoading ? null : _showCustomEntryDialog,
-                    icon: const Icon(Icons.edit_outlined),
-                    label: const Text('Custom'),
-                  ),
+              ),
+
+              // Button group for search and custom entry
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: _AddTeamConstants.paddingLarge,
                 ),
-              ],
-            ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: FilledButton.icon(
+                        onPressed:
+                            _isLoading
+                                ? null
+                                : () => _performSearch(
+                                  _materialSearchController.text,
+                                ),
+                        icon:
+                            _isLoading
+                                ? const SizedBox(
+                                  width: _AddTeamConstants.paddingLarge,
+                                  height: _AddTeamConstants.paddingLarge,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth:
+                                        _AddTeamConstants
+                                            .circularProgressStrokeWidth,
+                                  ),
+                                )
+                                : const Icon(Icons.search),
+                        label: Text(_isLoading ? 'Searching...' : 'Search'),
+                      ),
+                    ),
+                    const SizedBox(width: _AddTeamConstants.paddingMedium),
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: _isLoading ? null : _showCustomEntryDialog,
+                        icon: const Icon(Icons.edit_outlined),
+                        label: const Text('Custom'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: _AddTeamConstants.paddingLarge),
+
+              // Results
+              Expanded(child: _buildResultsSection()),
+            ],
           ),
-
-          const SizedBox(height: _AddTeamConstants.paddingLarge),
-
-          // Results
-          Expanded(child: _buildResultsSection()),
         ],
       ),
     );

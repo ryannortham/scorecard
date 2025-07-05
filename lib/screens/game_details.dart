@@ -73,6 +73,24 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       drawer: const AppDrawer(currentRoute: 'game_details'),
       body: Stack(
         children: [
+          // Gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.25],
+                  colors: [
+                    Theme.of(context).colorScheme.primaryContainer,
+                    Theme.of(context).colorScheme.surface,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Main content
           WidgetShotPlus(
             key: _widgetShotKey,
             child: GameDetailsWidget.fromStaticData(

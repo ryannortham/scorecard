@@ -219,6 +219,23 @@ class ScoringState extends State<Scoring> {
         drawer: const AppDrawer(currentRoute: 'scoring'),
         body: Stack(
           children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
             // Main content
             LayoutBuilder(
               builder: (context, constraints) {

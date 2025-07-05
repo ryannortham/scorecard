@@ -250,7 +250,26 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'game_history'),
-        body:
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Main content
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _gameSummaries.isEmpty
@@ -325,6 +344,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     },
                   ),
                 ),
+          ],
+        ),
       ),
     );
   }

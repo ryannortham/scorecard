@@ -141,7 +141,26 @@ class _TeamListState extends State<TeamList> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'team_list'),
-        body:
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Main content
             teamsProvider.loaded
                 ? Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -280,6 +299,8 @@ class _TeamListState extends State<TeamList> {
                   ),
                 )
                 : const Center(child: CircularProgressIndicator()),
+          ],
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             final navigator = Navigator.of(context);
