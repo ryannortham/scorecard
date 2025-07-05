@@ -37,9 +37,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawerEdgeDragWidth:
-          MediaQuery.of(context).size.width * 0.25, // 75% of screen width
-      drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -260,14 +257,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   }
 
   String _buildShareText() {
-    final homeScore =
-        '${widget.game.homeGoals}.${widget.game.homeBehinds} (${widget.game.homePoints})';
-    final awayScore =
-        '${widget.game.awayGoals}.${widget.game.awayBehinds} (${widget.game.awayPoints})';
-
-    return '''${widget.game.homeTeam} vs ${widget.game.awayTeam}
-Score: $homeScore - $awayScore
-Date: ${widget.game.date.day}/${widget.game.date.month}/${widget.game.date.year}''';
+    return 'Game Results';
   }
 
   /// Capture and share using WidgetShotPlus

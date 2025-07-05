@@ -106,9 +106,6 @@ class _TeamListState extends State<TeamList> {
         }
       },
       child: Scaffold(
-        drawerEdgeDragWidth:
-            MediaQuery.of(context).size.width * 0.25, // 75% of screen width
-        drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
         appBar: AppBar(
           title:
               _isSelectionMode

@@ -95,8 +95,6 @@ class _GameSetupState extends State<GameSetup> {
     final gameState = Provider.of<GameStateService>(context);
 
     return Scaffold(
-      drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
-      drawerEnableOpenDragGesture: true,
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,

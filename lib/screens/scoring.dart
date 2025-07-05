@@ -186,8 +186,6 @@ class ScoringState extends State<Scoring> {
         }
       },
       child: Scaffold(
-        drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
-        drawerEnableOpenDragGesture: true,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
