@@ -62,9 +62,7 @@ class _TeamListState extends State<TeamList> {
     if (shouldAutoNavigate) {
       _hasNavigatedToAddTeam = true;
 
-      final addedTeamName = await Navigator.of(
-        context,
-      ).pushReplacement<String, dynamic>(
+      final addedTeamName = await Navigator.of(context).push<String>(
         MaterialPageRoute(builder: (context) => const AddTeamScreen()),
       );
 
@@ -72,7 +70,7 @@ class _TeamListState extends State<TeamList> {
       if (addedTeamName != null && widget.title != 'Manage Teams') {
         widget.onTeamSelected(addedTeamName);
         if (mounted) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(addedTeamName);
         }
       }
     }
@@ -108,9 +106,6 @@ class _TeamListState extends State<TeamList> {
         }
       },
       child: Scaffold(
-        drawerEdgeDragWidth:
-            MediaQuery.of(context).size.width * 0.25, // 75% of screen width
-        drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
         appBar: AppBar(
           title:
               _isSelectionMode
@@ -127,7 +122,7 @@ class _TeamListState extends State<TeamList> {
                   : Builder(
                     builder:
                         (context) => IconButton(
-                          icon: const Icon(Icons.menu),
+                          icon: const Icon(Icons.menu_outlined),
                           tooltip: 'Menu',
                           onPressed: () {
                             Scaffold.of(context).openDrawer();
@@ -146,7 +141,26 @@ class _TeamListState extends State<TeamList> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'team_list'),
-        body:
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Main content
             teamsProvider.loaded
                 ? Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -179,8 +193,9 @@ class _TeamListState extends State<TeamList> {
                                     children: [
                                       Icon(
                                         isSelected
-                                            ? Icons.check_circle
-                                            : Icons.radio_button_unchecked,
+                                            ? Icons.check_circle_outlined
+                                            : Icons
+                                                .radio_button_unchecked_outlined,
                                         color:
                                             isSelected
                                                 ? Theme.of(
@@ -225,8 +240,8 @@ class _TeamListState extends State<TeamList> {
                                         icon: Icon(
                                           userPreferences.favoriteTeam ==
                                                   team.name
-                                              ? Icons.star
-                                              : Icons.star_border,
+                                              ? Icons.star_outlined
+                                              : Icons.star_border_outlined,
                                           color:
                                               userPreferences.favoriteTeam ==
                                                       team.name
@@ -285,6 +300,8 @@ class _TeamListState extends State<TeamList> {
                   ),
                 )
                 : const Center(child: CircularProgressIndicator()),
+          ],
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () async {
             final navigator = Navigator.of(context);
@@ -296,7 +313,9 @@ class _TeamListState extends State<TeamList> {
             if (addedTeamName != null && widget.title != 'Manage Teams') {
               widget.onTeamSelected(addedTeamName);
               if (mounted) {
-                navigator.pop();
+                navigator.pop(
+                  addedTeamName,
+                ); // Return the team name when popping
               }
             }
           },

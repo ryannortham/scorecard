@@ -5,7 +5,6 @@ import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
-import 'quarter_progress.dart';
 
 class TimerWidget extends StatefulWidget {
   final ValueNotifier<bool>? isRunning;
@@ -92,8 +91,6 @@ class TimerWidgetState extends State<TimerWidget> {
       elevation: 0,
       child: Column(
         children: [
-          QuarterProgress(),
-          const SizedBox(height: 8),
           const TimerClock(),
           TimerControls(
             onToggleTimer: toggleTimer,

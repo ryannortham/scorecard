@@ -217,16 +217,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         }
       },
       child: Scaffold(
-        drawerEdgeDragWidth:
-            MediaQuery.of(context).size.width * 0.25, // 75% of screen width
-        drawerEnableOpenDragGesture: true, // Explicitly enable drawer swipe
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
           title:
               _isSelectionMode
                   ? Text('${_selectedGameIds.length} selected')
-                  : const Text('Game History'),
+                  : const Text('Game Results'),
           leading:
               _isSelectionMode
                   ? IconButton(
@@ -236,7 +233,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                   : Builder(
                     builder:
                         (context) => IconButton(
-                          icon: const Icon(Icons.menu),
+                          icon: const Icon(Icons.menu_outlined),
                           tooltip: 'Menu',
                           onPressed: () {
                             Scaffold.of(context).openDrawer();
@@ -253,7 +250,26 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'game_history'),
-        body:
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Main content
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _gameSummaries.isEmpty
@@ -262,7 +278,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.history,
+                        Icons.flag_outlined,
                         size: 64,
                         color: Theme.of(
                           context,
@@ -328,6 +344,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                     },
                   ),
                 ),
+          ],
+        ),
       ),
     );
   }

@@ -137,13 +137,6 @@ class GameSharingService {
 
   /// Build share text with game details
   String _buildShareText() {
-    final homeScore =
-        '${gameStateService.homeGoals}.${gameStateService.homeBehinds} (${gameStateService.homePoints})';
-    final awayScore =
-        '${gameStateService.awayGoals}.${gameStateService.awayBehinds} (${gameStateService.awayPoints})';
-
-    return '''${gameStateService.homeTeam} vs ${gameStateService.awayTeam}
-Score: $homeScore - $awayScore
-Date: ${gameStateService.gameDate.day}/${gameStateService.gameDate.month}/${gameStateService.gameDate.year}''';
+    return 'Game Results';
   }
 }

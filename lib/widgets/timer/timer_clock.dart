@@ -46,6 +46,7 @@ class TimerClock extends StatelessWidget {
             final timerValue = snapshot.data ?? gameState.timerRawTime;
             final quarterMSec = gameState.quarterMSec;
             final isCountdownTimer = gameState.isCountdownTimer;
+            final currentQuarter = gameState.selectedQuarter;
 
             final progress =
                 quarterMSec > 0 && timerValue >= 0
@@ -54,15 +55,53 @@ class TimerClock extends StatelessWidget {
 
             return Column(
               children: [
-                Text(
-                  _formatTimerClock(timerValue, isCountdownTimer),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: _getTimerColor(
-                      context,
-                      timerValue,
-                      quarterMSec,
-                      isCountdownTimer,
-                    ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
+                      // Left section for quarter text
+                      Expanded(
+                        flex: 1,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Q$currentQuarter',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: _getTimerColor(
+                                context,
+                                timerValue,
+                                quarterMSec,
+                                isCountdownTimer,
+                              ).withOpacity(0.7),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Center section for timer text
+                      Expanded(
+                        flex: 2,
+                        child: Center(
+                          child: Text(
+                            _formatTimerClock(timerValue, isCountdownTimer),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineMedium?.copyWith(
+                              color: _getTimerColor(
+                                context,
+                                timerValue,
+                                quarterMSec,
+                                isCountdownTimer,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Right section for balance
+                      const Expanded(flex: 1, child: SizedBox()),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 6),

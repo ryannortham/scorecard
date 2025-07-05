@@ -186,15 +186,13 @@ class ScoringState extends State<Scoring> {
         }
       },
       child: Scaffold(
-        drawerEdgeDragWidth: MediaQuery.of(context).size.width * 0.25,
-        drawerEnableOpenDragGesture: true,
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
           leading: Builder(
             builder:
                 (context) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(Icons.menu_outlined),
                   tooltip: 'Menu',
                   onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
@@ -221,6 +219,23 @@ class ScoringState extends State<Scoring> {
         drawer: const AppDrawer(currentRoute: 'scoring'),
         body: Stack(
           children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
             // Main content
             LayoutBuilder(
               builder: (context, constraints) {
