@@ -26,6 +26,46 @@ class _AddTeamConstants {
   static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
 }
 
+/// Helper class for processing team names
+class _TeamNameProcessor {
+  // Single optimized regex pattern that captures all variations
+  static final RegExp _teamNameRegex = RegExp(
+    r'\([^)]*\)|' // Remove brackets and content
+    r'(?:Junior\s+Football\s+Club|Junior\s+FC)\b|' // Junior variations
+    r'Football\s+.*?Netball\s+Club\b|' // Football Netball variations
+    r'Football\s+Club\b', // Football Club
+    caseSensitive: false,
+  );
+
+  static final RegExp _whitespaceRegex = RegExp(r'\s+');
+
+  /// Process a team name according to the specified rules
+  static String processTeamName(String name) {
+    // Single pass replacement with callback function
+    String processed = name.replaceAllMapped(_teamNameRegex, (match) {
+      final matchText = match.group(0)!.toLowerCase();
+
+      // Remove bracketed content
+      if (matchText.startsWith('(')) return '';
+
+      // Convert Junior variations to JFC
+      if (matchText.contains('junior')) return 'JFC';
+
+      // Convert Football Netball variations to FNC
+      if (matchText.contains('netball')) return 'FNC';
+
+      // Convert Football Club to FC
+      if (matchText.contains('football') && matchText.contains('club'))
+        return 'FC';
+
+      return match.group(0)!; // Fallback (shouldn't happen)
+    });
+
+    // Normalize whitespace and trim
+    return processed.replaceAll(_whitespaceRegex, ' ').trim();
+  }
+}
+
 /// Screen for adding teams from PlayHQ search or custom entry
 class AddTeamScreen extends StatefulWidget {
   const AddTeamScreen({super.key});
@@ -94,10 +134,13 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     final hasExcludedWord = _AddTeamConstants.excludedWords.any(
                       (word) => nameLower.contains(word),
                     );
-                    // Exclude teams that already exist in our list
-                    final alreadyExists = teamsProvider.hasTeamWithName(
+                    // Exclude teams that already exist in our list (check both original and processed names)
+                    final processedName = _TeamNameProcessor.processTeamName(
                       team.name,
                     );
+                    final alreadyExists =
+                        teamsProvider.hasTeamWithName(team.name) ||
+                        teamsProvider.hasTeamWithName(processedName);
 
                     return !hasExcludedWord && !alreadyExists;
                   })
@@ -366,6 +409,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
 
   Widget _buildTeamCard(Organisation team) {
     final theme = Theme.of(context);
+    final processedName = _TeamNameProcessor.processTeamName(team.name);
 
     return Card(
       margin: const EdgeInsets.only(bottom: _AddTeamConstants.paddingMedium),
@@ -373,7 +417,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         contentPadding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
         leading: _buildTeamLogo(team),
         title: Text(
-          team.name,
+          processedName,
           style: theme.textTheme.bodyLarge?.copyWith(
             fontWeight: FontWeight.w600,
           ),
@@ -439,37 +483,40 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
   }
 
   /// Add a team from search results to the local teams list
+  /// Add a team from search results to the local teams list
   Future<void> _addTeamToList(Organisation team) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final processedName = _TeamNameProcessor.processTeamName(team.name);
 
-    // Check if team already exists
-    if (teamsProvider.hasTeamWithName(team.name)) {
+    // Check if team already exists (check both original and processed names)
+    if (teamsProvider.hasTeamWithName(team.name) ||
+        teamsProvider.hasTeamWithName(processedName)) {
       if (mounted) {
         final colorScheme = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Team "${team.name}" already exists'),
+            content: Text('Team "$processedName" already exists'),
             backgroundColor: colorScheme.error,
           ),
         );
-        // Still return the team name for potential selection
-        Navigator.of(context).pop(team.name);
+        // Still return the processed team name for potential selection
+        Navigator.of(context).pop(processedName);
       }
       return;
     }
 
-    // Add team with logos in multiple sizes for optimal display quality
+    // Add team with processed name and logos in multiple sizes for optimal display quality
     await teamsProvider.addTeam(
-      team.name,
+      processedName,
       logoUrl: team.logoUrl48, // General purpose logo
       logoUrl32: team.logoUrl32,
       logoUrl48: team.logoUrl48,
       logoUrlLarge: team.logoUrlLarge,
     );
 
-    // Navigate back and return the team name for potential selection
+    // Navigate back and return the processed team name for potential selection
     if (mounted) {
-      Navigator.of(context).pop(team.name);
+      Navigator.of(context).pop(processedName);
     }
   }
 
@@ -506,7 +553,11 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                   return 'Please enter a team name';
                 }
                 final trimmedValue = value.trim();
-                if (teamsProvider.hasTeamWithName(trimmedValue)) {
+                final processedValue = _TeamNameProcessor.processTeamName(
+                  trimmedValue,
+                );
+                if (teamsProvider.hasTeamWithName(trimmedValue) ||
+                    teamsProvider.hasTeamWithName(processedValue)) {
                   return 'Team name already exists';
                 }
                 return null;
@@ -524,13 +575,16 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               child: const Text('Add'),
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
-                  final teamName = controller.text.trim();
-                  await teamsProvider.addTeam(teamName);
+                  final rawTeamName = controller.text.trim();
+                  final processedTeamName = _TeamNameProcessor.processTeamName(
+                    rawTeamName,
+                  );
+                  await teamsProvider.addTeam(processedTeamName);
                   if (context.mounted) {
                     Navigator.of(context).pop(); // Close dialog
-                    Navigator.of(
-                      context,
-                    ).pop(teamName); // Navigate back and return team name
+                    Navigator.of(context).pop(
+                      processedTeamName,
+                    ); // Navigate back and return processed team name
                   }
                 }
               },
