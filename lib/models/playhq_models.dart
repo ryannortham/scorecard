@@ -112,6 +112,59 @@ class Organisation {
     // Fallback to tenant logo if available
     return tenant?.logoUrl32;
   }
+
+  /// Get the most appropriate logo URL for 128x128 display (watermarks)
+  String? get logoUrl128 {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      // Find the smallest logo that's at least 128x128, or the largest available
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
+
+      // Find first size >= 128x128, or use the largest available
+      final appropriateSize = sortedSizes.firstWhere(
+        (size) => size.dimensions.width >= 128 && size.dimensions.height >= 128,
+        orElse: () => sortedSizes.last,
+      );
+
+      return appropriateSize.url;
+    }
+
+    // Fallback to tenant logo if available
+    return tenant?.logoUrl128;
+  }
+
+  /// Get the most appropriate logo URL for 256x256 display (large watermarks)
+  String? get logoUrl256 {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      // Find the smallest logo that's at least 256x256, or the largest available
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
+
+      // Find first size >= 256x256, or use the largest available
+      final appropriateSize = sortedSizes.firstWhere(
+        (size) => size.dimensions.width >= 256 && size.dimensions.height >= 256,
+        orElse: () => sortedSizes.last,
+      );
+
+      return appropriateSize.url;
+    }
+
+    // Fallback to tenant logo if available
+    return tenant?.logoUrl256;
+  }
+
+  /// Get the largest available logo URL for watermarks (prefers 256, falls back to 128, then smaller)
+  String? get logoUrlLarge {
+    return logoUrl256 ?? logoUrl128 ?? logoUrl48 ?? logoUrl32;
+  }
 }
 
 class Logo {
@@ -209,6 +262,51 @@ class Tenant {
       return appropriateSize.url;
     }
     return null;
+  }
+
+  /// Get the most appropriate logo URL for 128x128 display (watermarks)
+  String? get logoUrl128 {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
+
+      final appropriateSize = sortedSizes.firstWhere(
+        (size) => size.dimensions.width >= 128 && size.dimensions.height >= 128,
+        orElse: () => sortedSizes.last,
+      );
+
+      return appropriateSize.url;
+    }
+    return null;
+  }
+
+  /// Get the most appropriate logo URL for 256x256 display (large watermarks)
+  String? get logoUrl256 {
+    final logoSizes = logo?.sizes;
+    if (logoSizes?.isNotEmpty == true) {
+      final sortedSizes = List<LogoSize>.from(logoSizes!)..sort((a, b) {
+        final aSize = a.dimensions.width * a.dimensions.height;
+        final bSize = b.dimensions.width * b.dimensions.height;
+        return aSize.compareTo(bSize);
+      });
+
+      final appropriateSize = sortedSizes.firstWhere(
+        (size) => size.dimensions.width >= 256 && size.dimensions.height >= 256,
+        orElse: () => sortedSizes.last,
+      );
+
+      return appropriateSize.url;
+    }
+    return null;
+  }
+
+  /// Get the largest available logo URL for watermarks (prefers 256, falls back to 128, then smaller)
+  String? get logoUrlLarge {
+    return logoUrl256 ?? logoUrl128 ?? logoUrl48 ?? logoUrl32;
   }
 }
 

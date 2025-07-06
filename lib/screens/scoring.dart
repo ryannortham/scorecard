@@ -4,10 +4,10 @@ import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
-import 'package:scorecard/widgets/bottom_sheets/exit_game_bottom_sheet.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
@@ -138,7 +138,13 @@ class ScoringState extends State<Scoring> {
   Future<bool> _onWillPop() async {
     if (!mounted) return false;
 
-    final result = await ExitGameBottomSheet.show(context);
+    final result = await DialogService.showConfirmationDialog(
+      context: context,
+      title: '',
+      content: '',
+      confirmText: 'Exit Game?',
+      isDestructive: true,
+    );
     return result;
   }
 
@@ -239,57 +245,51 @@ class ScoringState extends State<Scoring> {
             // Main content
             LayoutBuilder(
               builder: (context, constraints) {
-                // Use the constraints from LayoutBuilder which already accounts for AppBar
-                final availableHeight = constraints.maxHeight;
-
                 return SingleChildScrollView(
-                  padding: const EdgeInsets.all(4.0),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: availableHeight - 8.0,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          // Timer Panel
-                          TimerWidget(
-                            key: _quarterTimerKey,
-                            isRunning: isTimerRunning,
-                          ),
-
-                          // Home Team Score Table
-                          ValueListenableBuilder<bool>(
-                            valueListenable: isTimerRunning,
-                            builder: (context, timerRunning, child) {
-                              return ScorePanel(
-                                events: List<GameEvent>.from(gameEvents),
-                                homeTeam: gameStateService.homeTeam,
-                                awayTeam: gameStateService.awayTeam,
-                                displayTeam: gameStateService.homeTeam,
-                                isHomeTeam: true,
-                                enabled: timerRunning,
-                              );
-                            },
-                          ),
-
-                          // Away Team Score Table
-                          ValueListenableBuilder<bool>(
-                            valueListenable: isTimerRunning,
-                            builder: (context, timerRunning, child) {
-                              return ScorePanel(
-                                events: List<GameEvent>.from(gameEvents),
-                                homeTeam: gameStateService.homeTeam,
-                                awayTeam: gameStateService.awayTeam,
-                                displayTeam: gameStateService.awayTeam,
-                                isHomeTeam: false,
-                                enabled: timerRunning,
-                              );
-                            },
-                          ),
-                        ],
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Timer Panel
+                      TimerWidget(
+                        key: _quarterTimerKey,
+                        isRunning: isTimerRunning,
                       ),
-                    ),
+
+                      const SizedBox(height: 8),
+
+                      // Home Team Score Table
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, timerRunning, child) {
+                          return ScorePanel(
+                            events: List<GameEvent>.from(gameEvents),
+                            homeTeam: gameStateService.homeTeam,
+                            awayTeam: gameStateService.awayTeam,
+                            displayTeam: gameStateService.homeTeam,
+                            isHomeTeam: true,
+                            enabled: timerRunning,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      // Away Team Score Table
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, timerRunning, child) {
+                          return ScorePanel(
+                            events: List<GameEvent>.from(gameEvents),
+                            homeTeam: gameStateService.homeTeam,
+                            awayTeam: gameStateService.awayTeam,
+                            displayTeam: gameStateService.awayTeam,
+                            isHomeTeam: false,
+                            enabled: timerRunning,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 );
               },

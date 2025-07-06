@@ -467,9 +467,9 @@ class _TeamListState extends State<TeamList> {
 
     final confirmed = await AppNavigator.showConfirmationDialog(
       context: context,
-      title: 'Delete Team?',
-      content: 'Are you sure you want to delete "$teamName"?',
-      confirmText: 'Delete',
+      title: '',
+      content: '',
+      confirmText: 'Delete Team?',
       cancelText: 'Cancel',
       isDestructive: true,
     );
@@ -521,12 +521,14 @@ class _TeamListState extends State<TeamList> {
       listen: false,
     );
 
+    final count = _selectedTeamIndices.length;
+    final confirmText = count == 1 ? 'Delete Team?' : 'Delete $count Teams?';
+
     final confirmed = await AppNavigator.showConfirmationDialog(
       context: context,
-      title: 'Delete Teams?',
-      content:
-          'Are you sure you want to delete ${_selectedTeamIndices.length} teams?',
-      confirmText: 'Delete',
+      title: '',
+      content: '',
+      confirmText: confirmText,
       cancelText: 'Cancel',
       isDestructive: true,
     );

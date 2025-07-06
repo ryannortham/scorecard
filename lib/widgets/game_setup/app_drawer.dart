@@ -98,7 +98,7 @@ class AppDrawer extends StatelessWidget {
           // Manage Teams - hide on team-related screens to prevent navigation conflicts
           if (currentRoute != 'team_list' && currentRoute != 'add_team')
             ListTile(
-              leading: const Icon(Icons.diversity_3_outlined),
+              leading: const Icon(Icons.assignment_add),
               title: const Text('Manage Teams'),
               onTap: () {
                 Navigator.pop(context);

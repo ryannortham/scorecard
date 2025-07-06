@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/screens/scoring.dart';
-import 'package:scorecard/widgets/bottom_sheets/end_quarter_bottom_sheet.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
 
@@ -59,11 +59,13 @@ class TimerWidgetState extends State<TimerWidget> {
     bool confirmed = shouldSkipConfirmation;
 
     if (!shouldSkipConfirmation) {
-      confirmed = await EndQuarterBottomSheet.show(
+      final actionText = isLastQuarter ? 'End Game?' : 'End Quarter?';
+
+      confirmed = await DialogService.showConfirmationDialog(
         context: context,
-        currentQuarter: currentQuarter,
-        isLastQuarter: isLastQuarter,
-        onConfirm: () {},
+        title: '',
+        content: '',
+        confirmText: actionText,
       );
     }
 

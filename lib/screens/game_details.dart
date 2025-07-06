@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
-import 'package:scorecard/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -193,13 +193,13 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   }
 
   void _deleteGame(BuildContext context) async {
-    // Show confirmation bottom sheet
-    final shouldDelete = await ConfirmationBottomSheet.show(
+    // Show confirmation dialog
+    final shouldDelete = await DialogService.showConfirmationDialog(
       context: context,
-      actionText: 'Delete Game',
-      actionIcon: Icons.delete_outline,
+      title: '',
+      content: '',
+      confirmText: 'Delete Game?',
       isDestructive: true,
-      onConfirm: () {}, // The bottom sheet handles navigation internally
     );
 
     if (shouldDelete && context.mounted) {

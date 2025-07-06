@@ -324,7 +324,7 @@ class _GameSetupState extends State<GameSetup> {
 
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.6,
-                            child: FilledButton.tonal(
+                            child: FilledButton.tonalIcon(
                               onPressed:
                                   isValidSetup()
                                       ? () {
@@ -367,7 +367,8 @@ class _GameSetupState extends State<GameSetup> {
                                         );
                                       }
                                       : null,
-                              child: const Text('Start Scoring'),
+                              icon: const Icon(Icons.outlined_flag),
+                              label: const Text('Start Scoring'),
                             ),
                           ),
                         ],

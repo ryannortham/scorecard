@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/providers/teams_provider.dart';
+import '../football_icon.dart';
 
 /// Optimized widget for displaying game summary in the history list
 class GameSummaryCard extends StatelessWidget {
@@ -49,6 +51,68 @@ class GameSummaryCard extends StatelessWidget {
     return false;
   }
 
+  /// Build team logo widget with 48x48 circular design
+  Widget _buildTeamLogo(String teamName) {
+    return Consumer<TeamsProvider>(
+      builder: (context, teamsProvider, child) {
+        final team = teamsProvider.findTeamByName(teamName);
+        final logoUrl = team?.logoUrl;
+
+        if (logoUrl != null && logoUrl.isNotEmpty) {
+          return ClipOval(
+            child: Image.network(
+              logoUrl,
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return _buildDefaultLogo();
+              },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      value:
+                          loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }
+
+        return _buildDefaultLogo();
+      },
+    );
+  }
+
+  /// Build default logo when no team logo is available
+  Widget _buildDefaultLogo() {
+    return Builder(
+      builder:
+          (context) => Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: FootballIcon(
+              size: 28,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final userPrefs = Provider.of<UserPreferencesProvider>(context);
@@ -57,17 +121,23 @@ class GameSummaryCard extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final timeFormat = DateFormat('HH:mm');
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      elevation: 0,
-      color:
-          isSelected
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Theme.of(context).colorScheme.surfaceContainer,
-      child: ListTile(
-        leading:
-            isSelectionMode
-                ? Icon(
+    return GestureDetector(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        elevation: 0,
+        color:
+            isSelected
+                ? Theme.of(context).colorScheme.primaryContainer
+                : Theme.of(context).colorScheme.surfaceContainer,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // Selection checkbox on the left when in selection mode
+              if (isSelectionMode) ...[
+                Icon(
                   isSelected
                       ? Icons.check_circle_outlined
                       : Icons.radio_button_unchecked,
@@ -75,39 +145,86 @@ class GameSummaryCard extends StatelessWidget {
                       isSelected
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.outline,
-                )
-                : null,
-        title: Text(
-          '${gameSummary.homeTeam} vs ${gameSummary.awayTeam}',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(width: 12),
+              ],
+              // Left column - Home team logo
+              _buildTeamLogo(gameSummary.homeTeam),
+              const SizedBox(width: 16),
+              // Middle column - Existing text content
+              Expanded(
+                child: Column(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          gameSummary.homeTeam,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          'vs',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          gameSummary.awayTeam,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 6),
+                        Text(
+                          'Score: ${gameSummary.homeGoals}.${gameSummary.homeBehinds} (${gameSummary.homePoints}) - ${gameSummary.awayGoals}.${gameSummary.awayBehinds} (${gameSummary.awayPoints})',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (shouldShowTrophy)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Icon(
+                              Icons.emoji_events_outlined,
+                              color: Theme.of(context).colorScheme.secondary,
+                              size: 20,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Right column - Away team logo
+              _buildTeamLogo(gameSummary.awayTeam),
+            ],
+          ),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}',
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Score: ${gameSummary.homeGoals}.${gameSummary.homeBehinds} (${gameSummary.homePoints}) - ${gameSummary.awayGoals}.${gameSummary.awayBehinds} (${gameSummary.awayPoints})',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-        trailing:
-            shouldShowTrophy
-                ? Icon(
-                  Icons.emoji_events_outlined,
-                  color: Theme.of(context).colorScheme.secondary,
-                )
-                : null,
-        onTap: onTap,
-        onLongPress: onLongPress,
       ),
     );
   }

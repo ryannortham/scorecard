@@ -1,35 +1,75 @@
 import 'package:flutter/material.dart';
 
-/// Team data with optional logo
+/// Team data with optional logos in multiple sizes
 class Team {
   final String name;
   final String? logoUrl;
+  final String? logoUrl32;
+  final String? logoUrl48;
+  final String? logoUrlLarge;
 
-  const Team({required this.name, this.logoUrl});
+  const Team({
+    required this.name,
+    this.logoUrl,
+    this.logoUrl32,
+    this.logoUrl48,
+    this.logoUrlLarge,
+  });
 
-  Team copyWith({String? name, String? logoUrl}) {
-    return Team(name: name ?? this.name, logoUrl: logoUrl ?? this.logoUrl);
+  Team copyWith({
+    String? name,
+    String? logoUrl,
+    String? logoUrl32,
+    String? logoUrl48,
+    String? logoUrlLarge,
+  }) {
+    return Team(
+      name: name ?? this.name,
+      logoUrl: logoUrl ?? this.logoUrl,
+      logoUrl32: logoUrl32 ?? this.logoUrl32,
+      logoUrl48: logoUrl48 ?? this.logoUrl48,
+      logoUrlLarge: logoUrlLarge ?? this.logoUrlLarge,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'logoUrl': logoUrl};
+    return {
+      'name': name,
+      'logoUrl': logoUrl,
+      'logoUrl32': logoUrl32,
+      'logoUrl48': logoUrl48,
+      'logoUrlLarge': logoUrlLarge,
+    };
   }
 
   factory Team.fromJson(Map<String, dynamic> json) {
-    return Team(name: json['name'] ?? '', logoUrl: json['logoUrl']);
+    return Team(
+      name: json['name'] ?? '',
+      logoUrl: json['logoUrl'],
+      logoUrl32: json['logoUrl32'],
+      logoUrl48: json['logoUrl48'],
+      logoUrlLarge: json['logoUrlLarge'],
+    );
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Team && other.name == name && other.logoUrl == logoUrl;
+    return other is Team &&
+        other.name == name &&
+        other.logoUrl == logoUrl &&
+        other.logoUrl32 == logoUrl32 &&
+        other.logoUrl48 == logoUrl48 &&
+        other.logoUrlLarge == logoUrlLarge;
   }
 
   @override
-  int get hashCode => Object.hash(name, logoUrl);
+  int get hashCode =>
+      Object.hash(name, logoUrl, logoUrl32, logoUrl48, logoUrlLarge);
 
   @override
-  String toString() => 'Team(name: $name, logoUrl: $logoUrl)';
+  String toString() =>
+      'Team(name: $name, logoUrl: $logoUrl, logoUrl32: $logoUrl32, logoUrl48: $logoUrl48, logoUrlLarge: $logoUrlLarge)';
 }
 
 /// Base class for score-related data

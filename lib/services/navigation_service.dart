@@ -6,7 +6,7 @@ import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/game_setup.dart';
 import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/screens/team_list.dart';
-import 'package:scorecard/widgets/bottom_sheets/confirmation_bottom_sheet.dart';
+import 'package:scorecard/services/dialog_service.dart';
 
 /// Centralized navigation service following Flutter best practices
 /// Reduces code duplication and provides type-safe navigation
@@ -68,7 +68,7 @@ class AppNavigator {
     );
   }
 
-  /// Show confirmation bottom sheet with consistent styling
+  /// Show confirmation dialog with consistent styling
   static Future<bool> showConfirmationDialog({
     required BuildContext context,
     required String title,
@@ -78,12 +78,13 @@ class AppNavigator {
     IconData? icon,
     bool isDestructive = false,
   }) async {
-    return await ConfirmationBottomSheet.show(
+    return await DialogService.showConfirmationDialog(
       context: context,
-      actionText: confirmText,
-      actionIcon:
-          icon ?? (isDestructive ? Icons.delete_outline : Icons.check_outlined),
-      onConfirm: () {}, // The bottom sheet handles navigation internally
+      title: title,
+      content: content,
+      confirmText: confirmText,
+      cancelText: cancelText,
+      icon: icon,
       isDestructive: isDestructive,
     );
   }
