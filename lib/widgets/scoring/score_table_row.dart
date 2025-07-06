@@ -39,38 +39,42 @@ class ScoreTableRow extends StatelessWidget {
                 ? Theme.of(context).colorScheme.secondaryContainer
                 : Theme.of(context).colorScheme.surfaceContainerHigh,
       ),
-      child: Row(
-        children: [
-          // Quarter label
-          SizedBox(
-            width: 18,
-            child: Center(
-              child: Text(
-                'Q${quarter + 1}',
-                style: Theme.of(context).textTheme.labelMedium,
-              ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Quarter label
+            _buildQuarterColumn(context),
+            // Goals column
+            _buildScoreColumn(context, teamGoals, runningGoals, useTally: true),
+            // Behinds column
+            _buildScoreColumn(
+              context,
+              teamBehinds,
+              runningBehinds,
+              useTally: true,
             ),
-          ),
+            // Points column
+            _buildScoreColumn(
+              context,
+              teamPoints,
+              runningPoints,
+              useTally: false,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-          // Goals (Quarter + Total)
-          _buildScoreColumn(context, teamGoals, runningGoals, useTally: true),
-
-          // Behinds (Quarter + Total)
-          _buildScoreColumn(
-            context,
-            teamBehinds,
-            runningBehinds,
-            useTally: true,
-          ),
-
-          // Points (Quarter + Total)
-          _buildScoreColumn(
-            context,
-            teamPoints,
-            runningPoints,
-            useTally: false,
-          ),
-        ],
+  /// Builds the quarter column
+  Widget _buildQuarterColumn(BuildContext context) {
+    return Container(
+      width: 24,
+      child: Center(
+        child: Text(
+          'Q${quarter + 1}',
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
       ),
     );
   }
@@ -112,7 +116,7 @@ class ScoreTableRow extends StatelessWidget {
                             : Theme.of(
                               context,
                             ).colorScheme.surfaceContainerHighest,
-                    width: 1.5,
+                    width: 2,
                   ),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
