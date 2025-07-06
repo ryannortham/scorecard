@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_table_builder_service.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/football_icon.dart';
 
 /// A unified widget for displaying game details
 class GameDetailsWidget extends StatelessWidget {
@@ -221,7 +223,15 @@ class _TeamScoresRow extends StatelessWidget {
 
     return Stack(
       children: [
-        // Background content with proper alignment
+        // Background team logos (watermarks)
+        Row(
+          children: [
+            Expanded(child: _TeamLogoWatermark(teamName: game.homeTeam)),
+            const SizedBox(width: 18),
+            Expanded(child: _TeamLogoWatermark(teamName: game.awayTeam)),
+          ],
+        ),
+        // Foreground content with proper alignment
         Column(
           children: [
             // Team names row
@@ -446,12 +456,71 @@ class _QuarterBreakdownSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: Text(
-            teamName,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isWinner ? Theme.of(context).colorScheme.primary : null,
-            ),
+          child: Row(
+            children: [
+              Consumer<TeamsProvider>(
+                builder: (context, teamsProvider, child) {
+                  final team = teamsProvider.findTeamByName(teamName);
+                  final logoUrl = team?.logoUrl;
+
+                  return Container(
+                    width: 32,
+                    height: 32,
+                    margin: const EdgeInsets.only(right: 8),
+                    child:
+                        logoUrl != null && logoUrl.isNotEmpty
+                            ? ClipOval(
+                              child: Image.network(
+                                logoUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                    child: FootballIcon(
+                                      size: 16,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline
+                                          .withValues(alpha: 0.6),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                            : Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outline.withValues(alpha: 0.1),
+                              ),
+                              child: FootballIcon(
+                                size: 16,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outline.withValues(alpha: 0.6),
+                              ),
+                            ),
+                  );
+                },
+              ),
+              Expanded(
+                child: Text(
+                  teamName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color:
+                        isWinner ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         ScoreTableBuilderService.buildScoreTable(
@@ -463,6 +532,69 @@ class _QuarterBreakdownSection extends StatelessWidget {
           liveEvents: liveEvents,
         ),
       ],
+    );
+  }
+}
+
+/// Team logo watermark widget
+class _TeamLogoWatermark extends StatelessWidget {
+  final String teamName;
+
+  const _TeamLogoWatermark({required this.teamName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<TeamsProvider>(
+      builder: (context, teamsProvider, child) {
+        final team = teamsProvider.findTeamByName(teamName);
+        final logoUrl = team?.logoUrl;
+
+        return Center(
+          child: Opacity(
+            opacity: 0.15, // Subtle watermark opacity
+            child: SizedBox(
+              width: 144,
+              height: 144,
+              child: ShaderMask(
+                shaderCallback: (Rect bounds) {
+                  return const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.black, Colors.black, Colors.transparent],
+                    stops: [0.0, 0.4, 1.0],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child:
+                    logoUrl != null && logoUrl.isNotEmpty
+                        ? ClipOval(
+                          child: Image.network(
+                            logoUrl, // Use the logo URL directly - teams should be imported with larger logos
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return _buildFallbackLogo(context);
+                            },
+                          ),
+                        )
+                        : _buildFallbackLogo(context),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFallbackLogo(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+      ),
+      child: FootballIcon(
+        size: 72,
+        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+      ),
     );
   }
 }

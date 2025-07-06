@@ -83,7 +83,11 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
           // Filter to only include teams with logos and exclude certain words/existing teams
           _searchResults =
               response.results
-                  .where((team) => team.logoUrl48?.isNotEmpty ?? false)
+                  .where(
+                    (team) =>
+                        (team.logoUrlLarge ?? team.logoUrl48)?.isNotEmpty ??
+                        false,
+                  )
                   .where((team) {
                     final nameLower = team.name.toLowerCase();
                     // Exclude teams with excluded words
@@ -380,7 +384,8 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
   }
 
   Widget _buildTeamLogo(Organisation team) {
-    final logoUrl = team.logoUrl48;
+    // Prefer larger logo for better display quality, fallback to 48x48
+    final logoUrl = team.logoUrlLarge ?? team.logoUrl48;
 
     if (logoUrl != null && logoUrl.isNotEmpty) {
       return ClipOval(
@@ -453,8 +458,11 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
       return;
     }
 
-    // Add team with logo
-    await teamsProvider.addTeam(team.name, logoUrl: team.logoUrl48);
+    // Add team with logo (prefer larger size for better watermark quality)
+    await teamsProvider.addTeam(
+      team.name,
+      logoUrl: team.logoUrlLarge ?? team.logoUrl48,
+    );
 
     // Navigate back and return the team name for potential selection
     if (mounted) {
