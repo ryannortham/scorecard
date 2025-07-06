@@ -458,10 +458,13 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
       return;
     }
 
-    // Add team with logo (prefer larger size for better watermark quality)
+    // Add team with logos in multiple sizes for optimal display quality
     await teamsProvider.addTeam(
       team.name,
-      logoUrl: team.logoUrlLarge ?? team.logoUrl48,
+      logoUrl: team.logoUrl48, // General purpose logo
+      logoUrl32: team.logoUrl32,
+      logoUrl48: team.logoUrl48,
+      logoUrlLarge: team.logoUrlLarge,
     );
 
     // Navigate back and return the team name for potential selection

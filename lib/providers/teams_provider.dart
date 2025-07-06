@@ -46,16 +46,41 @@ class TeamsProvider extends ChangeNotifier {
     await prefs.setStringList('teams', teamsJson);
   }
 
-  Future<void> addTeam(String name, {String? logoUrl}) async {
-    final team = Team(name: name, logoUrl: logoUrl);
+  Future<void> addTeam(
+    String name, {
+    String? logoUrl,
+    String? logoUrl32,
+    String? logoUrl48,
+    String? logoUrlLarge,
+  }) async {
+    final team = Team(
+      name: name,
+      logoUrl: logoUrl,
+      logoUrl32: logoUrl32,
+      logoUrl48: logoUrl48,
+      logoUrlLarge: logoUrlLarge,
+    );
     _teams.add(team);
     await _saveTeams();
     notifyListeners();
   }
 
-  Future<void> editTeam(int index, String newName, {String? logoUrl}) async {
+  Future<void> editTeam(
+    int index,
+    String newName, {
+    String? logoUrl,
+    String? logoUrl32,
+    String? logoUrl48,
+    String? logoUrlLarge,
+  }) async {
     if (index >= 0 && index < _teams.length) {
-      _teams[index] = _teams[index].copyWith(name: newName, logoUrl: logoUrl);
+      _teams[index] = _teams[index].copyWith(
+        name: newName,
+        logoUrl: logoUrl,
+        logoUrl32: logoUrl32,
+        logoUrl48: logoUrl48,
+        logoUrlLarge: logoUrlLarge,
+      );
       await _saveTeams();
       notifyListeners();
     }

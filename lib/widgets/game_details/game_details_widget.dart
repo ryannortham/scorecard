@@ -461,7 +461,9 @@ class _QuarterBreakdownSection extends StatelessWidget {
               Consumer<TeamsProvider>(
                 builder: (context, teamsProvider, child) {
                   final team = teamsProvider.findTeamByName(teamName);
-                  final logoUrl = team?.logoUrl;
+                  // Use logoUrl32 for 32x32 display, with fallbacks
+                  final logoUrl =
+                      team?.logoUrl32 ?? team?.logoUrl48 ?? team?.logoUrl;
 
                   return Container(
                     width: 32,
@@ -547,7 +549,8 @@ class _TeamLogoWatermark extends StatelessWidget {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
-        final logoUrl = team?.logoUrl;
+        // Use logoUrlLarge for watermarks, with fallbacks
+        final logoUrl = team?.logoUrlLarge ?? team?.logoUrl48 ?? team?.logoUrl;
 
         return Center(
           child: Opacity(
