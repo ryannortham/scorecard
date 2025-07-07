@@ -106,6 +106,10 @@ class AppDrawer extends StatelessWidget {
                 : Icons.star_outline,
           ),
           title: const Text('Favorite Team'),
+          subtitle:
+              userPreferences.favoriteTeam.isNotEmpty
+                  ? Text(userPreferences.favoriteTeam)
+                  : const Text('None selected'),
           trailing:
               userPreferences.favoriteTeam.isNotEmpty
                   ? IconButton(
@@ -184,6 +188,7 @@ class AppDrawer extends StatelessWidget {
         child: ListTile(
           leading: Icon(_getThemeModeIcon(userPreferences.themeMode)),
           title: const Text('Theme'),
+          subtitle: Text(_getThemeModeName(userPreferences.themeMode)),
           trailing: const Icon(Icons.arrow_drop_down),
         ),
       ),
@@ -204,7 +209,8 @@ class AppDrawer extends StatelessWidget {
                     ? Theme.of(context).colorScheme.primary
                     : userPreferences.getThemeColor(),
           ),
-          title: const Text('Color Theme'),
+          title: const Text('Colour'),
+          subtitle: Text(_getColorThemeName(userPreferences.colorTheme)),
           trailing: const Icon(Icons.arrow_drop_down),
         ),
       ),
@@ -389,6 +395,36 @@ class AppDrawer extends StatelessWidget {
   /// Helper methods
   bool _isTeamRelatedRoute() {
     return currentRoute == 'add_team' || currentRoute == 'team_list';
+  }
+
+  String _getThemeModeName(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System';
+    }
+  }
+
+  String _getColorThemeName(String colorTheme) {
+    switch (colorTheme) {
+      case 'dynamic':
+        return 'Dynamic';
+      case 'blue':
+        return 'Blue';
+      case 'green':
+        return 'Green';
+      case 'purple':
+        return 'Purple';
+      case 'orange':
+        return 'Orange';
+      case 'pink':
+        return 'Pink';
+      default:
+        return 'Blue'; // fallback
+    }
   }
 
   /// Navigation methods

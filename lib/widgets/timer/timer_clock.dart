@@ -135,7 +135,7 @@ class _TimerClockState extends State<TimerClock> {
 
             return Column(
               children: [
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
@@ -184,7 +184,7 @@ class _TimerClockState extends State<TimerClock> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 LinearProgressIndicator(value: progress),
               ],
             );

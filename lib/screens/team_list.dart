@@ -114,6 +114,9 @@ class _TeamListState extends State<TeamList> {
                   : Text(widget.title),
           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
           leading:
               _isSelectionMode
                   ? IconButton(
@@ -152,9 +155,13 @@ class _TeamListState extends State<TeamList> {
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.25],
+                      stops: const [0.0, 0.12, 0.25, 0.5],
                       colors: [
                         Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.9),
                         Theme.of(context).colorScheme.surface,
                       ],
                     ),
