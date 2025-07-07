@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:confetti/confetti.dart';
 import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/dialog_service.dart';
+import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
@@ -12,6 +16,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:gal/gal.dart';
 import 'dart:io';
+import 'dart:math';
 
 /// A full-screen page for displaying game details from history
 class GameDetailsPage extends StatefulWidget {
@@ -29,10 +34,63 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isSharing = false;
 
+  // Confetti controller for celebration
+  late ConfettiController _confettiController;
+  bool _hasTriggeredConfetti = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize confetti controller
+    _confettiController = ConfettiController(
+      duration: const Duration(milliseconds: 500),
+    );
+
+    // Trigger confetti if conditions are met
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndTriggerConfetti();
+    });
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
+    _confettiController.dispose();
     super.dispose();
+  }
+
+  /// Check if confetti should be triggered and trigger it
+  void _checkAndTriggerConfetti() {
+    if (_hasTriggeredConfetti) return;
+
+    final userPrefs = Provider.of<UserPreferencesProvider>(
+      context,
+      listen: false,
+    );
+
+    // Check if the game is complete and favorite team won
+    final isComplete = GameAnalysisService.isGameComplete(widget.game);
+    final shouldShowTrophy = GameAnalysisService.shouldShowTrophyIcon(
+      widget.game,
+      userPrefs,
+    );
+
+    if (isComplete && shouldShowTrophy) {
+      _triggerConfetti();
+      _hasTriggeredConfetti = true;
+    }
+  }
+
+  /// Trigger confetti celebration
+  void _triggerConfetti() {
+    // Single confetti explosion from center
+    _confettiController.play();
+
+    AppLogger.info(
+      'Confetti triggered for favorite team victory',
+      component: 'GameDetails',
+    );
   }
 
   @override
@@ -104,6 +162,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                 scrollController: _scrollController,
               ),
             ),
+
             // Screenshot widget positioned off-screen
             Positioned(
               left: -1000,
@@ -121,6 +180,32 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                     ),
                   ),
                 ),
+              ),
+            ),
+
+            // Confetti widget for celebration - single explosion from center bottom
+            Positioned(
+              bottom: 100,
+              left: MediaQuery.of(context).size.width * 0.5 - 10,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirection: -pi / 2, // Straight up
+                particleDrag: 0.02, // Less drag for higher travel
+                emissionFrequency: 0.1, // Quick burst
+                numberOfParticles: 20,
+                gravity: 0.2, // Higher gravity for quicker fall
+                shouldLoop: false,
+                minBlastForce: 20, // Higher force for more height
+                maxBlastForce: 35,
+                maximumSize: const Size(10, 10), // Medium-sized particles
+                minimumSize: const Size(5, 5),
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.secondary,
+                  Theme.of(context).colorScheme.tertiary,
+                  Colors.yellow,
+                  Colors.orange,
+                ],
               ),
             ),
           ],
