@@ -45,16 +45,8 @@ class TallyDisplay extends StatelessWidget {
       return _buildCenteredContent(_buildTextDisplay(theme, effectiveColor));
     }
 
-    return _buildAlignedContent(
+    return _buildCenteredContent(
       _buildTallyIconDisplay(theme, effectiveColor, effectiveIconSize),
-    );
-  }
-
-  /// Wraps content with consistent padding and alignment
-  Widget _buildAlignedContent(Widget child) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Align(alignment: Alignment.centerLeft, child: child),
     );
   }
 
