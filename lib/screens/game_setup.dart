@@ -166,9 +166,7 @@ class _GameSetupState extends State<GameSetup> {
                                     Align(
                                       alignment: Alignment.centerLeft,
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0,
-                                        ),
+                                        padding: const EdgeInsets.all(8.0),
                                         child: Text(
                                           'Teams',
                                           style: Theme.of(
@@ -182,7 +180,6 @@ class _GameSetupState extends State<GameSetup> {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
                                     TeamSelectionWidget(
                                       homeTeam: homeTeam,
                                       awayTeam: awayTeam,

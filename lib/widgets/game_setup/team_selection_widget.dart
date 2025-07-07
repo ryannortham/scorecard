@@ -5,7 +5,7 @@ import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/screens/team_list.dart';
 import '../football_icon.dart';
 
-/// Widget for selecting home and away teams with drag-and-drop reordering
+/// Widget for selecting home and away teams
 class TeamSelectionWidget extends StatefulWidget {
   final String? homeTeam;
   final String? awayTeam;
@@ -51,7 +51,6 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
     required String? teamName,
     required VoidCallback onTap,
     required VoidCallback? onClear,
-    required bool isHomeTeam,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -65,179 +64,72 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
             )
             : null;
 
-    final bool canDrag = widget.homeTeam != null || widget.awayTeam != null;
-
-    Widget cardContent = Card(
+    return Card(
       elevation: 0,
       color:
           teamName == null
               ? colorScheme.surfaceContainer
               : colorScheme.surfaceContainerHigh,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child:
-            teamName == null
-                ? _buildEmptyState(label, colorScheme)
-                : _buildSelectedState(
-                  team,
-                  teamName,
-                  onClear,
-                  canDrag,
-                  colorScheme,
-                ),
-      ),
+      child:
+          teamName == null
+              ? InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(12),
+                child: _buildEmptyState(label, colorScheme),
+              )
+              : _buildSelectedStateWithClear(
+                team,
+                teamName,
+                onTap,
+                onClear,
+                colorScheme,
+              ),
     );
+  }
 
-    if (teamName != null && canDrag) {
-      return DragTarget<String>(
-        onWillAcceptWithDetails: (details) {
-          // Always accept drops - we'll handle swapping
-          return true;
-        },
-        onAcceptWithDetails: (details) {
-          // Handle the drop - swap the teams
-          final droppedTeam = details.data;
-
-          if (isHomeTeam) {
-            // Dropping on home team slot
-            if (widget.awayTeam == droppedTeam) {
-              // Swapping away team to home
-              widget.onHomeTeamChanged(droppedTeam);
-              widget.onAwayTeamChanged(
-                teamName,
-              ); // Put current home team in away slot
-            } else {
-              // Just setting home team (from external drag or empty slot)
-              widget.onHomeTeamChanged(droppedTeam);
-            }
-          } else {
-            // Dropping on away team slot
-            if (widget.homeTeam == droppedTeam) {
-              // Swapping home team to away
-              widget.onAwayTeamChanged(droppedTeam);
-              widget.onHomeTeamChanged(
-                teamName,
-              ); // Put current away team in home slot
-            } else {
-              // Just setting away team (from external drag or empty slot)
-              widget.onAwayTeamChanged(droppedTeam);
-            }
-          }
-        },
-        builder: (context, candidateData, rejectedData) {
-          return LongPressDraggable<String>(
-            data: teamName,
-            feedback: Material(
-              elevation: 8,
-              borderRadius: BorderRadius.circular(12),
-              child: SizedBox(
-                width:
-                    MediaQuery.of(context).size.width -
-                    40, // Reduce by 40px to match original card width
-                child: Card(
-                  elevation: 0,
-                  color: colorScheme.surfaceContainerHigh,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    child: _buildSelectedState(
-                      team,
-                      teamName,
-                      onClear, // Keep the actual onClear function
-                      true,
-                      colorScheme,
-                    ),
-                  ),
-                ),
+  Widget _buildSelectedStateWithClear(
+    dynamic team,
+    String teamName,
+    VoidCallback onTap,
+    VoidCallback? onClear,
+    ColorScheme colorScheme,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          _buildTeamLogo(team),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              teamName,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
               ),
             ),
-            childWhenDragging: Card(
-              elevation: 0,
-              color: colorScheme.surfaceContainerLowest.withValues(alpha: 0.5),
-              child: Container(height: 72),
+          ),
+          if (onClear != null)
+            IconButton(
+              onPressed: onClear,
+              icon: Icon(
+                Icons.close_outlined,
+                size: 20,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              padding: EdgeInsets.zero,
             ),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              decoration:
-                  candidateData.isNotEmpty
-                      ? BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: colorScheme.primary,
-                          width: 2,
-                        ),
-                      )
-                      : null,
-              child: cardContent,
-            ),
-          );
-        },
-      );
-    }
-
-    return DragTarget<String>(
-      onWillAcceptWithDetails: (details) {
-        // Always accept drops - we'll handle swapping
-        return true;
-      },
-      onAcceptWithDetails: (details) {
-        // Handle the drop - swap the teams
-        final droppedTeam = details.data;
-
-        if (isHomeTeam) {
-          // Dropping on home team slot
-          if (widget.awayTeam == droppedTeam) {
-            // Swapping away team to home
-            widget.onHomeTeamChanged(droppedTeam);
-            widget.onAwayTeamChanged(
-              teamName,
-            ); // Put current home team in away slot
-          } else {
-            // Just setting home team (from external drag or empty slot)
-            widget.onHomeTeamChanged(droppedTeam);
-          }
-        } else {
-          // Dropping on away team slot
-          if (widget.homeTeam == droppedTeam) {
-            // Swapping home team to away
-            widget.onAwayTeamChanged(droppedTeam);
-            widget.onHomeTeamChanged(
-              teamName,
-            ); // Put current away team in home slot
-          } else {
-            // Just setting away team (from external drag or empty slot)
-            widget.onAwayTeamChanged(droppedTeam);
-          }
-        }
-      },
-      builder: (context, candidateData, rejectedData) {
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration:
-              candidateData.isNotEmpty
-                  ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: colorScheme.primary, width: 2),
-                  )
-                  : null,
-          child: cardContent,
-        );
-      },
+        ],
+      ),
     );
   }
 
   Widget _buildEmptyState(String label, ColorScheme colorScheme) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 8.0,
-        vertical: 8.0,
-      ),
-      horizontalTitleGap: 8.0, // Consistent gap with selected state
-      leading: Row(
-        mainAxisSize: MainAxisSize.min,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
         children: [
-          // Add spacing to align with drag handle + logo when present
-          const SizedBox(width: 28), // 20px (drag handle) + 8px (spacing)
           Container(
             width: 48,
             height: 48,
@@ -251,66 +143,17 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
               color: colorScheme.onSurfaceVariant,
             ),
           ),
-        ],
-      ),
-      title: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-      ),
-    );
-  }
-
-  Widget _buildSelectedState(
-    dynamic team,
-    String teamName,
-    VoidCallback? onClear,
-    bool showDragHandle,
-    ColorScheme colorScheme,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.only(
-        left: 8.0,
-        right:
-            onClear != null
-                ? 4.0
-                : 8.0, // 4px from right edge when X icon is present
-        top: 8.0,
-        bottom: 8.0,
-      ),
-      horizontalTitleGap: 8.0, // Reduce gap between leading and title
-      leading: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Show drag handle when this team is selected (so it can be dragged)
-          if (showDragHandle) ...[
-            Icon(
-              Icons.drag_handle,
-              color: colorScheme.onSecondaryContainer,
-              size: 20,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-            const SizedBox(width: 8),
-          ],
-          _buildTeamLogo(team),
+          ),
         ],
       ),
-      title: Text(
-        teamName,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontWeight: FontWeight.w500,
-          color: colorScheme.onSecondaryContainer,
-        ),
-      ),
-      trailing:
-          onClear != null
-              ? IconButton(
-                onPressed: onClear,
-                icon: const Icon(Icons.close_outlined),
-                iconSize: 20,
-                visualDensity: VisualDensity.compact,
-              )
-              : null,
     );
   }
 
@@ -322,26 +165,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
           width: 48,
           height: 48,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultLogo();
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return SizedBox(
-              width: 48,
-              height: 48,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                ),
-              ),
-            );
-          },
+          errorBuilder: (context, error, stackTrace) => _buildDefaultLogo(),
         ),
       );
     }
@@ -350,65 +174,95 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
   }
 
   Widget _buildDefaultLogo() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: colorScheme.primaryContainer,
         shape: BoxShape.circle,
       ),
-      child: FootballIcon(
-        size: 28,
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
-      ),
+      child: FootballIcon(size: 24, color: colorScheme.onPrimaryContainer),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
       children: [
-        // Home Team Card
-        _buildTeamCard(
-          label: 'Home Team',
-          teamName: widget.homeTeam,
-          onTap: () async {
-            final selectedTeam = await _selectTeam(
-              title: 'Select Home Team',
-              excludeTeam: widget.awayTeam,
-            );
-            if (selectedTeam != null) {
-              widget.onHomeTeamChanged(selectedTeam);
-            }
-          },
-          onClear:
-              widget.homeTeam != null
-                  ? () => widget.onHomeTeamChanged(null)
-                  : null,
-          isHomeTeam: true,
+        // Team cards column (takes most of the space)
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Home Team Card
+              _buildTeamCard(
+                label: 'Home Team',
+                teamName: widget.homeTeam,
+                onTap: () async {
+                  final selectedTeam = await _selectTeam(
+                    title: 'Select Home Team',
+                    excludeTeam: widget.awayTeam,
+                  );
+                  if (selectedTeam != null) {
+                    widget.onHomeTeamChanged(selectedTeam);
+                  }
+                },
+                onClear:
+                    widget.homeTeam != null
+                        ? () => widget.onHomeTeamChanged(null)
+                        : null,
+              ),
+
+              const SizedBox(height: 8),
+
+              // Away Team Card
+              _buildTeamCard(
+                label: 'Away Team',
+                teamName: widget.awayTeam,
+                onTap: () async {
+                  final selectedTeam = await _selectTeam(
+                    title: 'Select Away Team',
+                    excludeTeam: widget.homeTeam,
+                  );
+                  if (selectedTeam != null) {
+                    widget.onAwayTeamChanged(selectedTeam);
+                  }
+                },
+                onClear:
+                    widget.awayTeam != null
+                        ? () => widget.onAwayTeamChanged(null)
+                        : null,
+              ),
+            ],
+          ),
         ),
 
-        const SizedBox(height: 4),
+        // Swap button on the right
+        SizedBox(
+          child: Center(
+            child: IconButton(
+              onPressed:
+                  (widget.homeTeam != null || widget.awayTeam != null)
+                      ? () {
+                        // Swap home and away teams
+                        final tempHome = widget.homeTeam;
+                        final tempAway = widget.awayTeam;
 
-        // Away Team Card
-        _buildTeamCard(
-          label: 'Away Team',
-          teamName: widget.awayTeam,
-          onTap: () async {
-            final selectedTeam = await _selectTeam(
-              title: 'Select Away Team',
-              excludeTeam: widget.homeTeam,
-            );
-            if (selectedTeam != null) {
-              widget.onAwayTeamChanged(selectedTeam);
-            }
-          },
-          onClear:
-              widget.awayTeam != null
-                  ? () => widget.onAwayTeamChanged(null)
-                  : null,
-          isHomeTeam: false,
+                        // Call the callbacks to update parent state
+                        widget.onHomeTeamChanged(tempAway);
+                        widget.onAwayTeamChanged(tempHome);
+                      }
+                      : null, // Disabled when both teams are null
+              icon: Icon(Icons.swap_vert, color: colorScheme.onSurfaceVariant),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+            ),
+          ),
         ),
       ],
     );
