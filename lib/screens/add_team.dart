@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/models/playhq_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
-import 'package:scorecard/widgets/game_setup/app_drawer.dart';
-import 'package:scorecard/widgets/swipe_drawer_wrapper.dart';
+import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 import '../widgets/football_icon.dart';
 
 /// Constants for the AddTeamScreen

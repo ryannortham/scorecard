@@ -6,8 +6,8 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
 import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
-import 'package:scorecard/widgets/game_setup/app_drawer.dart';
-import 'package:scorecard/widgets/swipe_drawer_wrapper.dart';
+import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 
 import 'scoring.dart';
 

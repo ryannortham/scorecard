@@ -6,8 +6,8 @@ import '../providers/teams_provider.dart';
 import '../providers/user_preferences_provider.dart';
 import '../services/navigation_service.dart';
 import '../screens/add_team.dart';
-import '../widgets/game_setup/app_drawer.dart';
-import '../widgets/swipe_drawer_wrapper.dart';
+import '../widgets/drawer/app_drawer.dart';
+import '../widgets/drawer/swipe_drawer_wrapper.dart';
 import '../widgets/football_icon.dart';
 
 class TeamList extends StatefulWidget {

@@ -4,8 +4,8 @@ import '../services/dialog_service.dart';
 import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
-import '../widgets/game_setup/app_drawer.dart';
-import '../widgets/swipe_drawer_wrapper.dart';
+import '../widgets/drawer/app_drawer.dart';
+import '../widgets/drawer/swipe_drawer_wrapper.dart';
 import 'package:scorecard/screens/game_details.dart' as details;
 
 class GameHistoryScreen extends StatefulWidget {

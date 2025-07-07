@@ -11,8 +11,8 @@ import 'package:scorecard/services/game_sharing_service.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
-import 'package:scorecard/widgets/game_setup/app_drawer.dart';
-import 'package:scorecard/widgets/swipe_drawer_wrapper.dart';
+import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 
 import 'game_details.dart';
 
