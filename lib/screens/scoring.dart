@@ -12,6 +12,7 @@ import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
+import 'package:scorecard/widgets/swipe_drawer_wrapper.dart';
 
 import 'game_details.dart';
 
@@ -223,98 +224,100 @@ class ScoringState extends State<Scoring> {
           ],
         ),
         drawer: const AppDrawer(currentRoute: 'scoring'),
-        body: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.25],
-                    colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(context).colorScheme.surface,
-                    ],
+        body: SwipeDrawerWrapper(
+          child: Stack(
+            children: [
+              // Gradient background
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: const [0.0, 0.25],
+                      colors: [
+                        Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.surface,
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            // Main content
-            LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      // Timer Panel
-                      TimerWidget(
-                        key: _quarterTimerKey,
-                        isRunning: isTimerRunning,
-                      ),
+              // Main content
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // Timer Panel
+                        TimerWidget(
+                          key: _quarterTimerKey,
+                          isRunning: isTimerRunning,
+                        ),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      // Home Team Score Table
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, timerRunning, child) {
-                          return ScorePanel(
-                            events: List<GameEvent>.from(gameEvents),
-                            homeTeam: gameStateService.homeTeam,
-                            awayTeam: gameStateService.awayTeam,
-                            displayTeam: gameStateService.homeTeam,
-                            isHomeTeam: true,
-                            enabled: timerRunning,
-                          );
-                        },
-                      ),
+                        // Home Team Score Table
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isTimerRunning,
+                          builder: (context, timerRunning, child) {
+                            return ScorePanel(
+                              events: List<GameEvent>.from(gameEvents),
+                              homeTeam: gameStateService.homeTeam,
+                              awayTeam: gameStateService.awayTeam,
+                              displayTeam: gameStateService.homeTeam,
+                              isHomeTeam: true,
+                              enabled: timerRunning,
+                            );
+                          },
+                        ),
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      // Away Team Score Table
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, timerRunning, child) {
-                          return ScorePanel(
-                            events: List<GameEvent>.from(gameEvents),
-                            homeTeam: gameStateService.homeTeam,
-                            awayTeam: gameStateService.awayTeam,
-                            displayTeam: gameStateService.awayTeam,
-                            isHomeTeam: false,
-                            enabled: timerRunning,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                        // Away Team Score Table
+                        ValueListenableBuilder<bool>(
+                          valueListenable: isTimerRunning,
+                          builder: (context, timerRunning, child) {
+                            return ScorePanel(
+                              events: List<GameEvent>.from(gameEvents),
+                              homeTeam: gameStateService.homeTeam,
+                              awayTeam: gameStateService.awayTeam,
+                              displayTeam: gameStateService.awayTeam,
+                              isHomeTeam: false,
+                              enabled: timerRunning,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
 
-            // Screenshot widget positioned off-screen
-            Positioned(
-              left: -1000,
-              top: -1000,
-              child: WidgetShotPlus(
-                key: _screenshotWidgetKey,
-                child: Material(
-                  child: IntrinsicHeight(
-                    child: SizedBox(
-                      width: 400,
-                      child: GameDetailsWidget.fromLiveData(
-                        events: gameEvents,
-                        enableScrolling: false,
+              // Screenshot widget positioned off-screen
+              Positioned(
+                left: -1000,
+                top: -1000,
+                child: WidgetShotPlus(
+                  key: _screenshotWidgetKey,
+                  child: Material(
+                    child: IntrinsicHeight(
+                      child: SizedBox(
+                        width: 400,
+                        child: GameDetailsWidget.fromLiveData(
+                          events: gameEvents,
+                          enableScrolling: false,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/widgets/game_setup/app_drawer.dart';
+import 'package:scorecard/widgets/swipe_drawer_wrapper.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -71,53 +72,55 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
         ],
       ),
       drawer: const AppDrawer(currentRoute: 'game_details'),
-      body: Stack(
-        children: [
-          // Gradient background
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.25],
-                  colors: [
-                    Theme.of(context).colorScheme.primaryContainer,
-                    Theme.of(context).colorScheme.surface,
-                  ],
+      body: SwipeDrawerWrapper(
+        child: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.25],
+                    colors: [
+                      Theme.of(context).colorScheme.primaryContainer,
+                      Theme.of(context).colorScheme.surface,
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // Main content
-          WidgetShotPlus(
-            key: _widgetShotKey,
-            child: GameDetailsWidget.fromStaticData(
-              game: widget.game,
-              scrollController: _scrollController,
+            // Main content
+            WidgetShotPlus(
+              key: _widgetShotKey,
+              child: GameDetailsWidget.fromStaticData(
+                game: widget.game,
+                scrollController: _scrollController,
+              ),
             ),
-          ),
-          // Screenshot widget positioned off-screen
-          Positioned(
-            left: -1000,
-            top: -1000,
-            child: WidgetShotPlus(
-              key: _screenshotWidgetKey,
-              child: Material(
-                child: IntrinsicHeight(
-                  child: SizedBox(
-                    width: 400,
-                    child: GameDetailsWidget.fromStaticData(
-                      game: widget.game,
-                      enableScrolling: false,
+            // Screenshot widget positioned off-screen
+            Positioned(
+              left: -1000,
+              top: -1000,
+              child: WidgetShotPlus(
+                key: _screenshotWidgetKey,
+                child: Material(
+                  child: IntrinsicHeight(
+                    child: SizedBox(
+                      width: 400,
+                      child: GameDetailsWidget.fromStaticData(
+                        game: widget.game,
+                        enableScrolling: false,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

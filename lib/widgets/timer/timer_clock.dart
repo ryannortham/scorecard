@@ -1,12 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
+import 'package:vibration/vibration.dart';
 
 import 'package:scorecard/services/game_state_service.dart';
 
 /// Widget that displays the timer value and progress indicator
-class TimerClock extends StatelessWidget {
+class TimerClock extends StatefulWidget {
   const TimerClock({super.key});
+
+  @override
+  State<TimerClock> createState() => _TimerClockState();
+}
+
+class _TimerClockState extends State<TimerClock> {
+  int? _previousTimerValue;
+  bool _hasVibratedForOvertime = false;
+  bool? _hasVibrator; // Cache vibration capability
+
+  @override
+  void initState() {
+    super.initState();
+    _checkVibrationCapability();
+  }
+
+  /// Check vibration capability once and cache the result
+  void _checkVibrationCapability() async {
+    _hasVibrator = await Vibration.hasVibrator();
+  }
 
   /// Gets the appropriate color for the timer display based on current state
   Color _getTimerColor(
@@ -35,6 +56,57 @@ class TimerClock extends StatelessWidget {
     return (isCountdownTimer && value < 0) ? '-$trimmedTime' : trimmedTime;
   }
 
+  /// Triggers vibration when timer reaches quarter end/overtime (optimized)
+  void _checkForOvertimeVibration(
+    int currentTime,
+    int quarterMSec,
+    bool isCountdownTimer,
+  ) {
+    // Early exit if no vibration capability
+    if (_hasVibrator != true) {
+      _previousTimerValue = currentTime;
+      return;
+    }
+
+    final isOvertime =
+        isCountdownTimer ? currentTime <= 0 : currentTime > quarterMSec;
+    
+    // Reset vibration flag when not in overtime
+    if (!isOvertime) {
+      _hasVibratedForOvertime = false;
+      _previousTimerValue = currentTime;
+      return;
+    }
+
+    // Check if we just entered overtime and haven't vibrated yet
+    if (_hasVibratedForOvertime) {
+      _previousTimerValue = currentTime;
+      return;
+    }
+
+    final wasNotOvertime = _previousTimerValue != null &&
+        (isCountdownTimer
+            ? _previousTimerValue! > 0
+            : _previousTimerValue! <= quarterMSec);
+
+    // Trigger vibration when transitioning from normal time to overtime
+    if (wasNotOvertime) {
+      _triggerOvertimeVibration();
+      _hasVibratedForOvertime = true;
+    }
+
+    _previousTimerValue = currentTime;
+  }
+
+  /// Triggers vibration pattern for overtime (non-blocking)
+  void _triggerOvertimeVibration() {
+    // Check if vibration is available (using cached result)
+    if (_hasVibrator == true) {
+      // Use fire-and-forget to avoid blocking the UI thread
+      Vibration.vibrate(pattern: [0, 200, 100, 400]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<GameStateService>(
@@ -52,6 +124,9 @@ class TimerClock extends StatelessWidget {
                 quarterMSec > 0 && timerValue >= 0
                     ? (timerValue / quarterMSec).clamp(0.0, 1.0)
                     : 0.0;
+
+            // Check and trigger vibration for overtime
+            _checkForOvertimeVibration(timerValue, quarterMSec, isCountdownTimer);
 
             return Column(
               children: [
