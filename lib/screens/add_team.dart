@@ -55,8 +55,9 @@ class _TeamNameProcessor {
       if (matchText.contains('netball')) return 'FNC';
 
       // Convert Football Club to FC
-      if (matchText.contains('football') && matchText.contains('club'))
+      if (matchText.contains('football') && matchText.contains('club')) {
         return 'FC';
+      }
 
       return match.group(0)!; // Fallback (shouldn't happen)
     });

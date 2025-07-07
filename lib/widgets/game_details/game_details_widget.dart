@@ -554,7 +554,7 @@ class _TeamLogoWatermark extends StatelessWidget {
 
         return Center(
           child: Opacity(
-            opacity: 0.15, // Subtle watermark opacity
+            opacity: 0.2, // Subtle watermark opacity
             child: SizedBox(
               width: 144,
               height: 144,

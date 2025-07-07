@@ -92,7 +92,7 @@ class ScoreTable extends StatelessWidget {
       child: Row(
         children: [
           // Quarter column - match data row structure exactly
-          Container(
+          SizedBox(
             width: 24,
             child: Center(
               child: SizedBox(), // Empty but same structure as data rows

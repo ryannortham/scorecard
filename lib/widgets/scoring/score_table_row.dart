@@ -68,7 +68,7 @@ class ScoreTableRow extends StatelessWidget {
 
   /// Builds the quarter column
   Widget _buildQuarterColumn(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 24,
       child: Center(
         child: Text(
