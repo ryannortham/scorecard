@@ -70,7 +70,7 @@ class _TimerClockState extends State<TimerClock> {
 
     final isOvertime =
         isCountdownTimer ? currentTime <= 0 : currentTime > quarterMSec;
-    
+
     // Reset vibration flag when not in overtime
     if (!isOvertime) {
       _hasVibratedForOvertime = false;
@@ -84,7 +84,8 @@ class _TimerClockState extends State<TimerClock> {
       return;
     }
 
-    final wasNotOvertime = _previousTimerValue != null &&
+    final wasNotOvertime =
+        _previousTimerValue != null &&
         (isCountdownTimer
             ? _previousTimerValue! > 0
             : _previousTimerValue! <= quarterMSec);
@@ -126,7 +127,11 @@ class _TimerClockState extends State<TimerClock> {
                     : 0.0;
 
             // Check and trigger vibration for overtime
-            _checkForOvertimeVibration(timerValue, quarterMSec, isCountdownTimer);
+            _checkForOvertimeVibration(
+              timerValue,
+              quarterMSec,
+              isCountdownTimer,
+            );
 
             return Column(
               children: [
