@@ -3,27 +3,30 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/models/playhq_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 import '../widgets/football_icon.dart';
 
 /// Constants for the AddTeamScreen
 class _AddTeamConstants {
+  // Search configuration
   static const int searchLimit = 20;
   static const int searchDelayMs = 1000;
-  static const int maxTeamNameLength = 60;
+
+  // UI dimensions
   static const double logoSize = 48.0;
   static const double defaultLogoIconSize = 28.0;
-  static const double circularProgressStrokeWidth = 2.0;
   static const double largeIconSize = 64.0;
+  static const double circularProgressStrokeWidth = 2.0;
 
-  // Spacing constants
+  // Spacing
   static const double paddingSmall = 8.0;
   static const double paddingMedium = 12.0;
   static const double paddingLarge = 16.0;
   static const double paddingExtraLarge = 32.0;
 
-  // Excluded words for team filtering (case insensitive)
+  // Team filtering
   static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
 }
 
@@ -117,36 +120,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
       setState(() {
         _isLoading = false;
         if (response != null) {
-          final teamsProvider = Provider.of<TeamsProvider>(
-            context,
-            listen: false,
-          );
-
-          // Filter to only include teams with logos and exclude certain words/existing teams
-          _searchResults =
-              response.results
-                  .where(
-                    (team) =>
-                        (team.logoUrlLarge ?? team.logoUrl48)?.isNotEmpty ??
-                        false,
-                  )
-                  .where((team) {
-                    final nameLower = team.name.toLowerCase();
-                    // Exclude teams with excluded words
-                    final hasExcludedWord = _AddTeamConstants.excludedWords.any(
-                      (word) => nameLower.contains(word),
-                    );
-                    // Exclude teams that already exist in our list (check both original and processed names)
-                    final processedName = _TeamNameProcessor.processTeamName(
-                      team.name,
-                    );
-                    final alreadyExists =
-                        teamsProvider.hasTeamWithName(team.name) ||
-                        teamsProvider.hasTeamWithName(processedName);
-
-                    return !hasExcludedWord && !alreadyExists;
-                  })
-                  .toList();
+          _searchResults = _filterSearchResults(response.results);
           _errorMessage = null;
         } else {
           _searchResults = [];
@@ -160,6 +134,24 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         _errorMessage = 'An error occurred while searching: $e';
       });
     }
+  }
+
+  /// Filter search results to only include valid teams
+  List<Organisation> _filterSearchResults(List<Organisation> results) {
+    return results.where(_hasValidLogo).where(_isNotExcludedTeam).toList();
+  }
+
+  /// Check if team has a valid logo
+  bool _hasValidLogo(Organisation team) {
+    return (team.logoUrlLarge ?? team.logoUrl48)?.isNotEmpty ?? false;
+  }
+
+  /// Check if team is not in excluded list
+  bool _isNotExcludedTeam(Organisation team) {
+    final nameLower = team.name.toLowerCase();
+    return !_AddTeamConstants.excludedWords.any(
+      (word) => nameLower.contains(word),
+    );
   }
 
   @override
@@ -436,19 +428,16 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
   }
 
   Widget _buildTeamLogo(Organisation team) {
-    // Prefer larger logo for better display quality, fallback to 48x48
-    final logoUrl = team.logoUrlLarge ?? team.logoUrl48;
+    final logoUrl = _getBestLogoUrl(team);
 
-    if (logoUrl != null && logoUrl.isNotEmpty) {
+    if (logoUrl != null) {
       return ClipOval(
         child: Image.network(
           logoUrl,
           width: _AddTeamConstants.logoSize,
           height: _AddTeamConstants.logoSize,
           fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultLogo();
-          },
+          errorBuilder: (context, error, stackTrace) => _buildDefaultLogo(),
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return SizedBox(
@@ -473,6 +462,11 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     return _buildDefaultLogo();
   }
 
+  /// Get the best available logo URL from the team
+  String? _getBestLogoUrl(Organisation team) {
+    return team.logoUrlLarge ?? team.logoUrl48;
+  }
+
   Widget _buildDefaultLogo() {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -490,116 +484,102 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     );
   }
 
-  /// Add a team from search results to the local teams list
-  /// Add a team from search results to the local teams list
+  /// Add team to the list, handling duplicates with edit dialog
   Future<void> _addTeamToList(Organisation team) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
     final processedName = _TeamNameProcessor.processTeamName(team.name);
 
-    // Check if team already exists (check both original and processed names)
-    if (teamsProvider.hasTeamWithName(team.name) ||
-        teamsProvider.hasTeamWithName(processedName)) {
-      if (mounted) {
-        final colorScheme = Theme.of(context).colorScheme;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Team "$processedName" already exists'),
-            backgroundColor: colorScheme.error,
-          ),
-        );
-        // Still return the processed team name for potential selection
-        Navigator.of(context).pop(processedName);
-      }
-      return;
-    }
+    // Check if team already exists
+    final existingTeam = teamsProvider.findTeamByName(processedName);
 
-    // Add team with processed name and logos in multiple sizes for optimal display quality
-    await teamsProvider.addTeam(
-      processedName,
-      logoUrl: team.logoUrl48, // General purpose logo
-      logoUrl32: team.logoUrl32,
-      logoUrl48: team.logoUrl48,
-      logoUrlLarge: team.logoUrlLarge,
-    );
-
-    // Navigate back and return the processed team name for potential selection
-    if (mounted) {
-      Navigator.of(context).pop(processedName);
+    if (existingTeam != null) {
+      // Show edit dialog for existing team, passing the logo info from search result
+      await _showEditTeamDialog(existingTeam.name, team);
+    } else {
+      // Add new team directly
+      await _addTeamAndFinish(processedName, logoUrl: _getBestLogoUrl(team));
     }
   }
 
-  /// Show custom team entry dialog
+  /// Helper method to add team and handle success flow
+  Future<void> _addTeamAndFinish(
+    String teamName, {
+    String? logoUrl,
+    String? logoUrl32,
+    String? logoUrl48,
+    String? logoUrlLarge,
+  }) async {
+    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    await teamsProvider.addTeam(
+      teamName,
+      logoUrl: logoUrl,
+      logoUrl32: logoUrl32,
+      logoUrl48: logoUrl48,
+      logoUrlLarge: logoUrlLarge,
+    );
+
+    if (mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Added "$teamName" to your teams'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // Return the team name so it can be auto-selected
+      navigator.pop(teamName);
+    }
+  }
+
+  /// Show dialog for creating a new team with custom name (from search results)
+  Future<void> _showEditTeamDialog(
+    String currentName,
+    Organisation originalTeam,
+  ) async {
+    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+
+    final result = await DialogService.showTeamNameDialog(
+      context: context,
+      title: 'Add Team',
+      initialValue: currentName,
+      hasTeamWithName: teamsProvider.hasTeamWithName,
+      currentTeamName: null, // Don't allow any existing team names
+      confirmText: 'Add Team',
+      cancelText: 'Cancel',
+    );
+
+    if (result != null) {
+      // Always create a new team (never modify existing) with logo from search result
+      await _addTeamAndFinish(
+        result,
+        logoUrl: _getBestLogoUrl(originalTeam),
+        logoUrl32: originalTeam.logoUrl32,
+        logoUrl48: originalTeam.logoUrl48,
+        logoUrlLarge: originalTeam.logoUrlLarge,
+      );
+    }
+  }
+
+  /// Show dialog for custom team entry
   Future<void> _showCustomEntryDialog() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final TextEditingController controller = TextEditingController();
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-    // Pre-populate with search text if available
-    if (_materialSearchController.text.trim().isNotEmpty) {
-      controller.text = _materialSearchController.text.trim();
-    }
-
-    return showDialog<void>(
+    final result = await DialogService.showTeamNameDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Custom Team'),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Team Name',
-                hintText: 'Enter team name',
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              maxLength: _AddTeamConstants.maxTeamNameLength,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a team name';
-                }
-                final trimmedValue = value.trim();
-                final processedValue = _TeamNameProcessor.processTeamName(
-                  trimmedValue,
-                );
-                if (teamsProvider.hasTeamWithName(trimmedValue) ||
-                    teamsProvider.hasTeamWithName(processedValue)) {
-                  return 'Team name already exists';
-                }
-                return null;
-              },
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () async {
-                if (formKey.currentState?.validate() ?? false) {
-                  final rawTeamName = controller.text.trim();
-                  final processedTeamName = _TeamNameProcessor.processTeamName(
-                    rawTeamName,
-                  );
-                  await teamsProvider.addTeam(processedTeamName);
-                  if (context.mounted) {
-                    Navigator.of(context).pop(); // Close dialog
-                    Navigator.of(context).pop(
-                      processedTeamName,
-                    ); // Navigate back and return processed team name
-                  }
-                }
-              },
-            ),
-          ],
-        );
-      },
+      title: 'Add Custom Team',
+      initialValue: null,
+      hasTeamWithName: teamsProvider.hasTeamWithName,
+      confirmText: 'Add Team',
+      cancelText: 'Cancel',
+      description: 'Enter a custom team name:',
     );
+
+    if (result != null) {
+      // Add the custom team (no logo for custom teams)
+      await _addTeamAndFinish(result);
+    }
   }
 }

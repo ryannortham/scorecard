@@ -5,6 +5,7 @@ import '../models/score_models.dart';
 import '../providers/teams_provider.dart';
 import '../providers/user_preferences_provider.dart';
 import '../services/navigation_service.dart';
+import '../services/dialog_service.dart';
 import '../screens/add_team.dart';
 import '../widgets/drawer/app_drawer.dart';
 import '../widgets/drawer/swipe_drawer_wrapper.dart';
@@ -403,71 +404,19 @@ class _TeamListState extends State<TeamList> {
     int index,
     Team currentTeam,
   ) async {
-    final TextEditingController controller = TextEditingController(
-      text: currentTeam.name,
-    );
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-    return showDialog<void>(
+    final result = await DialogService.showTeamNameDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Team Name'),
-          content: Form(
-            key: formKey,
-            child: TextFormField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Team Name',
-                hintText: 'Enter team name',
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              maxLength: 60,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a team name';
-                }
-                final trimmedValue = value.trim();
-                // Don't validate against the current team name (allow keeping the same name)
-                if (trimmedValue != currentTeam.name &&
-                    teamsProvider.hasTeamWithName(trimmedValue)) {
-                  return 'Team name already exists';
-                }
-                return null;
-              },
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () async {
-                if (formKey.currentState?.validate() ?? false) {
-                  final newTeamName = controller.text.trim();
-                  if (newTeamName != currentTeam.name) {
-                    await teamsProvider.editTeam(
-                      index,
-                      newTeamName,
-                      logoUrl: currentTeam.logoUrl,
-                    );
-                  }
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                }
-              },
-            ),
-          ],
-        );
-      },
+      title: 'Edit Team Name',
+      initialValue: currentTeam.name,
+      hasTeamWithName: teamsProvider.hasTeamWithName,
+      currentTeamName: currentTeam.name,
+      confirmText: 'Save',
+      cancelText: 'Cancel',
     );
+
+    if (result != null && result != currentTeam.name) {
+      await teamsProvider.editTeam(index, result, logoUrl: currentTeam.logoUrl);
+    }
   }
 
   Future<void> _showDeleteTeamConfirmation(
