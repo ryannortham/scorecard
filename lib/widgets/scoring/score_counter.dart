@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/color_service.dart';
 
 class ScoreCounter extends StatefulWidget {
   final String label;
@@ -38,7 +39,7 @@ class ScoreCounterState extends State<ScoreCounter> {
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color:
                     widget.enabled
-                        ? Theme.of(context).colorScheme.onSurface
+                        ? context.colors.onSurface
                         : Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.38),
@@ -51,8 +52,8 @@ class ScoreCounterState extends State<ScoreCounter> {
               margin: const EdgeInsets.only(top: 8),
               color:
                   widget.enabled
-                      ? Theme.of(context).colorScheme.secondaryContainer
-                      : Theme.of(context).colorScheme.onSurface.withValues(
+                      ? context.colors.secondaryContainer
+                      : context.colors.onSurface.withValues(
                         alpha: 0.12,
                       ), // Material 3 disabled surface opacity
               shape: RoundedRectangleBorder(
@@ -85,8 +86,9 @@ class ScoreCounterState extends State<ScoreCounter> {
                                   ? Theme.of(
                                     context,
                                   ).colorScheme.onSecondaryContainer
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.38),
+                                  : context.colors.onSurface.withValues(
+                                    alpha: 0.38,
+                                  ),
                         ),
                       );
                     },
@@ -129,8 +131,9 @@ class ScoreCounterState extends State<ScoreCounter> {
                                   ? Theme.of(
                                     context,
                                   ).colorScheme.onSecondaryContainer
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.38),
+                                  : context.colors.onSurface.withValues(
+                                    alpha: 0.38,
+                                  ),
                         ),
                       );
                     },

@@ -6,6 +6,7 @@ import 'package:scorecard/models/score_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
 import '../football_icon.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Header widget displaying team name and total score
 class ScorePanelHeader extends StatelessWidget {
@@ -28,7 +29,7 @@ class ScorePanelHeader extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            color: context.colors.surfaceContainerHigh,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8.0),
               topRight: Radius.circular(8.0),
@@ -44,7 +45,7 @@ class ScorePanelHeader extends StatelessWidget {
                 child: AdaptiveTitle(
                   title: teamName,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: context.colors.primary,
                   ),
                   textAlign: TextAlign.left,
                 ),
@@ -114,12 +115,12 @@ class ScorePanelHeader extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: context.colors.primaryContainer,
               shape: BoxShape.circle,
             ),
             child: FootballIcon(
               size: 20,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              color: context.colors.onPrimaryContainer,
             ),
           ),
     );

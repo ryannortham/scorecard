@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorecard/services/color_service.dart';
 
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/widgets/scoring/tally_display.dart';
@@ -36,8 +37,8 @@ class ScoreTableRow extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             isCurrentQuarter
-                ? Theme.of(context).colorScheme.secondaryContainer
-                : Theme.of(context).colorScheme.surfaceContainerHigh,
+                ? context.colors.secondaryContainer
+                : context.colors.surfaceContainerHigh,
       ),
       child: IntrinsicHeight(
         child: Row(
@@ -108,11 +109,11 @@ class ScoreTableRow extends StatelessWidget {
               flex: 3,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
+                  color: ColorService.transparent,
                   border: Border.all(
                     color:
                         isFutureQuarter
-                            ? Colors.transparent
+                            ? ColorService.transparent
                             : Theme.of(
                               context,
                             ).colorScheme.surfaceContainerHighest,

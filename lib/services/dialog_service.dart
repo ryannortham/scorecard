@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// A service for showing Material 3 compliant dialogs throughout the app
 /// Provides consistent styling and behavior for all prompts
@@ -34,8 +35,8 @@ class DialogService {
               style:
                   isDestructive
                       ? FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
+                        backgroundColor: context.colors.error,
+                        foregroundColor: context.colors.onError,
                       )
                       : null,
               child: const Text('OK'),
@@ -78,8 +79,8 @@ class DialogService {
               style:
                   isDestructive
                       ? FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                        foregroundColor: Theme.of(context).colorScheme.onError,
+                        backgroundColor: context.colors.error,
+                        foregroundColor: context.colors.onError,
                       )
                       : null,
               child: const Text('OK'),
@@ -298,10 +299,7 @@ class DialogService {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          icon: Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-          ),
+          icon: Icon(Icons.error_outline, color: context.colors.error),
           title: Text(title),
           content: Text(content),
           actions: [

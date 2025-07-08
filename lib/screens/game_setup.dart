@@ -10,6 +10,7 @@ import 'package:scorecard/widgets/drawer/app_drawer.dart';
 import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 
 import 'scoring.dart';
+import 'package:scorecard/services/color_service.dart';
 
 class GameSetup extends StatefulWidget {
   const GameSetup({super.key, required this.title});
@@ -98,8 +99,8 @@ class _GameSetupState extends State<GameSetup> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        backgroundColor: context.colors.primaryContainer,
+        foregroundColor: context.colors.onPrimaryContainer,
         leading: Builder(
           builder:
               (context) => IconButton(
@@ -124,12 +125,12 @@ class _GameSetupState extends State<GameSetup> {
                     end: Alignment.bottomCenter,
                     stops: const [0.0, 0.12, 0.25, 0.5],
                     colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(context).colorScheme.primaryContainer,
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer,
                       Theme.of(
                         context,
                       ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                      Theme.of(context).colorScheme.surface,
+                      context.colors.surface,
                     ],
                   ),
                 ),

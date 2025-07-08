@@ -8,6 +8,7 @@ import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
@@ -97,8 +98,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        backgroundColor: context.colors.primaryContainer,
+        foregroundColor: context.colors.onPrimaryContainer,
         leading: Builder(
           builder:
               (context) => IconButton(
@@ -142,12 +143,10 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                     end: Alignment.bottomCenter,
                     stops: const [0.0, 0.12, 0.25, 0.5],
                     colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                      Theme.of(context).colorScheme.surface,
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer.withValues(alpha: 0.9),
+                      context.colors.surface,
                     ],
                   ),
                 ),
@@ -193,18 +192,18 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                 particleDrag: 0.02, // Less drag for higher travel
                 emissionFrequency: 0.1, // Quick burst
                 numberOfParticles: 20,
-                gravity: 0.2, // Higher gravity for quicker fall
+                gravity: 0.1, // Higher gravity for quicker fall
                 shouldLoop: false,
-                minBlastForce: 20, // Higher force for more height
-                maxBlastForce: 35,
-                maximumSize: const Size(10, 10), // Medium-sized particles
-                minimumSize: const Size(5, 5),
+                minBlastForce: 24, // Higher force for more height
+                maxBlastForce: 48,
+                maximumSize: const Size(16, 16), // Medium-sized particles
+                minimumSize: const Size(8, 8),
                 colors: [
-                  Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.secondary,
-                  Theme.of(context).colorScheme.tertiary,
-                  Colors.yellow,
-                  Colors.orange,
+                  context.colors.primary,
+                  context.colors.secondary,
+                  context.colors.tertiary,
+                  ColorService.getThemeColor('pink'),
+                  ColorService.getThemeColor('purple'),
                 ],
               ),
             ),
@@ -257,7 +256,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Failed to share: $e'),
-                backgroundColor: Theme.of(context).colorScheme.error,
+                backgroundColor: context.colors.error,
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -317,7 +316,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to delete game: $e'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: context.colors.error,
               duration: const Duration(seconds: 3),
             ),
           );

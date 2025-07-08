@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 
+import '../services/color_service.dart';
+
 /// Unified provider for managing all user preferences and settings
 /// Combines app settings and game setup preferences into a single cohesive provider
 class UserPreferencesProvider extends ChangeNotifier {
@@ -31,7 +33,10 @@ class UserPreferencesProvider extends ChangeNotifier {
   // App Settings Getters
   String get favoriteTeam => _favoriteTeam;
   ThemeMode get themeMode => _themeMode;
-  String get colorTheme => _validateColorTheme(_colorTheme);
+  String get colorTheme => ColorService.validateTheme(
+    _colorTheme,
+    supportsDynamicColors: supportsDynamicColors,
+  );
   bool get useTallys => _useTallys;
 
   // Game Setup Preferences Getters
@@ -55,7 +60,7 @@ class UserPreferencesProvider extends ChangeNotifier {
     _dynamicColorsSupported = await _checkDynamicColorSupport();
 
     // Set default color theme to blue for consistency across all devices
-    _colorTheme = 'blue';
+    _colorTheme = ColorService.defaultTheme;
 
     // Then load preferences
     await _loadPreferencesAsync();
@@ -75,8 +80,12 @@ class UserPreferencesProvider extends ChangeNotifier {
         orElse: () => ThemeMode.system,
       );
 
-      _colorTheme = prefs.getString(_colorThemeKey) ?? 'blue';
-      _colorTheme = _validateColorTheme(_colorTheme);
+      _colorTheme =
+          prefs.getString(_colorThemeKey) ?? ColorService.defaultTheme;
+      _colorTheme = ColorService.validateTheme(
+        _colorTheme,
+        supportsDynamicColors: supportsDynamicColors,
+      );
 
       _useTallys = prefs.getBool(_useTallysKey) ?? true;
 
@@ -127,7 +136,10 @@ class UserPreferencesProvider extends ChangeNotifier {
   }
 
   Future<void> setColorTheme(String theme) async {
-    _colorTheme = _validateColorTheme(theme);
+    _colorTheme = ColorService.validateTheme(
+      theme,
+      supportsDynamicColors: supportsDynamicColors,
+    );
     await _savePreferences();
     notifyListeners();
   }
@@ -151,29 +163,9 @@ class UserPreferencesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Validate color theme and return a valid one
-  String _validateColorTheme(String theme) {
-    // Check if device supports dynamic colors for dynamic theme
-    final supportsDynamicColors = _dynamicColorsSupported ?? false;
-
-    const validThemes = {'blue', 'green', 'purple', 'orange', 'pink'};
-
-    // Add dynamic to valid themes only if supported
-    final allValidThemes = {
-      if (supportsDynamicColors) 'dynamic',
-      ...validThemes,
-    };
-
-    if (allValidThemes.contains(theme)) {
-      return theme;
-    } else {
-      // If user had 'dynamic' but device doesn't support it, fall back to 'blue'
-      if (theme == 'dynamic' && !supportsDynamicColors) {
-        return 'blue';
-      }
-      // For other invalid themes, default to blue
-      return 'blue';
-    }
+  /// Get color from theme name using Material Design 3 seed colors
+  Color getThemeColor() {
+    return ColorService.getThemeColorWithDynamicFallback(_colorTheme);
   }
 
   /// Async method to check if device supports dynamic colors
@@ -202,28 +194,6 @@ class UserPreferencesProvider extends ChangeNotifier {
     } catch (e) {
       // If we can't determine the API level, err on the side of caution
       return false;
-    }
-  }
-
-  /// Get color from theme name using Material Design 3 seed colors
-  Color getThemeColor() {
-    switch (_colorTheme) {
-      case 'dynamic':
-        // For dynamic theme, return Material 3 baseline for fallback
-        // The actual dynamic colors are handled in main.dart via DynamicColorBuilder
-        return const Color.fromRGBO(0, 145, 234, 1);
-      case 'blue':
-        return const Color.fromRGBO(0, 145, 234, 1);
-      case 'green':
-        return const Color.fromRGBO(21, 183, 109, 1);
-      case 'purple':
-        return const Color.fromRGBO(128, 100, 244, 1);
-      case 'orange':
-        return const Color.fromRGBO(255, 158, 0, 1);
-      case 'pink':
-        return const Color.fromRGBO(238, 33, 114, 1);
-      default:
-        return const Color.fromRGBO(0, 145, 234, 1); // Default to Blue
     }
   }
 }

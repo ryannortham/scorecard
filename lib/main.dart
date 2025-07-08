@@ -45,14 +45,14 @@ class FootyScoreCardApp extends StatelessWidget {
             // Get color schemes
             final lightColorScheme =
                 (useDynamicColors && lightDynamic != null)
-                    ? lightDynamic.harmonized()
+                    ? lightDynamic
                     : ColorScheme.fromSeed(
                       seedColor: userPreferences.getThemeColor(),
                     );
 
             final darkColorScheme =
                 (useDynamicColors && darkDynamic != null)
-                    ? darkDynamic.harmonized()
+                    ? darkDynamic
                     : ColorScheme.fromSeed(
                       seedColor: userPreferences.getThemeColor(),
                       brightness: Brightness.dark,
@@ -63,10 +63,20 @@ class FootyScoreCardApp extends StatelessWidget {
               theme: ThemeData(
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
+                // Ensure Material 3 surface variations are respected
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(elevation: 1),
+                ),
+                cardTheme: const CardThemeData(elevation: 1),
               ),
               darkTheme: ThemeData(
                 colorScheme: darkColorScheme,
                 useMaterial3: true,
+                // Ensure Material 3 surface variations are respected
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(elevation: 1),
+                ),
+                cardTheme: const CardThemeData(elevation: 1),
               ),
               themeMode: userPreferences.themeMode,
               home: const SplashWrapper(),

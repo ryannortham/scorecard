@@ -4,6 +4,7 @@ import 'package:scorecard/models/playhq_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
+import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 import '../widgets/football_icon.dart';
@@ -189,12 +190,12 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     end: Alignment.bottomCenter,
                     stops: const [0.0, 0.12, 0.25, 0.5],
                     colors: [
-                      Theme.of(context).colorScheme.primaryContainer,
-                      Theme.of(context).colorScheme.primaryContainer,
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer,
                       Theme.of(
                         context,
                       ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                      Theme.of(context).colorScheme.surface,
+                      context.colors.surface,
                     ],
                   ),
                 ),
@@ -468,18 +469,16 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
   }
 
   Widget _buildDefaultLogo() {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       width: _AddTeamConstants.logoSize,
       height: _AddTeamConstants.logoSize,
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        color: context.colors.primaryContainer,
         shape: BoxShape.circle,
       ),
       child: FootballIcon(
         size: _AddTeamConstants.defaultLogoIconSize,
-        color: colorScheme.onPrimaryContainer,
+        color: context.colors.onPrimaryContainer,
       ),
     );
   }

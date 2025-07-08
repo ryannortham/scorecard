@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorecard/services/color_service.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
@@ -14,7 +15,7 @@ class QuarterProgress extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            color: context.colors.surfaceContainerHigh,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(8.0),
               topRight: Radius.circular(8.0),
@@ -39,10 +40,10 @@ class QuarterProgress extends StatelessWidget {
                   decoration: BoxDecoration(
                     color:
                         isCurrentQuarter
-                            ? Theme.of(context).colorScheme.primaryContainer
+                            ? context.colors.primaryContainer
                             : isCompleted
-                            ? Theme.of(context).colorScheme.secondaryContainer
-                            : Theme.of(context).colorScheme.surfaceContainer,
+                            ? context.colors.secondaryContainer
+                            : context.colors.surfaceContainer,
                     borderRadius:
                         quarterNumber == 1
                             ? const BorderRadius.only(
@@ -62,7 +63,7 @@ class QuarterProgress extends StatelessWidget {
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color:
                           isCurrentQuarter
-                              ? Theme.of(context).colorScheme.onPrimaryContainer
+                              ? context.colors.onPrimaryContainer
                               : isCompleted
                               ? Theme.of(
                                 context,

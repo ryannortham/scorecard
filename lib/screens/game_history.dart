@@ -7,6 +7,7 @@ import '../widgets/game_history/game_summary_card.dart';
 import '../widgets/drawer/app_drawer.dart';
 import '../widgets/drawer/swipe_drawer_wrapper.dart';
 import 'package:scorecard/screens/game_details.dart' as details;
+import 'package:scorecard/services/color_service.dart';
 
 class GameHistoryScreen extends StatefulWidget {
   const GameHistoryScreen({super.key});
@@ -110,7 +111,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error loading games: $e'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: context.colors.error,
               duration: const Duration(seconds: 3),
             ),
           );
@@ -177,7 +178,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
               content: Text(
                 '${gameIdsToDelete.length} games deleted successfully',
               ),
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: context.colors.primary,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -193,7 +194,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error deleting games: $e'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: context.colors.error,
               duration: const Duration(seconds: 3),
             ),
           );
@@ -230,8 +231,8 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+          backgroundColor: context.colors.primaryContainer,
+          foregroundColor: context.colors.onPrimaryContainer,
           title:
               _isSelectionMode
                   ? Text('${_selectedGameIds.length} selected')
@@ -274,12 +275,12 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                       end: Alignment.bottomCenter,
                       stops: const [0.0, 0.12, 0.25, 0.5],
                       colors: [
-                        Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(context).colorScheme.primaryContainer,
+                        context.colors.primaryContainer,
+                        context.colors.primaryContainer,
                         Theme.of(
                           context,
                         ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                        Theme.of(context).colorScheme.surface,
+                        context.colors.surface,
                       ],
                     ),
                   ),

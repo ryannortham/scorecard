@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/tally_icon_service.dart';
+import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
 
 /// A widget that displays tally icons for a given numeric value
@@ -27,8 +28,8 @@ class TallyDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseColor = color ?? theme.colorScheme.onSurface;
-    final effectiveColor = baseColor.withValues(alpha: 0.9);
+    final baseColor = color ?? context.colors.onSurface;
+    final effectiveColor = ColorService.semiTransparent(baseColor, 0.9);
     final effectiveIconSize = iconSize ?? 24.0;
 
     // Get the user preference for using tallys

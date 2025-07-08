@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Team data with optional logos in multiple sizes
 class Team {
@@ -145,10 +146,7 @@ class CompactScoreDisplay extends StatelessWidget {
         Text(
           teamScore.name,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color:
-                teamScore.isWinner
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            color: teamScore.isWinner ? context.colors.primary : null,
             fontWeight: teamScore.isWinner ? FontWeight.w600 : FontWeight.w500,
           ),
           textAlign: TextAlign.center,
@@ -157,10 +155,7 @@ class CompactScoreDisplay extends StatelessWidget {
         Text(
           '${teamScore.score.goals}.${teamScore.score.behinds}',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color:
-                teamScore.isWinner
-                    ? Theme.of(context).colorScheme.primary
-                    : null,
+            color: teamScore.isWinner ? context.colors.primary : null,
             fontWeight: FontWeight.w700,
             fontSize: fontSize,
           ),
@@ -171,10 +166,7 @@ class CompactScoreDisplay extends StatelessWidget {
           Text(
             '(${teamScore.score.points})',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color:
-                  teamScore.isWinner
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
+              color: teamScore.isWinner ? context.colors.primary : null,
               fontWeight: teamScore.isWinner ? FontWeight.w600 : null,
             ),
             textAlign: TextAlign.center,

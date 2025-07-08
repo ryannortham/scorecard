@@ -6,6 +6,7 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_table_builder_service.dart';
@@ -116,7 +117,7 @@ class _GameCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      color: context.colors.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -124,7 +125,7 @@ class _GameCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, color: Theme.of(context).colorScheme.primary),
+                Icon(icon, color: context.colors.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: AdaptiveTitle(
@@ -180,7 +181,7 @@ class _ScoreSection extends StatelessWidget {
           Text(
             DateFormat('EEEE, MMM d, yyyy').format(game.date),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: context.colors.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -290,9 +291,7 @@ class _TeamScoresRow extends StatelessWidget {
               heightFactor: 0.8,
               child: Container(
                 width: 2,
-                color: Theme.of(
-                  context,
-                ).colorScheme.outline.withValues(alpha: 0.3),
+                color: ColorService.withAlpha(context.colors.outline, 0.3),
               ),
             ),
           ),
@@ -311,7 +310,7 @@ class _TeamName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isWinner ? Theme.of(context).colorScheme.primary : null;
+    final color = isWinner ? context.colors.primary : null;
     final fontWeight = isWinner ? FontWeight.w600 : null;
 
     return Text(
@@ -342,7 +341,7 @@ class _TeamScores extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isWinner ? Theme.of(context).colorScheme.primary : null;
+    final color = isWinner ? context.colors.primary : null;
     final fontWeight = isWinner ? FontWeight.w600 : null;
 
     return Column(
@@ -402,13 +401,13 @@ class _GameResultBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: context.colors.primaryContainer,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         resultText,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          color: context.colors.onPrimaryContainer,
           fontWeight: FontWeight.w500,
         ),
         textAlign: TextAlign.center,
@@ -479,17 +478,17 @@ class _QuarterBreakdownSection extends StatelessWidget {
                                   return Container(
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outline
-                                          .withValues(alpha: 0.1),
+                                      color: ColorService.withAlpha(
+                                        context.colors.outline,
+                                        0.5,
+                                      ),
                                     ),
                                     child: FootballIcon(
                                       size: 16,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outline
-                                          .withValues(alpha: 0.6),
+                                      color: ColorService.withAlpha(
+                                        context.colors.outline,
+                                        0.6,
+                                      ),
                                     ),
                                   );
                                 },
@@ -498,15 +497,17 @@ class _QuarterBreakdownSection extends StatelessWidget {
                             : Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outline.withValues(alpha: 0.1),
+                                color: ColorService.withAlpha(
+                                  context.colors.outline,
+                                  0.1,
+                                ),
                               ),
                               child: FootballIcon(
                                 size: 16,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outline.withValues(alpha: 0.6),
+                                color: ColorService.withAlpha(
+                                  context.colors.outline,
+                                  0.6,
+                                ),
                               ),
                             ),
                   );
@@ -517,8 +518,7 @@ class _QuarterBreakdownSection extends StatelessWidget {
                   teamName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color:
-                        isWinner ? Theme.of(context).colorScheme.primary : null,
+                    color: isWinner ? context.colors.primary : null,
                   ),
                 ),
               ),
@@ -560,11 +560,11 @@ class _TeamLogoWatermark extends StatelessWidget {
               height: 144,
               child: ShaderMask(
                 shaderCallback: (Rect bounds) {
-                  return const LinearGradient(
+                  return LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [Colors.black, Colors.black, Colors.transparent],
-                    stops: [0.0, 0.4, 1.0],
+                    stops: const [0.0, 0.4, 1.0],
                   ).createShader(bounds);
                 },
                 blendMode: BlendMode.dstIn,
@@ -592,11 +592,11 @@ class _TeamLogoWatermark extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+        color: ColorService.withAlpha(context.colors.outline, 0.1),
       ),
       child: FootballIcon(
         size: 72,
-        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+        color: ColorService.withAlpha(context.colors.outline, 0.3),
       ),
     );
   }

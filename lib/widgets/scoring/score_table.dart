@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/widgets/scoring/score_table_row.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Score table widget that displays quarter-by-quarter scores
 class ScoreTable extends StatelessWidget {
@@ -38,7 +39,7 @@ class ScoreTable extends StatelessWidget {
                   horizontal: 6.0,
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: context.colors.surfaceContainerHighest,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8.0),
                     topRight: Radius.circular(8.0),
@@ -69,7 +70,7 @@ class ScoreTable extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  color: context.colors.surfaceContainerHighest,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(8.0),
                     bottomRight: Radius.circular(8.0),
@@ -151,28 +152,19 @@ class ScoreTable extends StatelessWidget {
           // Gap before first divider
           SizedBox(width: 6.0),
           // First divider (after quarter column)
-          Container(
-            width: 2.0,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          ),
+          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
           // Goals column - flexible space
           Expanded(child: SizedBox()),
           // Gap before second divider
           SizedBox(width: 6.0),
           // Second divider (after goals column)
-          Container(
-            width: 2.0,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          ),
+          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
           // Behinds column - flexible space
           Expanded(child: SizedBox()),
           // Gap before third divider
           SizedBox(width: 6.0),
           // Third divider (after behinds column)
-          Container(
-            width: 2.0,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          ),
+          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
           // Points column - flexible space
           Expanded(child: SizedBox()),
           // Right padding

@@ -4,6 +4,7 @@ import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
+import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
@@ -153,10 +154,7 @@ class ScoringState extends State<Scoring> {
   void _showErrorMessage(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+        SnackBar(content: Text(message), backgroundColor: context.colors.error),
       );
     }
   }
@@ -206,12 +204,13 @@ class ScoringState extends State<Scoring> {
                       end: Alignment.bottomCenter,
                       stops: const [0.0, 0.12, 0.25, 0.5],
                       colors: [
-                        Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                        Theme.of(context).colorScheme.surface,
+                        context.colors.primaryContainer,
+                        context.colors.primaryContainer,
+                        ColorService.withAlpha(
+                          context.colors.primaryContainer,
+                          0.9,
+                        ),
+                        context.colors.surface,
                       ],
                     ),
                   ),
@@ -223,16 +222,14 @@ class ScoringState extends State<Scoring> {
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return [
                     SliverAppBar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onPrimaryContainer,
+                      backgroundColor: context.colors.primaryContainer,
+                      foregroundColor: context.colors.onPrimaryContainer,
                       floating: true,
                       snap: true,
                       pinned: false,
                       elevation: 0,
-                      shadowColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
+                      shadowColor: ColorService.transparent,
+                      surfaceTintColor: ColorService.transparent,
                       leading: Builder(
                         builder:
                             (context) => IconButton(

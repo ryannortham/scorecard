@@ -6,6 +6,7 @@ import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import '../football_icon.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Optimized widget for displaying game summary in the history list
 class GameSummaryCard extends StatelessWidget {
@@ -102,12 +103,12 @@ class GameSummaryCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: context.colors.primaryContainer,
               shape: BoxShape.circle,
             ),
             child: FootballIcon(
               size: 28,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              color: context.colors.onPrimaryContainer,
             ),
           ),
     );
@@ -129,8 +130,8 @@ class GameSummaryCard extends StatelessWidget {
         elevation: 0,
         color:
             isSelected
-                ? Theme.of(context).colorScheme.primaryContainer
-                : Theme.of(context).colorScheme.surfaceContainer,
+                ? context.colors.primaryContainer
+                : context.colors.surfaceContainer,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
@@ -143,8 +144,8 @@ class GameSummaryCard extends StatelessWidget {
                       : Icons.radio_button_unchecked,
                   color:
                       isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.outline,
+                          ? context.colors.primary
+                          : context.colors.outline,
                 ),
                 const SizedBox(width: 12),
               ],
@@ -169,7 +170,7 @@ class GameSummaryCard extends StatelessWidget {
                           style: Theme.of(
                             context,
                           ).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: context.colors.onSurface,
                             fontWeight: FontWeight.w400,
                           ),
                         ),
@@ -191,18 +192,15 @@ class GameSummaryCard extends StatelessWidget {
                             context,
                           ).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: context.colors.onSurface,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: context.colors.onSurface),
                           textAlign: TextAlign.center,
                         ),
                         if (shouldShowTrophy)
@@ -210,7 +208,7 @@ class GameSummaryCard extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 4.0),
                             child: Icon(
                               Icons.emoji_events_outlined,
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: context.colors.secondary,
                               size: 20,
                             ),
                           ),

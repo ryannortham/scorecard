@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Widget for configuring timer settings (quarter minutes and timer type)
 /// on the game setup screen
@@ -39,7 +40,7 @@ class GameSettingsConfiguration extends StatelessWidget {
         Text(
           'Quarter Minutes: ${gameState.quarterMinutes}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: context.colors.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 8),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/score_models.dart';
 import '../providers/teams_provider.dart';
+import '../services/color_service.dart';
 import '../providers/user_preferences_provider.dart';
 import '../services/navigation_service.dart';
 import '../services/dialog_service.dart';
@@ -113,11 +114,11 @@ class _TeamListState extends State<TeamList> {
               _isSelectionMode
                   ? Text('${_selectedTeamIndices.length} selected')
                   : Text(widget.title),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+          backgroundColor: context.colors.primaryContainer,
+          foregroundColor: context.colors.onPrimaryContainer,
           elevation: 0,
-          shadowColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
+          shadowColor: ColorService.transparent,
+          surfaceTintColor: ColorService.transparent,
           leading:
               _isSelectionMode
                   ? IconButton(
@@ -158,12 +159,13 @@ class _TeamListState extends State<TeamList> {
                       end: Alignment.bottomCenter,
                       stops: const [0.0, 0.12, 0.25, 0.5],
                       colors: [
-                        Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(context).colorScheme.primaryContainer,
-                        Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                        Theme.of(context).colorScheme.surface,
+                        context.colors.primaryContainer,
+                        context.colors.primaryContainer,
+                        ColorService.withAlpha(
+                          context.colors.primaryContainer,
+                          0.9,
+                        ),
+                        context.colors.surface,
                       ],
                     ),
                   ),
@@ -387,12 +389,12 @@ class _TeamListState extends State<TeamList> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: context.colors.primaryContainer,
               shape: BoxShape.circle,
             ),
             child: FootballIcon(
               size: 28,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              color: context.colors.onPrimaryContainer,
             ),
           ),
     );
@@ -537,7 +539,7 @@ class _TeamListState extends State<TeamList> {
               content: Text(
                 '${sortedIndices.length} teams deleted successfully',
               ),
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: context.colors.primary,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -547,7 +549,7 @@ class _TeamListState extends State<TeamList> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error deleting teams: $e'),
-              backgroundColor: Theme.of(context).colorScheme.error,
+              backgroundColor: context.colors.error,
               duration: const Duration(seconds: 3),
             ),
           );

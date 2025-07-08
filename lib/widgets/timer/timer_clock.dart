@@ -4,6 +4,7 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:vibration/vibration.dart';
 
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// Widget that displays the timer value and progress indicator
 class TimerClock extends StatefulWidget {
@@ -38,9 +39,7 @@ class _TimerClockState extends State<TimerClock> {
   ) {
     final isOvertime =
         isCountdownTimer ? currentTime <= 0 : currentTime > quarterMSec;
-    return isOvertime
-        ? Theme.of(context).colorScheme.error
-        : Theme.of(context).colorScheme.onSurface;
+    return isOvertime ? context.colors.error : context.colors.onSurface;
   }
 
   /// Formats the timer display string

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// A widget that displays a football icon using a PNG asset
 /// The icon adapts to the app theme through color filtering
@@ -10,7 +11,7 @@ class FootballIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = color ?? Theme.of(context).colorScheme.onSurface;
+    final iconColor = color ?? context.colors.onSurface;
 
     return ColorFiltered(
       colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/screens/team_list.dart';
+import 'package:scorecard/services/color_service.dart';
 import '../football_icon.dart';
 
 /// Widget for selecting home and away teams
@@ -258,7 +259,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
                       : null, // Disabled when both teams are null
               icon: Icon(Icons.swap_vert, color: colorScheme.onSurfaceVariant),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.transparent,
+                backgroundColor: ColorService.transparent,
                 elevation: 0,
               ),
             ),

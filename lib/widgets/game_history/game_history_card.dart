@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/navigation_service.dart';
+import 'package:scorecard/services/color_service.dart';
 
 /// A reusable widget for displaying a game card in the history list
 class GameHistoryCard extends StatelessWidget {
@@ -24,7 +25,7 @@ class GameHistoryCard extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      color: context.colors.surfaceContainer,
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: ListTile(
         title: Column(
@@ -39,7 +40,7 @@ class GameHistoryCard extends StatelessWidget {
             Text(
               'vs',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: context.colors.onSurfaceVariant,
                 fontWeight: FontWeight.w400,
               ),
               textAlign: TextAlign.center,

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/team_list.dart';
+import 'package:scorecard/services/color_service.dart';
 import '../football_icon.dart';
 
 /// A Material 3 navigation drawer for the app.
@@ -158,7 +159,7 @@ class AppDrawer extends StatelessWidget {
       SwitchListTile.adaptive(
         secondary: ColorFiltered(
           colorFilter: ColorFilter.mode(
-            Theme.of(context).colorScheme.onSurfaceVariant,
+            context.colors.onSurfaceVariant,
             BlendMode.srcIn,
           ),
           child: Image.asset('assets/tally/tally5.ico', width: 24, height: 24),
@@ -206,7 +207,7 @@ class AppDrawer extends StatelessWidget {
             Icons.palette_outlined,
             color:
                 userPreferences.colorTheme == 'dynamic'
-                    ? Theme.of(context).colorScheme.primary
+                    ? context.colors.primary
                     : userPreferences.getThemeColor(),
           ),
           title: const Text('Colour'),
@@ -260,7 +261,7 @@ class AppDrawer extends StatelessWidget {
               const Text('Light'),
               if (provider.themeMode == ThemeMode.light) ...[
                 const Spacer(),
-                Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.check, color: context.colors.primary),
               ],
             ],
           ),
@@ -274,7 +275,7 @@ class AppDrawer extends StatelessWidget {
               const Text('Dark'),
               if (provider.themeMode == ThemeMode.dark) ...[
                 const Spacer(),
-                Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.check, color: context.colors.primary),
               ],
             ],
           ),
@@ -288,7 +289,7 @@ class AppDrawer extends StatelessWidget {
               const Text('System'),
               if (provider.themeMode == ThemeMode.system) ...[
                 const Spacer(),
-                Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.check, color: context.colors.primary),
               ],
             ],
           ),
@@ -320,40 +321,9 @@ class AppDrawer extends StatelessWidget {
       Offset.zero & overlay.size,
     );
 
-    final colorOptions = <Map<String, dynamic>>[
-      // Show dynamic only if device supports it
-      if (provider.supportsDynamicColors)
-        {
-          'value': 'dynamic',
-          'label': 'Dynamic',
-          'color': const Color.fromRGBO(0, 145, 234, 1), // Fallback color
-        },
-      {
-        'value': 'blue',
-        'label': 'Blue',
-        'color': const Color.fromRGBO(0, 145, 234, 1),
-      },
-      {
-        'value': 'green',
-        'label': 'Green',
-        'color': const Color.fromRGBO(21, 183, 109, 1),
-      },
-      {
-        'value': 'purple',
-        'label': 'Purple',
-        'color': const Color.fromRGBO(128, 100, 244, 1),
-      },
-      {
-        'value': 'orange',
-        'label': 'Orange',
-        'color': const Color.fromRGBO(255, 158, 0, 1),
-      },
-      {
-        'value': 'pink',
-        'label': 'Pink',
-        'color': const Color.fromRGBO(238, 33, 114, 1),
-      },
-    ];
+    final colorOptions = ColorService.getColorOptions(
+      supportsDynamicColors: provider.supportsDynamicColors,
+    );
 
     showMenu<String>(
       context: context,
@@ -376,10 +346,7 @@ class AppDrawer extends StatelessWidget {
                   Text(option['label'] as String),
                   if (provider.colorTheme == option['value']) ...[
                     const Spacer(),
-                    Icon(
-                      Icons.check,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    Icon(Icons.check, color: context.colors.primary),
                   ],
                 ],
               ),
