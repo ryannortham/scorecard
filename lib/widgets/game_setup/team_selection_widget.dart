@@ -256,11 +256,15 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
                         widget.onHomeTeamChanged(tempAway);
                         widget.onAwayTeamChanged(tempHome);
                       }
-                      : null, // Disabled when both teams are null
-              icon: Icon(Icons.swap_vert, color: colorScheme.onSurfaceVariant),
+                      : null, // Disabled when no teams are selected
+              icon: const Icon(Icons.swap_vert),
               style: IconButton.styleFrom(
                 backgroundColor: ColorService.transparent,
                 elevation: 0,
+                foregroundColor: colorScheme.onSurfaceVariant,
+                disabledForegroundColor: colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
               ),
             ),
           ),

@@ -67,8 +67,46 @@ jobs:
         if: steps.check_tests.outputs.tests_exist == 'true'
         run: flutter test
 
+  # Mobile Security Framework (MobSF) Security Scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Mobile Security Scan
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python for MobSF
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Run MobSF Security Scan
+        uses: MobSF/mobsfscan@main
+        with:
+          args: '. --sarif --output mobsf-results.sarif || true'
+      
+      - name: Upload MobSF SARIF results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: mobsf-results.sarif
+          category: mobsf-security-scan
+      
+      - name: Upload MobSF scan results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobsf-security-results
+          path: mobsf-results.sarif
+          retention-days: 30
+
   build:
-    needs: test
+    needs: [test, security-scan]
     runs-on: ubuntu-latest
     # Run on main branch pushes OR on releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'

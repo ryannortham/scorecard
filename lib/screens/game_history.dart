@@ -5,7 +5,7 @@ import '../services/game_history_service.dart';
 import '../services/game_state_service.dart';
 import '../widgets/game_history/game_summary_card.dart';
 import '../widgets/drawer/app_drawer.dart';
-import '../widgets/drawer/swipe_drawer_wrapper.dart';
+
 import 'package:scorecard/screens/game_details.dart' as details;
 import 'package:scorecard/services/color_service.dart';
 
@@ -230,142 +230,174 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: context.colors.primaryContainer,
-          foregroundColor: context.colors.onPrimaryContainer,
-          title:
-              _isSelectionMode
-                  ? Text('${_selectedGameIds.length} selected')
-                  : const Text('Game Results'),
-          leading:
-              _isSelectionMode
-                  ? IconButton(
-                    icon: const Icon(Icons.close_outlined),
-                    onPressed: _exitSelectionMode,
-                  )
-                  : Builder(
-                    builder:
-                        (context) => IconButton(
-                          icon: const Icon(Icons.menu_outlined),
-                          tooltip: 'Menu',
-                          onPressed: () {
-                            Scaffold.of(context).openDrawer();
-                          },
-                        ),
-                  ),
-          actions: [
-            if (_isSelectionMode)
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed:
-                    _selectedGameIds.isNotEmpty ? _deleteSelectedGames : null,
-              ),
-          ],
-        ),
-        drawer: const AppDrawer(currentRoute: 'game_history'),
-        body: SwipeDrawerWrapper(
-          child: Stack(
-            children: [
-              // Gradient background
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.12, 0.25, 0.5],
-                      colors: [
+        endDrawer: const AppDrawer(currentRoute: 'game_history'),
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.12, 0.25, 0.5],
+                    colors: [
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer,
+                      ColorService.withAlpha(
                         context.colors.primaryContainer,
-                        context.colors.primaryContainer,
-                        Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                        context.colors.surface,
-                      ],
-                    ),
+                        0.9,
+                      ),
+                      context.colors.surface,
+                    ],
                   ),
                 ),
               ),
+            ),
 
-              // Main content
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _gameSummaries.isEmpty
-                  ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.flag_outlined,
-                          size: 64,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+            // Main content with collapsible app bar
+            NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverAppBar(
+                    backgroundColor: context.colors.primaryContainer,
+                    foregroundColor: context.colors.onPrimaryContainer,
+                    floating: true,
+                    snap: true,
+                    pinned: false,
+                    elevation: 0,
+                    shadowColor: ColorService.transparent,
+                    surfaceTintColor: ColorService.transparent,
+                    title:
+                        _isSelectionMode
+                            ? Text('${_selectedGameIds.length} selected')
+                            : const Text('Game Results'),
+                    leading:
+                        _isSelectionMode
+                            ? IconButton(
+                              icon: const Icon(Icons.close_outlined),
+                              onPressed: _exitSelectionMode,
+                            )
+                            : IconButton(
+                              icon: const Icon(Icons.arrow_back_outlined),
+                              tooltip: 'Back',
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                    actions: [
+                      if (_isSelectionMode)
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed:
+                              _selectedGameIds.isNotEmpty
+                                  ? _deleteSelectedGames
+                                  : null,
+                        )
+                      else
+                        Builder(
+                          builder:
+                              (context) => IconButton(
+                                icon: const Icon(Icons.menu_outlined),
+                                tooltip: 'Menu',
+                                onPressed:
+                                    () => Scaffold.of(context).openEndDrawer(),
+                              ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No games yet',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Games are automatically saved when you start scoring',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                  : RefreshIndicator(
-                    onRefresh: _loadGames,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount:
-                          _gameSummaries.length +
-                          (_hasMoreGames || _isLoadingMore ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        // Show loading indicator at the bottom
-                        if (index == _gameSummaries.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-
-                        final gameSummary = _gameSummaries[index];
-                        return GameSummaryCard(
-                          gameSummary: gameSummary,
-                          isSelectionMode: _isSelectionMode,
-                          isSelected: _selectedGameIds.contains(gameSummary.id),
-                          onTap: () {
-                            if (_isSelectionMode) {
-                              _toggleGameSelection(gameSummary.id);
-                            } else {
-                              _showGameDetails(gameSummary.id);
-                            }
-                          },
-                          onLongPress: () {
-                            if (!_isSelectionMode) {
-                              _enterSelectionMode(gameSummary.id);
-                            }
-                          },
-                        );
-                      },
-                    ),
+                    ],
                   ),
-            ],
-          ),
+                ];
+              },
+              body: RefreshIndicator(
+                onRefresh: _loadGames,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    // Main content
+                    if (_isLoading)
+                      const SliverFillRemaining(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (_gameSummaries.isEmpty)
+                      SliverFillRemaining(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.flag_outlined,
+                                size: 64,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No games yet',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Games are automatically saved when you start scoring',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            // Show loading indicator at the bottom
+                            if (index == _gameSummaries.length) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            final gameSummary = _gameSummaries[index];
+                            return GameSummaryCard(
+                              gameSummary: gameSummary,
+                              isSelectionMode: _isSelectionMode,
+                              isSelected: _selectedGameIds.contains(
+                                gameSummary.id,
+                              ),
+                              onTap: () {
+                                if (_isSelectionMode) {
+                                  _toggleGameSelection(gameSummary.id);
+                                } else {
+                                  _showGameDetails(gameSummary.id);
+                                }
+                              },
+                              onLongPress: () {
+                                if (!_isSelectionMode) {
+                                  _enterSelectionMode(gameSummary.id);
+                                }
+                              },
+                            );
+                          },
+                          childCount:
+                              _gameSummaries.length +
+                              (_hasMoreGames || _isLoadingMore ? 1 : 0),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

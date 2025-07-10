@@ -5,6 +5,7 @@ import 'package:vibration/vibration.dart';
 
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/providers/user_preferences_provider.dart';
 
 /// Widget that displays the timer value and progress indicator
 class TimerClock extends StatefulWidget {
@@ -42,9 +43,23 @@ class _TimerClockState extends State<TimerClock> {
     return isOvertime ? context.colors.error : context.colors.onSurface;
   }
 
-  /// Formats the timer display string
-  String _formatTimerClock(int value, bool isCountdownTimer) {
-    final absValue = isCountdownTimer && value < 0 ? value.abs() : value;
+  /// Formats the timer display string based on user preference, not game state
+  String _formatTimerClock(
+    int elapsedTime,
+    bool displayAsCountdown,
+    int quarterMSec,
+  ) {
+    // Calculate what the display value should be based on display preference
+    int displayValue;
+    if (displayAsCountdown) {
+      // Show remaining time (quarter time - elapsed time)
+      displayValue = quarterMSec - elapsedTime;
+    } else {
+      // Show elapsed time
+      displayValue = elapsedTime;
+    }
+
+    final absValue = displayValue < 0 ? displayValue.abs() : displayValue;
     final timeStr = StopWatchTimer.getDisplayTime(
       absValue,
       hours: false,
@@ -52,7 +67,7 @@ class _TimerClockState extends State<TimerClock> {
     );
     final trimmedTime = timeStr.substring(0, timeStr.length - 1);
 
-    return (isCountdownTimer && value < 0) ? '-$trimmedTime' : trimmedTime;
+    return (displayValue < 0) ? '-$trimmedTime' : trimmedTime;
   }
 
   /// Triggers vibration when timer reaches quarter end/overtime (optimized)
@@ -109,8 +124,8 @@ class _TimerClockState extends State<TimerClock> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GameStateService>(
-      builder: (context, gameState, _) {
+    return Consumer2<GameStateService, UserPreferencesProvider>(
+      builder: (context, gameState, userPreferences, _) {
         return StreamBuilder<int>(
           stream: GameStateService.instance.timerStream,
           initialData: gameState.timerRawTime,
@@ -118,7 +133,11 @@ class _TimerClockState extends State<TimerClock> {
             final timerValue = snapshot.data ?? gameState.timerRawTime;
             final quarterMSec = gameState.quarterMSec;
             final isCountdownTimer = gameState.isCountdownTimer;
+            final displayAsCountdown = userPreferences.isCountdownTimer;
             final currentQuarter = gameState.selectedQuarter;
+
+            // Get elapsed time for display calculation
+            final elapsedTime = gameState.getElapsedTimeInQuarter();
 
             final progress =
                 quarterMSec > 0 && timerValue >= 0
@@ -164,7 +183,11 @@ class _TimerClockState extends State<TimerClock> {
                         flex: 2,
                         child: Center(
                           child: Text(
-                            _formatTimerClock(timerValue, isCountdownTimer),
+                            _formatTimerClock(
+                              elapsedTime,
+                              displayAsCountdown,
+                              quarterMSec,
+                            ),
                             style: Theme.of(
                               context,
                             ).textTheme.headlineMedium?.copyWith(

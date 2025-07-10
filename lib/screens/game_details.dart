@@ -5,12 +5,10 @@ import 'package:confetti/confetti.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/app_logger.dart';
-import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
-import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
+
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -32,7 +30,6 @@ class GameDetailsPage extends StatefulWidget {
 class _GameDetailsPageState extends State<GameDetailsPage> {
   final GlobalKey _widgetShotKey = GlobalKey();
   final GlobalKey _screenshotWidgetKey = GlobalKey();
-  final ScrollController _scrollController = ScrollController();
   bool _isSharing = false;
 
   // Confetti controller for celebration
@@ -56,7 +53,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _confettiController.dispose();
     super.dispose();
   }
@@ -97,118 +93,143 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: context.colors.primaryContainer,
-        foregroundColor: context.colors.onPrimaryContainer,
-        leading: Builder(
-          builder:
-              (context) => IconButton(
-                icon: const Icon(Icons.menu_outlined),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-        ),
-        title: Text("Game Results"),
-        actions: [
-          IconButton(
-            icon:
-                _isSharing
-                    ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : const Icon(Icons.share_outlined),
-            onPressed: _isSharing ? null : () => _shareGameDetails(context),
-            tooltip: 'Share Game Details',
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () => _deleteGame(context),
-            tooltip: 'Delete Game',
-          ),
-        ],
-      ),
-      drawer: const AppDrawer(currentRoute: 'game_details'),
-      body: SwipeDrawerWrapper(
-        child: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
+      endDrawer: const AppDrawer(currentRoute: 'game_details'),
+      body: Stack(
+        children: [
+          // Gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.12, 0.25, 0.5],
+                  colors: [
+                    context.colors.primaryContainer,
+                    context.colors.primaryContainer,
+                    ColorService.withAlpha(
                       context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer.withValues(alpha: 0.9),
-                      context.colors.surface,
-                    ],
-                  ),
+                      0.9,
+                    ),
+                    context.colors.surface,
+                  ],
                 ),
               ),
             ),
+          ),
 
-            // Main content
-            WidgetShotPlus(
-              key: _widgetShotKey,
-              child: GameDetailsWidget.fromStaticData(
-                game: widget.game,
-                scrollController: _scrollController,
-              ),
-            ),
-
-            // Screenshot widget positioned off-screen
-            Positioned(
-              left: -1000,
-              top: -1000,
-              child: WidgetShotPlus(
-                key: _screenshotWidgetKey,
-                child: Material(
-                  child: IntrinsicHeight(
-                    child: SizedBox(
-                      width: 400,
+          // Main content with collapsible app bar
+          NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  backgroundColor: context.colors.primaryContainer,
+                  foregroundColor: context.colors.onPrimaryContainer,
+                  floating: true,
+                  snap: true,
+                  pinned: false,
+                  elevation: 0,
+                  shadowColor: ColorService.transparent,
+                  surfaceTintColor: ColorService.transparent,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_outlined),
+                    tooltip: 'Back',
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  title: const Text("Game Results"),
+                  actions: [
+                    IconButton(
+                      icon:
+                          _isSharing
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.share_outlined),
+                      onPressed:
+                          _isSharing ? null : () => _shareGameDetails(context),
+                      tooltip: 'Share Game Details',
+                    ),
+                    Builder(
+                      builder:
+                          (context) => IconButton(
+                            icon: const Icon(Icons.menu_outlined),
+                            tooltip: 'Menu',
+                            onPressed:
+                                () => Scaffold.of(context).openEndDrawer(),
+                          ),
+                    ),
+                  ],
+                ),
+              ];
+            },
+            body: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: WidgetShotPlus(
+                      key: _widgetShotKey,
                       child: GameDetailsWidget.fromStaticData(
                         game: widget.game,
-                        enableScrolling: false,
+                        enableScrolling: true,
                       ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Screenshot widget positioned off-screen
+          Positioned(
+            left: -1000,
+            top: -1000,
+            child: WidgetShotPlus(
+              key: _screenshotWidgetKey,
+              child: Material(
+                child: IntrinsicHeight(
+                  child: SizedBox(
+                    width: 400,
+                    child: GameDetailsWidget.fromStaticData(
+                      game: widget.game,
+                      enableScrolling: false,
                     ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            // Confetti widget for celebration - single explosion from center bottom
-            Positioned(
-              bottom: 100,
-              left: MediaQuery.of(context).size.width * 0.5 - 10,
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -pi / 2, // Straight up
-                particleDrag: 0.02, // Less drag for higher travel
-                emissionFrequency: 0.1, // Quick burst
-                numberOfParticles: 20,
-                gravity: 0.1, // Higher gravity for quicker fall
-                shouldLoop: false,
-                minBlastForce: 24, // Higher force for more height
-                maxBlastForce: 48,
-                maximumSize: const Size(16, 16), // Medium-sized particles
-                minimumSize: const Size(8, 8),
-                colors: [
-                  context.colors.primary,
-                  context.colors.secondary,
-                  context.colors.tertiary,
-                  ColorService.getThemeColor('pink'),
-                  ColorService.getThemeColor('purple'),
-                ],
-              ),
+          // Confetti widget for celebration - single explosion from center bottom
+          Positioned(
+            bottom: 100,
+            left: MediaQuery.of(context).size.width * 0.5 - 10,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: -pi / 2, // Straight up
+              particleDrag: 0.02, // Less drag for higher travel
+              emissionFrequency: 0.1, // Quick burst
+              numberOfParticles: 20,
+              gravity: 0.1, // Higher gravity for quicker fall
+              shouldLoop: false,
+              minBlastForce: 24, // Higher force for more height
+              maxBlastForce: 48,
+              maximumSize: const Size(16, 16), // Medium-sized particles
+              minimumSize: const Size(8, 8),
+              colors: [
+                context.colors.primary,
+                context.colors.secondary,
+                context.colors.tertiary,
+                ColorService.getThemeColor('pink'),
+                ColorService.getThemeColor('purple'),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -283,46 +304,8 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
     }
   }
 
-  void _deleteGame(BuildContext context) async {
-    // Show confirmation dialog
-    final shouldDelete = await DialogService.showConfirmationDialog(
-      context: context,
-      title: '',
-      content: '',
-      confirmText: 'Delete Game?',
-      isDestructive: true,
-    );
-
-    if (shouldDelete && context.mounted) {
-      try {
-        // Delete the game from storage
-        await GameHistoryService.deleteGame(widget.game.id);
-
-        AppLogger.info('Game deleted successfully', component: 'GameDetails');
-
-        // Navigate back to the previous screen with result indicating deletion
-        if (context.mounted) {
-          Navigator.of(context).pop(true);
-        }
-      } catch (e) {
-        AppLogger.error(
-          'Failed to delete game',
-          component: 'GameDetails',
-          error: e,
-        );
-
-        // Show error message
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to delete game: $e'),
-              backgroundColor: context.colors.error,
-              duration: const Duration(seconds: 3),
-            ),
-          );
-        }
-      }
-    }
+  String _buildShareText() {
+    return 'Game Results';
   }
 
   /// Save image in debug mode (without UI state management)
@@ -363,10 +346,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       );
       rethrow; // Re-throw to be handled by caller
     }
-  }
-
-  String _buildShareText() {
-    return 'Game Results';
   }
 
   /// Capture and share using WidgetShotPlus

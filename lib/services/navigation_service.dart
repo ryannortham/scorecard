@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/screens/game_details.dart' as details;
 import 'package:scorecard/screens/game_history.dart';
-import 'package:scorecard/screens/game_setup.dart';
+import 'package:scorecard/screens/home_screen.dart';
 import 'package:scorecard/screens/scoring.dart';
 import 'package:scorecard/screens/team_list.dart';
 import 'package:scorecard/services/dialog_service.dart';
@@ -35,11 +35,9 @@ class AppNavigator {
 
   /// Navigate to game setup
   static Future<T?> toGameSetup<T extends Object?>(BuildContext context) {
-    return Navigator.of(context).push<T>(
-      MaterialPageRoute(
-        builder: (context) => const GameSetup(title: 'Game Setup'),
-      ),
-    );
+    return Navigator.of(
+      context,
+    ).push<T>(MaterialPageRoute(builder: (context) => const HomeScreen()));
   }
 
   /// Navigate to game history

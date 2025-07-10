@@ -6,7 +6,7 @@ import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
+
 import '../widgets/football_icon.dart';
 
 /// Constants for the AddTeamScreen
@@ -161,140 +161,204 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Team'),
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
-        leading: Builder(
-          builder:
-              (context) => IconButton(
-                icon: const Icon(Icons.menu_outlined),
-                onPressed: () {
-                  // Unfocus search bar before opening drawer to prevent potential conflicts
-                  _searchFocusNode.unfocus();
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
-        ),
-      ),
-      drawer: const AppDrawer(currentRoute: 'add_team'),
-      body: SwipeDrawerWrapper(
-        child: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer.withValues(alpha: 0.9),
-                      context.colors.surface,
-                    ],
-                  ),
+      endDrawer: const AppDrawer(currentRoute: 'add_team'),
+      body: Stack(
+        children: [
+          // Gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.12, 0.25, 0.5],
+                  colors: [
+                    colorScheme.primaryContainer,
+                    colorScheme.primaryContainer,
+                    ColorService.withAlpha(colorScheme.primaryContainer, 0.9),
+                    colorScheme.surface,
+                  ],
                 ),
               ),
             ),
+          ),
 
-            // Main content
-            Column(
-              children: [
-                // Search bar
-                Padding(
-                  padding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
-                  child: SearchBar(
-                    controller: _materialSearchController,
-                    focusNode: _searchFocusNode,
-                    hintText: 'Search for teams...',
-                    leading: const Icon(Icons.search_outlined),
-                    trailing:
-                        _materialSearchController.text.isNotEmpty
-                            ? [
-                              IconButton(
-                                icon: const Icon(Icons.clear_outlined),
-                                onPressed: () {
-                                  _materialSearchController.clear();
-                                  _performSearch('');
-                                },
-                              ),
-                            ]
-                            : null,
-                    onSubmitted: _performSearch,
-                    onChanged: (value) {
-                      setState(() {}); // Rebuild to show/hide clear button
-
-                      // Perform search after a short delay to avoid too many requests
-                      Future.delayed(
-                        const Duration(
-                          milliseconds: _AddTeamConstants.searchDelayMs,
-                        ),
-                        () {
-                          if (_materialSearchController.text == value) {
-                            _performSearch(value);
-                          }
-                        },
-                      );
+          // Main content with collapsible app bar
+          NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  backgroundColor: colorScheme.primaryContainer,
+                  foregroundColor: colorScheme.onPrimaryContainer,
+                  floating: true,
+                  snap: true,
+                  pinned: false,
+                  elevation: 0,
+                  shadowColor: ColorService.transparent,
+                  surfaceTintColor: ColorService.transparent,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_outlined),
+                    tooltip: 'Back',
+                    onPressed: () {
+                      // Unfocus search bar before navigating back
+                      _searchFocusNode.unfocus();
+                      Navigator.of(context).pop();
                     },
                   ),
+                  title: const Text('Add Team'),
+                  actions: [
+                    Builder(
+                      builder:
+                          (context) => IconButton(
+                            icon: const Icon(Icons.menu_outlined),
+                            tooltip: 'Menu',
+                            onPressed: () {
+                              // Unfocus search bar before opening drawer to prevent potential conflicts
+                              _searchFocusNode.unfocus();
+                              Scaffold.of(context).openEndDrawer();
+                            },
+                          ),
+                    ),
+                  ],
                 ),
+              ];
+            },
+            body: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      _AddTeamConstants.paddingLarge,
+                    ),
+                    child: Column(
+                      children: [
+                        // Search bar
+                        Padding(
+                          padding: const EdgeInsets.all(
+                            _AddTeamConstants.paddingLarge,
+                          ),
+                          child: SearchBarTheme(
+                            data: SearchBarThemeData(
+                              elevation: const WidgetStatePropertyAll(0),
+                              side: const WidgetStatePropertyAll(
+                                BorderSide.none,
+                              ),
+                            ),
+                            child: SearchBar(
+                              controller: _materialSearchController,
+                              focusNode: _searchFocusNode,
+                              hintText: 'Search for teams...',
+                              leading: const Icon(Icons.search_outlined),
+                              trailing:
+                                  _materialSearchController.text.isNotEmpty
+                                      ? [
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.clear_outlined,
+                                          ),
+                                          onPressed: () {
+                                            _materialSearchController.clear();
+                                            _performSearch('');
+                                          },
+                                        ),
+                                      ]
+                                      : null,
+                              onSubmitted: _performSearch,
+                              onChanged: (value) {
+                                setState(
+                                  () {},
+                                ); // Rebuild to show/hide clear button
 
-                // Button group for search and custom entry
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: _AddTeamConstants.paddingLarge,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: FilledButton.icon(
-                          onPressed:
-                              _isLoading
-                                  ? null
-                                  : () => _performSearch(
-                                    _materialSearchController.text,
+                                // Perform search after a short delay to avoid too many requests
+                                Future.delayed(
+                                  const Duration(
+                                    milliseconds:
+                                        _AddTeamConstants.searchDelayMs,
                                   ),
-                          icon:
-                              _isLoading
-                                  ? const SizedBox(
-                                    width: _AddTeamConstants.paddingLarge,
-                                    height: _AddTeamConstants.paddingLarge,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth:
-                                          _AddTeamConstants
-                                              .circularProgressStrokeWidth,
-                                    ),
-                                  )
-                                  : const Icon(Icons.search_outlined),
-                          label: Text(_isLoading ? 'Searching...' : 'Search'),
+                                  () {
+                                    if (_materialSearchController.text ==
+                                        value) {
+                                      _performSearch(value);
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: _AddTeamConstants.paddingMedium),
-                      Expanded(
-                        child: FilledButton.tonalIcon(
-                          onPressed: _isLoading ? null : _showCustomEntryDialog,
-                          icon: const Icon(Icons.edit_outlined),
-                          label: const Text('Custom'),
+
+                        // Button group for search and custom entry
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: _AddTeamConstants.paddingLarge,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      _isLoading ||
+                                              _materialSearchController.text
+                                                  .trim()
+                                                  .isEmpty
+                                          ? null
+                                          : () => _performSearch(
+                                            _materialSearchController.text,
+                                          ),
+                                  icon:
+                                      _isLoading
+                                          ? const SizedBox(
+                                            width:
+                                                _AddTeamConstants.paddingLarge,
+                                            height:
+                                                _AddTeamConstants.paddingLarge,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth:
+                                                  _AddTeamConstants
+                                                      .circularProgressStrokeWidth,
+                                            ),
+                                          )
+                                          : const Icon(Icons.search_outlined),
+                                  label: Text(
+                                    _isLoading ? 'Searching...' : 'Search',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: _AddTeamConstants.paddingMedium,
+                              ),
+                              Expanded(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 100,
+                                  ),
+                                  child: FilledButton.tonalIcon(
+                                    onPressed:
+                                        _isLoading
+                                            ? null
+                                            : _showCustomEntryDialog,
+                                    icon: const Icon(Icons.edit_outlined),
+                                    label: const Text('Custom'),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: _AddTeamConstants.paddingLarge),
+
+                        // Results
+                        _buildResultsSection(),
+                      ],
+                    ),
                   ),
                 ),
-
-                const SizedBox(height: _AddTeamConstants.paddingLarge),
-
-                // Results
-                Expanded(child: _buildResultsSection()),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

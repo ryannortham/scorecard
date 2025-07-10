@@ -5,6 +5,7 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/team_list.dart';
 import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/services/game_state_service.dart';
 import '../football_icon.dart';
 
 /// A Material 3 navigation drawer for the app.
@@ -23,20 +24,29 @@ class AppDrawer extends StatelessWidget {
     return Consumer<UserPreferencesProvider>(
       builder: (context, userPreferences, _) {
         return Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // App header using Material 3 DrawerHeader
               _buildDrawerHeader(context),
 
-              // Navigation section
-              ..._buildNavigationItems(context, userPreferences),
+              // Scrollable content area
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // Navigation section
+                    ..._buildNavigationItems(context, userPreferences),
 
-              // Divider before settings
-              const Divider(),
+                    // Divider before settings
+                    const Divider(),
 
-              // Settings section
-              ..._buildSettingsItems(context, userPreferences),
+                    // Settings section
+                    ..._buildSettingsItems(context, userPreferences),
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -49,20 +59,32 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
 
     return DrawerHeader(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.fromLTRB(16, 24, 8, 16),
       decoration: BoxDecoration(color: theme.colorScheme.primary),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Footy Score Card',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onPrimary,
+      child: SizedBox(
+        height: 40, // Constrain the content height
+        child: Row(
+          children: [
+            _buildAppIcon(context),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'Settings',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
-          ),
-          _buildAppIcon(context),
-        ],
+            IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_outlined),
+              color: theme.colorScheme.onPrimary,
+              tooltip: 'Close',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -97,54 +119,117 @@ class AppDrawer extends StatelessWidget {
   ) {
     final List<Widget> items = [];
 
-    // Favorite Team - hide on team-related screens
-    if (!_isTeamRelatedRoute()) {
-      items.add(
-        ListTile(
-          leading: Icon(
-            userPreferences.favoriteTeam.isNotEmpty
-                ? Icons.star
-                : Icons.star_outline,
-          ),
-          title: const Text('Favorite Team'),
-          subtitle:
-              userPreferences.favoriteTeam.isNotEmpty
-                  ? Text(userPreferences.favoriteTeam)
-                  : const Text('None selected'),
-          trailing:
-              userPreferences.favoriteTeam.isNotEmpty
-                  ? IconButton(
-                    onPressed: () => userPreferences.setFavoriteTeam(''),
-                    icon: const Icon(Icons.clear_outlined),
-                    tooltip: 'Clear favorite team',
+    // Favorite Team - always visible, disabled on team-related screens
+    final isTeamRelated = _isTeamRelatedRoute();
+    items.add(
+      ListTile(
+        enabled: !isTeamRelated,
+        leading: Icon(
+          userPreferences.favoriteTeam.isNotEmpty
+              ? Icons.star
+              : Icons.star_outline,
+          color:
+              isTeamRelated
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
+        ),
+        title: Text(
+          'Favorite Team',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
                   )
                   : null,
-          onTap: () => _navigateToTeamSelection(context, userPreferences),
         ),
-      );
-    }
+        subtitle: Text(
+          userPreferences.favoriteTeam.isNotEmpty
+              ? userPreferences.favoriteTeam
+              : 'None selected',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        trailing:
+            userPreferences.favoriteTeam.isNotEmpty && !isTeamRelated
+                ? IconButton(
+                  onPressed: () => userPreferences.setFavoriteTeam(''),
+                  icon: const Icon(Icons.clear_outlined),
+                  tooltip: 'Clear favorite team',
+                )
+                : null,
+        onTap:
+            isTeamRelated
+                ? null
+                : () => _navigateToTeamSelection(context, userPreferences),
+      ),
+    );
 
-    // Manage Teams - hide on team-related screens
-    if (!_isTeamRelatedRoute()) {
-      items.add(
-        ListTile(
-          leading: const Icon(Icons.group_outlined),
-          title: const Text('Manage Teams'),
-          onTap: () => _navigateToTeamManagement(context),
+    // Manage Teams - always visible, disabled on team-related screens
+    items.add(
+      ListTile(
+        enabled: !isTeamRelated,
+        leading: Icon(
+          Icons.group_outlined,
+          color:
+              isTeamRelated
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
         ),
-      );
-    }
+        title: Text(
+          'Manage Teams',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        onTap: isTeamRelated ? null : () => _navigateToTeamManagement(context),
+      ),
+    );
 
-    // Game Results - hide on team-related screens
-    if (!_isTeamRelatedRoute() && currentRoute != 'game_history') {
-      items.add(
-        ListTile(
-          leading: const Icon(Icons.flag_outlined),
-          title: const Text('Game Results'),
-          onTap: () => _navigateToGameHistory(context),
+    // Game Results - always visible, disabled on game history screen
+    final isGameHistory = currentRoute == 'game_history';
+    items.add(
+      ListTile(
+        enabled: !isGameHistory,
+        leading: Icon(
+          Icons.flag_outlined,
+          color:
+              isGameHistory
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
         ),
-      );
-    }
+        title: Text(
+          'Game Results',
+          style:
+              isGameHistory
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        onTap: isGameHistory ? null : () => _navigateToGameHistory(context),
+      ),
+    );
 
     return items;
   }
@@ -165,18 +250,35 @@ class AppDrawer extends StatelessWidget {
           child: Image.asset('assets/tally/tally5.ico', width: 24, height: 24),
         ),
         title: const Text('Tally Marks'),
+        subtitle: Text(
+          userPreferences.useTallys ? 'Display Tally Marks' : 'Display Numbers',
+        ),
         value: userPreferences.useTallys,
         onChanged: userPreferences.setUseTallys,
       ),
 
-      // Countdown Timer Toggle - hide on scoring screen
-      if (currentRoute != 'scoring')
-        SwitchListTile.adaptive(
-          secondary: const Icon(Icons.timer_outlined),
-          title: const Text('Countdown Timer'),
-          value: userPreferences.isCountdownTimer,
-          onChanged: userPreferences.setIsCountdownTimer,
+      // Countdown Timer Toggle - disabled on scoring screen
+      SwitchListTile.adaptive(
+        secondary: const Icon(Icons.timer_outlined),
+        title: const Text('Countdown Timer'),
+        subtitle: Text(
+          userPreferences.isCountdownTimer
+              ? 'Timer Counts Down'
+              : 'Timer Counts Up',
         ),
+        value: userPreferences.isCountdownTimer,
+        onChanged:
+            currentRoute == 'scoring'
+                ? null // Disabled on scoring screen
+                : (bool newValue) async {
+                  // Update user preferences
+                  await userPreferences.setIsCountdownTimer(newValue);
+
+                  // Update the current game's timer mode without resetting the timer
+                  final gameState = GameStateService.instance;
+                  gameState.setCountdownMode(newValue);
+                },
+      ),
 
       // Theme Mode Selector
       GestureDetector(

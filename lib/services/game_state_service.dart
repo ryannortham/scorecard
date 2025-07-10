@@ -165,12 +165,31 @@ class GameStateService extends ChangeNotifier {
     _isCountdownTimer = isCountdownMode;
     _quarterMinutes = quarterMaxTime ~/ (60 * 1000);
 
+    // Reset timer to appropriate initial value for the new mode
+    resetTimer();
+
     // Never create a game record for timer configuration
     if (_currentGameId == null) {
       AppLogger.debug(
         'Timer configured with no active game',
         component: 'GameState',
       );
+    }
+  }
+
+  /// Updates the countdown mode without resetting the timer value.
+  /// This allows toggling between countdown and count-up modes during a game
+  /// without losing the current timer state.
+  void setCountdownMode(bool isCountdownMode) {
+    if (_isCountdownTimer != isCountdownMode) {
+      _isCountdownTimer = isCountdownMode;
+
+      AppLogger.debug(
+        'Timer mode changed to ${isCountdownMode ? 'countdown' : 'count-up'}',
+        component: 'GameState',
+      );
+
+      notifyListeners();
     }
   }
 
@@ -280,7 +299,8 @@ class GameStateService extends ChangeNotifier {
   }
 
   void _recordClockEvent(String eventType) {
-    final currentTime = Duration(milliseconds: _timerRawTime);
+    // Use elapsed time for consistency across all events
+    final elapsedTime = Duration(milliseconds: getElapsedTimeInQuarter());
 
     // Prevent duplicate sequential events
     if (_gameEvents.isNotEmpty) {
@@ -293,7 +313,7 @@ class GameStateService extends ChangeNotifier {
 
     final event = GameEvent(
       quarter: _selectedQuarter,
-      time: currentTime,
+      time: elapsedTime,
       team: "",
       type: eventType,
     );
@@ -302,10 +322,11 @@ class GameStateService extends ChangeNotifier {
   }
 
   void recordQuarterEnd(int quarter) {
-    final currentTime = Duration(milliseconds: _timerRawTime);
+    // Use elapsed time for consistency across all events
+    final elapsedTime = Duration(milliseconds: getElapsedTimeInQuarter());
     final event = GameEvent(
       quarter: quarter,
-      time: currentTime,
+      time: elapsedTime,
       team: "",
       type: 'clock_end',
     );
