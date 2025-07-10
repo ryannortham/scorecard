@@ -139,6 +139,15 @@ class ScoringState extends State<Scoring> {
   Future<bool> _onWillPop() async {
     if (!mounted) return false;
 
+    // Check if there are any game events recorded (any activity including timer/quarter events)
+    final hasGameActivity = _gameStateService.gameEvents.isNotEmpty;
+
+    // If no game activity, allow exit without confirmation
+    if (!hasGameActivity) {
+      return true;
+    }
+
+    // Show confirmation dialog if there's any game activity
     final result = await DialogService.showConfirmationDialog(
       context: context,
       title: '',
@@ -231,7 +240,12 @@ class ScoringState extends State<Scoring> {
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_outlined),
                       tooltip: 'Back',
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () async {
+                        final shouldPop = await _onWillPop();
+                        if (shouldPop && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                     ),
                     title: Text(
                       "Score Card",

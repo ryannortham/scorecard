@@ -5,6 +5,7 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/game_history.dart';
 import 'package:scorecard/screens/team_list.dart';
 import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/services/game_state_service.dart';
 import '../football_icon.dart';
 
 /// A Material 3 navigation drawer for the app.
@@ -23,20 +24,29 @@ class AppDrawer extends StatelessWidget {
     return Consumer<UserPreferencesProvider>(
       builder: (context, userPreferences, _) {
         return Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               // App header using Material 3 DrawerHeader
               _buildDrawerHeader(context),
 
-              // Navigation section
-              ..._buildNavigationItems(context, userPreferences),
+              // Scrollable content area
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // Navigation section
+                    ..._buildNavigationItems(context, userPreferences),
 
-              // Divider before settings
-              const Divider(),
+                    // Divider before settings
+                    const Divider(),
 
-              // Settings section
-              ..._buildSettingsItems(context, userPreferences),
+                    // Settings section
+                    ..._buildSettingsItems(context, userPreferences),
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -49,20 +59,32 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
 
     return DrawerHeader(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.fromLTRB(16, 24, 8, 16),
       decoration: BoxDecoration(color: theme.colorScheme.primary),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Footy Score Card',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onPrimary,
+      child: SizedBox(
+        height: 40, // Constrain the content height
+        child: Row(
+          children: [
+            _buildAppIcon(context),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                'Settings',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
-          ),
-          _buildAppIcon(context),
-        ],
+            IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close_outlined),
+              color: theme.colorScheme.onPrimary,
+              tooltip: 'Close',
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -228,18 +250,35 @@ class AppDrawer extends StatelessWidget {
           child: Image.asset('assets/tally/tally5.ico', width: 24, height: 24),
         ),
         title: const Text('Tally Marks'),
+        subtitle: Text(
+          userPreferences.useTallys ? 'Display Tally Marks' : 'Display Numbers',
+        ),
         value: userPreferences.useTallys,
         onChanged: userPreferences.setUseTallys,
       ),
 
-      // Countdown Timer Toggle - hide on scoring screen
-      if (currentRoute != 'scoring')
-        SwitchListTile.adaptive(
-          secondary: const Icon(Icons.timer_outlined),
-          title: const Text('Countdown Timer'),
-          value: userPreferences.isCountdownTimer,
-          onChanged: userPreferences.setIsCountdownTimer,
+      // Countdown Timer Toggle - disabled on scoring screen
+      SwitchListTile.adaptive(
+        secondary: const Icon(Icons.timer_outlined),
+        title: const Text('Countdown Timer'),
+        subtitle: Text(
+          userPreferences.isCountdownTimer
+              ? 'Timer Counts Down'
+              : 'Timer Counts Up',
         ),
+        value: userPreferences.isCountdownTimer,
+        onChanged:
+            currentRoute == 'scoring'
+                ? null // Disabled on scoring screen
+                : (bool newValue) async {
+                  // Update user preferences
+                  await userPreferences.setIsCountdownTimer(newValue);
+
+                  // Update the current game's timer mode without resetting the timer
+                  final gameState = GameStateService.instance;
+                  gameState.setCountdownMode(newValue);
+                },
+      ),
 
       // Theme Mode Selector
       GestureDetector(
