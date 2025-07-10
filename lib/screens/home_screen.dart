@@ -42,22 +42,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // Set up the date controller with today's date
-    _dateController.text = DateFormat(
-      'EEEE dd/MM/yyyy',
-    ).format(DateTime.now());
+    _dateController.text = DateFormat('EEEE dd/MM/yyyy').format(DateTime.now());
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    
+
     // Only initialize once, and only after user preferences are loaded
     if (!_hasInitialized) {
       final userPreferences = Provider.of<UserPreferencesProvider>(
         context,
         listen: true, // Listen for changes
       );
-      
+
       // Wait for user preferences to be loaded before initializing
       if (userPreferences.loaded) {
         // Defer initialization until after the build is complete
@@ -80,9 +78,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // First, completely reset the game state
     gameState.configureGame(
-      homeTeam: userPreferences.favoriteTeam.isNotEmpty
-          ? userPreferences.favoriteTeam
-          : '',
+      homeTeam:
+          userPreferences.favoriteTeam.isNotEmpty
+              ? userPreferences.favoriteTeam
+              : '',
       awayTeam: '',
       gameDate: DateTime.now(),
       quarterMinutes: userPreferences.quarterMinutes,
