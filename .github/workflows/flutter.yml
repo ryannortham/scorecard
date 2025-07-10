@@ -110,6 +110,8 @@ jobs:
   build:
     needs: [test, security-scan]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     # Run on main branch pushes OR on releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
     
