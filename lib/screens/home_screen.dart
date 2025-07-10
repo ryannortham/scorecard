@@ -130,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
           builder: (context, gameState, child) {
             return Scaffold(
               endDrawer: const AppDrawer(currentRoute: 'game_setup'),
+              endDrawerEnableOpenDragGesture: false,
               body: Stack(
                 children: [
                   // Gradient background

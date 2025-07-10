@@ -200,6 +200,7 @@ class ScoringState extends State<Scoring> {
       },
       child: Scaffold(
         endDrawer: const AppDrawer(currentRoute: 'scoring'),
+        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background

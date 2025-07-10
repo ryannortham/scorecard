@@ -231,6 +231,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
       },
       child: Scaffold(
         endDrawer: const AppDrawer(currentRoute: 'game_history'),
+        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background

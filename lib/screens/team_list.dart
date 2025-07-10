@@ -110,6 +110,7 @@ class _TeamListState extends State<TeamList> {
       },
       child: Scaffold(
         endDrawer: const AppDrawer(currentRoute: 'teams'),
+        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background

@@ -160,6 +160,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
 
     return Scaffold(
       endDrawer: const AppDrawer(currentRoute: 'add_team'),
+      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           // Gradient background

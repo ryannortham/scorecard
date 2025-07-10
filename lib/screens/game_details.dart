@@ -94,6 +94,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       endDrawer: const AppDrawer(currentRoute: 'game_details'),
+      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           // Gradient background
