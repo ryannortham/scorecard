@@ -23,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String? homeTeam;
   String? awayTeam;
+  bool _hasInitialized = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final dateKey = GlobalKey<FormState>();
@@ -40,49 +41,72 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Completely reset and initialize game state on startup
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final gameState = Provider.of<GameStateService>(context, listen: false);
+    // Set up the date controller with today's date
+    _dateController.text = DateFormat(
+      'EEEE dd/MM/yyyy',
+    ).format(DateTime.now());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    
+    // Only initialize once, and only after user preferences are loaded
+    if (!_hasInitialized) {
       final userPreferences = Provider.of<UserPreferencesProvider>(
         context,
-        listen: false,
+        listen: true, // Listen for changes
       );
-      // First, completely reset the game state
-      gameState.configureGame(
-        homeTeam:
-            userPreferences.favoriteTeam.isNotEmpty
-                ? userPreferences.favoriteTeam
-                : '',
-        awayTeam: '',
-        gameDate: DateTime.now(),
-        quarterMinutes: userPreferences.quarterMinutes,
-        isCountdownTimer: userPreferences.isCountdownTimer,
-      );
-
-      // Reset the score state as well
-      gameState.resetGame();
-
-      // Configure the timer with fresh settings
-      gameState.configureTimer(
-        isCountdownMode: userPreferences.isCountdownTimer,
-        quarterMaxTime: userPreferences.quarterMinutes * 60 * 1000,
-      );
-
-      // Now set up the form fields
-      String homeTeamValue = '';
-      if (userPreferences.favoriteTeam.isNotEmpty) {
-        homeTeamValue = userPreferences.favoriteTeam;
-        // Home team is already set in configureGame above
+      
+      // Wait for user preferences to be loaded before initializing
+      if (userPreferences.loaded) {
+        // Defer initialization until after the build is complete
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _initializeGameState();
+          }
+        });
+        _hasInitialized = true;
       }
+    }
+  }
 
-      _dateController.text = DateFormat(
-        'EEEE dd/MM/yyyy',
-      ).format(DateTime.now());
+  void _initializeGameState() {
+    final gameState = Provider.of<GameStateService>(context, listen: false);
+    final userPreferences = Provider.of<UserPreferencesProvider>(
+      context,
+      listen: false,
+    );
 
-      setState(() {
-        homeTeam = homeTeamValue.isNotEmpty ? homeTeamValue : null;
-        awayTeam = null;
-      });
+    // First, completely reset the game state
+    gameState.configureGame(
+      homeTeam: userPreferences.favoriteTeam.isNotEmpty
+          ? userPreferences.favoriteTeam
+          : '',
+      awayTeam: '',
+      gameDate: DateTime.now(),
+      quarterMinutes: userPreferences.quarterMinutes,
+      isCountdownTimer: userPreferences.isCountdownTimer,
+    );
+
+    // Reset the score state as well
+    gameState.resetGame();
+
+    // Configure the timer with fresh settings
+    gameState.configureTimer(
+      isCountdownMode: userPreferences.isCountdownTimer,
+      quarterMaxTime: userPreferences.quarterMinutes * 60 * 1000,
+    );
+
+    // Set up the form fields
+    String homeTeamValue = '';
+    if (userPreferences.favoriteTeam.isNotEmpty) {
+      homeTeamValue = userPreferences.favoriteTeam;
+    }
+
+    setState(() {
+      homeTeam = homeTeamValue.isNotEmpty ? homeTeamValue : null;
+      awayTeam = null;
     });
   }
 
