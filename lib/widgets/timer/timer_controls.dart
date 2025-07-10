@@ -53,6 +53,67 @@ class TimerControls extends StatelessWidget {
         : currentTime != 0;
   }
 
+  /// Creates a button that switches to icon-only when space is limited
+  Widget _buildAdaptiveButton({
+    required VoidCallback? onPressed,
+    required IconData iconData,
+    required String label,
+    required bool isTonal,
+    double iconSize = 16,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Estimate if text will fit: icon + padding + text width
+        // This is a rough estimate to avoid complex text measuring
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: label,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+
+        // Rough estimate: icon + margins + text + button padding
+        final estimatedWidth = iconSize + 8 + textPainter.width + 32;
+        final hasSpace = constraints.maxWidth > estimatedWidth;
+
+        if (hasSpace) {
+          // Show icon + label
+          return isTonal
+              ? FilledButton.tonalIcon(
+                onPressed: onPressed,
+                icon: Icon(iconData, size: iconSize),
+                label: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              )
+              : FilledButton.icon(
+                onPressed: onPressed,
+                icon: Icon(iconData, size: iconSize),
+                label: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              );
+        } else {
+          // Show icon only
+          return isTonal
+              ? FilledButton.tonal(
+                onPressed: onPressed,
+                child: Icon(iconData, size: iconSize),
+              )
+              : FilledButton(
+                onPressed: onPressed,
+                child: Icon(iconData, size: iconSize),
+              );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -82,14 +143,12 @@ class TimerControls extends StatelessWidget {
                   // Reset Button
                   Expanded(
                     flex: 2,
-                    child: FilledButton.tonalIcon(
+                    child: _buildAdaptiveButton(
                       onPressed: isResetEnabled ? onResetTimer : null,
-                      icon: const Icon(Icons.refresh_outlined, size: 16),
-                      label: const Text(
-                        'Reset',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
+                      iconData: Icons.refresh_outlined,
+                      label: 'Reset',
+                      isTonal: true,
+                      iconSize: 16,
                     ),
                   ),
 
@@ -143,36 +202,16 @@ class TimerControls extends StatelessWidget {
                   // Next Button
                   Expanded(
                     flex: 2,
-                    child:
-                        isOvertime
-                            ? FilledButton.icon(
-                              onPressed: isNextEnabled ? onNextQuarter : null,
-                              icon: Icon(
-                                isLastQuarter
-                                    ? Icons.outlined_flag
-                                    : Icons.arrow_forward_outlined,
-                                size: 16,
-                              ),
-                              label: Text(
-                                isLastQuarter ? 'End' : 'Next',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            )
-                            : FilledButton.tonalIcon(
-                              onPressed: isNextEnabled ? onNextQuarter : null,
-                              icon: Icon(
-                                isLastQuarter
-                                    ? Icons.outlined_flag
-                                    : Icons.arrow_forward_outlined,
-                                size: 16,
-                              ),
-                              label: Text(
-                                isLastQuarter ? 'End' : 'Next',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
+                    child: _buildAdaptiveButton(
+                      onPressed: isNextEnabled ? onNextQuarter : null,
+                      iconData:
+                          isLastQuarter
+                              ? Icons.outlined_flag
+                              : Icons.arrow_forward_outlined,
+                      label: isLastQuarter ? 'End' : 'Next',
+                      isTonal: !isOvertime,
+                      iconSize: 16,
+                    ),
                   ),
                 ],
               );

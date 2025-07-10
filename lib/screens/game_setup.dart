@@ -328,7 +328,7 @@ class _GameSetupState extends State<GameSetup> {
 
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.6,
-                            child: FilledButton.tonalIcon(
+                            child: FilledButton.icon(
                               onPressed:
                                   isValidSetup()
                                       ? () {

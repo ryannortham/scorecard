@@ -299,7 +299,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     Expanded(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(minWidth: 100),
-                        child: FilledButton.icon(
+                        child: FilledButton.tonalIcon(
                           onPressed: _isLoading ? null : _showCustomEntryDialog,
                           icon: const Icon(Icons.edit_outlined),
                           label: const Text('Custom'),
