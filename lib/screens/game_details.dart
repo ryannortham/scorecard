@@ -10,7 +10,7 @@ import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
+
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
@@ -100,14 +100,10 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
       appBar: AppBar(
         backgroundColor: context.colors.primaryContainer,
         foregroundColor: context.colors.onPrimaryContainer,
-        leading: Builder(
-          builder:
-              (context) => IconButton(
-                icon: const Icon(Icons.menu_outlined),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_outlined),
+          tooltip: 'Back',
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text("Game Results"),
         actions: [
@@ -128,87 +124,95 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
             onPressed: () => _deleteGame(context),
             tooltip: 'Delete Game',
           ),
+          Builder(
+            builder:
+                (context) => IconButton(
+                  icon: const Icon(Icons.menu_outlined),
+                  tooltip: 'Menu',
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                ),
+          ),
         ],
       ),
-      drawer: const AppDrawer(currentRoute: 'game_details'),
-      body: SwipeDrawerWrapper(
-        child: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer.withValues(alpha: 0.9),
-                      context.colors.surface,
-                    ],
-                  ),
+      endDrawer: const AppDrawer(currentRoute: 'game_details'),
+      body: Stack(
+        children: [
+          // Gradient background
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.12, 0.25, 0.5],
+                  colors: [
+                    context.colors.primaryContainer,
+                    context.colors.primaryContainer,
+                    context.colors.primaryContainer.withValues(alpha: 0.9),
+                    context.colors.surface,
+                  ],
                 ),
               ),
             ),
+          ),
 
-            // Main content
-            WidgetShotPlus(
-              key: _widgetShotKey,
-              child: GameDetailsWidget.fromStaticData(
-                game: widget.game,
-                scrollController: _scrollController,
-              ),
+          // Main content
+          WidgetShotPlus(
+            key: _widgetShotKey,
+            child: GameDetailsWidget.fromStaticData(
+              game: widget.game,
+              scrollController: _scrollController,
             ),
+          ),
 
-            // Screenshot widget positioned off-screen
-            Positioned(
-              left: -1000,
-              top: -1000,
-              child: WidgetShotPlus(
-                key: _screenshotWidgetKey,
-                child: Material(
-                  child: IntrinsicHeight(
-                    child: SizedBox(
-                      width: 400,
-                      child: GameDetailsWidget.fromStaticData(
-                        game: widget.game,
-                        enableScrolling: false,
-                      ),
+          // Screenshot widget positioned off-screen
+          Positioned(
+            left: -1000,
+            top: -1000,
+            child: WidgetShotPlus(
+              key: _screenshotWidgetKey,
+              child: Material(
+                child: IntrinsicHeight(
+                  child: SizedBox(
+                    width: 400,
+                    child: GameDetailsWidget.fromStaticData(
+                      game: widget.game,
+                      enableScrolling: false,
                     ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            // Confetti widget for celebration - single explosion from center bottom
-            Positioned(
-              bottom: 100,
-              left: MediaQuery.of(context).size.width * 0.5 - 10,
-              child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -pi / 2, // Straight up
-                particleDrag: 0.02, // Less drag for higher travel
-                emissionFrequency: 0.1, // Quick burst
-                numberOfParticles: 20,
-                gravity: 0.1, // Higher gravity for quicker fall
-                shouldLoop: false,
-                minBlastForce: 24, // Higher force for more height
-                maxBlastForce: 48,
-                maximumSize: const Size(16, 16), // Medium-sized particles
-                minimumSize: const Size(8, 8),
-                colors: [
-                  context.colors.primary,
-                  context.colors.secondary,
-                  context.colors.tertiary,
-                  ColorService.getThemeColor('pink'),
-                  ColorService.getThemeColor('purple'),
-                ],
-              ),
+          // Confetti widget for celebration - single explosion from center bottom
+          Positioned(
+            bottom: 100,
+            left: MediaQuery.of(context).size.width * 0.5 - 10,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: -pi / 2, // Straight up
+              particleDrag: 0.02, // Less drag for higher travel
+              emissionFrequency: 0.1, // Quick burst
+              numberOfParticles: 20,
+              gravity: 0.1, // Higher gravity for quicker fall
+              shouldLoop: false,
+              minBlastForce: 24, // Higher force for more height
+              maxBlastForce: 48,
+              maximumSize: const Size(16, 16), // Medium-sized particles
+              minimumSize: const Size(8, 8),
+              colors: [
+                context.colors.primary,
+                context.colors.secondary,
+                context.colors.tertiary,
+                ColorService.getThemeColor('pink'),
+                ColorService.getThemeColor('purple'),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

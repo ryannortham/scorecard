@@ -13,7 +13,6 @@ import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/drawer/swipe_drawer_wrapper.dart';
 
 import 'game_details.dart';
 
@@ -191,165 +190,168 @@ class ScoringState extends State<Scoring> {
         }
       },
       child: Scaffold(
-        drawer: const AppDrawer(currentRoute: 'scoring'),
-        body: SwipeDrawerWrapper(
-          child: Stack(
-            children: [
-              // Gradient background
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: const [0.0, 0.12, 0.25, 0.5],
-                      colors: [
+        endDrawer: const AppDrawer(currentRoute: 'scoring'),
+        body: Stack(
+          children: [
+            // Gradient background
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    stops: const [0.0, 0.12, 0.25, 0.5],
+                    colors: [
+                      context.colors.primaryContainer,
+                      context.colors.primaryContainer,
+                      ColorService.withAlpha(
                         context.colors.primaryContainer,
-                        context.colors.primaryContainer,
-                        ColorService.withAlpha(
-                          context.colors.primaryContainer,
-                          0.9,
-                        ),
-                        context.colors.surface,
-                      ],
-                    ),
+                        0.9,
+                      ),
+                      context.colors.surface,
+                    ],
                   ),
                 ),
               ),
+            ),
 
-              // Main content with collapsible app bar
-              NestedScrollView(
-                headerSliverBuilder: (context, innerBoxIsScrolled) {
-                  return [
-                    SliverAppBar(
-                      backgroundColor: context.colors.primaryContainer,
-                      foregroundColor: context.colors.onPrimaryContainer,
-                      floating: true,
-                      snap: true,
-                      pinned: false,
-                      elevation: 0,
-                      shadowColor: ColorService.transparent,
-                      surfaceTintColor: ColorService.transparent,
-                      leading: Builder(
+            // Main content with collapsible app bar
+            NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverAppBar(
+                    backgroundColor: context.colors.primaryContainer,
+                    foregroundColor: context.colors.onPrimaryContainer,
+                    floating: true,
+                    snap: true,
+                    pinned: false,
+                    elevation: 0,
+                    shadowColor: ColorService.transparent,
+                    surfaceTintColor: ColorService.transparent,
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back_outlined),
+                      tooltip: 'Back',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    title: Text(
+                      "Score Card",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    actions: [
+                      IconButton(
+                        icon:
+                            _isSharing
+                                ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                : const Icon(Icons.share_outlined),
+                        tooltip: 'Share Game Details',
+                        onPressed: _isSharing ? null : _shareGameDetails,
+                      ),
+                      Builder(
                         builder:
                             (context) => IconButton(
                               icon: const Icon(Icons.menu_outlined),
                               tooltip: 'Menu',
                               onPressed:
-                                  () => Scaffold.of(context).openDrawer(),
+                                  () => Scaffold.of(context).openEndDrawer(),
                             ),
                       ),
-                      title: Text(
-                        "Score Card",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      actions: [
-                        IconButton(
-                          icon:
-                              _isSharing
-                                  ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                  : const Icon(Icons.share_outlined),
-                          tooltip: 'Share Game Details',
-                          onPressed: _isSharing ? null : _shareGameDetails,
-                        ),
-                      ],
-                    ),
-                  ];
-                },
-                body: CustomScrollView(
-                  slivers: [
-                    // Timer Panel
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
-                        child: TimerWidget(
-                          key: _quarterTimerKey,
-                          isRunning: isTimerRunning,
-                        ),
+                    ],
+                  ),
+                ];
+              },
+              body: CustomScrollView(
+                slivers: [
+                  // Timer Panel
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
+                      child: TimerWidget(
+                        key: _quarterTimerKey,
+                        isRunning: isTimerRunning,
                       ),
                     ),
+                  ),
 
-                    SliverToBoxAdapter(child: const SizedBox(height: 6)),
+                  SliverToBoxAdapter(child: const SizedBox(height: 6)),
 
-                    // Home Team Score Table
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ValueListenableBuilder<bool>(
-                          valueListenable: isTimerRunning,
-                          builder: (context, timerRunning, child) {
-                            return ScorePanel(
-                              events: List<GameEvent>.from(gameEvents),
-                              homeTeam: gameStateService.homeTeam,
-                              awayTeam: gameStateService.awayTeam,
-                              displayTeam: gameStateService.homeTeam,
-                              isHomeTeam: true,
-                              enabled: timerRunning,
-                            );
-                          },
-                        ),
+                  // Home Team Score Table
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, timerRunning, child) {
+                          return ScorePanel(
+                            events: List<GameEvent>.from(gameEvents),
+                            homeTeam: gameStateService.homeTeam,
+                            awayTeam: gameStateService.awayTeam,
+                            displayTeam: gameStateService.homeTeam,
+                            isHomeTeam: true,
+                            enabled: timerRunning,
+                          );
+                        },
                       ),
                     ),
+                  ),
 
-                    SliverToBoxAdapter(child: const SizedBox(height: 6)),
+                  SliverToBoxAdapter(child: const SizedBox(height: 6)),
 
-                    // Away Team Score Table
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ValueListenableBuilder<bool>(
-                          valueListenable: isTimerRunning,
-                          builder: (context, timerRunning, child) {
-                            return ScorePanel(
-                              events: List<GameEvent>.from(gameEvents),
-                              homeTeam: gameStateService.homeTeam,
-                              awayTeam: gameStateService.awayTeam,
-                              displayTeam: gameStateService.awayTeam,
-                              isHomeTeam: false,
-                              enabled: timerRunning,
-                            );
-                          },
-                        ),
+                  // Away Team Score Table
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isTimerRunning,
+                        builder: (context, timerRunning, child) {
+                          return ScorePanel(
+                            events: List<GameEvent>.from(gameEvents),
+                            homeTeam: gameStateService.homeTeam,
+                            awayTeam: gameStateService.awayTeam,
+                            displayTeam: gameStateService.awayTeam,
+                            isHomeTeam: false,
+                            enabled: timerRunning,
+                          );
+                        },
                       ),
                     ),
+                  ),
 
-                    // Bottom padding for safe scrolling
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).padding.bottom + 16,
-                      ),
+                  // Bottom padding for safe scrolling
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).padding.bottom + 16,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              // Screenshot widget positioned off-screen
-              Positioned(
-                left: -1000,
-                top: -1000,
-                child: WidgetShotPlus(
-                  key: _screenshotWidgetKey,
-                  child: Material(
-                    child: IntrinsicHeight(
-                      child: SizedBox(
-                        width: 400,
-                        child: GameDetailsWidget.fromLiveData(
-                          events: gameEvents,
-                          enableScrolling: false,
-                        ),
+            // Screenshot widget positioned off-screen
+            Positioned(
+              left: -1000,
+              top: -1000,
+              child: WidgetShotPlus(
+                key: _screenshotWidgetKey,
+                child: Material(
+                  child: IntrinsicHeight(
+                    child: SizedBox(
+                      width: 400,
+                      child: GameDetailsWidget.fromLiveData(
+                        events: gameEvents,
+                        enableScrolling: false,
                       ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -97,54 +97,117 @@ class AppDrawer extends StatelessWidget {
   ) {
     final List<Widget> items = [];
 
-    // Favorite Team - hide on team-related screens
-    if (!_isTeamRelatedRoute()) {
-      items.add(
-        ListTile(
-          leading: Icon(
-            userPreferences.favoriteTeam.isNotEmpty
-                ? Icons.star
-                : Icons.star_outline,
-          ),
-          title: const Text('Favorite Team'),
-          subtitle:
-              userPreferences.favoriteTeam.isNotEmpty
-                  ? Text(userPreferences.favoriteTeam)
-                  : const Text('None selected'),
-          trailing:
-              userPreferences.favoriteTeam.isNotEmpty
-                  ? IconButton(
-                    onPressed: () => userPreferences.setFavoriteTeam(''),
-                    icon: const Icon(Icons.clear_outlined),
-                    tooltip: 'Clear favorite team',
+    // Favorite Team - always visible, disabled on team-related screens
+    final isTeamRelated = _isTeamRelatedRoute();
+    items.add(
+      ListTile(
+        enabled: !isTeamRelated,
+        leading: Icon(
+          userPreferences.favoriteTeam.isNotEmpty
+              ? Icons.star
+              : Icons.star_outline,
+          color:
+              isTeamRelated
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
+        ),
+        title: Text(
+          'Favorite Team',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
                   )
                   : null,
-          onTap: () => _navigateToTeamSelection(context, userPreferences),
         ),
-      );
-    }
+        subtitle: Text(
+          userPreferences.favoriteTeam.isNotEmpty
+              ? userPreferences.favoriteTeam
+              : 'None selected',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        trailing:
+            userPreferences.favoriteTeam.isNotEmpty && !isTeamRelated
+                ? IconButton(
+                  onPressed: () => userPreferences.setFavoriteTeam(''),
+                  icon: const Icon(Icons.clear_outlined),
+                  tooltip: 'Clear favorite team',
+                )
+                : null,
+        onTap:
+            isTeamRelated
+                ? null
+                : () => _navigateToTeamSelection(context, userPreferences),
+      ),
+    );
 
-    // Manage Teams - hide on team-related screens
-    if (!_isTeamRelatedRoute()) {
-      items.add(
-        ListTile(
-          leading: const Icon(Icons.group_outlined),
-          title: const Text('Manage Teams'),
-          onTap: () => _navigateToTeamManagement(context),
+    // Manage Teams - always visible, disabled on team-related screens
+    items.add(
+      ListTile(
+        enabled: !isTeamRelated,
+        leading: Icon(
+          Icons.group_outlined,
+          color:
+              isTeamRelated
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
         ),
-      );
-    }
+        title: Text(
+          'Manage Teams',
+          style:
+              isTeamRelated
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        onTap: isTeamRelated ? null : () => _navigateToTeamManagement(context),
+      ),
+    );
 
-    // Game Results - hide on team-related screens
-    if (!_isTeamRelatedRoute() && currentRoute != 'game_history') {
-      items.add(
-        ListTile(
-          leading: const Icon(Icons.flag_outlined),
-          title: const Text('Game Results'),
-          onTap: () => _navigateToGameHistory(context),
+    // Game Results - always visible, disabled on game history screen
+    final isGameHistory = currentRoute == 'game_history';
+    items.add(
+      ListTile(
+        enabled: !isGameHistory,
+        leading: Icon(
+          Icons.flag_outlined,
+          color:
+              isGameHistory
+                  ? Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.38)
+                  : null,
         ),
-      );
-    }
+        title: Text(
+          'Game Results',
+          style:
+              isGameHistory
+                  ? TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.38),
+                  )
+                  : null,
+        ),
+        onTap: isGameHistory ? null : () => _navigateToGameHistory(context),
+      ),
+    );
 
     return items;
   }
