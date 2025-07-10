@@ -22,10 +22,8 @@ class _AddTeamConstants {
   static const double circularProgressStrokeWidth = 2.0;
 
   // Spacing
-  static const double paddingSmall = 8.0;
-  static const double paddingMedium = 12.0;
-  static const double paddingLarge = 16.0;
-  static const double paddingExtraLarge = 32.0;
+  static const double paddingSmall = 4.0;
+  static const double paddingMedium = 8.0;
 
   // Team filtering
   static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
@@ -228,14 +226,14 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.all(
-                      _AddTeamConstants.paddingLarge,
+                      _AddTeamConstants.paddingMedium,
                     ),
                     child: Column(
                       children: [
                         // Search bar
                         Padding(
                           padding: const EdgeInsets.all(
-                            _AddTeamConstants.paddingLarge,
+                            _AddTeamConstants.paddingMedium,
                           ),
                           child: SearchBarTheme(
                             data: SearchBarThemeData(
@@ -247,7 +245,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                             child: SearchBar(
                               controller: _materialSearchController,
                               focusNode: _searchFocusNode,
-                              hintText: 'Search for teams...',
+                              hintText: 'Enter team name',
                               leading: const Icon(Icons.search_outlined),
                               trailing:
                                   _materialSearchController.text.isNotEmpty
@@ -290,12 +288,12 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                         // Button group for search and custom entry
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: _AddTeamConstants.paddingLarge,
+                            horizontal: _AddTeamConstants.paddingMedium,
                           ),
                           child: Row(
                             children: [
                               Expanded(
-                                flex: 2,
+                                flex: 3,
                                 child: FilledButton.icon(
                                   onPressed:
                                       _isLoading ||
@@ -310,9 +308,9 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                                       _isLoading
                                           ? const SizedBox(
                                             width:
-                                                _AddTeamConstants.paddingLarge,
+                                                _AddTeamConstants.paddingMedium,
                                             height:
-                                                _AddTeamConstants.paddingLarge,
+                                                _AddTeamConstants.paddingMedium,
                                             child: CircularProgressIndicator(
                                               strokeWidth:
                                                   _AddTeamConstants
@@ -329,17 +327,17 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                                 width: _AddTeamConstants.paddingMedium,
                               ),
                               Expanded(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minWidth: 100,
-                                  ),
-                                  child: FilledButton.tonalIcon(
-                                    onPressed:
-                                        _isLoading
-                                            ? null
-                                            : _showCustomEntryDialog,
-                                    icon: const Icon(Icons.edit_outlined),
-                                    label: const Text('Custom'),
+                                flex: 2,
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      _isLoading
+                                          ? null
+                                          : _showCustomEntryDialog,
+                                  icon: const Icon(Icons.edit_outlined),
+                                  label: const Text(
+                                    'Custom',
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                               ),
@@ -347,7 +345,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: _AddTeamConstants.paddingLarge),
+                        const SizedBox(height: _AddTeamConstants.paddingMedium),
 
                         // Results
                         _buildResultsSection(),
@@ -378,13 +376,6 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               size: _AddTeamConstants.largeIconSize,
               color: colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: _AddTeamConstants.paddingLarge),
-            Text(
-              'Enter a team name to search',
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
           ],
         ),
       );
@@ -396,7 +387,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const CircularProgressIndicator(),
-            const SizedBox(height: _AddTeamConstants.paddingLarge),
+            const SizedBox(height: _AddTeamConstants.paddingMedium),
             Text('Searching teams...', style: textTheme.bodyMedium),
           ],
         ),
@@ -413,10 +404,10 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               size: _AddTeamConstants.largeIconSize,
               color: colorScheme.error,
             ),
-            const SizedBox(height: _AddTeamConstants.paddingLarge),
+            const SizedBox(height: _AddTeamConstants.paddingMedium),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: _AddTeamConstants.paddingExtraLarge,
+                horizontal: _AddTeamConstants.paddingMedium,
               ),
               child: Text(
                 _errorMessage!,
@@ -424,7 +415,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                 style: textTheme.bodyLarge?.copyWith(color: colorScheme.error),
               ),
             ),
-            const SizedBox(height: _AddTeamConstants.paddingLarge),
+            const SizedBox(height: _AddTeamConstants.paddingMedium),
             ElevatedButton(
               onPressed: () => _performSearch(_materialSearchController.text),
               child: const Text('Retry'),
@@ -443,7 +434,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               size: _AddTeamConstants.largeIconSize,
               color: colorScheme.onSurfaceVariant,
             ),
-            const SizedBox(height: _AddTeamConstants.paddingLarge),
+            const SizedBox(height: _AddTeamConstants.paddingMedium),
             Text(
               'No teams found for "${_materialSearchController.text}"',
               style: textTheme.bodyLarge?.copyWith(
@@ -463,8 +454,10 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
+      padding: const EdgeInsets.all(_AddTeamConstants.paddingMedium),
       itemCount: _searchResults.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final team = _searchResults[index];
         return _buildTeamCard(team);
@@ -479,7 +472,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: _AddTeamConstants.paddingMedium),
       child: ListTile(
-        contentPadding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
+        contentPadding: const EdgeInsets.all(_AddTeamConstants.paddingMedium),
         leading: _buildTeamLogo(team),
         title: Text(
           processedName,
