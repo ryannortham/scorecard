@@ -219,39 +219,45 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               // Search bar
               Padding(
                 padding: const EdgeInsets.all(_AddTeamConstants.paddingLarge),
-                child: SearchBar(
-                  controller: _materialSearchController,
-                  focusNode: _searchFocusNode,
-                  hintText: 'Search for teams...',
-                  leading: const Icon(Icons.search_outlined),
-                  trailing:
-                      _materialSearchController.text.isNotEmpty
-                          ? [
-                            IconButton(
-                              icon: const Icon(Icons.clear_outlined),
-                              onPressed: () {
-                                _materialSearchController.clear();
-                                _performSearch('');
-                              },
-                            ),
-                          ]
-                          : null,
-                  onSubmitted: _performSearch,
-                  onChanged: (value) {
-                    setState(() {}); // Rebuild to show/hide clear button
+                child: SearchBarTheme(
+                  data: SearchBarThemeData(
+                    elevation: const WidgetStatePropertyAll(0),
+                    side: const WidgetStatePropertyAll(BorderSide.none),
+                  ),
+                  child: SearchBar(
+                    controller: _materialSearchController,
+                    focusNode: _searchFocusNode,
+                    hintText: 'Search for teams...',
+                    leading: const Icon(Icons.search_outlined),
+                    trailing:
+                        _materialSearchController.text.isNotEmpty
+                            ? [
+                              IconButton(
+                                icon: const Icon(Icons.clear_outlined),
+                                onPressed: () {
+                                  _materialSearchController.clear();
+                                  _performSearch('');
+                                },
+                              ),
+                            ]
+                            : null,
+                    onSubmitted: _performSearch,
+                    onChanged: (value) {
+                      setState(() {}); // Rebuild to show/hide clear button
 
-                    // Perform search after a short delay to avoid too many requests
-                    Future.delayed(
-                      const Duration(
-                        milliseconds: _AddTeamConstants.searchDelayMs,
-                      ),
-                      () {
-                        if (_materialSearchController.text == value) {
-                          _performSearch(value);
-                        }
-                      },
-                    );
-                  },
+                      // Perform search after a short delay to avoid too many requests
+                      Future.delayed(
+                        const Duration(
+                          milliseconds: _AddTeamConstants.searchDelayMs,
+                        ),
+                        () {
+                          if (_materialSearchController.text == value) {
+                            _performSearch(value);
+                          }
+                        },
+                      );
+                    },
+                  ),
                 ),
               ),
 
@@ -266,7 +272,10 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                       flex: 2,
                       child: FilledButton.icon(
                         onPressed:
-                            _isLoading
+                            _isLoading ||
+                                    _materialSearchController.text
+                                        .trim()
+                                        .isEmpty
                                 ? null
                                 : () => _performSearch(
                                   _materialSearchController.text,
@@ -288,10 +297,13 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     ),
                     const SizedBox(width: _AddTeamConstants.paddingMedium),
                     Expanded(
-                      child: FilledButton.tonalIcon(
-                        onPressed: _isLoading ? null : _showCustomEntryDialog,
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Custom'),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minWidth: 100),
+                        child: FilledButton.icon(
+                          onPressed: _isLoading ? null : _showCustomEntryDialog,
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text('Custom'),
+                        ),
                       ),
                     ),
                   ],
