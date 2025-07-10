@@ -96,23 +96,6 @@ class _GameSetupState extends State<GameSetup> {
     final gameState = Provider.of<GameStateService>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: context.colors.primaryContainer,
-        foregroundColor: context.colors.onPrimaryContainer,
-        actions: [
-          Builder(
-            builder:
-                (context) => IconButton(
-                  icon: const Icon(Icons.menu_outlined),
-                  tooltip: 'Menu',
-                  onPressed: () {
-                    Scaffold.of(context).openEndDrawer();
-                  },
-                ),
-          ),
-        ],
-      ),
       endDrawer: const AppDrawer(currentRoute: 'game_setup'),
       body: Stack(
         children: [
@@ -127,9 +110,10 @@ class _GameSetupState extends State<GameSetup> {
                   colors: [
                     context.colors.primaryContainer,
                     context.colors.primaryContainer,
-                    Theme.of(
-                      context,
-                    ).colorScheme.primaryContainer.withValues(alpha: 0.9),
+                    ColorService.withAlpha(
+                      context.colors.primaryContainer,
+                      0.9,
+                    ),
                     context.colors.surface,
                   ],
                 ),
@@ -137,251 +121,317 @@ class _GameSetupState extends State<GameSetup> {
             ),
           ),
 
-          // Main content
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final availableHeight = constraints.maxHeight;
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(8.0),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: availableHeight - 16.0,
+          // Main content with collapsible app bar
+          NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  backgroundColor: context.colors.primaryContainer,
+                  foregroundColor: context.colors.onPrimaryContainer,
+                  floating: true,
+                  snap: true,
+                  pinned: false,
+                  elevation: 0,
+                  shadowColor: ColorService.transparent,
+                  surfaceTintColor: ColorService.transparent,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_outlined),
+                    tooltip: 'Back',
+                    onPressed: () => Navigator.of(context).pop(),
                   ),
-                  child: IntrinsicHeight(
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          // Teams Section
-                          Card(
-                            elevation: 0,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerLow,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                  title: Text(
+                    widget.title,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  actions: [
+                    Builder(
+                      builder:
+                          (context) => IconButton(
+                            icon: const Icon(Icons.menu_outlined),
+                            tooltip: 'Menu',
+                            onPressed:
+                                () => Scaffold.of(context).openEndDrawer(),
+                          ),
+                    ),
+                  ],
+                ),
+              ];
+            },
+            body: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final availableHeight =
+                          MediaQuery.of(context).size.height -
+                          MediaQuery.of(context).padding.top -
+                          kToolbarHeight;
+
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: availableHeight - 16.0,
+                          ),
+                          child: IntrinsicHeight(
+                            child: Form(
+                              key: _formKey,
                               child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  Align(
-                                    alignment: Alignment.centerLeft,
+                                  // Teams Section
+                                  Card(
+                                    elevation: 0,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerLow,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        'Teams',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium?.copyWith(
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  TeamSelectionWidget(
-                                    homeTeam: homeTeam,
-                                    awayTeam: awayTeam,
-                                    onHomeTeamChanged: (newTeam) {
-                                      setState(() {
-                                        homeTeam = newTeam;
-                                      });
-                                      // Also update the game state immediately
-                                      gameState.configureGame(
-                                        homeTeam: newTeam ?? '',
-                                        awayTeam: gameState.awayTeam,
-                                        gameDate: gameState.gameDate,
-                                        quarterMinutes:
-                                            gameState.quarterMinutes,
-                                        isCountdownTimer:
-                                            gameState.isCountdownTimer,
-                                      );
-                                    },
-                                    onAwayTeamChanged: (newTeam) {
-                                      setState(() {
-                                        awayTeam = newTeam;
-                                      });
-                                      // Also update the game state immediately
-                                      gameState.configureGame(
-                                        homeTeam: gameState.homeTeam,
-                                        awayTeam: newTeam ?? '',
-                                        gameDate: gameState.gameDate,
-                                        quarterMinutes:
-                                            gameState.quarterMinutes,
-                                        isCountdownTimer:
-                                            gameState.isCountdownTimer,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // Game Date Section
-                          Card(
-                            elevation: 0,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerLow,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Game Date',
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleMedium?.copyWith(
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Form(
-                                    key: dateKey,
-                                    child: TextFormField(
-                                      readOnly: true,
-                                      controller: _dateController,
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                      ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please select Game Date';
-                                        }
-                                        return null;
-                                      },
-                                      onTap: () async {
-                                        final DateTime? pickedDate =
-                                            await showDatePicker(
-                                              context: context,
-                                              initialDate: DateTime.now(),
-                                              firstDate: DateTime.now()
-                                                  .subtract(
-                                                    const Duration(days: 365),
-                                                  ),
-                                              lastDate: DateTime.now().add(
-                                                const Duration(days: 365),
+                                      child: Column(
+                                        children: [
+                                          Align(
+                                            alignment: Alignment.centerLeft,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(
+                                                8.0,
                                               ),
-                                            );
+                                              child: Text(
+                                                'Teams',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                      color:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurfaceVariant,
+                                                    ),
+                                              ),
+                                            ),
+                                          ),
+                                          TeamSelectionWidget(
+                                            homeTeam: homeTeam,
+                                            awayTeam: awayTeam,
+                                            onHomeTeamChanged: (newTeam) {
+                                              setState(() {
+                                                homeTeam = newTeam;
+                                              });
+                                              // Also update the game state immediately
+                                              gameState.configureGame(
+                                                homeTeam: newTeam ?? '',
+                                                awayTeam: gameState.awayTeam,
+                                                gameDate: gameState.gameDate,
+                                                quarterMinutes:
+                                                    gameState.quarterMinutes,
+                                                isCountdownTimer:
+                                                    gameState.isCountdownTimer,
+                                              );
+                                            },
+                                            onAwayTeamChanged: (newTeam) {
+                                              setState(() {
+                                                awayTeam = newTeam;
+                                              });
+                                              // Also update the game state immediately
+                                              gameState.configureGame(
+                                                homeTeam: gameState.homeTeam,
+                                                awayTeam: newTeam ?? '',
+                                                gameDate: gameState.gameDate,
+                                                quarterMinutes:
+                                                    gameState.quarterMinutes,
+                                                isCountdownTimer:
+                                                    gameState.isCountdownTimer,
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
 
-                                        if (pickedDate != null) {
-                                          gameState.configureGame(
-                                            homeTeam: gameState.homeTeam,
-                                            awayTeam: gameState.awayTeam,
-                                            gameDate: pickedDate,
-                                            quarterMinutes:
-                                                gameState.quarterMinutes,
-                                            isCountdownTimer:
-                                                gameState.isCountdownTimer,
-                                          );
-                                          _dateController.text = DateFormat(
-                                            'EEEE dd/MM/yyyy',
-                                          ).format(pickedDate);
-                                        }
-                                        dateKey.currentState?.validate();
-                                      },
+                                  const SizedBox(height: 8),
+
+                                  // Game Date Section
+                                  Card(
+                                    elevation: 0,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerLow,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Game Date',
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium?.copyWith(
+                                              color:
+                                                  Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Form(
+                                            key: dateKey,
+                                            child: TextFormField(
+                                              readOnly: true,
+                                              controller: _dateController,
+                                              style:
+                                                  Theme.of(
+                                                    context,
+                                                  ).textTheme.bodyLarge,
+                                              decoration: const InputDecoration(
+                                                border: InputBorder.none,
+                                              ),
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return 'Please select Game Date';
+                                                }
+                                                return null;
+                                              },
+                                              onTap: () async {
+                                                final DateTime? pickedDate =
+                                                    await showDatePicker(
+                                                      context: context,
+                                                      initialDate:
+                                                          DateTime.now(),
+                                                      firstDate: DateTime.now()
+                                                          .subtract(
+                                                            const Duration(
+                                                              days: 365,
+                                                            ),
+                                                          ),
+                                                      lastDate: DateTime.now()
+                                                          .add(
+                                                            const Duration(
+                                                              days: 365,
+                                                            ),
+                                                          ),
+                                                    );
+
+                                                if (pickedDate != null) {
+                                                  gameState.configureGame(
+                                                    homeTeam:
+                                                        gameState.homeTeam,
+                                                    awayTeam:
+                                                        gameState.awayTeam,
+                                                    gameDate: pickedDate,
+                                                    quarterMinutes:
+                                                        gameState
+                                                            .quarterMinutes,
+                                                    isCountdownTimer:
+                                                        gameState
+                                                            .isCountdownTimer,
+                                                  );
+                                                  _dateController
+                                                      .text = DateFormat(
+                                                    'EEEE dd/MM/yyyy',
+                                                  ).format(pickedDate);
+                                                }
+                                                dateKey.currentState
+                                                    ?.validate();
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 8),
+
+                                  // Quarter Minutes Section
+                                  Card(
+                                    elevation: 0,
+                                    color:
+                                        Theme.of(
+                                          context,
+                                        ).colorScheme.surfaceContainerLow,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: GameSettingsConfiguration(),
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 24),
+
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    child: FilledButton.icon(
+                                      onPressed:
+                                          isValidSetup()
+                                              ? () {
+                                                final gameState = Provider.of<
+                                                  GameStateService
+                                                >(context, listen: false);
+                                                // First configure the game with current setup data
+                                                gameState.configureGame(
+                                                  homeTeam: homeTeam ?? '',
+                                                  awayTeam: awayTeam ?? '',
+                                                  gameDate: gameState.gameDate,
+                                                  quarterMinutes:
+                                                      gameState.quarterMinutes,
+                                                  isCountdownTimer:
+                                                      gameState
+                                                          .isCountdownTimer,
+                                                );
+
+                                                // Configure timer settings using current game state values
+                                                gameState.configureTimer(
+                                                  isCountdownMode:
+                                                      gameState
+                                                          .isCountdownTimer,
+                                                  quarterMaxTime:
+                                                      gameState.quarterMinutes *
+                                                      60 *
+                                                      1000,
+                                                );
+
+                                                // Then reset the score state for a new game
+                                                gameState.resetGame();
+
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            const Scoring(
+                                                              title: 'Scoring',
+                                                            ),
+                                                  ),
+                                                );
+                                              }
+                                              : null,
+                                      icon: const Icon(Icons.outlined_flag),
+                                      label: const Text('Start Scoring'),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                           ),
-
-                          const SizedBox(height: 8),
-
-                          // Quarter Minutes Section
-                          Card(
-                            elevation: 0,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerLow,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: GameSettingsConfiguration(),
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.6,
-                            child: FilledButton.icon(
-                              onPressed:
-                                  isValidSetup()
-                                      ? () {
-                                        final gameState =
-                                            Provider.of<GameStateService>(
-                                              context,
-                                              listen: false,
-                                            );
-                                        // First configure the game with current setup data
-                                        gameState.configureGame(
-                                          homeTeam: homeTeam ?? '',
-                                          awayTeam: awayTeam ?? '',
-                                          gameDate: gameState.gameDate,
-                                          quarterMinutes:
-                                              gameState.quarterMinutes,
-                                          isCountdownTimer:
-                                              gameState.isCountdownTimer,
-                                        );
-
-                                        // Configure timer settings using current game state values
-                                        gameState.configureTimer(
-                                          isCountdownMode:
-                                              gameState.isCountdownTimer,
-                                          quarterMaxTime:
-                                              gameState.quarterMinutes *
-                                              60 *
-                                              1000,
-                                        );
-
-                                        // Then reset the score state for a new game
-                                        gameState.resetGame();
-
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) => const Scoring(
-                                                  title: 'Scoring',
-                                                ),
-                                          ),
-                                        );
-                                      }
-                                      : null,
-                              icon: const Icon(Icons.outlined_flag),
-                              label: const Text('Start Scoring'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-              );
-            },
+              ],
+            ),
           ),
         ],
       ),
