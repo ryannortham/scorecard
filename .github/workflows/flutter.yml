@@ -255,7 +255,7 @@ jobs:
       # Create GitHub release for tagged versions
       - name: Create GitHub Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: build/app/outputs/bundle/release/app-release.aab
           tag_name: ${{ github.event.release.tag_name }}
