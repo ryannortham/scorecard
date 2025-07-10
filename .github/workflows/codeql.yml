@@ -46,7 +46,7 @@ jobs:
       if: matrix.language == 'java-kotlin'
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.32.1'
+        flutter-version: '3.32.5'  # Updated to match your Flutter version
         channel: 'stable'
         cache: true
 
@@ -89,8 +89,8 @@ jobs:
       if: matrix.language == 'java-kotlin'
       run: |
         # Build the Android project to generate the necessary files for CodeQL analysis
-        cd android
-        ./gradlew assembleDebug --no-daemon
+        flutter build apk --debug --verbose
+      continue-on-error: false
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
