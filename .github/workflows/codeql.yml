@@ -1,0 +1,98 @@
+name: "CodeQL Security Analysis"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '30 2 * * 1'  # Run weekly on Mondays at 2:30 AM UTC
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      # Required for all workflows
+      security-events: write
+      # Required to fetch internal or private CodeQL packs
+      packages: read
+      # Only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: java-kotlin
+          build-mode: manual
+        - language: javascript-typescript
+          build-mode: none
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    # For Java/Kotlin analysis, we need to build the Flutter Android project
+    - name: Setup Flutter for Java/Kotlin analysis
+      if: matrix.language == 'java-kotlin'
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.1'
+        channel: 'stable'
+        cache: true
+
+    - name: Setup Java for Android builds
+      if: matrix.language == 'java-kotlin'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Cache Gradle dependencies
+      if: matrix.language == 'java-kotlin'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          android/.gradle
+        key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          gradle-${{ runner.os }}-
+
+    - name: Install Flutter dependencies
+      if: matrix.language == 'java-kotlin'
+      run: flutter pub get
+
+    - name: Create dummy keystore for build
+      if: matrix.language == 'java-kotlin'
+      run: |
+        # Create a dummy keystore for CodeQL analysis
+        keytool -genkey -v -keystore android/app/dummy-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias dummy -storepass dummypass -keypass dummypass -dname "CN=Dummy, OU=Dummy, O=Dummy, L=Dummy, ST=Dummy, C=US"
+        
+        # Create dummy key.properties
+        echo "storePassword=dummypass" > android/key.properties
+        echo "keyPassword=dummypass" >> android/key.properties
+        echo "keyAlias=dummy" >> android/key.properties
+        echo "storeFile=dummy-keystore.jks" >> android/key.properties
+
+    - name: Build Android project for analysis
+      if: matrix.language == 'java-kotlin'
+      run: |
+        # Build the Android project to generate the necessary files for CodeQL analysis
+        cd android
+        ./gradlew assembleDebug --no-daemon
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"
