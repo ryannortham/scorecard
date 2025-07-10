@@ -1,0 +1,115 @@
+# Dependabot configuration for automatic dependency updates
+# See: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Flutter/Dart dependencies
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Australia/Sydney"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "ryannortham"  # Replace with your GitHub username
+    assignees:
+      - "ryannortham"  # Replace with your GitHub username
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "flutter"
+    # Group related updates together
+    groups:
+      flutter-core:
+        patterns:
+          - "flutter*"
+          - "cupertino_icons"
+          - "material_color_utilities"
+      ui-packages:
+        patterns:
+          - "dynamic_color"
+          - "confetti"
+      state-management:
+        patterns:
+          - "provider"
+      networking:
+        patterns:
+          - "http"
+          - "graphql_flutter"
+      storage:
+        patterns:
+          - "shared_preferences"
+          - "path_provider"
+      dev-tools:
+        patterns:
+          - "*_test"
+          - "test*"
+          - "mockito"
+          - "build_runner"
+
+  # Android Gradle dependencies
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "Australia/Sydney"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "ryannortham"  # Replace with your GitHub username
+    assignees:
+      - "ryannortham"  # Replace with your GitHub username
+    commit-message:
+      prefix: "deps(android)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "android"
+    groups:
+      android-gradle:
+        patterns:
+          - "com.android.tools.build:gradle"
+          - "org.jetbrains.kotlin:*"
+          - "androidx.*"
+
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "11:00"
+      timezone: "Australia/Sydney"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "ryannortham"  # Replace with your GitHub username
+    assignees:
+      - "ryannortham"  # Replace with your GitHub username
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci/cd"
+    groups:
+      github-actions-core:
+        patterns:
+          - "actions/*"
+      flutter-actions:
+        patterns:
+          - "subosito/flutter-action"
+      security-actions:
+        patterns:
+          - "github/codeql-action"
+          - "MobSF/mobsfscan"
+      deployment-actions:
+        patterns:
+          - "r0adkll/upload-google-play"
+          - "softprops/action-gh-release"

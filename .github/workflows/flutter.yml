@@ -72,7 +72,7 @@ jobs:
   # Mobile Security Framework (MobSF) Security Scanning
   security-scan:
     runs-on: ubuntu-latest
-    name: Mobile Security Scan
+    name: security scan
     permissions:
       contents: read
       security-events: write
