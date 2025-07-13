@@ -14,17 +14,17 @@ import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 
-import 'game_details.dart';
+import '../results/results_screen.dart';
 
-class Scoring extends StatefulWidget {
-  const Scoring({super.key, required this.title});
+class ScoringScreen extends StatefulWidget {
+  const ScoringScreen({super.key, required this.title});
   final String title;
 
   @override
-  ScoringState createState() => ScoringState();
+  ScoringScreenState createState() => ScoringScreenState();
 }
 
-class ScoringState extends State<Scoring> {
+class ScoringScreenState extends State<ScoringScreen> {
   late GameStateService gameStateService;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
   final GameStateService _gameStateService = GameStateService.instance;
@@ -122,7 +122,7 @@ class ScoringState extends State<Scoring> {
       if (mounted) {
         await Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => GameDetailsPage(game: gameRecord),
+            builder: (context) => ResultsScreen(game: gameRecord),
           ),
         );
       }

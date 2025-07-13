@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/screens/game_history.dart';
-import 'package:scorecard/screens/team_list.dart';
+import 'package:scorecard/screens/results/results_list_screen.dart';
+import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import '../football_icon.dart';
@@ -506,7 +506,7 @@ class AppDrawer extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder:
-            (context) => TeamList(
+            (context) => TeamListScreen(
               title: 'Select Favorite Team',
               onTeamSelected: userPreferences.setFavoriteTeam,
             ),
@@ -520,7 +520,7 @@ class AppDrawer extends StatelessWidget {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder:
-              (context) => TeamList(
+              (context) => TeamListScreen(
                 title: 'Manage Teams',
                 onTeamSelected: (_) {}, // No action needed
               ),
@@ -530,7 +530,7 @@ class AppDrawer extends StatelessWidget {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder:
-              (context) => TeamList(
+              (context) => TeamListScreen(
                 title: 'Manage Teams',
                 onTeamSelected: (_) {}, // No action needed
               ),
@@ -543,6 +543,6 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context);
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const GameHistoryScreen()));
+    ).push(MaterialPageRoute(builder: (context) => const ResultsListScreen()));
   }
 }

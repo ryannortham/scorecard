@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/screens/scoring.dart';
+import 'package:scorecard/screens/scoring/scoring_screen.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
 
@@ -71,7 +71,7 @@ class TimerWidgetState extends State<TimerWidget> {
 
     if (!confirmed || !mounted) return;
 
-    final scoringState = context.findAncestorStateOfType<ScoringState>();
+    final scoringState = context.findAncestorStateOfType<ScoringScreenState>();
     if (scoringState == null) return;
 
     scoringState.recordQuarterEnd(currentQuarter);

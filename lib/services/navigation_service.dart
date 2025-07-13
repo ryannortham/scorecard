@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/screens/game_details.dart' as details;
-import 'package:scorecard/screens/game_history.dart';
-import 'package:scorecard/screens/home_screen.dart';
-import 'package:scorecard/screens/scoring.dart';
-import 'package:scorecard/screens/team_list.dart';
+import 'package:scorecard/screens/results/results_screen.dart';
+import 'package:scorecard/screens/results/results_list_screen.dart';
+import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
+import 'package:scorecard/screens/scoring/scoring_screen.dart';
+import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/dialog_service.dart';
 
 /// Centralized navigation service following Flutter best practices
@@ -27,7 +27,8 @@ class AppNavigator {
     return Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder:
-            (context) => TeamList(title: title, onTeamSelected: onTeamSelected),
+            (context) =>
+                TeamListScreen(title: title, onTeamSelected: onTeamSelected),
         settings: RouteSettings(arguments: excludeTeam),
       ),
     );
@@ -35,15 +36,15 @@ class AppNavigator {
 
   /// Navigate to game setup
   static Future<T?> toGameSetup<T extends Object?>(BuildContext context) {
-    return Navigator.of(
-      context,
-    ).push<T>(MaterialPageRoute(builder: (context) => const HomeScreen()));
+    return Navigator.of(context).push<T>(
+      MaterialPageRoute(builder: (context) => const ScoringSetupScreen()),
+    );
   }
 
   /// Navigate to game history
   static Future<T?> toGameHistory<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(builder: (context) => const GameHistoryScreen()),
+      MaterialPageRoute(builder: (context) => const ResultsListScreen()),
     );
   }
 
@@ -53,16 +54,16 @@ class AppNavigator {
     required GameRecord game,
   }) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(
-        builder: (context) => details.GameDetailsPage(game: game),
-      ),
+      MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
     );
   }
 
   /// Navigate to active scoring screen
   static Future<T?> toScoring<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
-      MaterialPageRoute(builder: (context) => const Scoring(title: 'Scoring')),
+      MaterialPageRoute(
+        builder: (context) => const ScoringScreen(title: 'Scoring'),
+      ),
     );
   }
 

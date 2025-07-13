@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../services/app_logger.dart';
-import '../services/dialog_service.dart';
-import '../services/game_history_service.dart';
-import '../services/game_state_service.dart';
-import '../widgets/game_history/game_summary_card.dart';
-import '../widgets/drawer/app_drawer.dart';
+import '../../services/app_logger.dart';
+import '../../services/dialog_service.dart';
+import '../../services/game_history_service.dart';
+import '../../services/game_state_service.dart';
+import '../../widgets/game_history/game_summary_card.dart';
+import '../../widgets/drawer/app_drawer.dart';
 
-import 'package:scorecard/screens/game_details.dart' as details;
-import 'package:scorecard/services/color_service.dart';
+import 'results_screen.dart';
+import '../../services/color_service.dart';
 
-class GameHistoryScreen extends StatefulWidget {
-  const GameHistoryScreen({super.key});
+class ResultsListScreen extends StatefulWidget {
+  const ResultsListScreen({super.key});
 
   @override
-  State<GameHistoryScreen> createState() => _GameHistoryScreenState();
+  State<ResultsListScreen> createState() => _ResultsListScreenState();
 }
 
-class _GameHistoryScreenState extends State<GameHistoryScreen> {
+class _ResultsListScreenState extends State<ResultsListScreen> {
   List<GameSummary> _gameSummaries = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -208,9 +208,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     final game = await GameHistoryService.loadGameById(gameId);
     if (game != null && mounted) {
       final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (context) => details.GameDetailsPage(game: game),
-        ),
+        MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
       );
 
       // If the game was deleted (result is true), refresh the list

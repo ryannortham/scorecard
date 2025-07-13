@@ -7,9 +7,9 @@ import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 
-import '../widgets/football_icon.dart';
+import '../../widgets/football_icon.dart';
 
-/// Constants for the AddTeamScreen
+/// Constants for the TeamAddScreen
 class _AddTeamConstants {
   // Search configuration
   static const int searchLimit = 20;
@@ -71,14 +71,14 @@ class _TeamNameProcessor {
 }
 
 /// Screen for adding teams from PlayHQ search or custom entry
-class AddTeamScreen extends StatefulWidget {
-  const AddTeamScreen({super.key});
+class TeamAddScreen extends StatefulWidget {
+  const TeamAddScreen({super.key});
 
   @override
-  State<AddTeamScreen> createState() => _AddTeamScreenState();
+  State<TeamAddScreen> createState() => _TeamAddScreenState();
 }
 
-class _AddTeamScreenState extends State<AddTeamScreen> {
+class _TeamAddScreenState extends State<TeamAddScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   final SearchController _materialSearchController = SearchController();
 

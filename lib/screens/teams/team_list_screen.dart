@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/score_models.dart';
-import '../providers/teams_provider.dart';
-import '../services/color_service.dart';
-import '../providers/user_preferences_provider.dart';
-import '../services/navigation_service.dart';
-import '../services/dialog_service.dart';
-import '../screens/add_team.dart';
-import '../widgets/drawer/app_drawer.dart';
+import '../../models/score_models.dart';
+import '../../providers/teams_provider.dart';
+import '../../services/color_service.dart';
+import '../../providers/user_preferences_provider.dart';
+import '../../services/navigation_service.dart';
+import '../../services/dialog_service.dart';
+import 'team_add_screen.dart';
+import '../../widgets/drawer/app_drawer.dart';
 
-import '../widgets/football_icon.dart';
+import '../../widgets/football_icon.dart';
 
-class TeamList extends StatefulWidget {
-  const TeamList({
+class TeamListScreen extends StatefulWidget {
+  const TeamListScreen({
     super.key,
     required this.title,
     required this.onTeamSelected,
@@ -22,10 +22,10 @@ class TeamList extends StatefulWidget {
   final void Function(String) onTeamSelected;
 
   @override
-  State<TeamList> createState() => _TeamListState();
+  State<TeamListScreen> createState() => _TeamListScreenState();
 }
 
-class _TeamListState extends State<TeamList> {
+class _TeamListScreenState extends State<TeamListScreen> {
   bool _hasNavigatedToAddTeam = false;
   bool _hasInitiallyLoaded = false; // Track if we've completed initial load
 
@@ -66,7 +66,7 @@ class _TeamListState extends State<TeamList> {
       _hasNavigatedToAddTeam = true;
 
       final addedTeamName = await Navigator.of(context).push<String>(
-        MaterialPageRoute(builder: (context) => const AddTeamScreen()),
+        MaterialPageRoute(builder: (context) => const TeamAddScreen()),
       );
 
       // If a team was added and this is a team selection screen, auto-select it
@@ -357,7 +357,7 @@ class _TeamListState extends State<TeamList> {
           onPressed: () async {
             final navigator = Navigator.of(context);
             final addedTeamName = await navigator.push<String>(
-              MaterialPageRoute(builder: (context) => const AddTeamScreen()),
+              MaterialPageRoute(builder: (context) => const TeamAddScreen()),
             );
 
             // If a team was added and this is a team selection screen, auto-select it

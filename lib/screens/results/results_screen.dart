@@ -18,16 +18,16 @@ import 'dart:io';
 import 'dart:math';
 
 /// A full-screen page for displaying game details from history
-class GameDetailsPage extends StatefulWidget {
+class ResultsScreen extends StatefulWidget {
   final GameRecord game;
 
-  const GameDetailsPage({super.key, required this.game});
+  const ResultsScreen({super.key, required this.game});
 
   @override
-  State<GameDetailsPage> createState() => _GameDetailsPageState();
+  State<ResultsScreen> createState() => _ResultsScreenState();
 }
 
-class _GameDetailsPageState extends State<GameDetailsPage> {
+class _ResultsScreenState extends State<ResultsScreen> {
   final GlobalKey _widgetShotKey = GlobalKey();
   final GlobalKey _screenshotWidgetKey = GlobalKey();
   bool _isSharing = false;
