@@ -1,0 +1,95 @@
+name: Setup Repository Labels
+
+on:
+  workflow_dispatch:  # Allow manual trigger
+  push:
+    paths:
+      - '.github/dependabot.yml'
+      - '.github/workflows/setup-labels.yml'
+    branches:
+      - main
+
+jobs:
+  setup-labels:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      
+    steps:
+      - name: Create or Update Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Define all the labels we need for Dependabot and general project management
+            const labels = [
+              // Dependabot required labels
+              { name: 'dependencies', color: '0366d6', description: 'Pull requests that update a dependency file' },
+              { name: 'flutter', color: '02569B', description: 'Related to Flutter framework' },
+              { name: 'android', color: '3DDC84', description: 'Related to Android platform' },
+              { name: 'github-actions', color: '2088FF', description: 'Related to GitHub Actions workflows' },
+              { name: 'ci/cd', color: '1f883d', description: 'Related to continuous integration and deployment' },
+              
+              // General project labels
+              { name: 'bug', color: 'd73a4a', description: 'Something is not working' },
+              { name: 'enhancement', color: 'a2eeef', description: 'New feature or request' },
+              { name: 'documentation', color: '0075ca', description: 'Improvements or additions to documentation' },
+              { name: 'security', color: 'e11d21', description: 'Security related issues or updates' },
+              { name: 'performance', color: 'fbca04', description: 'Performance improvements' },
+              { name: 'ui/ux', color: 'c5def5', description: 'User interface and experience improvements' },
+              
+              // Priority labels
+              { name: 'priority: high', color: 'b60205', description: 'High priority' },
+              { name: 'priority: medium', color: 'fbca04', description: 'Medium priority' },
+              { name: 'priority: low', color: '0e8a16', description: 'Low priority' },
+              
+              // Status labels
+              { name: 'status: needs review', color: 'f9d0c4', description: 'Needs code review' },
+              { name: 'status: in progress', color: 'fef2c0', description: 'Work in progress' },
+              { name: 'status: blocked', color: 'e11d21', description: 'Blocked by external dependencies' },
+              { name: 'status: ready to merge', color: '0e8a16', description: 'Ready to be merged' },
+              
+              // Type labels
+              { name: 'type: feature', color: 'a2eeef', description: 'New feature implementation' },
+              { name: 'type: bugfix', color: 'd73a4a', description: 'Bug fix' },
+              { name: 'type: refactor', color: 'e4e669', description: 'Code refactoring' },
+              { name: 'type: test', color: 'c5def5', description: 'Testing related changes' }
+            ];
+            
+            for (const label of labels) {
+              try {
+                // Try to get the existing label
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name
+                });
+                
+                // If label exists, update it
+                await github.rest.issues.updateLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                  color: label.color,
+                  description: label.description
+                });
+                console.log(`✅ Updated label: ${label.name}`);
+                
+              } catch (error) {
+                if (error.status === 404) {
+                  // Label doesn't exist, create it
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label.name,
+                    color: label.color,
+                    description: label.description
+                  });
+                  console.log(`🆕 Created label: ${label.name}`);
+                } else {
+                  console.error(`❌ Error with label ${label.name}:`, error.message);
+                }
+              }
+            }
+            
+            console.log('🎉 Label setup complete!');

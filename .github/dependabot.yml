@@ -12,10 +12,6 @@ updates:
       time: "09:00"
       timezone: "Australia/Sydney"
     open-pull-requests-limit: 5
-    reviewers:
-      - "ryannortham"  # Replace with your GitHub username
-    assignees:
-      - "ryannortham"  # Replace with your GitHub username
     commit-message:
       prefix: "deps"
       prefix-development: "deps-dev"
@@ -61,10 +57,6 @@ updates:
       time: "10:00"
       timezone: "Australia/Sydney"
     open-pull-requests-limit: 3
-    reviewers:
-      - "ryannortham"  # Replace with your GitHub username
-    assignees:
-      - "ryannortham"  # Replace with your GitHub username
     commit-message:
       prefix: "deps(android)"
       include: "scope"
@@ -87,10 +79,6 @@ updates:
       time: "11:00"
       timezone: "Australia/Sydney"
     open-pull-requests-limit: 3
-    reviewers:
-      - "ryannortham"  # Replace with your GitHub username
-    assignees:
-      - "ryannortham"  # Replace with your GitHub username
     commit-message:
       prefix: "ci"
       include: "scope"

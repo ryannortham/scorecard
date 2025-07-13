@@ -1,0 +1,23 @@
+# Global code owners - all files unless specified otherwise
+* @ryannortham
+
+# Flutter/Dart dependencies - pub updates
+pubspec.yaml @ryannortham
+pubspec.lock @ryannortham
+
+# Android dependencies and configuration
+android/ @ryannortham
+
+# GitHub Actions workflows and CI/CD
+.github/ @ryannortham
+
+# Documentation
+*.md @ryannortham
+docs/ @ryannortham
+
+# Security-related files
+android/app/src/main/AndroidManifest.xml @ryannortham
+
+# Configuration files
+.gitignore @ryannortham
+analysis_options.yaml @ryannortham
