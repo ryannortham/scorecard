@@ -1,4 +1,4 @@
-name: Flutter CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
@@ -7,99 +7,83 @@ on:
     branches: [ "main" ]
   release:
     types: [published]
+  schedule:
+    - cron: '30 2 * * 1'  # Weekly security scan
+
+env:
+  FLUTTER_VERSION: '3.32.5'
+  JAVA_VERSION: '17'
+  GRADLE_VERSION: '8.14.2'
 
 jobs:
+  # =============================================================================
+  # ANALYSIS PHASE - Runs in parallel for all pushes/PRs
+  # =============================================================================
+  
   test:
+    name: 🧪 Test & Lint
     runs-on: ubuntu-latest
     permissions:
       contents: read
     
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      # Cache Flutter SDK
-      - name: Cache Flutter SDK
-        uses: actions/cache@v4
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          path: /opt/hostedtoolcache/flutter
-          key: flutter-sdk-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            flutter-sdk-${{ runner.os }}-
-
-      # Setup Flutter SDK
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.32.1'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
 
-      # Cache Pub dependencies
-      - name: Cache Pub dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.PUB_CACHE }}
-            ~/.pub-cache
-          key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            pub-cache-${{ runner.os }}-
-
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: flutter pub get
 
-      # Verify formatting
-      - name: Verify formatting
+      - name: 🎨 Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      - name: Analyze project source
+      - name: 🔍 Analyze project source
         run: flutter analyze
 
-      # Run tests if any exist
-      - name: Check if tests exist
-        id: check_tests
+      - name: 🧪 Run tests
         run: |
           if [ -d "test" ]; then
-            echo "tests_exist=true" >> $GITHUB_OUTPUT
+            flutter test
           else
-            echo "tests_exist=false" >> $GITHUB_OUTPUT
+            echo "No tests found, skipping test execution"
           fi
 
-      - name: Run tests
-        if: steps.check_tests.outputs.tests_exist == 'true'
-        run: flutter test
-
-  # Mobile Security Framework (MobSF) Security Scanning
   security-scan:
+    name: 🔒 Security Scan (MobSF)
     runs-on: ubuntu-latest
-    name: security scan
     permissions:
       contents: read
       security-events: write
       actions: read
     
     steps:
-      - name: Checkout the code
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
       
-      - name: Setup Python for MobSF
+      - name: 🐍 Setup Python for MobSF
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       
-      - name: Run MobSF Security Scan
+      - name: 🔒 Run MobSF Security Scan
         uses: MobSF/mobsfscan@main
         with:
           args: '. --sarif --output mobsf-results.sarif || true'
       
-      - name: Upload MobSF SARIF results to GitHub Security
+      - name: 📤 Upload MobSF SARIF results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: mobsf-results.sarif
           category: mobsf-security-scan
       
-      - name: Upload MobSF scan results as artifact
+      - name: 📋 Upload scan results as artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -107,12 +91,88 @@ jobs:
           path: mobsf-results.sarif
           retention-days: 30
 
-  build:
-    needs: [test, security-scan]
+  codeql-analyze:
+    name: 🔍 CodeQL Analysis (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
+      security-events: write
+      packages: read
+      actions: read
       contents: read
-    # Run on main branch pushes OR on releases
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: java-kotlin
+          build-mode: manual
+        - language: javascript-typescript
+          build-mode: none
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    - name: 🔍 Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    # Setup for Java/Kotlin analysis only
+    - name: 🐦 Setup Flutter (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ env.FLUTTER_VERSION }}
+        channel: 'stable'
+        cache: true
+
+    - name: ☕ Setup Java (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: ${{ env.JAVA_VERSION }}
+
+    - name: 🏗️ Setup Gradle (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: ${{ env.GRADLE_VERSION }}
+
+    - name: 📦 Install Flutter dependencies (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      run: flutter pub get
+
+    - name: 🔑 Create dummy keystore (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      run: |
+        keytool -genkey -v -keystore android/app/dummy-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias dummy -storepass dummypass -keypass dummypass -dname "CN=Dummy, OU=Dummy, O=Dummy, L=Dummy, ST=Dummy, C=US"
+        echo "storePassword=dummypass" > android/key.properties
+        echo "keyPassword=dummypass" >> android/key.properties
+        echo "keyAlias=dummy" >> android/key.properties
+        echo "storeFile=dummy-keystore.jks" >> android/key.properties
+
+    - name: 🏗️ Build Android project (Java/Kotlin)
+      if: matrix.language == 'java-kotlin'
+      run: flutter build apk --debug --verbose
+
+    - name: 📊 Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ matrix.language }}"
+
+  # =============================================================================
+  # BUILD PHASE - Only runs on main branch or releases
+  # =============================================================================
+  
+  build:
+    name: 🏗️ Build Release
+    needs: [test, security-scan, codeql-analyze]
+    runs-on: ubuntu-latest
+    # Only run on main branch pushes OR releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
     
     outputs:
@@ -121,89 +181,49 @@ jobs:
       track: ${{ steps.version.outputs.track }}
     
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      # Cache Flutter SDK
-      - name: Cache Flutter SDK
-        uses: actions/cache@v4
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          path: /opt/hostedtoolcache/flutter
-          key: flutter-sdk-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            flutter-sdk-${{ runner.os }}-
-
-      # Setup Flutter SDK
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.32.1'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: 'stable'
           cache: true
 
-      # Cache Pub dependencies
-      - name: Cache Pub dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            $HOME/.pub-cache
-          key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            pub-cache-${{ runner.os }}-
-
-      # Cache Gradle dependencies
-      - name: Cache Gradle dependencies
-        id: gradle-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            android/.gradle
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            gradle-${{ runner.os }}-
-
-      # Setup Java for Android builds
-      - uses: actions/setup-java@v4
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: ${{ env.JAVA_VERSION }}
 
-      # Setup Gradle to ensure consistent version
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+      - name: 🏗️ Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.14.2'
+          gradle-version: ${{ env.GRADLE_VERSION }}
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: flutter pub get
 
-      # Selective clean - only if Gradle cache missed or we have memory pressure
-      - name: Clean build environment (if needed)
-        if: steps.gradle-cache.outputs.cache-hit != 'true'
+      # Clean only if needed
+      - name: 🧹 Clean build environment (if needed)
         run: |
-          echo "🧹 Gradle cache miss detected - cleaning selectively"
-          # Only clean Flutter build, preserve Gradle caches
+          echo "🧹 Cleaning build environment"
           flutter clean
-          # Remove only corrupted local Gradle files, keep global cache
           rm -rf android/app/build/
           rm -rf android/.gradle/configuration-cache/
         continue-on-error: true
 
-      # Extract version information
-      - name: Extract version info
+      - name: 📋 Extract version info
         id: version
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
-            # Use release tag (e.g., v1.2.3 -> 1.2.3)
             VERSION_NAME="${{ github.event.release.tag_name }}"
-            VERSION_NAME="${VERSION_NAME#v}"  # Remove 'v' prefix if present
-            # Generate version code from semantic version (1.2.3 -> 10203)
+            VERSION_NAME="${VERSION_NAME#v}"
             IFS='.' read -ra VERSION_PARTS <<< "$VERSION_NAME"
             VERSION_CODE=$((${VERSION_PARTS[0]} * 10000 + ${VERSION_PARTS[1]} * 100 + ${VERSION_PARTS[2]}))
             TRACK="internal"
           else
-            # Use commit SHA for dev builds
             VERSION_NAME="dev-${GITHUB_SHA::8}"
             VERSION_CODE="${GITHUB_RUN_NUMBER}"
             TRACK="internal"
@@ -215,8 +235,7 @@ jobs:
           echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
           echo "🚀 Track: $TRACK"
 
-      # Setup Android signing
-      - name: Setup Android signing
+      - name: 🔑 Setup Android signing
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/keystore.jks
           echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
@@ -224,8 +243,7 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=keystore.jks" >> android/key.properties
 
-      # Build release AAB
-      - name: Build release AAB
+      - name: 📱 Build release AAB
         env:
           JAVA_OPTS: -Xmx4g -XX:MaxMetaspaceSize=512m
           GRADLE_OPTS: -Xmx4g -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false
@@ -234,34 +252,37 @@ jobs:
             --build-name=${{ steps.version.outputs.version_name }} \
             --build-number=${{ steps.version.outputs.version_code }}
 
-      # Store the built AAB as an artifact
-      - name: Upload AAB artifact
+      - name: 📤 Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-aab-${{ steps.version.outputs.version_name }}
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+  # =============================================================================
+  # DEPLOY PHASE - Only runs after successful build on main/releases
+  # =============================================================================
+  
   deploy:
+    name: 🚀 Deploy to Play Store
     needs: build
     runs-on: ubuntu-latest
-    # Run on main branch pushes OR on releases
+    # Only run on main branch pushes OR releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
     
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
 
-      # Download the built AAB artifact
-      - name: Download AAB artifact
+      - name: 📥 Download AAB artifact
         uses: actions/download-artifact@v4
         with:
           name: release-aab-${{ needs.build.outputs.version_name }}
           path: build/app/outputs/bundle/release/
 
-      # Create GitHub release for tagged versions
-      - name: Create GitHub Release
+      - name: 🏷️ Create GitHub Release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v1
         with:
           files: build/app/outputs/bundle/release/app-release.aab
           tag_name: ${{ github.event.release.tag_name }}
@@ -281,8 +302,7 @@ jobs:
             
             See the [changelog](./android/whatsnew/whatsnew-en-US) for details.
 
-      # Upload to Google Play Store with retry logic
-      - name: Upload to Play Store
+      - name: 🚀 Upload to Play Store
         id: upload-play-store
         uses: r0adkll/upload-google-play@v1
         with:
@@ -296,14 +316,13 @@ jobs:
           releaseName: ${{ needs.build.outputs.version_name }}
         continue-on-error: true
 
-      # Retry Play Store upload if it failed due to concurrent edits
-      - name: Wait before retry
+      - name: ⏳ Wait before retry
         if: steps.upload-play-store.outcome == 'failure'
         run: |
           echo "⏳ Waiting 30 seconds before retrying Play Store upload..."
           sleep 30
 
-      - name: Retry Play Store Upload (if needed)
+      - name: 🔄 Retry Play Store Upload
         if: steps.upload-play-store.outcome == 'failure'
         uses: r0adkll/upload-google-play@v1
         with:

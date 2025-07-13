@@ -1,4 +1,4 @@
-name: Setup Repository Labels
+name: 🏷️ Setup Repository Labels
 
 on:
   workflow_dispatch:  # Allow manual trigger
