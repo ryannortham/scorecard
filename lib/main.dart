@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
+import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
@@ -114,6 +114,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return const ScoringSetupScreen();
+    return const NavigationShell();
   }
 }

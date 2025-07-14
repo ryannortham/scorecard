@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/screens/results/results_list_screen.dart';
 import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
@@ -119,7 +118,7 @@ class AppDrawer extends StatelessWidget {
   ) {
     final List<Widget> items = [];
 
-    // Favorite Team - always visible, disabled on team-related screens
+    // Favorite Team - this is a user setting, so we keep it
     final isTeamRelated = _isTeamRelatedRoute();
     items.add(
       ListTile(
@@ -171,63 +170,6 @@ class AppDrawer extends StatelessWidget {
             isTeamRelated
                 ? null
                 : () => _navigateToTeamSelection(context, userPreferences),
-      ),
-    );
-
-    // Manage Teams - always visible, disabled on team-related screens
-    items.add(
-      ListTile(
-        enabled: !isTeamRelated,
-        leading: Icon(
-          Icons.group_outlined,
-          color:
-              isTeamRelated
-                  ? Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.38)
-                  : null,
-        ),
-        title: Text(
-          'Manage Teams',
-          style:
-              isTeamRelated
-                  ? TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.38),
-                  )
-                  : null,
-        ),
-        onTap: isTeamRelated ? null : () => _navigateToTeamManagement(context),
-      ),
-    );
-
-    // Game Results - always visible, disabled on game history screen
-    final isGameHistory = currentRoute == 'game_history';
-    items.add(
-      ListTile(
-        enabled: !isGameHistory,
-        leading: Icon(
-          Icons.flag_outlined,
-          color:
-              isGameHistory
-                  ? Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.38)
-                  : null,
-        ),
-        title: Text(
-          'Game Results',
-          style:
-              isGameHistory
-                  ? TextStyle(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.38),
-                  )
-                  : null,
-        ),
-        onTap: isGameHistory ? null : () => _navigateToGameHistory(context),
       ),
     );
 
@@ -512,37 +454,5 @@ class AppDrawer extends StatelessWidget {
             ),
       ),
     );
-  }
-
-  void _navigateToTeamManagement(BuildContext context) {
-    Navigator.pop(context);
-    if (currentRoute == 'add_team') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder:
-              (context) => TeamListScreen(
-                title: 'Manage Teams',
-                onTeamSelected: (_) {}, // No action needed
-              ),
-        ),
-      );
-    } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder:
-              (context) => TeamListScreen(
-                title: 'Manage Teams',
-                onTeamSelected: (_) {}, // No action needed
-              ),
-        ),
-      );
-    }
-  }
-
-  void _navigateToGameHistory(BuildContext context) {
-    Navigator.pop(context);
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => const ResultsListScreen()));
   }
 }

@@ -41,6 +41,25 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
     super.dispose();
   }
 
+  /// Handles back button press by trying to pop or navigating to Scoring tab
+  void _handleBackPress() {
+    // Try to pop first
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      // If we can't pop, we're in a NavigationShell tab context
+      // Navigate to the Scoring tab (index 0) as the default "back" behavior
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
+  }
+
+  /// Determines if the back button should be shown.
+  /// Returns true - we always want to show the back button, but handle it appropriately
+  bool _shouldShowBackButton() {
+    // Always show the back button - let _handleBackPress decide what to do
+    return true;
+  }
+
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
@@ -221,10 +240,14 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !_isSelectionMode,
+      canPop: false, // We'll handle all pop attempts manually
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _isSelectionMode) {
+        if (didPop) return; // Already handled
+
+        if (_isSelectionMode) {
           _exitSelectionMode();
+        } else {
+          _handleBackPress(); // Use the same logic as UI back button
         }
       },
       child: Scaffold(
@@ -277,11 +300,13 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                               icon: const Icon(Icons.close_outlined),
                               onPressed: _exitSelectionMode,
                             )
-                            : IconButton(
+                            : _shouldShowBackButton()
+                            ? IconButton(
                               icon: const Icon(Icons.arrow_back_outlined),
                               tooltip: 'Back',
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
+                              onPressed: _handleBackPress,
+                            )
+                            : null,
                     actions: [
                       if (_isSelectionMode)
                         IconButton(
