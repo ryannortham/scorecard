@@ -7,7 +7,7 @@ import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
 import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/football_icon.dart';
+import 'package:scorecard/services/assets/asset_icon_service.dart';
 
 import 'scoring_screen.dart';
 import 'package:scorecard/services/color_service.dart';

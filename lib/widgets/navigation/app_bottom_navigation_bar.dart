@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/assets/asset_icon_service.dart';
 
 /// Material 3 compliant bottom navigation bar for the app
 class AppBottomNavigationBar extends StatelessWidget {
@@ -22,18 +23,18 @@ class AppBottomNavigationBar extends StatelessWidget {
       child: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: onDestinationSelected,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.sports_football_outlined),
-            selectedIcon: Icon(Icons.sports_football),
+            icon: FootballIcon(size: 32),
+            selectedIcon: FootballIcon(size: 32),
             label: 'Scoring',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.groups_outlined),
             selectedIcon: Icon(Icons.groups),
             label: 'Teams',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.emoji_events_outlined),
             selectedIcon: Icon(Icons.emoji_events),
             label: 'Results',

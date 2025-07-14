@@ -5,7 +5,7 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import '../football_icon.dart';
+import 'package:scorecard/services/assets/asset_icon_service.dart';
 
 /// A Material 3 navigation drawer for the app.
 ///

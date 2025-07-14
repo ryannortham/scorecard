@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/tally_icon_service.dart';
+import '../../services/assets/asset_icon_service.dart';
 import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
 
@@ -75,7 +75,7 @@ class TallyDisplay extends StatelessWidget {
     Color effectiveColor,
     double effectiveIconSize,
   ) {
-    final tallyIcons = TallyIconService.getTallyIcons(value);
+    final tallyIcons = AssetIconService.getTallyIconPaths(value);
 
     if (tallyIcons.isEmpty) {
       return const SizedBox.shrink();

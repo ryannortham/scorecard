@@ -7,7 +7,7 @@ import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/drawer/app_drawer.dart';
 
-import '../../widgets/football_icon.dart';
+import '../../services/assets/asset_icon_service.dart';
 
 /// Constants for the TeamAddScreen
 class _AddTeamConstants {

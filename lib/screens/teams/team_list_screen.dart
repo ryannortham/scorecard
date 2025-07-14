@@ -10,7 +10,7 @@ import '../../services/dialog_service.dart';
 import 'team_add_screen.dart';
 import '../../widgets/drawer/app_drawer.dart';
 
-import '../../widgets/football_icon.dart';
+import '../../services/assets/asset_icon_service.dart';
 
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({

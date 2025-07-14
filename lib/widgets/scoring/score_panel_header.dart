@@ -5,7 +5,7 @@ import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/models/score_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
-import '../football_icon.dart';
+import '../../services/assets/asset_icon_service.dart';
 import 'package:scorecard/services/color_service.dart';
 
 /// Header widget displaying team name and total score
