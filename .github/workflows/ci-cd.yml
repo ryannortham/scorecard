@@ -178,9 +178,13 @@ jobs:
       run: |
         # Generate the necessary Flutter files and plugin registrations
         flutter packages get
-        # Create local.properties file for Android build
-        echo "flutter.sdk=${FLUTTER_ROOT}" > android/local.properties
-        echo "sdk.dir=${ANDROID_HOME}" >> android/local.properties
+        # Create local.properties file for Android build with proper environment variables
+        echo "flutter.sdk=${FLUTTER_ROOT:-$HOME/hostedtoolcache/flutter}" > android/local.properties
+        echo "sdk.dir=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> android/local.properties
+        # Show the created properties for debugging
+        echo "📋 Created local.properties:"
+        cat android/local.properties
+        # Generate Flutter Android files
         flutter build apk --config-only
 
     - name: 🔍 Verify Java/Kotlin sources (Java/Kotlin)
@@ -199,7 +203,15 @@ jobs:
       run: |
         # Build Android project directly with Gradle for better CodeQL analysis
         chmod +x gradlew
-        ./gradlew clean
+        echo "🔧 Environment check:"
+        echo "ANDROID_HOME: ${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+        echo "FLUTTER_ROOT: ${FLUTTER_ROOT}"
+        ls -la gradlew
+        # Clean first
+        ./gradlew clean --stacktrace
+        # Build with debug info for CodeQL
+        ./gradlew compileDebugJavaWithJavac compileDebugKotlin --stacktrace --info
+        # Also run assembleDebug to ensure full build
         ./gradlew assembleDebug --stacktrace --info
       continue-on-error: false
 
@@ -263,24 +275,18 @@ jobs:
       - name: 📋 Extract version info
         id: version
         run: |
-          # Extract base version from pubspec.yaml
-          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
-          PUBSPEC_BUILD=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
-          
           if [ "${{ github.event_name }}" = "release" ]; then
             VERSION_NAME="${{ github.event.release.tag_name }}"
             VERSION_NAME="${VERSION_NAME#v}"
-            IFS='.' read -ra VERSION_PARTS <<< "$VERSION_NAME"
-            # Ensure version code is always higher than previous releases
-            BASE_VERSION_CODE=$((${VERSION_PARTS[0]} * 10000 + ${VERSION_PARTS[1]} * 100 + ${VERSION_PARTS[2]}))
-            VERSION_CODE=$((BASE_VERSION_CODE + GITHUB_RUN_NUMBER))
+            # For releases, use run number + 100 to ensure it's always higher than 56
+            VERSION_CODE="$((100 + GITHUB_RUN_NUMBER))"
             TRACK="internal"
           else
+            # Extract version from pubspec.yaml
+            PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
             VERSION_NAME="$PUBSPEC_VERSION-dev.${GITHUB_SHA::8}"
-            # Use a high base number plus run number to ensure uniqueness
-            # Current timestamp ensures we're always moving forward
-            CURRENT_TIME=$(date +%s)
-            VERSION_CODE=$((1000000 + (CURRENT_TIME % 1000000) + GITHUB_RUN_NUMBER))
+            # For dev builds, use run number + 200 to ensure it's higher than any release
+            VERSION_CODE="$((200 + GITHUB_RUN_NUMBER))"
             TRACK="internal"
           fi
           
@@ -289,7 +295,6 @@ jobs:
           echo "track=$TRACK" >> $GITHUB_OUTPUT
           echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
           echo "🚀 Track: $TRACK"
-          echo "🔢 Base from pubspec: $PUBSPEC_VERSION+$PUBSPEC_BUILD"
 
       - name: 🔑 Setup Android signing
         run: |
