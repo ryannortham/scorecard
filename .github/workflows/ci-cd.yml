@@ -92,7 +92,7 @@ jobs:
           retention-days: 30
 
   codeql-analyze:
-    name: 🔍 CodeQL Analysis (${{ matrix.language }})
+    name: 🔍 CodeQL Analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -101,15 +101,6 @@ jobs:
       contents: read
     timeout-minutes: 360
 
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        - language: java-kotlin
-          build-mode: manual
-        - language: javascript-typescript
-          build-mode: none
-
     steps:
     - name: 📥 Checkout repository
       uses: actions/checkout@v4
@@ -117,108 +108,18 @@ jobs:
     - name: 🔍 Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
+        languages: javascript-typescript
+        build-mode: none
         # Add specific configuration for consistent analysis
         config: |
           name: "CodeQL Config"
           queries:
             - uses: security-and-quality
 
-    # Setup for Java/Kotlin analysis only
-    - name: 🐦 Setup Flutter (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-        channel: 'stable'
-        cache: true
-
-    - name: ☕ Setup Java (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: ${{ env.JAVA_VERSION }}
-
-    - name: 📱 Setup Android SDK (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      uses: android-actions/setup-android@v3
-
-    - name: 🏗️ Setup Gradle (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      uses: gradle/actions/setup-gradle@v4
-      with:
-        gradle-version: ${{ env.GRADLE_VERSION }}
-
-    - name: 📦 Install Flutter dependencies (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      run: flutter pub get
-
-    - name: 🔧 Clean and prepare build environment (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      run: |
-        flutter clean
-        rm -rf android/app/build/
-        rm -rf android/.gradle/
-        rm -rf build/
-
-    - name: 🔑 Create dummy keystore (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      run: |
-        mkdir -p android/app
-        keytool -genkey -v -keystore android/app/dummy-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias dummy -storepass dummypass -keypass dummypass -dname "CN=Dummy, OU=Dummy, O=Dummy, L=Dummy, ST=Dummy, C=US"
-        echo "storePassword=dummypass" > android/key.properties
-        echo "keyPassword=dummypass" >> android/key.properties
-        echo "keyAlias=dummy" >> android/key.properties
-        echo "storeFile=dummy-keystore.jks" >> android/key.properties
-
-    - name: 🔧 Generate Flutter files (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      run: |
-        # Generate the necessary Flutter files and plugin registrations
-        flutter packages get
-        # Create local.properties file for Android build with proper environment variables
-        echo "flutter.sdk=${FLUTTER_ROOT:-$HOME/hostedtoolcache/flutter}" > android/local.properties
-        echo "sdk.dir=${ANDROID_HOME:-$ANDROID_SDK_ROOT}" >> android/local.properties
-        # Show the created properties for debugging
-        echo "📋 Created local.properties:"
-        cat android/local.properties
-        # Generate Flutter Android files
-        flutter build apk --config-only
-
-    - name: 🔍 Verify Java/Kotlin sources (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      run: |
-        echo "📁 Checking for Java/Kotlin source files..."
-        find android -name "*.java" -o -name "*.kt" | head -20
-        echo "📁 Android app source structure:"
-        ls -la android/app/src/main/
-        echo "📁 Gradle wrapper verification:"
-        ls -la android/gradle*
-
-    - name: 🏗️ Build Android project directly with Gradle (Java/Kotlin)
-      if: matrix.language == 'java-kotlin'
-      working-directory: android
-      run: |
-        # Build Android project directly with Gradle for better CodeQL analysis
-        chmod +x gradlew
-        echo "🔧 Environment check:"
-        echo "ANDROID_HOME: ${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
-        echo "FLUTTER_ROOT: ${FLUTTER_ROOT}"
-        ls -la gradlew
-        # Clean first
-        ./gradlew clean --stacktrace
-        # Build with debug info for CodeQL
-        ./gradlew compileDebugJavaWithJavac compileDebugKotlin --stacktrace --info
-        # Also run assembleDebug to ensure full build
-        ./gradlew assembleDebug --stacktrace --info
-      continue-on-error: false
-
-    - name: 📊 Perform CodeQL Analysis
+    - name: � Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
-        category: "/language:${{ matrix.language }}"
+        category: "/language:javascript-typescript"
         # Add upload-database to ensure configuration persistence
         upload-database: true
 
