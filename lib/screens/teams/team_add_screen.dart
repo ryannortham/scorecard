@@ -5,9 +5,9 @@ import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/menu/app_menu.dart';
 
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 
 /// Constants for the TeamAddScreen
 class _AddTeamConstants {
@@ -159,8 +159,6 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      endDrawer: const AppDrawer(currentRoute: 'add_team'),
-      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           // Gradient background
@@ -205,20 +203,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                     },
                   ),
                   title: const Text('Add Team'),
-                  actions: [
-                    Builder(
-                      builder:
-                          (context) => IconButton(
-                            icon: const Icon(Icons.menu_outlined),
-                            tooltip: 'Menu',
-                            onPressed: () {
-                              // Unfocus search bar before opening drawer to prevent potential conflicts
-                              _searchFocusNode.unfocus();
-                              Scaffold.of(context).openEndDrawer();
-                            },
-                          ),
-                    ),
-                  ],
+                  actions: [const AppMenu(currentRoute: 'add_team')],
                 ),
               ];
             },

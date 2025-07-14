@@ -4,7 +4,7 @@ import '../../services/dialog_service.dart';
 import '../../services/game_history_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/game_history/game_summary_card.dart';
-import '../../widgets/drawer/app_drawer.dart';
+import '../../widgets/menu/app_menu.dart';
 
 import 'results_screen.dart';
 import '../../services/color_service.dart';
@@ -251,8 +251,6 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         }
       },
       child: Scaffold(
-        endDrawer: const AppDrawer(currentRoute: 'game_history'),
-        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background
@@ -317,15 +315,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                                   : null,
                         )
                       else
-                        Builder(
-                          builder:
-                              (context) => IconButton(
-                                icon: const Icon(Icons.menu_outlined),
-                                tooltip: 'Menu',
-                                onPressed:
-                                    () => Scaffold.of(context).openEndDrawer(),
-                              ),
-                        ),
+                        const AppMenu(currentRoute: 'game_history'),
                     ],
                   ),
                 ];

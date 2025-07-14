@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 
 /// Material 3 compliant bottom navigation bar for the app
 class AppBottomNavigationBar extends StatelessWidget {

@@ -8,9 +8,9 @@ import '../../providers/user_preferences_provider.dart';
 import '../../services/navigation_service.dart';
 import '../../services/dialog_service.dart';
 import 'team_add_screen.dart';
-import '../../widgets/drawer/app_drawer.dart';
+import '../../widgets/menu/app_menu.dart';
 
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({
@@ -113,8 +113,6 @@ class _TeamListScreenState extends State<TeamListScreen> {
         }
       },
       child: Scaffold(
-        endDrawer: const AppDrawer(currentRoute: 'teams'),
-        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background
@@ -179,15 +177,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                   : null,
                         )
                       else
-                        Builder(
-                          builder:
-                              (context) => IconButton(
-                                icon: const Icon(Icons.menu_outlined),
-                                tooltip: 'Menu',
-                                onPressed:
-                                    () => Scaffold.of(context).openEndDrawer(),
-                              ),
-                        ),
+                        const AppMenu(currentRoute: 'teams'),
                     ],
                   ),
                 ];

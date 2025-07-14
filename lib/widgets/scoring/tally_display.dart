@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
 

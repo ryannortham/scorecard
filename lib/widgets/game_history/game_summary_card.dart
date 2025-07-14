@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_history_service.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 import 'package:scorecard/services/color_service.dart';
 
 /// Optimized widget for displaying game summary in the history list

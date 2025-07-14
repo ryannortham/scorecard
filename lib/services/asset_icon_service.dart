@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../color_service.dart';
+import 'color_service.dart';
 
 /// Service for handling all app icon assets including tally marks and football icons
 class AssetIconService {

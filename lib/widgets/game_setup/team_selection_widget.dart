@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/color_service.dart';
-import '../../services/assets/asset_icon_service.dart';
+import '../../services/asset_icon_service.dart';
 
 /// Widget for selecting home and away teams
 class TeamSelectionWidget extends StatefulWidget {

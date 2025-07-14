@@ -12,7 +12,7 @@ import 'package:scorecard/services/game_sharing_service.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
-import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/menu/app_menu.dart';
 
 import '../results/results_screen.dart';
 
@@ -199,8 +199,6 @@ class ScoringScreenState extends State<ScoringScreen> {
         }
       },
       child: Scaffold(
-        endDrawer: const AppDrawer(currentRoute: 'scoring'),
-        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background
@@ -267,15 +265,7 @@ class ScoringScreenState extends State<ScoringScreen> {
                         tooltip: 'Share Game Details',
                         onPressed: _isSharing ? null : _shareGameDetails,
                       ),
-                      Builder(
-                        builder:
-                            (context) => IconButton(
-                              icon: const Icon(Icons.menu_outlined),
-                              tooltip: 'Menu',
-                              onPressed:
-                                  () => Scaffold.of(context).openEndDrawer(),
-                            ),
-                      ),
+                      const AppMenu(currentRoute: 'scoring'),
                     ],
                   ),
                 ];
