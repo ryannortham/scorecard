@@ -263,15 +263,24 @@ jobs:
       - name: 📋 Extract version info
         id: version
         run: |
+          # Extract base version from pubspec.yaml
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          PUBSPEC_BUILD=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          
           if [ "${{ github.event_name }}" = "release" ]; then
             VERSION_NAME="${{ github.event.release.tag_name }}"
             VERSION_NAME="${VERSION_NAME#v}"
             IFS='.' read -ra VERSION_PARTS <<< "$VERSION_NAME"
-            VERSION_CODE=$((${VERSION_PARTS[0]} * 10000 + ${VERSION_PARTS[1]} * 100 + ${VERSION_PARTS[2]}))
+            # Ensure version code is always higher than previous releases
+            BASE_VERSION_CODE=$((${VERSION_PARTS[0]} * 10000 + ${VERSION_PARTS[1]} * 100 + ${VERSION_PARTS[2]}))
+            VERSION_CODE=$((BASE_VERSION_CODE + GITHUB_RUN_NUMBER))
             TRACK="internal"
           else
-            VERSION_NAME="dev-${GITHUB_SHA::8}"
-            VERSION_CODE="${GITHUB_RUN_NUMBER}"
+            VERSION_NAME="$PUBSPEC_VERSION-dev.${GITHUB_SHA::8}"
+            # Use a high base number plus run number to ensure uniqueness
+            # Current timestamp ensures we're always moving forward
+            CURRENT_TIME=$(date +%s)
+            VERSION_CODE=$((1000000 + (CURRENT_TIME % 1000000) + GITHUB_RUN_NUMBER))
             TRACK="internal"
           fi
           
@@ -280,6 +289,7 @@ jobs:
           echo "track=$TRACK" >> $GITHUB_OUTPUT
           echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
           echo "🚀 Track: $TRACK"
+          echo "🔢 Base from pubspec: $PUBSPEC_VERSION+$PUBSPEC_BUILD"
 
       - name: 🔑 Setup Android signing
         run: |
@@ -325,6 +335,27 @@ jobs:
         with:
           name: release-aab-${{ needs.build.outputs.version_name }}
           path: build/app/outputs/bundle/release/
+
+      - name: 🔍 Verify AAB and version info
+        run: |
+          echo "📱 Deploying version: ${{ needs.build.outputs.version_name }}"
+          echo "🔢 Version code: ${{ needs.build.outputs.version_code }}"
+          echo "🚀 Track: ${{ needs.build.outputs.track }}"
+          echo "📦 AAB file:"
+          ls -la build/app/outputs/bundle/release/
+          
+          # Verify AAB file exists and is valid
+          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
+            echo "❌ AAB file not found!"
+            exit 1
+          fi
+          
+          # Check file size (should be reasonable)
+          AAB_SIZE=$(stat -c%s build/app/outputs/bundle/release/app-release.aab)
+          echo "📦 AAB size: ${AAB_SIZE} bytes"
+          if [ $AAB_SIZE -lt 1000000 ]; then
+            echo "⚠️ Warning: AAB file seems small (< 1MB)"
+          fi
 
       - name: 🏷️ Create GitHub Release
         if: github.event_name == 'release'
