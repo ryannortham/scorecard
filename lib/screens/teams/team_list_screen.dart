@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/score_models.dart';
-import '../providers/teams_provider.dart';
-import '../services/color_service.dart';
-import '../providers/user_preferences_provider.dart';
-import '../services/navigation_service.dart';
-import '../services/dialog_service.dart';
-import '../screens/add_team.dart';
-import '../widgets/drawer/app_drawer.dart';
+import '../../models/score_models.dart';
+import '../../providers/teams_provider.dart';
+import '../../services/color_service.dart';
+import '../../providers/user_preferences_provider.dart';
+import '../../services/navigation_service.dart';
+import '../../services/dialog_service.dart';
+import 'team_add_screen.dart';
+import '../../widgets/menu/app_menu.dart';
 
-import '../widgets/football_icon.dart';
+import '../../services/asset_icon_service.dart';
 
-class TeamList extends StatefulWidget {
-  const TeamList({
+class TeamListScreen extends StatefulWidget {
+  const TeamListScreen({
     super.key,
     required this.title,
     required this.onTeamSelected,
@@ -22,10 +22,10 @@ class TeamList extends StatefulWidget {
   final void Function(String) onTeamSelected;
 
   @override
-  State<TeamList> createState() => _TeamListState();
+  State<TeamListScreen> createState() => _TeamListScreenState();
 }
 
-class _TeamListState extends State<TeamList> {
+class _TeamListScreenState extends State<TeamListScreen> {
   bool _hasNavigatedToAddTeam = false;
   bool _hasInitiallyLoaded = false; // Track if we've completed initial load
 
@@ -66,7 +66,7 @@ class _TeamListState extends State<TeamList> {
       _hasNavigatedToAddTeam = true;
 
       final addedTeamName = await Navigator.of(context).push<String>(
-        MaterialPageRoute(builder: (context) => const AddTeamScreen()),
+        MaterialPageRoute(builder: (context) => const TeamAddScreen()),
       );
 
       // If a team was added and this is a team selection screen, auto-select it
@@ -102,15 +102,17 @@ class _TeamListState extends State<TeamList> {
     }
 
     return PopScope(
-      canPop: !_isSelectionMode,
+      canPop: false, // We'll handle all pop attempts manually
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _isSelectionMode) {
+        if (didPop) return; // Already handled
+
+        if (_isSelectionMode) {
           _exitSelectionMode();
+        } else {
+          _handleBackPress(); // Use the same logic as UI back button
         }
       },
       child: Scaffold(
-        endDrawer: const AppDrawer(currentRoute: 'teams'),
-        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background
@@ -158,11 +160,13 @@ class _TeamListState extends State<TeamList> {
                               icon: const Icon(Icons.close_outlined),
                               onPressed: _exitSelectionMode,
                             )
-                            : IconButton(
+                            : _shouldShowBackButton()
+                            ? IconButton(
                               icon: const Icon(Icons.arrow_back_outlined),
                               tooltip: 'Back',
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
+                              onPressed: _handleBackPress,
+                            )
+                            : null,
                     actions: [
                       if (_isSelectionMode)
                         IconButton(
@@ -173,15 +177,7 @@ class _TeamListState extends State<TeamList> {
                                   : null,
                         )
                       else
-                        Builder(
-                          builder:
-                              (context) => IconButton(
-                                icon: const Icon(Icons.menu_outlined),
-                                tooltip: 'Menu',
-                                onPressed:
-                                    () => Scaffold.of(context).openEndDrawer(),
-                              ),
-                        ),
+                        const AppMenu(currentRoute: 'teams'),
                     ],
                   ),
                 ];
@@ -357,7 +353,7 @@ class _TeamListState extends State<TeamList> {
           onPressed: () async {
             final navigator = Navigator.of(context);
             final addedTeamName = await navigator.push<String>(
-              MaterialPageRoute(builder: (context) => const AddTeamScreen()),
+              MaterialPageRoute(builder: (context) => const TeamAddScreen()),
             );
 
             // If a team was added and this is a team selection screen, auto-select it
@@ -588,5 +584,24 @@ class _TeamListState extends State<TeamList> {
         }
       }
     }
+  }
+
+  /// Handles back button press by trying to pop or navigating to Scoring tab
+  void _handleBackPress() {
+    // Only try to pop if we can actually pop safely
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      // If we can't pop, we're in a NavigationShell tab context
+      // Navigate to the Scoring tab (index 0) as the default "back" behavior
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
+  }
+
+  /// Determines if the back button should be shown.
+  /// Returns true - we always want to show the back button, but handle it appropriately
+  bool _shouldShowBackButton() {
+    // Always show the back button - let _handleBackPress decide what to do
+    return true;
   }
 }

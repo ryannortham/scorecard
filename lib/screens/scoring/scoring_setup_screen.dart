@@ -6,21 +6,21 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
 import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
-import 'package:scorecard/widgets/drawer/app_drawer.dart';
-import 'package:scorecard/widgets/football_icon.dart';
+import 'package:scorecard/widgets/menu/app_menu.dart';
+import 'package:scorecard/services/asset_icon_service.dart';
 
-import 'scoring.dart';
+import 'scoring_screen.dart';
 import 'package:scorecard/services/color_service.dart';
 
-/// Home screen that serves as the game setup interface
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+/// Scoring setup screen that serves as the game setup interface
+class ScoringSetupScreen extends StatefulWidget {
+  const ScoringSetupScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ScoringSetupScreen> createState() => _ScoringSetupScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
   String? homeTeam;
   String? awayTeam;
   bool _hasInitialized = false;
@@ -129,8 +129,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return Consumer<GameStateService>(
           builder: (context, gameState, child) {
             return Scaffold(
-              endDrawer: const AppDrawer(currentRoute: 'game_setup'),
-              endDrawerEnableOpenDragGesture: false,
               body: Stack(
                 children: [
                   // Gradient background
@@ -184,20 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ],
                           ),
-                          actions: [
-                            Builder(
-                              builder:
-                                  (context) => IconButton(
-                                    icon: const Icon(Icons.menu_outlined),
-                                    tooltip: 'Menu',
-                                    onPressed:
-                                        () =>
-                                            Scaffold.of(
-                                              context,
-                                            ).openEndDrawer(),
-                                  ),
-                            ),
-                          ],
+                          actions: [const AppMenu(currentRoute: 'game_setup')],
                         ),
                       ];
                     },
@@ -504,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             builder:
                                                                 (
                                                                   context,
-                                                                ) => const Scoring(
+                                                                ) => const ScoringScreen(
                                                                   title:
                                                                       'Scoring',
                                                                 ),

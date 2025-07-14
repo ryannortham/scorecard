@@ -5,11 +5,11 @@ import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/menu/app_menu.dart';
 
-import '../widgets/football_icon.dart';
+import '../../services/asset_icon_service.dart';
 
-/// Constants for the AddTeamScreen
+/// Constants for the TeamAddScreen
 class _AddTeamConstants {
   // Search configuration
   static const int searchLimit = 20;
@@ -71,14 +71,14 @@ class _TeamNameProcessor {
 }
 
 /// Screen for adding teams from PlayHQ search or custom entry
-class AddTeamScreen extends StatefulWidget {
-  const AddTeamScreen({super.key});
+class TeamAddScreen extends StatefulWidget {
+  const TeamAddScreen({super.key});
 
   @override
-  State<AddTeamScreen> createState() => _AddTeamScreenState();
+  State<TeamAddScreen> createState() => _TeamAddScreenState();
 }
 
-class _AddTeamScreenState extends State<AddTeamScreen> {
+class _TeamAddScreenState extends State<TeamAddScreen> {
   final FocusNode _searchFocusNode = FocusNode();
   final SearchController _materialSearchController = SearchController();
 
@@ -159,8 +159,6 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      endDrawer: const AppDrawer(currentRoute: 'add_team'),
-      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           // Gradient background
@@ -205,20 +203,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
                     },
                   ),
                   title: const Text('Add Team'),
-                  actions: [
-                    Builder(
-                      builder:
-                          (context) => IconButton(
-                            icon: const Icon(Icons.menu_outlined),
-                            tooltip: 'Menu',
-                            onPressed: () {
-                              // Unfocus search bar before opening drawer to prevent potential conflicts
-                              _searchFocusNode.unfocus();
-                              Scaffold.of(context).openEndDrawer();
-                            },
-                          ),
-                    ),
-                  ],
+                  actions: [const AppMenu(currentRoute: 'add_team')],
                 ),
               ];
             },

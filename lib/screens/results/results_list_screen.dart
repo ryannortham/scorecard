@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import '../services/app_logger.dart';
-import '../services/dialog_service.dart';
-import '../services/game_history_service.dart';
-import '../services/game_state_service.dart';
-import '../widgets/game_history/game_summary_card.dart';
-import '../widgets/drawer/app_drawer.dart';
+import '../../services/app_logger.dart';
+import '../../services/dialog_service.dart';
+import '../../services/game_history_service.dart';
+import '../../services/game_state_service.dart';
+import '../../widgets/game_history/game_summary_card.dart';
+import '../../widgets/menu/app_menu.dart';
 
-import 'package:scorecard/screens/game_details.dart' as details;
-import 'package:scorecard/services/color_service.dart';
+import 'results_screen.dart';
+import '../../services/color_service.dart';
 
-class GameHistoryScreen extends StatefulWidget {
-  const GameHistoryScreen({super.key});
+class ResultsListScreen extends StatefulWidget {
+  const ResultsListScreen({super.key});
 
   @override
-  State<GameHistoryScreen> createState() => _GameHistoryScreenState();
+  State<ResultsListScreen> createState() => _ResultsListScreenState();
 }
 
-class _GameHistoryScreenState extends State<GameHistoryScreen> {
+class _ResultsListScreenState extends State<ResultsListScreen> {
   List<GameSummary> _gameSummaries = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -39,6 +39,25 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Handles back button press by trying to pop or navigating to Scoring tab
+  void _handleBackPress() {
+    // Try to pop first
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      // If we can't pop, we're in a NavigationShell tab context
+      // Navigate to the Scoring tab (index 0) as the default "back" behavior
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
+  }
+
+  /// Determines if the back button should be shown.
+  /// Returns true - we always want to show the back button, but handle it appropriately
+  bool _shouldShowBackButton() {
+    // Always show the back button - let _handleBackPress decide what to do
+    return true;
   }
 
   void _onScroll() {
@@ -208,9 +227,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
     final game = await GameHistoryService.loadGameById(gameId);
     if (game != null && mounted) {
       final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (context) => details.GameDetailsPage(game: game),
-        ),
+        MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
       );
 
       // If the game was deleted (result is true), refresh the list
@@ -223,15 +240,17 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: !_isSelectionMode,
+      canPop: false, // We'll handle all pop attempts manually
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _isSelectionMode) {
+        if (didPop) return; // Already handled
+
+        if (_isSelectionMode) {
           _exitSelectionMode();
+        } else {
+          _handleBackPress(); // Use the same logic as UI back button
         }
       },
       child: Scaffold(
-        endDrawer: const AppDrawer(currentRoute: 'game_history'),
-        endDrawerEnableOpenDragGesture: false,
         body: Stack(
           children: [
             // Gradient background
@@ -279,11 +298,13 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                               icon: const Icon(Icons.close_outlined),
                               onPressed: _exitSelectionMode,
                             )
-                            : IconButton(
+                            : _shouldShowBackButton()
+                            ? IconButton(
                               icon: const Icon(Icons.arrow_back_outlined),
                               tooltip: 'Back',
-                              onPressed: () => Navigator.of(context).pop(),
-                            ),
+                              onPressed: _handleBackPress,
+                            )
+                            : null,
                     actions: [
                       if (_isSelectionMode)
                         IconButton(
@@ -294,15 +315,7 @@ class _GameHistoryScreenState extends State<GameHistoryScreen> {
                                   : null,
                         )
                       else
-                        Builder(
-                          builder:
-                              (context) => IconButton(
-                                icon: const Icon(Icons.menu_outlined),
-                                tooltip: 'Menu',
-                                onPressed:
-                                    () => Scaffold.of(context).openEndDrawer(),
-                              ),
-                        ),
+                        const AppMenu(currentRoute: 'game_history'),
                     ],
                   ),
                 ];

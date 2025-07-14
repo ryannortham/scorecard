@@ -7,7 +7,7 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/widgets/drawer/app_drawer.dart';
+import 'package:scorecard/widgets/menu/app_menu.dart';
 
 import 'package:scorecard/widgets/game_details/game_details_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
@@ -18,16 +18,16 @@ import 'dart:io';
 import 'dart:math';
 
 /// A full-screen page for displaying game details from history
-class GameDetailsPage extends StatefulWidget {
+class ResultsScreen extends StatefulWidget {
   final GameRecord game;
 
-  const GameDetailsPage({super.key, required this.game});
+  const ResultsScreen({super.key, required this.game});
 
   @override
-  State<GameDetailsPage> createState() => _GameDetailsPageState();
+  State<ResultsScreen> createState() => _ResultsScreenState();
 }
 
-class _GameDetailsPageState extends State<GameDetailsPage> {
+class _ResultsScreenState extends State<ResultsScreen> {
   final GlobalKey _widgetShotKey = GlobalKey();
   final GlobalKey _screenshotWidgetKey = GlobalKey();
   bool _isSharing = false;
@@ -93,8 +93,6 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      endDrawer: const AppDrawer(currentRoute: 'game_details'),
-      endDrawerEnableOpenDragGesture: false,
       body: Stack(
         children: [
           // Gradient background
@@ -154,15 +152,7 @@ class _GameDetailsPageState extends State<GameDetailsPage> {
                           _isSharing ? null : () => _shareGameDetails(context),
                       tooltip: 'Share Game Details',
                     ),
-                    Builder(
-                      builder:
-                          (context) => IconButton(
-                            icon: const Icon(Icons.menu_outlined),
-                            tooltip: 'Menu',
-                            onPressed:
-                                () => Scaffold.of(context).openEndDrawer(),
-                          ),
-                    ),
+                    const AppMenu(currentRoute: 'game_details'),
                   ],
                 ),
               ];

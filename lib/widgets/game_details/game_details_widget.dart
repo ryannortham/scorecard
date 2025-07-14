@@ -11,7 +11,7 @@ import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_table_builder_service.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
-import 'package:scorecard/widgets/football_icon.dart';
+import 'package:scorecard/services/asset_icon_service.dart';
 
 /// A unified widget for displaying game details
 class GameDetailsWidget extends StatelessWidget {

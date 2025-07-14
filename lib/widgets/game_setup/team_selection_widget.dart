@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/screens/team_list.dart';
+import 'package:scorecard/screens/teams/team_list_screen.dart';
 import 'package:scorecard/services/color_service.dart';
-import '../football_icon.dart';
+import '../../services/asset_icon_service.dart';
 
 /// Widget for selecting home and away teams
 class TeamSelectionWidget extends StatefulWidget {
@@ -34,7 +34,7 @@ class _TeamSelectionWidgetState extends State<TeamSelectionWidget> {
       context,
       MaterialPageRoute(
         builder:
-            (context) => TeamList(
+            (context) => TeamListScreen(
               title: title,
               onTeamSelected: (teamName) {
                 // This callback gets called when a team is selected
