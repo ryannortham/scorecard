@@ -9,7 +9,7 @@ import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/menu/app_menu.dart';
 
-import 'package:scorecard/widgets/game_details/game_details_widget.dart';
+import 'package:scorecard/widgets/results/results_widget.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,7 +17,7 @@ import 'package:gal/gal.dart';
 import 'dart:io';
 import 'dart:math';
 
-/// A full-screen page for displaying game details from history
+/// A full-screen page for displaying game details from results
 class ResultsScreen extends StatefulWidget {
   final GameRecord game;
 
@@ -135,7 +135,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     tooltip: 'Back',
                     onPressed: () => Navigator.of(context).pop(),
                   ),
-                  title: const Text("Game Results"),
+                  title: const Text("Results"),
                   actions: [
                     IconButton(
                       icon:
@@ -164,7 +164,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: WidgetShotPlus(
                       key: _widgetShotKey,
-                      child: GameDetailsWidget.fromStaticData(
+                      child: ResultsWidget.fromStaticData(
                         game: widget.game,
                         enableScrolling: true,
                       ),
@@ -185,7 +185,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 child: IntrinsicHeight(
                   child: SizedBox(
                     width: 400,
-                    child: GameDetailsWidget.fromStaticData(
+                    child: ResultsWidget.fromStaticData(
                       game: widget.game,
                       enableScrolling: false,
                     ),

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/services/app_logger.dart';
 
 class GameStateService extends ChangeNotifier {
@@ -403,7 +403,7 @@ class GameStateService extends ChangeNotifier {
       _gameDate = DateTime.now();
 
       // Create a game record to get a unique ID, but don't save it yet
-      final gameRecord = GameHistoryService.createGameRecord(
+      final gameRecord = ResultsService.createGameRecord(
         date: _gameDate,
         homeTeam: _homeTeam,
         awayTeam: _awayTeam,
@@ -416,7 +416,7 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      // Only store the ID, don't save to history yet
+      // Only store the ID, don't save to results yet
       _currentGameId = gameRecord.id;
 
       // Reset save tracking for new game
@@ -502,7 +502,7 @@ class GameStateService extends ChangeNotifier {
       // Game has no meaningful data, just clear the current game ID
       _currentGameId = null;
       AppLogger.info(
-        'Game completed with no meaningful data, not saving to history',
+        'Game completed with no meaningful data, not saving to results',
         component: 'GameState',
       );
     }
@@ -526,7 +526,7 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      await GameHistoryService.saveGame(gameRecord);
+      await ResultsService.saveGame(gameRecord);
       AppLogger.info(
         'Force saved final game record',
         component: 'GameState',
@@ -559,7 +559,7 @@ class GameStateService extends ChangeNotifier {
         awayBehinds: _awayBehinds,
       );
 
-      await GameHistoryService.saveGame(gameRecord);
+      await ResultsService.saveGame(gameRecord);
     } catch (e) {
       AppLogger.error(
         'Error updating game record',

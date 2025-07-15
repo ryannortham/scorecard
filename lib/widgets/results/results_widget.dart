@@ -14,14 +14,14 @@ import 'package:scorecard/widgets/adaptive_title.dart';
 import 'package:scorecard/services/asset_icon_service.dart';
 
 /// A unified widget for displaying game details
-class GameDetailsWidget extends StatelessWidget {
+class ResultsWidget extends StatelessWidget {
   final GameRecord? staticGame;
   final List<GameEvent>? liveEvents;
   final ScrollController? scrollController;
   final bool enableScrolling;
   final bool isLiveData;
 
-  const GameDetailsWidget({
+  const ResultsWidget({
     super.key,
     this.staticGame,
     this.liveEvents,
@@ -29,8 +29,8 @@ class GameDetailsWidget extends StatelessWidget {
     this.enableScrolling = true,
   }) : isLiveData = staticGame == null;
 
-  /// Factory constructor for static data (game history)
-  const GameDetailsWidget.fromStaticData({
+  /// Factory constructor for static data (game results)
+  const ResultsWidget.fromStaticData({
     super.key,
     required GameRecord game,
     this.scrollController,
@@ -40,7 +40,7 @@ class GameDetailsWidget extends StatelessWidget {
        isLiveData = false;
 
   /// Factory constructor for live data (current game)
-  const GameDetailsWidget.fromLiveData({
+  const ResultsWidget.fromLiveData({
     super.key,
     required List<GameEvent> events,
     this.scrollController,

@@ -73,7 +73,7 @@ class TimerControls extends StatelessWidget {
           textDirection: TextDirection.ltr,
         )..layout();
 
-        final estimatedWidth = iconSize + 16 + textPainter.width + 48;
+        final estimatedWidth = iconSize + 16 + textPainter.width + 36;
         final hasSpace = constraints.maxWidth >= estimatedWidth;
 
         if (hasSpace) {

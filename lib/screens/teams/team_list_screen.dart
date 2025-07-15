@@ -52,15 +52,15 @@ class _TeamListScreenState extends State<TeamListScreen> {
 
     // Only auto-navigate if:
     // 1. Teams are loaded
-    // 2. Either the full teams list is empty (for Manage Teams) OR the filtered teams list is empty (for team selection)
+    // 2. Either the full teams list is empty (for Teams) OR the filtered teams list is empty (for team selection)
     // 3. We haven't already navigated
     // 4. This is the initial load (not after user deletions)
     final shouldAutoNavigate =
         teamsProvider.loaded &&
         !_hasNavigatedToAddTeam &&
         !_hasInitiallyLoaded &&
-        ((widget.title == 'Manage Teams' && teamsProvider.teams.isEmpty) ||
-            (widget.title != 'Manage Teams' && filteredTeams.isEmpty));
+        ((widget.title == 'Teams' && teamsProvider.teams.isEmpty) ||
+            (widget.title != 'Teams' && filteredTeams.isEmpty));
 
     if (shouldAutoNavigate) {
       _hasNavigatedToAddTeam = true;
@@ -70,7 +70,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
       );
 
       // If a team was added and this is a team selection screen, auto-select it
-      if (addedTeamName != null && widget.title != 'Manage Teams') {
+      if (addedTeamName != null && widget.title != 'Teams') {
         widget.onTeamSelected(addedTeamName);
         if (mounted) {
           Navigator.of(context).pop(addedTeamName);
@@ -243,15 +243,15 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                 onTap: () {
                                   if (_isSelectionMode) {
                                     _toggleTeamSelection(realIndex);
-                                  } else if (widget.title != 'Manage Teams') {
-                                    // Only navigate if we're in team selection mode (not manage teams)
+                                  } else if (widget.title != 'Teams') {
+                                    // Only navigate if we're in team selection mode (not Teams)
                                     widget.onTeamSelected(team.name);
                                     Navigator.pop(context, team.name);
                                   }
                                 },
                                 onLongPress: () {
                                   if (!_isSelectionMode &&
-                                      widget.title == 'Manage Teams') {
+                                      widget.title == 'Teams') {
                                     _enterSelectionMode(realIndex);
                                   }
                                 },
@@ -357,7 +357,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
             );
 
             // If a team was added and this is a team selection screen, auto-select it
-            if (addedTeamName != null && widget.title != 'Manage Teams') {
+            if (addedTeamName != null && widget.title != 'Teams') {
               widget.onTeamSelected(addedTeamName);
               if (mounted) {
                 navigator.pop(
