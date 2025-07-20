@@ -12,7 +12,6 @@ import '../../services/asset_icon_service.dart';
 /// Constants for the TeamAddScreen
 class _AddTeamConstants {
   // Search configuration
-  static const int searchLimit = 20;
   static const int searchDelayMs = 1000;
 
   // UI dimensions
@@ -111,20 +110,12 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     });
 
     try {
-      final response = await PlayHQGraphQLService.searchAFLClubs(
-        query: query.trim(),
-        limit: _AddTeamConstants.searchLimit,
-      );
+      final response = await PlayHQGraphQLService.searchAFLClubs(query.trim());
 
       setState(() {
         _isLoading = false;
-        if (response != null) {
-          _searchResults = _filterSearchResults(response.results);
-          _errorMessage = null;
-        } else {
-          _searchResults = [];
-          _errorMessage = 'Failed to search teams. Please try again.';
-        }
+        _searchResults = _filterSearchResults(response.results);
+        _errorMessage = null;
       });
     } catch (e) {
       setState(() {
@@ -538,8 +529,74 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       // Show edit dialog for existing team, passing the logo info from search result
       await _showEditTeamDialog(existingTeam.name, team);
     } else {
-      // Add new team directly
-      await _addTeamAndFinish(processedName, logoUrl: _getBestLogoUrl(team));
+      // Add new team directly, fetching address details
+      await _addTeamWithAddressDetails(processedName, team);
+    }
+  }
+
+  /// Fetch address details from PlayHQ and add team
+  Future<void> _addTeamWithAddressDetails(
+    String teamName,
+    Organisation org,
+  ) async {
+    try {
+      // Show loading indicator
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                CircularProgressIndicator.adaptive(),
+                SizedBox(width: 16),
+                Text('Fetching team details...'),
+              ],
+            ),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      // Fetch detailed organization information including address
+      final orgResponse = await PlayHQGraphQLService.getOrganisationDetails(
+        org.routingCode,
+      );
+
+      final address = orgResponse.organisation?.address;
+
+      // Add team with address information
+      await _addTeamAndFinish(
+        teamName,
+        logoUrl: _getBestLogoUrl(org),
+        logoUrl32: org.logoUrl32,
+        logoUrl48: org.logoUrl48,
+        logoUrlLarge: org.logoUrlLarge,
+        address: address,
+        playHQId: org.id,
+        routingCode: org.routingCode,
+      );
+    } catch (e) {
+      // If address fetch fails, still add the team without address
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not fetch address details, but team was added: $e',
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+
+      await _addTeamAndFinish(
+        teamName,
+        logoUrl: _getBestLogoUrl(org),
+        logoUrl32: org.logoUrl32,
+        logoUrl48: org.logoUrl48,
+        logoUrlLarge: org.logoUrlLarge,
+        playHQId: org.id,
+        routingCode: org.routingCode,
+      );
     }
   }
 
@@ -550,6 +607,9 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     String? logoUrl32,
     String? logoUrl48,
     String? logoUrlLarge,
+    Address? address,
+    String? playHQId,
+    String? routingCode,
   }) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
     final messenger = ScaffoldMessenger.of(context);
@@ -561,6 +621,9 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       logoUrl32: logoUrl32,
       logoUrl48: logoUrl48,
       logoUrlLarge: logoUrlLarge,
+      address: address,
+      playHQId: playHQId,
+      routingCode: routingCode,
     );
 
     if (mounted) {

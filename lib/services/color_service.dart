@@ -298,6 +298,8 @@ class AppColors {
   }
 
   Color get surface => _getSurfaceColor('surface');
+  Color get surfaceVariant =>
+      _colorScheme?.surfaceContainerHighest ?? const Color(0xFFE7E0EC);
   Color get onSurface => _colorScheme?.onSurface ?? _fallbackOnSurface;
   Color get onSurfaceVariant =>
       _colorScheme?.onSurfaceVariant ?? _fallbackOnSurfaceVariant;

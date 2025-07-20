@@ -1,184 +1,227 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:scorecard/models/playhq_models.dart';
-import 'package:scorecard/services/app_logger.dart';
 
-/// Service for interacting with PlayHQ GraphQL API
+import '../models/playhq_models.dart';
+import 'app_logger.dart';
+
 class PlayHQGraphQLService {
-  static const String _baseUrl = 'https://search.playhq.com/graphql';
+  static const String _searchUrl = 'https://search.playhq.com/graphql';
+  static const String _apiUrl = 'https://api.playhq.com/graphql';
 
-  static const String _searchQuery = '''
-    query search(\$filter: SearchFilter!) {
-      search(filter: \$filter) {
-        meta {
-          page
-          totalPages
-          totalRecords
-          __typename
-        }
-        results {
-          ... on Organisation {
-            id
-            routingCode
-            name
-            type
-            logo {
-              sizes {
-                url
-                dimensions {
-                  width
-                  height
-                  __typename
-                }
-                __typename
-              }
-              __typename
-            }
-            tenant {
+  static const Map<String, String> _searchHeaders = {
+    'Content-Type': 'application/json',
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0',
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Origin': 'https://www.playhq.com',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-site',
+  };
+
+  static const Map<String, String> _apiHeaders = {
+    'Content-Type': 'application/json',
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0',
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Origin': 'https://www.playhq.com',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-site',
+    'tenant': 'afl',
+  };
+
+  /// Search for AFL clubs using GraphQL
+  static Future<PlayHQSearchResponse> searchAFLClubs(String searchTerm) async {
+    const query = '''
+      query search(\$filter: SearchFilter!) {
+        search(filter: \$filter) {
+          meta {
+            page
+            totalPages
+            totalRecords
+          }
+          results {
+            ... on Organisation {
               id
+              routingCode
               name
+              type
               logo {
                 sizes {
                   url
                   dimensions {
                     width
                     height
-                    __typename
                   }
-                  __typename
                 }
-                __typename
               }
-              slug
-              __typename
+              tenant {
+                id
+                name
+                slug
+              }
             }
-            __typename
           }
-          __typename
         }
-        __typename
       }
-    }
-  ''';
+    ''';
 
-  static final Map<String, String> _headers = {
-    'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0',
-    'Accept': '*/*',
-    'Accept-Language': 'en-US,en;q=0.5',
-    'Accept-Encoding': 'gzip, deflate, br, zstd',
-    'Content-Type': 'application/json',
-    'Origin': 'https://www.playhq.com',
-    'DNT': '1',
-    'Sec-GPC': '1',
-    'Connection': 'keep-alive',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-site',
-    'Priority': 'u=4',
-    'TE': 'trailers',
-  };
+    final variables = {
+      'filter': {
+        'meta': {'limit': 10, 'page': 1},
+        'organisation': {
+          'query': searchTerm,
+          'types': ['ASSOCIATION', 'CLUB'],
+          'sports': ['AFL'],
+        },
+      },
+    };
 
-  /// Search for football clubs/associations
-  static Future<PlayHQSearchResponse?> searchClubs({
-    required String query,
-    List<String> types = const ['ASSOCIATION', 'CLUB'],
-    List<String> sports = const ['AFL'],
-    int limit = 20,
-    int page = 1,
-  }) async {
+    final body = {'query': query, 'variables': variables};
+
+    AppLogger.debug('PlayHQ Search Request', component: 'PlayHQGraphQLService');
+    AppLogger.debug('URL: $_searchUrl', component: 'PlayHQGraphQLService');
+    AppLogger.debug(
+      'Headers: $_searchHeaders',
+      component: 'PlayHQGraphQLService',
+    );
+    AppLogger.debug(
+      'Body: ${json.encode(body)}',
+      component: 'PlayHQGraphQLService',
+    );
+
     try {
-      AppLogger.info(
-        'Searching PlayHQ for: "$query"',
-        component: 'PlayHQGraphQLService',
-      );
-
-      final searchFilter = SearchFilter(
-        meta: SearchMeta(page: page, totalPages: 0, totalRecords: limit),
-        organisation: OrganisationFilter(
-          query: query,
-          types: types,
-          sports: sports,
-        ),
-      );
-
-      final requestBody = {
-        'operationName': 'search',
-        'variables': {'filter': searchFilter.toJson()},
-        'query': _searchQuery,
-      };
-
-      AppLogger.debug(
-        'GraphQL request: ${jsonEncode(requestBody)}',
-        component: 'PlayHQGraphQLService',
-      );
-
       final response = await http.post(
-        Uri.parse(_baseUrl),
-        headers: _headers,
-        body: jsonEncode(requestBody),
+        Uri.parse(_searchUrl),
+        headers: _searchHeaders,
+        body: json.encode(body),
       );
 
       AppLogger.debug(
-        'Response status: ${response.statusCode}',
+        'Search Response Status: ${response.statusCode}',
+        component: 'PlayHQGraphQLService',
+      );
+      AppLogger.debug(
+        'Search Response Body: ${response.body}',
         component: 'PlayHQGraphQLService',
       );
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-
-        AppLogger.debug(
-          'Response data: ${jsonEncode(jsonResponse)}',
-          component: 'PlayHQGraphQLService',
-        );
-
-        // Check for GraphQL errors
-        if (jsonResponse['errors'] != null) {
-          AppLogger.error(
-            'GraphQL errors: ${jsonResponse['errors']}',
-            component: 'PlayHQGraphQLService',
-          );
-          return null;
-        }
-
-        final searchResponse = PlayHQSearchResponse.fromJson(jsonResponse);
-
-        AppLogger.info(
-          'Found ${searchResponse.results.length} clubs for query: "$query"',
-          component: 'PlayHQGraphQLService',
-        );
-
-        return searchResponse;
+        final jsonData = json.decode(response.body);
+        return PlayHQSearchResponse.fromJson(jsonData);
       } else {
-        AppLogger.error(
-          'HTTP error: ${response.statusCode} - ${response.body}',
-          component: 'PlayHQGraphQLService',
+        throw Exception(
+          'Failed to search clubs: ${response.statusCode} - ${response.body}',
         );
-        return null;
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       AppLogger.error(
-        'Error searching clubs: $e',
+        'Search Error: $e',
         component: 'PlayHQGraphQLService',
         error: e,
-        stackTrace: stackTrace,
       );
-      return null;
+      throw Exception('Error searching clubs: $e');
     }
   }
 
-  /// Search specifically for AFL clubs
-  static Future<PlayHQSearchResponse?> searchAFLClubs({
-    required String query,
-    int limit = 20,
-    int page = 1,
-  }) {
-    return searchClubs(
-      query: query,
-      types: ['CLUB'],
-      sports: ['AFL'],
-      limit: limit,
-      page: page,
+  /// Get organisation details including address using discoverOrganisation query
+  static Future<OrganisationDetailsResponse> getOrganisationDetails(
+    String organisationCode,
+  ) async {
+    const query = '''
+      query discoverOrganisation(\$organisationCode: String!) {
+        discoverOrganisation(code: \$organisationCode) {
+          id
+          type
+          name
+          email
+          contactNumber
+          websiteUrl
+          address {
+            id
+            line1
+            suburb
+            postcode
+            state
+            country
+          }
+          logo {
+            sizes {
+              url
+              dimensions {
+                width
+                height
+              }
+            }
+          }
+          contacts {
+            id
+            firstName
+            lastName
+            position
+            email
+            phone
+          }
+          shopVisible
+        }
+      }
+    ''';
+
+    final variables = {'organisationCode': organisationCode};
+
+    final body = {'query': query, 'variables': variables};
+
+    AppLogger.debug(
+      'PlayHQ Org Details Request',
+      component: 'PlayHQGraphQLService',
     );
+    AppLogger.debug('URL: $_apiUrl', component: 'PlayHQGraphQLService');
+    AppLogger.debug('Headers: $_apiHeaders', component: 'PlayHQGraphQLService');
+    AppLogger.debug(
+      'Body: ${json.encode(body)}',
+      component: 'PlayHQGraphQLService',
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse(_apiUrl),
+        headers: _apiHeaders,
+        body: json.encode(body),
+      );
+
+      AppLogger.debug(
+        'Org Details Response Status: ${response.statusCode}',
+        component: 'PlayHQGraphQLService',
+      );
+      AppLogger.debug(
+        'Org Details Response Body: ${response.body}',
+        component: 'PlayHQGraphQLService',
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        return OrganisationDetailsResponse.fromJson(jsonData);
+      } else {
+        throw Exception(
+          'Failed to get organisation details: ${response.statusCode} - ${response.body}',
+        );
+      }
+    } catch (e) {
+      AppLogger.error(
+        'Org Details Error: $e',
+        component: 'PlayHQGraphQLService',
+        error: e,
+      );
+      throw Exception('Error getting organisation details: $e');
+    }
   }
 }

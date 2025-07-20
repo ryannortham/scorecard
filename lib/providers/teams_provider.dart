@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scorecard/models/score_models.dart';
+import 'package:scorecard/models/playhq_models.dart';
 
 class TeamsProvider extends ChangeNotifier {
   List<Team> _teams = [];
@@ -52,6 +53,9 @@ class TeamsProvider extends ChangeNotifier {
     String? logoUrl32,
     String? logoUrl48,
     String? logoUrlLarge,
+    Address? address,
+    String? playHQId,
+    String? routingCode,
   }) async {
     final team = Team(
       name: name,
@@ -59,6 +63,9 @@ class TeamsProvider extends ChangeNotifier {
       logoUrl32: logoUrl32,
       logoUrl48: logoUrl48,
       logoUrlLarge: logoUrlLarge,
+      address: address,
+      playHQId: playHQId,
+      routingCode: routingCode,
     );
     _teams.add(team);
     await _saveTeams();
@@ -72,6 +79,9 @@ class TeamsProvider extends ChangeNotifier {
     String? logoUrl32,
     String? logoUrl48,
     String? logoUrlLarge,
+    Address? address,
+    String? playHQId,
+    String? routingCode,
   }) async {
     if (index >= 0 && index < _teams.length) {
       _teams[index] = _teams[index].copyWith(
@@ -80,6 +90,9 @@ class TeamsProvider extends ChangeNotifier {
         logoUrl32: logoUrl32,
         logoUrl48: logoUrl48,
         logoUrlLarge: logoUrlLarge,
+        address: address,
+        playHQId: playHQId,
+        routingCode: routingCode,
       );
       await _saveTeams();
       notifyListeners();

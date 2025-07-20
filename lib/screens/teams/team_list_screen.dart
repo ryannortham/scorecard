@@ -6,8 +6,8 @@ import '../../providers/teams_provider.dart';
 import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
 import '../../services/navigation_service.dart';
-import '../../services/dialog_service.dart';
 import 'team_add_screen.dart';
+import 'team_detail_screen.dart';
 import '../../widgets/menu/app_menu.dart';
 
 import '../../services/asset_icon_service.dart';
@@ -259,9 +259,12 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                       if (_isSelectionMode) {
                                         _toggleTeamSelection(realIndex);
                                       } else if (widget.title != 'Teams') {
-                                        // Only navigate if we're in team selection mode (not Teams)
+                                        // Team selection mode - select team and return
                                         widget.onTeamSelected(team.name);
                                         Navigator.pop(context, team.name);
+                                      } else {
+                                        // Teams mode - navigate to team detail
+                                        _navigateToTeamDetail(team.name);
                                       }
                                     },
                                     onLongPress: () {
@@ -273,82 +276,45 @@ class _TeamListScreenState extends State<TeamListScreen> {
                                     trailing:
                                         _isSelectionMode
                                             ? null
-                                            : Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                IconButton(
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  icon: Icon(
+                                            : IconButton(
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              icon: Icon(
+                                                userPreferences.favoriteTeam ==
+                                                        team.name
+                                                    ? Icons.star_outlined
+                                                    : Icons
+                                                        .star_border_outlined,
+                                                color:
                                                     userPreferences
                                                                 .favoriteTeam ==
                                                             team.name
-                                                        ? Icons.star_outlined
-                                                        : Icons
-                                                            .star_border_outlined,
-                                                    color:
-                                                        userPreferences
-                                                                    .favoriteTeam ==
-                                                                team.name
-                                                            ? Theme.of(context)
-                                                                .colorScheme
-                                                                .primary
-                                                            : Theme.of(context)
-                                                                .colorScheme
-                                                                .onSurfaceVariant,
-                                                  ),
-                                                  tooltip:
-                                                      userPreferences
-                                                                  .favoriteTeam ==
-                                                              team.name
-                                                          ? 'Remove from favorites'
-                                                          : 'Mark as favorite',
-                                                  onPressed: () {
-                                                    if (userPreferences
-                                                            .favoriteTeam ==
-                                                        team.name) {
-                                                      userPreferences
-                                                          .setFavoriteTeam('');
-                                                    } else {
-                                                      userPreferences
-                                                          .setFavoriteTeam(
-                                                            team.name,
-                                                          );
-                                                    }
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  icon: const Icon(
-                                                    Icons.edit_outlined,
-                                                  ),
-                                                  tooltip: 'Edit',
-                                                  onPressed:
-                                                      () => _showEditTeamDialog(
-                                                        context,
-                                                        teamsProvider,
-                                                        realIndex,
-                                                        team,
-                                                      ),
-                                                ),
-                                                IconButton(
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  icon: const Icon(
-                                                    Icons.delete_outline,
-                                                  ),
-                                                  tooltip: 'Delete',
-                                                  onPressed:
-                                                      () =>
-                                                          _showDeleteTeamConfirmation(
-                                                            context,
-                                                            teamsProvider,
-                                                            realIndex,
-                                                            team.name,
-                                                          ),
-                                                ),
-                                              ],
+                                                        ? Theme.of(
+                                                          context,
+                                                        ).colorScheme.primary
+                                                        : Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant,
+                                              ),
+                                              tooltip:
+                                                  userPreferences
+                                                              .favoriteTeam ==
+                                                          team.name
+                                                      ? 'Remove from favorites'
+                                                      : 'Mark as favorite',
+                                              onPressed: () {
+                                                if (userPreferences
+                                                        .favoriteTeam ==
+                                                    team.name) {
+                                                  userPreferences
+                                                      .setFavoriteTeam('');
+                                                } else {
+                                                  userPreferences
+                                                      .setFavoriteTeam(
+                                                        team.name,
+                                                      );
+                                                }
+                                              },
                                             ),
                                   ),
                                 );
@@ -452,58 +418,6 @@ class _TeamListScreenState extends State<TeamListScreen> {
             ),
           ),
     );
-  }
-
-  Future<void> _showEditTeamDialog(
-    BuildContext context,
-    TeamsProvider teamsProvider,
-    int index,
-    Team currentTeam,
-  ) async {
-    final result = await DialogService.showTeamNameDialog(
-      context: context,
-      title: 'Edit Team Name',
-      initialValue: currentTeam.name,
-      hasTeamWithName: teamsProvider.hasTeamWithName,
-      currentTeamName: currentTeam.name,
-      confirmText: 'Save',
-      cancelText: 'Cancel',
-    );
-
-    if (result != null && result != currentTeam.name) {
-      await teamsProvider.editTeam(index, result, logoUrl: currentTeam.logoUrl);
-    }
-  }
-
-  Future<void> _showDeleteTeamConfirmation(
-    BuildContext context,
-    TeamsProvider teamsProvider,
-    int index,
-    String teamName,
-  ) async {
-    final userPreferences = Provider.of<UserPreferencesProvider>(
-      context,
-      listen: false,
-    );
-
-    final confirmed = await AppNavigator.showConfirmationDialog(
-      context: context,
-      title: '',
-      content: '',
-      confirmText: 'Delete Team?',
-      cancelText: 'Cancel',
-      isDestructive: true,
-    );
-
-    if (confirmed) {
-      // If deleting the favorite team, clear the favorite
-      if (userPreferences.favoriteTeam == teamName) {
-        await userPreferences.setFavoriteTeam('');
-      }
-
-      await teamsProvider.deleteTeam(index);
-      // Stay on the team list after deletion - don't navigate back
-    }
   }
 
   void _enterSelectionMode(int teamIndex) {
@@ -610,6 +524,14 @@ class _TeamListScreenState extends State<TeamListScreen> {
         }
       }
     }
+  }
+
+  void _navigateToTeamDetail(String teamName) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TeamDetailScreen(teamName: teamName),
+      ),
+    );
   }
 
   /// Handles back button press by trying to pop or navigating to Scoring tab
