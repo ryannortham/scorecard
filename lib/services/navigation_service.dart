@@ -41,7 +41,7 @@ class AppNavigator {
     );
   }
 
-  /// Navigate to game history
+  /// Navigate to game results
   static Future<T?> toGameHistory<T extends Object?>(BuildContext context) {
     return Navigator.of(context).push<T>(
       MaterialPageRoute(builder: (context) => const ResultsListScreen()),

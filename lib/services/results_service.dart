@@ -44,7 +44,7 @@ class GameSummary {
   }
 }
 
-class GameHistoryService {
+class ResultsService {
   static const String _gamesKey = 'saved_games';
   static const Uuid _uuid = Uuid();
 
@@ -68,7 +68,7 @@ class GameHistoryService {
     AppLogger.performance(
       'Game save',
       stopwatch.elapsed,
-      component: 'GameHistory',
+      component: 'GameResults',
     );
   }
 
@@ -112,7 +112,7 @@ class GameHistoryService {
       } catch (e) {
         AppLogger.warning(
           'Skipping corrupted game summary data',
-          component: 'GameHistory',
+          component: 'GameResults',
           data: e.toString(),
         );
         continue;
@@ -240,7 +240,7 @@ class GameHistoryService {
               } catch (e) {
                 AppLogger.warning(
                   'Skipping corrupted game data',
-                  component: 'GameHistory',
+                  component: 'GameResults',
                   data: e.toString(),
                 );
                 return null; // Skip corrupted games
@@ -260,9 +260,9 @@ class GameHistoryService {
     AppLogger.performance(
       'Load games',
       stopwatch.elapsed,
-      component: 'GameHistory',
+      component: 'GameResults',
     );
-    AppLogger.info('Loaded ${games.length} games', component: 'GameHistory');
+    AppLogger.info('Loaded ${games.length} games', component: 'GameResults');
 
     return games;
   }

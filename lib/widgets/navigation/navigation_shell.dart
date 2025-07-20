@@ -73,7 +73,7 @@ class _NavigationShellState extends State<NavigationShell>
         return const ScoringSetupScreen();
       case 1:
         return TeamListScreen(
-          title: 'Manage Teams',
+          title: 'Teams',
           onTeamSelected: (_) {}, // No action needed for main teams view
         );
       case 2:
@@ -88,6 +88,7 @@ class _NavigationShellState extends State<NavigationShell>
     return NotificationListener<ScrollNotification>(
       onNotification: _onScrollNotification,
       child: Scaffold(
+        extendBody: true,
         body: _buildPage(
           _currentIndex,
         ), // Direct widget switching instead of PageView

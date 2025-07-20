@@ -6,7 +6,7 @@ AFL goal umpires app for keeping track of game scores.
 
 - **Score Tracking**: Track goals, behinds, and total points for multiple teams
 - **Quarter Management**: Organize scoring by quarters with running totals
-- **Game History**: Save and review past games
+- **Game Results**: Save and review past games
 - **Team Management**: Create and manage team information
 - **Material Design**: Modern UI following Material 3 design principles
 
@@ -137,7 +137,7 @@ lib/
 ### Key Services
 
 - **GameRecordBuilder**: Handles game state and score calculations
-- **GameHistoryService**: Manages saving and loading game history
+- **ResultsService**: Manages saving and loading game results
 - **NavigationService**: Handles app-wide navigation
 
 ## License

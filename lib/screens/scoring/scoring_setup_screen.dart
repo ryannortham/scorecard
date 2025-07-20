@@ -122,6 +122,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
         // Show loading screen until settings are loaded
         if (!userPreferences.loaded) {
           return const Scaffold(
+            extendBody: true,
             body: Center(child: CircularProgressIndicator()),
           );
         }
@@ -129,6 +130,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
         return Consumer<GameStateService>(
           builder: (context, gameState, child) {
             return Scaffold(
+              extendBody: true,
               body: Stack(
                 children: [
                   // Gradient background
@@ -197,7 +199,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                   kToolbarHeight;
 
                               return Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(4.0),
                                 child: ConstrainedBox(
                                   constraints: BoxConstraints(
                                     minHeight: availableHeight - 16.0,
@@ -301,7 +303,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                             ),
                                           ),
 
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: 4),
 
                                           // Game Date Section
                                           Card(
@@ -411,7 +413,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                             ),
                                           ),
 
-                                          const SizedBox(height: 8),
+                                          const SizedBox(height: 4),
 
                                           // Quarter Minutes Section
                                           Card(
@@ -431,7 +433,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                             ),
                                           ),
 
-                                          const SizedBox(height: 24),
+                                          const SizedBox(height: 4),
 
                                           SizedBox(
                                             width:
@@ -512,6 +514,13 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                 ),
                               );
                             },
+                          ),
+                        ),
+
+                        // Add bottom padding for system navigation bar
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: MediaQuery.of(context).padding.bottom,
                           ),
                         ),
                       ],

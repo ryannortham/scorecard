@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/app_logger.dart';
 import '../../services/dialog_service.dart';
-import '../../services/game_history_service.dart';
+import '../../services/results_service.dart';
 import '../../services/game_state_service.dart';
-import '../../widgets/game_history/game_summary_card.dart';
+import '../../widgets/results/results_summary_card.dart';
 import '../../widgets/menu/app_menu.dart';
 
 import 'results_screen.dart';
@@ -97,7 +97,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
     try {
       final gameStateService = GameStateService.instance;
 
-      final newSummaries = await GameHistoryService.loadGameSummaries(
+      final newSummaries = await ResultsService.loadGameSummaries(
         limit: _pageSize,
         offset: offset,
         excludeGameId: gameStateService.currentGameId,
@@ -117,7 +117,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
     } catch (e) {
       AppLogger.error(
         'Error loading game summaries',
-        component: 'GameHistory',
+        component: 'GameResults',
         error: e,
       );
       if (mounted) {
@@ -185,7 +185,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         // Delete all selected games
         final gameIdsToDelete = List<String>.from(_selectedGameIds);
         for (final gameId in gameIdsToDelete) {
-          await GameHistoryService.deleteGame(gameId);
+          await ResultsService.deleteGame(gameId);
         }
 
         _exitSelectionMode();
@@ -204,9 +204,9 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         }
       } catch (e) {
         AppLogger.error(
-          'Failed to delete games from history',
+          'Failed to delete games from results',
           error: e,
-          component: 'GameHistory',
+          component: 'GameResults',
         );
 
         if (mounted && context.mounted) {
@@ -224,7 +224,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
 
   Future<void> _showGameDetails(String gameId) async {
     // Load the full game data only when needed
-    final game = await GameHistoryService.loadGameById(gameId);
+    final game = await ResultsService.loadGameById(gameId);
     if (game != null && mounted) {
       final result = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
@@ -251,6 +251,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         }
       },
       child: Scaffold(
+        extendBody: true,
         body: Stack(
           children: [
             // Gradient background
@@ -291,7 +292,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                     title:
                         _isSelectionMode
                             ? Text('${_selectedGameIds.length} selected')
-                            : const Text('Game Results'),
+                            : const Text('Results'),
                     leading:
                         _isSelectionMode
                             ? IconButton(
@@ -315,7 +316,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                                   : null,
                         )
                       else
-                        const AppMenu(currentRoute: 'game_history'),
+                        const AppMenu(currentRoute: 'results'),
                     ],
                   ),
                 ];
@@ -382,7 +383,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                             }
 
                             final gameSummary = _gameSummaries[index];
-                            return GameSummaryCard(
+                            return ResultsSummaryCard(
                               gameSummary: gameSummary,
                               isSelectionMode: _isSelectionMode,
                               isSelected: _selectedGameIds.contains(
@@ -407,6 +408,13 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                               (_hasMoreGames || _isLoadingMore ? 1 : 0),
                         ),
                       ),
+
+                    // Add bottom padding for system navigation bar
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).padding.bottom,
+                      ),
+                    ),
                   ],
                 ),
               ),

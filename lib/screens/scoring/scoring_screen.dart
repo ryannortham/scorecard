@@ -6,12 +6,12 @@ import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
-import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
-import 'package:scorecard/widgets/game_details/game_details_widget.dart';
+import 'package:scorecard/widgets/results/results_widget.dart';
 import 'package:scorecard/widgets/menu/app_menu.dart';
 
 import '../results/results_screen.dart';
@@ -99,7 +99,7 @@ class ScoringScreenState extends State<ScoringScreen> {
 
       await _gameStateService.forceFinalSave();
 
-      final allGames = await GameHistoryService.loadGames();
+      final allGames = await ResultsService.loadGames();
       final gameRecord = allGames.firstWhere(
         (game) => game.id == gameId,
         orElse: () {
@@ -347,7 +347,7 @@ class ScoringScreenState extends State<ScoringScreen> {
                   child: IntrinsicHeight(
                     child: SizedBox(
                       width: 400,
-                      child: GameDetailsWidget.fromLiveData(
+                      child: ResultsWidget.fromLiveData(
                         events: gameEvents,
                         enableScrolling: false,
                       ),

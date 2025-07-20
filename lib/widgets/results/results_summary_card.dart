@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/services/game_history_service.dart';
+import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import '../../services/asset_icon_service.dart';
 import 'package:scorecard/services/color_service.dart';
 
-/// Optimized widget for displaying game summary in the history list
-class GameSummaryCard extends StatelessWidget {
+/// Optimized widget for displaying game summary in the results list
+class ResultsSummaryCard extends StatelessWidget {
   final GameSummary gameSummary;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool isSelectionMode;
   final bool isSelected;
 
-  const GameSummaryCard({
+  const ResultsSummaryCard({
     super.key,
     required this.gameSummary,
     required this.onTap,
