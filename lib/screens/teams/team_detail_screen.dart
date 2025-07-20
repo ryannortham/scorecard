@@ -249,7 +249,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                     elevation: 0,
                     shadowColor: ColorService.transparent,
                     surfaceTintColor: ColorService.transparent,
-                    title: Text(team.name),
+                    title: const Text('Team Details'),
                     leading: IconButton(
                       icon: const Icon(Icons.arrow_back_outlined),
                       tooltip: 'Back',
@@ -262,15 +262,12 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.only(
-                        left: 16.0,
-                        right: 16.0,
-                        top: 32.0,
-                        bottom: 16.0 + MediaQuery.of(context).padding.bottom,
-                      ),
+                      padding: const EdgeInsets.all(4.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          const SizedBox(height: 24.0),
+
                           // Team Logo
                           _buildTeamLogo(team, size: 120),
 
@@ -284,19 +281,27 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                             textAlign: TextAlign.center,
                           ),
 
-                          // Address Section
-                          if (team.address != null) ...[
-                            const SizedBox(height: 32.0),
-                            _buildAddressSection(team.address!),
-                          ] else ...[
-                            const SizedBox(height: 32.0),
-                            _buildNoAddressSection(teamIndex, team),
+                          const SizedBox(height: 24.0),
+
+                          // Action Buttons (moved above address)
+                          _buildActionButtons(context, isFavorite),
+
+                          // Address Section - only show for PlayHQ teams
+                          if (team.playHQId != null &&
+                              team.playHQId!.isNotEmpty) ...[
+                            if (team.address != null) ...[
+                              const SizedBox(height: 4.0),
+                              _buildAddressSection(team.address!),
+                            ] else ...[
+                              const SizedBox(height: 4.0),
+                              _buildNoAddressSection(teamIndex, team),
+                            ],
                           ],
 
-                          const SizedBox(height: 48.0),
-
-                          // Action Buttons
-                          _buildActionButtons(context, isFavorite),
+                          SizedBox(
+                            height:
+                                16.0 + MediaQuery.of(context).padding.bottom,
+                          ),
                         ],
                       ),
                     ),
@@ -315,7 +320,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       elevation: 0,
       color: context.colors.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -341,109 +346,12 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16.0),
-            // Embedded Google Maps Static Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Container(
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: context.colors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Stack(
-                  children: [
-                    // Google Maps Static Image
-                    Image.network(
-                      _buildGoogleMapsStaticUrl(address),
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          width: double.infinity,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: context.colors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value:
-                                  loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                            ),
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: context.colors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.map_outlined,
-                                size: 48,
-                                color: context.colors.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Map unavailable',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color: context.colors.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    // Tap overlay to open full map
-                    Positioned.fill(
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8.0),
-                          onTap: () => _openGoogleMaps(address),
-                          child: Container(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+            Center(
+              child: FilledButton.icon(
+                onPressed: () => _openDirections(address),
+                icon: const Icon(Icons.directions_outlined),
+                label: const Text('Directions'),
               ),
-            ),
-            const SizedBox(height: 16.0),
-            // Maps Actions
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openGoogleMaps(address),
-                    icon: const Icon(Icons.map_outlined),
-                    label: const Text('View Map'),
-                  ),
-                ),
-                const SizedBox(width: 12.0),
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: () => _openDirections(address),
-                    icon: const Icon(Icons.directions_outlined),
-                    label: const Text('Directions'),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -456,7 +364,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       elevation: 0,
       color: context.colors.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -528,7 +436,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       elevation: 0,
       color: context.colors.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -577,7 +485,10 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                Text('Edit', style: Theme.of(context).textTheme.labelMedium),
+                Text(
+                  'Edit Name',
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
               ],
             ),
 
@@ -602,31 +513,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _openGoogleMaps(Address address) async {
-    final query = Uri.encodeComponent(address.googleMapsAddress);
-    final googleMapsUrl =
-        'https://www.google.com/maps/search/?api=1&query=$query';
-
-    try {
-      final uri = Uri.parse(googleMapsUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open Google Maps')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error opening Google Maps: $e')),
-        );
-      }
-    }
   }
 
   Future<void> _openDirections(Address address) async {
@@ -810,29 +696,5 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     } else {
       Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     }
-  }
-
-  /// Builds a Google Maps Static API URL for the given address
-  String _buildGoogleMapsStaticUrl(Address address) {
-    const apiKey =
-        'YOUR_API_KEY'; // Note: Replace with actual API key or use env variable
-    const baseUrl = 'https://maps.googleapis.com/maps/api/staticmap';
-
-    // Encode the address for URL
-    final encodedAddress = Uri.encodeComponent(address.displayAddress);
-
-    // Build the URL with appropriate parameters
-    final url =
-        '$baseUrl?'
-        'center=$encodedAddress'
-        '&zoom=15'
-        '&size=600x300'
-        '&maptype=roadmap'
-        '&markers=color:red%7C$encodedAddress'
-        '&style=feature:poi%7Cvisibility:off'
-        '&style=feature:transit%7Cvisibility:off'
-        '&key=$apiKey';
-
-    return url;
   }
 }
