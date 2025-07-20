@@ -84,7 +84,7 @@ class ResultsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _ScoreSection(game: game, isLiveData: isLiveData),
-        const SizedBox(height: 16),
+        const SizedBox(height: 4),
         _QuarterBreakdownSection(game: game, liveEvents: liveEvents),
       ],
     );
@@ -92,11 +92,24 @@ class ResultsWidget extends StatelessWidget {
     if (enableScrolling) {
       return SingleChildScrollView(
         controller: scrollController,
-        padding: const EdgeInsets.all(8.0),
+        padding: EdgeInsets.only(
+          left: 4.0,
+          right: 4.0,
+          top: 4.0,
+          bottom: 4.0 + MediaQuery.of(context).padding.bottom,
+        ),
         child: content,
       );
     } else {
-      return Padding(padding: const EdgeInsets.all(8.0), child: content);
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 4.0,
+          right: 4.0,
+          top: 4.0,
+          bottom: 4.0 + MediaQuery.of(context).padding.bottom,
+        ),
+        child: content,
+      );
     }
   }
 }
@@ -119,14 +132,14 @@ class _GameCard extends StatelessWidget {
       elevation: 0,
       color: context.colors.surfaceContainer,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(4.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(icon, color: context.colors.primary),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 Expanded(
                   child: AdaptiveTitle(
                     title: title,
@@ -139,7 +152,7 @@ class _GameCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
             child,
           ],
         ),
@@ -175,9 +188,9 @@ class _ScoreSection extends StatelessWidget {
       child: Column(
         children: [
           _TeamScoresRow(game: game),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _GameResultBadge(game: game, isComplete: isComplete),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           Text(
             DateFormat('EEEE, MMM d, yyyy').format(game.date),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -434,7 +447,7 @@ class _QuarterBreakdownSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildTeamBreakdown(context, game.homeTeam, true),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           _buildTeamBreakdown(context, game.awayTeam, false),
         ],
       ),
@@ -454,7 +467,7 @@ class _QuarterBreakdownSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
           child: Row(
             children: [
               Consumer<TeamsProvider>(

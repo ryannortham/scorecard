@@ -161,7 +161,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(4.0),
                     child: WidgetShotPlus(
                       key: _widgetShotKey,
                       child: ResultsWidget.fromStaticData(
