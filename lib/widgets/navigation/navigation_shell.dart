@@ -88,6 +88,7 @@ class _NavigationShellState extends State<NavigationShell>
     return NotificationListener<ScrollNotification>(
       onNotification: _onScrollNotification,
       child: Scaffold(
+        extendBody: true,
         body: _buildPage(
           _currentIndex,
         ), // Direct widget switching instead of PageView

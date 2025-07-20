@@ -17,8 +17,8 @@ class AppBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSlide(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOutCubic,
       offset: isVisible ? Offset.zero : const Offset(0, 1),
       child: NavigationBar(
         selectedIndex: currentIndex,

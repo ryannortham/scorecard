@@ -251,6 +251,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         }
       },
       child: Scaffold(
+        extendBody: true,
         body: Stack(
           children: [
             // Gradient background
@@ -407,6 +408,13 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                               (_hasMoreGames || _isLoadingMore ? 1 : 0),
                         ),
                       ),
+
+                    // Add bottom padding for system navigation bar
+                    SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: MediaQuery.of(context).padding.bottom,
+                      ),
+                    ),
                   ],
                 ),
               ),

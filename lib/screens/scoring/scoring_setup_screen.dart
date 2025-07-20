@@ -122,6 +122,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
         // Show loading screen until settings are loaded
         if (!userPreferences.loaded) {
           return const Scaffold(
+            extendBody: true,
             body: Center(child: CircularProgressIndicator()),
           );
         }
@@ -129,6 +130,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
         return Consumer<GameStateService>(
           builder: (context, gameState, child) {
             return Scaffold(
+              extendBody: true,
               body: Stack(
                 children: [
                   // Gradient background
@@ -512,6 +514,13 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                 ),
                               );
                             },
+                          ),
+                        ),
+
+                        // Add bottom padding for system navigation bar
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: MediaQuery.of(context).padding.bottom,
                           ),
                         ),
                       ],
