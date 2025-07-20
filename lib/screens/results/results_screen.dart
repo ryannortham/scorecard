@@ -93,6 +93,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: Stack(
         children: [
           // Gradient background
@@ -160,15 +161,19 @@ class _ResultsScreenState extends State<ResultsScreen> {
             body: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: WidgetShotPlus(
-                      key: _widgetShotKey,
-                      child: ResultsWidget.fromStaticData(
-                        game: widget.game,
-                        enableScrolling: true,
-                      ),
+                  child: WidgetShotPlus(
+                    key: _widgetShotKey,
+                    child: ResultsWidget.fromStaticData(
+                      game: widget.game,
+                      enableScrolling: true,
                     ),
+                  ),
+                ),
+
+                // Add bottom padding for system navigation bar
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom,
                   ),
                 ),
               ],
