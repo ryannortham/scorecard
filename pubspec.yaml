@@ -41,7 +41,7 @@ dependencies:
   share_plus: ^11.0.0
   path_provider: ^2.1.5
   widget_screenshot_plus: ^0.0.6
-  gal: ^2.3.0
+  gal: ^2.3.2
   flutter_native_splash: ^2.4.1
   device_info_plus: ^11.2.0
   graphql_flutter: ^5.2.0
