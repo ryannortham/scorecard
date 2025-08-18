@@ -28,7 +28,7 @@ jobs:
     
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
@@ -64,7 +64,7 @@ jobs:
     
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       
       - name: 🐍 Setup Python for MobSF
         uses: actions/setup-python@v5
@@ -103,7 +103,7 @@ jobs:
 
     steps:
     - name: 📥 Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: 🔍 Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -141,7 +141,7 @@ jobs:
     
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
@@ -234,10 +234,10 @@ jobs:
     
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 📥 Download AAB artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: release-aab-${{ needs.build.outputs.version_name }}
           path: build/app/outputs/bundle/release/
