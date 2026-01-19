@@ -12,9 +12,10 @@ import '../../services/app_logger.dart';
 import '../../services/color_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/dialog_service.dart';
-import '../../services/asset_icon_service.dart';
 import '../../services/playhq_graphql_service.dart';
 import '../../services/google_maps_service.dart';
+import '../../widgets/team_logo.dart';
+import '../../widgets/app_scaffold.dart';
 
 class TeamDetailScreen extends StatefulWidget {
   const TeamDetailScreen({super.key, required this.teamName});
@@ -214,112 +215,86 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         if (didPop) return;
         _handleBackPress();
       },
-      child: Scaffold(
+      child: AppScaffold(
         extendBody: true,
-        body: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      ColorService.withAlpha(
-                        context.colors.primaryContainer,
-                        0.9,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                backgroundColor: ColorService.transparent,
+                foregroundColor: context.colors.onPrimaryContainer,
+                floating: true,
+                snap: true,
+                pinned: false,
+                elevation: 0,
+                shadowColor: ColorService.transparent,
+                surfaceTintColor: ColorService.transparent,
+                title: const Text('Team Details'),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_outlined),
+                  tooltip: 'Back',
+                  onPressed: _handleBackPress,
+                ),
+              ),
+            ];
+          },
+          body: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24.0),
+
+                      // Team Logo
+                      TeamLogo(logoUrl: team.logoUrl, size: 120),
+
+                      const SizedBox(height: 32.0),
+
+                      // Team Name
+                      Text(
+                        team.name,
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(fontWeight: FontWeight.w500),
+                        textAlign: TextAlign.center,
                       ),
-                      context.colors.surface,
+
+                      const SizedBox(height: 24.0),
+
+                      // Action Buttons (moved above address)
+                      _buildActionButtons(context, isFavorite),
+
+                      // Address Section - only show for PlayHQ teams with valid addresses
+                      if (team.playHQId != null &&
+                          team.playHQId!.isNotEmpty) ...[
+                        if (team.address != null &&
+                            team.address!.isValidForDirections) ...[
+                          const SizedBox(height: 4.0),
+                          _buildAddressSection(team.address!, team.name),
+                        ] else if (team.address == null) ...[
+                          const SizedBox(height: 4.0),
+                          _buildNoAddressSection(teamIndex, team),
+                        ],
+                        // If address exists but is invalid (P.O. Box, etc.), don't show anything
+                      ],
+
+                      SizedBox(
+                        height: 16.0 + MediaQuery.of(context).padding.bottom,
+                      ),
                     ],
                   ),
                 ),
               ),
-            ),
-
-            // Main content with collapsible app bar
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverAppBar(
-                    backgroundColor: context.colors.primaryContainer,
-                    foregroundColor: context.colors.onPrimaryContainer,
-                    floating: true,
-                    snap: true,
-                    pinned: false,
-                    elevation: 0,
-                    shadowColor: ColorService.transparent,
-                    surfaceTintColor: ColorService.transparent,
-                    title: const Text('Team Details'),
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_outlined),
-                      tooltip: 'Back',
-                      onPressed: _handleBackPress,
-                    ),
-                  ),
-                ];
-              },
-              body: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 24.0),
-
-                          // Team Logo
-                          _buildTeamLogo(team, size: 120),
-
-                          const SizedBox(height: 32.0),
-
-                          // Team Name
-                          Text(
-                            team.name,
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.w500),
-                            textAlign: TextAlign.center,
-                          ),
-
-                          const SizedBox(height: 24.0),
-
-                          // Action Buttons (moved above address)
-                          _buildActionButtons(context, isFavorite),
-
-                          // Address Section - only show for PlayHQ teams
-                          if (team.playHQId != null &&
-                              team.playHQId!.isNotEmpty) ...[
-                            if (team.address != null) ...[
-                              const SizedBox(height: 4.0),
-                              _buildAddressSection(team.address!),
-                            ] else ...[
-                              const SizedBox(height: 4.0),
-                              _buildNoAddressSection(teamIndex, team),
-                            ],
-                          ],
-
-                          SizedBox(
-                            height:
-                                16.0 + MediaQuery.of(context).padding.bottom,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAddressSection(Address address) {
+  Widget _buildAddressSection(Address address, String teamName) {
     return Card(
       elevation: 0,
       color: context.colors.surfaceContainer,
@@ -358,6 +333,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                 child: Image.network(
                   GoogleMapsService.getStaticMapUrl(
                     address,
+                    venueName: teamName,
                     width: 600,
                     height: 250,
                     zoom: 15,
@@ -426,7 +402,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
             Center(
               child: FilledButton.icon(
-                onPressed: () => _openDirections(address),
+                onPressed: () => _openDirections(address, teamName),
                 icon: const Icon(Icons.directions_outlined),
                 label: const Text('Directions'),
               ),
@@ -593,17 +569,20 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     );
   }
 
-  Future<void> _openDirections(Address address) async {
+  Future<void> _openDirections(Address address, String teamName) async {
     try {
       Uri? uri;
 
+      // Use enhanced query with venue name for better search accuracy
+      final query = Uri.encodeComponent(
+        address.getSearchQueryWithVenue(teamName),
+      );
+
       if (Platform.isAndroid) {
         // Use geo: URI for Android - opens any maps app with preference for Google Maps
-        final query = Uri.encodeComponent(address.googleMapsAddress);
         uri = Uri.parse('geo:0,0?q=$query');
       } else if (Platform.isIOS) {
         // Try Google Maps app first, fallback to Apple Maps
-        final query = Uri.encodeComponent(address.googleMapsAddress);
         final googleMapsUri = Uri.parse('comgooglemaps://?q=$query');
 
         if (await canLaunchUrl(googleMapsUri)) {
@@ -614,7 +593,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         }
       } else {
         // Web and other platforms - use HTTPS URL
-        final query = Uri.encodeComponent(address.googleMapsAddress);
         uri = Uri.parse(
           'https://www.google.com/maps/dir/?api=1&destination=$query',
         );
@@ -636,57 +614,6 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         ).showSnackBar(SnackBar(content: Text('Error opening directions: $e')));
       }
     }
-  }
-
-  Widget _buildTeamLogo(Team team, {double size = 48}) {
-    final logoUrl = team.logoUrl;
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          logoUrl,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultLogo(size: size);
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return SizedBox(
-              width: size,
-              height: size,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    return _buildDefaultLogo(size: size);
-  }
-
-  Widget _buildDefaultLogo({double size = 48}) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: FootballIcon(
-        size: size * 0.6,
-        color: context.colors.onPrimaryContainer,
-      ),
-    );
   }
 
   void _toggleFavorite() {

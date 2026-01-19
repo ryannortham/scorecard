@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/widgets/app_scaffold.dart';
 import 'package:scorecard/widgets/game_setup/game_settings_configuration.dart';
 import 'package:scorecard/widgets/game_setup/team_selection_widget.dart';
 import 'package:scorecard/widgets/menu/app_menu.dart';
@@ -129,38 +130,15 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
 
         return Consumer<GameStateService>(
           builder: (context, gameState, child) {
-            return Scaffold(
+            return AppScaffold(
               extendBody: true,
               body: Stack(
                 children: [
-                  // Gradient background
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          stops: const [0.0, 0.12, 0.25, 0.5],
-                          colors: [
-                            context.colors.primaryContainer,
-                            context.colors.primaryContainer,
-                            ColorService.withAlpha(
-                              context.colors.primaryContainer,
-                              0.9,
-                            ),
-                            context.colors.surface,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Main content with collapsible app bar
                   NestedScrollView(
                     headerSliverBuilder: (context, innerBoxIsScrolled) {
                       return [
                         SliverAppBar(
-                          backgroundColor: context.colors.primaryContainer,
+                          backgroundColor: ColorService.transparent,
                           foregroundColor: context.colors.onPrimaryContainer,
                           floating: true,
                           snap: true,
@@ -215,9 +193,9 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                           Card(
                                             elevation: 0,
                                             color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainerLow,
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.surfaceContainer,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(12.0),
@@ -309,9 +287,9 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                           Card(
                                             elevation: 0,
                                             color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainerLow,
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.surfaceContainer,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(12.0),
@@ -419,9 +397,9 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                           Card(
                                             elevation: 0,
                                             color:
-                                                Theme.of(context)
-                                                    .colorScheme
-                                                    .surfaceContainerLow,
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.surfaceContainer,
                                             shape: RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.circular(12.0),
@@ -430,81 +408,6 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                                               padding: EdgeInsets.all(16.0),
                                               child:
                                                   GameSettingsConfiguration(),
-                                            ),
-                                          ),
-
-                                          const SizedBox(height: 4),
-
-                                          SizedBox(
-                                            width:
-                                                MediaQuery.of(
-                                                  context,
-                                                ).size.width *
-                                                0.6,
-                                            child: FilledButton.icon(
-                                              onPressed:
-                                                  isValidSetup()
-                                                      ? () {
-                                                        final gameState =
-                                                            Provider.of<
-                                                              GameStateService
-                                                            >(
-                                                              context,
-                                                              listen: false,
-                                                            );
-                                                        // First configure the game with current setup data
-                                                        gameState.configureGame(
-                                                          homeTeam:
-                                                              homeTeam ?? '',
-                                                          awayTeam:
-                                                              awayTeam ?? '',
-                                                          gameDate:
-                                                              gameState
-                                                                  .gameDate,
-                                                          quarterMinutes:
-                                                              gameState
-                                                                  .quarterMinutes,
-                                                          isCountdownTimer:
-                                                              gameState
-                                                                  .isCountdownTimer,
-                                                        );
-
-                                                        // Configure timer settings using current game state values
-                                                        gameState.configureTimer(
-                                                          isCountdownMode:
-                                                              gameState
-                                                                  .isCountdownTimer,
-                                                          quarterMaxTime:
-                                                              gameState
-                                                                  .quarterMinutes *
-                                                              60 *
-                                                              1000,
-                                                        );
-
-                                                        // Then reset the score state for a new game
-                                                        gameState.resetGame();
-
-                                                        Navigator.of(
-                                                          context,
-                                                        ).push(
-                                                          MaterialPageRoute(
-                                                            builder:
-                                                                (
-                                                                  context,
-                                                                ) => const ScoringScreen(
-                                                                  title:
-                                                                      'Scoring',
-                                                                ),
-                                                          ),
-                                                        );
-                                                      }
-                                                      : null,
-                                              icon: const Icon(
-                                                Icons.outlined_flag,
-                                              ),
-                                              label: const Text(
-                                                'Start Scoring',
-                                              ),
                                             ),
                                           ),
                                         ],
@@ -520,10 +423,71 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
                         // Add bottom padding for system navigation bar
                         SliverToBoxAdapter(
                           child: SizedBox(
-                            height: MediaQuery.of(context).padding.bottom,
+                            height: MediaQuery.of(context).padding.bottom + 80,
                           ),
                         ),
                       ],
+                    ),
+                  ),
+
+                  // Fixed position FAB - bottom right (well above nav bar)
+                  Positioned(
+                    right: 16.0,
+                    bottom: 140.0,
+                    child: FloatingActionButton.extended(
+                      backgroundColor:
+                          isValidSetup()
+                              ? context.colors.primary
+                              : context.colors.onSurface.withValues(
+                                alpha: 0.12,
+                              ),
+                      foregroundColor:
+                          isValidSetup()
+                              ? context.colors.onPrimary
+                              : context.colors.onSurface.withValues(
+                                alpha: 0.38,
+                              ),
+                      elevation: 0,
+                      disabledElevation: 0,
+                      heroTag: 'add_team_fab',
+                      onPressed:
+                          isValidSetup()
+                              ? () {
+                                final gameState = Provider.of<GameStateService>(
+                                  context,
+                                  listen: false,
+                                );
+                                // First configure the game with current setup data
+                                gameState.configureGame(
+                                  homeTeam: homeTeam ?? '',
+                                  awayTeam: awayTeam ?? '',
+                                  gameDate: gameState.gameDate,
+                                  quarterMinutes: gameState.quarterMinutes,
+                                  isCountdownTimer: gameState.isCountdownTimer,
+                                );
+
+                                // Configure timer settings using current game state values
+                                gameState.configureTimer(
+                                  isCountdownMode: gameState.isCountdownTimer,
+                                  quarterMaxTime:
+                                      gameState.quarterMinutes * 60 * 1000,
+                                );
+
+                                // Then reset the score state for a new game
+                                gameState.resetGame();
+
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => const ScoringScreen(
+                                          title: 'Scoring',
+                                        ),
+                                  ),
+                                );
+                              }
+                              : null,
+                      icon: const Icon(Icons.outlined_flag),
+                      label: const Text('Start Scoring'),
                     ),
                   ),
                 ],

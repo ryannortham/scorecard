@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/score_models.dart';
 import '../../providers/teams_provider.dart';
 import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
 import '../../services/navigation_service.dart';
+import '../../widgets/team_logo.dart';
+import '../../widgets/app_scaffold.dart';
 import 'team_add_screen.dart';
 import 'team_detail_screen.dart';
 import '../../widgets/menu/app_menu.dart';
-
-import '../../services/asset_icon_service.dart';
 
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({
@@ -112,224 +111,188 @@ class _TeamListScreenState extends State<TeamListScreen> {
           _handleBackPress(); // Use the same logic as UI back button
         }
       },
-      child: Scaffold(
+      child: AppScaffold(
         extendBody: true,
         body: Stack(
           children: [
-            // Main content stack (background + NestedScrollView)
-            Stack(
-              children: [
-                // Gradient background
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        stops: const [0.0, 0.12, 0.25, 0.5],
-                        colors: [
-                          context.colors.primaryContainer,
-                          context.colors.primaryContainer,
-                          ColorService.withAlpha(
-                            context.colors.primaryContainer,
-                            0.9,
-                          ),
-                          context.colors.surface,
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Main content with collapsible app bar
-                NestedScrollView(
-                  headerSliverBuilder: (context, innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar(
-                        backgroundColor: context.colors.primaryContainer,
-                        foregroundColor: context.colors.onPrimaryContainer,
-                        floating: true,
-                        snap: true,
-                        pinned: false,
-                        elevation: 0,
-                        shadowColor: ColorService.transparent,
-                        surfaceTintColor: ColorService.transparent,
-                        title:
-                            _isSelectionMode
-                                ? Text(
-                                  '${_selectedTeamIndices.length} selected',
-                                )
-                                : Text(widget.title),
-                        leading:
-                            _isSelectionMode
-                                ? IconButton(
-                                  icon: const Icon(Icons.close_outlined),
-                                  onPressed: _exitSelectionMode,
-                                )
-                                : IconButton(
-                                  icon: const Icon(Icons.arrow_back_outlined),
-                                  tooltip: 'Back',
-                                  onPressed: _handleBackPress,
-                                ),
-                        actions: [
-                          if (_isSelectionMode)
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed:
-                                  _selectedTeamIndices.isNotEmpty
-                                      ? _deleteSelectedTeams
-                                      : null,
+            // Main content with collapsible app bar
+            NestedScrollView(
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverAppBar(
+                    backgroundColor: ColorService.transparent,
+                    foregroundColor: context.colors.onPrimaryContainer,
+                    floating: true,
+                    snap: true,
+                    pinned: false,
+                    elevation: 0,
+                    shadowColor: ColorService.transparent,
+                    surfaceTintColor: ColorService.transparent,
+                    title:
+                        _isSelectionMode
+                            ? Text('${_selectedTeamIndices.length} selected')
+                            : Text(widget.title),
+                    leading:
+                        _isSelectionMode
+                            ? IconButton(
+                              icon: const Icon(Icons.close_outlined),
+                              onPressed: _exitSelectionMode,
                             )
-                          else
-                            const AppMenu(currentRoute: 'teams'),
-                        ],
-                      ),
-                    ];
-                  },
-                  body: CustomScrollView(
-                    slivers: [
-                      // Main content
-                      if (teamsProvider.loaded)
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              left: 4.0,
-                              right: 4.0,
-                              top: 4.0,
-                              bottom:
-                                  4.0 + MediaQuery.of(context).padding.bottom,
+                            : IconButton(
+                              icon: const Icon(Icons.arrow_back_outlined),
+                              tooltip: 'Back',
+                              onPressed: _handleBackPress,
                             ),
-                            child: Column(
-                              children: List.generate(teams.length, (index) {
-                                final team = teams[index];
-                                final realIndex = teamsProvider.teams.indexOf(
-                                  team,
-                                );
-                                final isSelected = _selectedTeamIndices
-                                    .contains(realIndex);
-
-                                return Card(
-                                  elevation: 0,
-                                  color:
-                                      isSelected
-                                          ? Theme.of(
-                                            context,
-                                          ).colorScheme.primaryContainer
-                                          : Theme.of(
-                                            context,
-                                          ).colorScheme.surfaceContainer,
-                                  child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12.0,
-                                      vertical: 4.0,
-                                    ),
-                                    leading:
-                                        _isSelectionMode
-                                            ? Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  isSelected
-                                                      ? Icons
-                                                          .check_circle_outlined
-                                                      : Icons
-                                                          .radio_button_unchecked_outlined,
-                                                  color:
-                                                      isSelected
-                                                          ? Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary
-                                                          : Theme.of(
-                                                            context,
-                                                          ).colorScheme.outline,
-                                                ),
-                                                const SizedBox(width: 8.0),
-                                                _buildTeamLogo(team),
-                                              ],
-                                            )
-                                            : _buildTeamLogo(team),
-                                    title: Text(
-                                      team.name,
-                                      style:
-                                          Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
-                                    ),
-                                    onTap: () {
-                                      if (_isSelectionMode) {
-                                        _toggleTeamSelection(realIndex);
-                                      } else if (widget.title != 'Teams') {
-                                        // Team selection mode - select team and return
-                                        widget.onTeamSelected(team.name);
-                                        Navigator.pop(context, team.name);
-                                      } else {
-                                        // Teams mode - navigate to team detail
-                                        _navigateToTeamDetail(team.name);
-                                      }
-                                    },
-                                    onLongPress: () {
-                                      if (!_isSelectionMode &&
-                                          widget.title == 'Teams') {
-                                        _enterSelectionMode(realIndex);
-                                      }
-                                    },
-                                    trailing:
-                                        _isSelectionMode
-                                            ? null
-                                            : IconButton(
-                                              visualDensity:
-                                                  VisualDensity.compact,
-                                              icon: Icon(
-                                                userPreferences.favoriteTeam ==
-                                                        team.name
-                                                    ? Icons.star_outlined
-                                                    : Icons
-                                                        .star_border_outlined,
-                                                color:
-                                                    userPreferences
-                                                                .favoriteTeam ==
-                                                            team.name
-                                                        ? Theme.of(
-                                                          context,
-                                                        ).colorScheme.primary
-                                                        : Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurfaceVariant,
-                                              ),
-                                              tooltip:
-                                                  userPreferences
-                                                              .favoriteTeam ==
-                                                          team.name
-                                                      ? 'Remove from favorites'
-                                                      : 'Mark as favorite',
-                                              onPressed: () {
-                                                if (userPreferences
-                                                        .favoriteTeam ==
-                                                    team.name) {
-                                                  userPreferences
-                                                      .setFavoriteTeam('');
-                                                } else {
-                                                  userPreferences
-                                                      .setFavoriteTeam(
-                                                        team.name,
-                                                      );
-                                                }
-                                              },
-                                            ),
-                                  ),
-                                );
-                              }),
-                            ),
-                          ),
+                    actions: [
+                      if (_isSelectionMode)
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed:
+                              _selectedTeamIndices.isNotEmpty
+                                  ? _deleteSelectedTeams
+                                  : null,
                         )
                       else
-                        const SliverFillRemaining(
-                          child: Center(child: CircularProgressIndicator()),
-                        ),
+                        const AppMenu(currentRoute: 'teams'),
                     ],
                   ),
-                ),
-              ],
+                ];
+              },
+              body: CustomScrollView(
+                slivers: [
+                  // Main content
+                  if (teamsProvider.loaded)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 4.0,
+                          right: 4.0,
+                          top: 4.0,
+                          bottom: 4.0 + MediaQuery.of(context).padding.bottom,
+                        ),
+                        child: Column(
+                          children: List.generate(teams.length, (index) {
+                            final team = teams[index];
+                            final realIndex = teamsProvider.teams.indexOf(team);
+                            final isSelected = _selectedTeamIndices.contains(
+                              realIndex,
+                            );
+
+                            return Card(
+                              elevation: 0,
+                              color:
+                                  isSelected
+                                      ? Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer
+                                      : Theme.of(context).colorScheme.surface,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12.0,
+                                  vertical: 4.0,
+                                ),
+                                leading:
+                                    _isSelectionMode
+                                        ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              isSelected
+                                                  ? Icons.check_circle_outlined
+                                                  : Icons
+                                                      .radio_button_unchecked_outlined,
+                                              color:
+                                                  isSelected
+                                                      ? Theme.of(
+                                                        context,
+                                                      ).colorScheme.primary
+                                                      : Theme.of(
+                                                        context,
+                                                      ).colorScheme.outline,
+                                            ),
+                                            const SizedBox(width: 8.0),
+                                            TeamLogo(
+                                              logoUrl: team.logoUrl,
+                                              size: 48,
+                                            ),
+                                          ],
+                                        )
+                                        : TeamLogo(
+                                          logoUrl: team.logoUrl,
+                                          size: 48,
+                                        ),
+                                title: Text(
+                                  team.name,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                                onTap: () {
+                                  if (_isSelectionMode) {
+                                    _toggleTeamSelection(realIndex);
+                                  } else if (widget.title != 'Teams') {
+                                    // Team selection mode - select team and return
+                                    widget.onTeamSelected(team.name);
+                                    Navigator.pop(context, team.name);
+                                  } else {
+                                    // Teams mode - navigate to team detail
+                                    _navigateToTeamDetail(team.name);
+                                  }
+                                },
+                                onLongPress: () {
+                                  if (!_isSelectionMode &&
+                                      widget.title == 'Teams') {
+                                    _enterSelectionMode(realIndex);
+                                  }
+                                },
+                                trailing:
+                                    _isSelectionMode
+                                        ? null
+                                        : IconButton(
+                                          visualDensity: VisualDensity.compact,
+                                          icon: Icon(
+                                            userPreferences.favoriteTeam ==
+                                                    team.name
+                                                ? Icons.star_outlined
+                                                : Icons.star_border_outlined,
+                                            color:
+                                                userPreferences.favoriteTeam ==
+                                                        team.name
+                                                    ? Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurfaceVariant,
+                                          ),
+                                          tooltip:
+                                              userPreferences.favoriteTeam ==
+                                                      team.name
+                                                  ? 'Remove from favorites'
+                                                  : 'Mark as favorite',
+                                          onPressed: () {
+                                            if (userPreferences.favoriteTeam ==
+                                                team.name) {
+                                              userPreferences.setFavoriteTeam(
+                                                '',
+                                              );
+                                            } else {
+                                              userPreferences.setFavoriteTeam(
+                                                team.name,
+                                              );
+                                            }
+                                          },
+                                        ),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                    )
+                  else
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              ),
             ),
 
             // Fixed position FAB
@@ -337,6 +300,10 @@ class _TeamListScreenState extends State<TeamListScreen> {
               right: 16.0,
               bottom: 140.0, // Fixed position well above nav bar
               child: FloatingActionButton.extended(
+                backgroundColor: context.colors.primary,
+                foregroundColor: context.colors.onPrimary,
+                elevation: 0,
+                heroTag: 'add_team_fab',
                 onPressed: () async {
                   final navigator = Navigator.of(context);
                   final addedTeamName = await navigator.push<String>(
@@ -363,60 +330,6 @@ class _TeamListScreenState extends State<TeamListScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTeamLogo(Team team) {
-    final logoUrl = team.logoUrl;
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          logoUrl,
-          width: 48,
-          height: 48,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultLogo();
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return SizedBox(
-              width: 48,
-              height: 48,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    return _buildDefaultLogo();
-  }
-
-  Widget _buildDefaultLogo() {
-    return Builder(
-      builder:
-          (context) => Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: context.colors.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: FootballIcon(
-              size: 28,
-              color: context.colors.onPrimaryContainer,
-            ),
-          ),
     );
   }
 

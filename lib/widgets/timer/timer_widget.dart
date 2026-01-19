@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
@@ -39,12 +40,16 @@ class TimerWidgetState extends State<TimerWidget> {
   }
 
   void toggleTimer() {
+    HapticFeedback.mediumImpact();
+
     _gameStateService.setTimerRunning(!_gameStateService.isTimerRunning);
 
     widget.isRunning?.value = _gameStateService.isTimerRunning;
   }
 
   void resetTimer() {
+    HapticFeedback.selectionClick();
+
     _gameStateService.resetTimer();
 
     widget.isRunning?.value = false;
@@ -70,6 +75,9 @@ class TimerWidgetState extends State<TimerWidget> {
     }
 
     if (!confirmed || !mounted) return;
+
+    // Provide haptic feedback for quarter/game end
+    HapticFeedback.mediumImpact();
 
     final scoringState = context.findAncestorStateOfType<ScoringScreenState>();
     if (scoringState == null) return;

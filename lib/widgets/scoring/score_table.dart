@@ -142,6 +142,8 @@ class ScoreTable extends StatelessWidget {
 
   /// Builds continuous vertical dividers that span the entire table height
   Widget _buildVerticalDividers(BuildContext context) {
+    final dividerColor = context.colors.outline.withValues(alpha: 0.15);
+
     return Positioned.fill(
       child: Row(
         children: [
@@ -152,19 +154,19 @@ class ScoreTable extends StatelessWidget {
           // Gap before first divider
           SizedBox(width: 6.0),
           // First divider (after quarter column)
-          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
+          Container(width: 1.0, color: dividerColor),
           // Goals column - flexible space
           Expanded(child: SizedBox()),
           // Gap before second divider
           SizedBox(width: 6.0),
           // Second divider (after goals column)
-          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
+          Container(width: 1.0, color: dividerColor),
           // Behinds column - flexible space
           Expanded(child: SizedBox()),
           // Gap before third divider
           SizedBox(width: 6.0),
           // Third divider (after behinds column)
-          Container(width: 2.0, color: context.colors.surfaceContainerHighest),
+          Container(width: 1.0, color: dividerColor),
           // Points column - flexible space
           Expanded(child: SizedBox()),
           // Right padding

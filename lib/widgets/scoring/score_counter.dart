@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/color_service.dart';
@@ -148,6 +149,9 @@ class ScoreCounterState extends State<ScoreCounter> {
   }
 
   void _updateCount(int newCount) {
+    // Provide tactile feedback for score changes
+    HapticFeedback.lightImpact();
+
     // Use the game state service directly
     final gameStateService = GameStateService.instance;
 

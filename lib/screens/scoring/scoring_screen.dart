@@ -9,6 +9,7 @@ import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
+import 'package:scorecard/widgets/app_scaffold.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
 import 'package:scorecard/widgets/results/results_widget.dart';
@@ -198,143 +199,22 @@ class ScoringScreenState extends State<ScoringScreen> {
           Navigator.of(context).pop();
         }
       },
-      child: Scaffold(
+      child: AppScaffold(
         body: Stack(
           children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      ColorService.withAlpha(
-                        context.colors.primaryContainer,
-                        0.9,
-                      ),
-                      context.colors.surface,
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            // Main content - adaptive layout based on available height
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Threshold: below 580dp content height we need scrolling
+                // to fit timer + both score panels comfortably
+                final needsScroll = constraints.maxHeight < 580;
 
-            // Main content with collapsible app bar
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverAppBar(
-                    backgroundColor: context.colors.primaryContainer,
-                    foregroundColor: context.colors.onPrimaryContainer,
-                    floating: true,
-                    snap: true,
-                    pinned: false,
-                    elevation: 0,
-                    shadowColor: ColorService.transparent,
-                    surfaceTintColor: ColorService.transparent,
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back_outlined),
-                      tooltip: 'Back',
-                      onPressed: () async {
-                        final shouldPop = await _onWillPop();
-                        if (shouldPop && context.mounted) {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    ),
-                    title: Text(
-                      "Score Card",
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    actions: [
-                      IconButton(
-                        icon:
-                            _isSharing
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Icon(Icons.share_outlined),
-                        tooltip: 'Share Game Details',
-                        onPressed: _isSharing ? null : _shareGameDetails,
-                      ),
-                      const AppMenu(currentRoute: 'scoring'),
-                    ],
-                  ),
-                ];
+                if (needsScroll) {
+                  return _buildScrollableLayout(context);
+                } else {
+                  return _buildFixedLayout(context);
+                }
               },
-              body: CustomScrollView(
-                slivers: [
-                  // Timer Panel
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
-                      child: TimerWidget(
-                        key: _quarterTimerKey,
-                        isRunning: isTimerRunning,
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(child: const SizedBox(height: 6)),
-
-                  // Home Team Score Table
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, timerRunning, child) {
-                          return ScorePanel(
-                            events: List<GameEvent>.from(gameEvents),
-                            homeTeam: gameStateService.homeTeam,
-                            awayTeam: gameStateService.awayTeam,
-                            displayTeam: gameStateService.homeTeam,
-                            isHomeTeam: true,
-                            enabled: timerRunning,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                  SliverToBoxAdapter(child: const SizedBox(height: 6)),
-
-                  // Away Team Score Table
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: ValueListenableBuilder<bool>(
-                        valueListenable: isTimerRunning,
-                        builder: (context, timerRunning, child) {
-                          return ScorePanel(
-                            events: List<GameEvent>.from(gameEvents),
-                            homeTeam: gameStateService.homeTeam,
-                            awayTeam: gameStateService.awayTeam,
-                            displayTeam: gameStateService.awayTeam,
-                            isHomeTeam: false,
-                            enabled: timerRunning,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-
-                  // Bottom padding for safe scrolling
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).padding.bottom + 16,
-                    ),
-                  ),
-                ],
-              ),
             ),
 
             // Screenshot widget positioned off-screen
@@ -359,6 +239,204 @@ class ScoringScreenState extends State<ScoringScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  /// Build scrollable layout for smaller screens
+  Widget _buildScrollableLayout(BuildContext context) {
+    return NestedScrollView(
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [_buildSliverAppBar(context)];
+      },
+      body: CustomScrollView(
+        slivers: [
+          // Timer Panel
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
+              child: TimerWidget(
+                key: _quarterTimerKey,
+                isRunning: isTimerRunning,
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 6)),
+
+          // Home Team Score Table
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: _buildHomeScorePanel(),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 6)),
+
+          // Away Team Score Table
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: _buildAwayScorePanel(),
+            ),
+          ),
+
+          // Bottom padding for safe scrolling
+          SliverToBoxAdapter(
+            child: SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build fixed layout for larger screens - no scrolling needed
+  Widget _buildFixedLayout(BuildContext context) {
+    return Column(
+      children: [
+        // App bar row
+        _buildStaticAppBar(context),
+
+        // Timer Panel
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
+          child: TimerWidget(key: _quarterTimerKey, isRunning: isTimerRunning),
+        ),
+
+        const SizedBox(height: 6),
+
+        // Home Team Score Panel - expanded to fill available space
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: _buildHomeScorePanel(),
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        // Away Team Score Panel - expanded to fill available space
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: _buildAwayScorePanel(),
+          ),
+        ),
+
+        // Bottom safe area padding
+        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+      ],
+    );
+  }
+
+  /// Build the sliver app bar for scrollable layout
+  SliverAppBar _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      backgroundColor: ColorService.transparent,
+      foregroundColor: context.colors.onPrimaryContainer,
+      floating: true,
+      snap: true,
+      pinned: false,
+      elevation: 0,
+      shadowColor: ColorService.transparent,
+      surfaceTintColor: ColorService.transparent,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_outlined),
+        tooltip: 'Back',
+        onPressed: () async {
+          final shouldPop = await _onWillPop();
+          if (shouldPop && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
+      title: Text("Score Card", style: Theme.of(context).textTheme.titleLarge),
+      actions: _buildAppBarActions(),
+    );
+  }
+
+  /// Build static app bar for fixed layout
+  Widget _buildStaticAppBar(BuildContext context) {
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_outlined),
+              tooltip: 'Back',
+              color: context.colors.onPrimaryContainer,
+              onPressed: () async {
+                final shouldPop = await _onWillPop();
+                if (shouldPop && context.mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+            Expanded(
+              child: Text(
+                "Score Card",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            ..._buildAppBarActions(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build app bar action buttons
+  List<Widget> _buildAppBarActions() {
+    return [
+      IconButton(
+        icon:
+            _isSharing
+                ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+                : const Icon(Icons.share_outlined),
+        tooltip: 'Share Game Details',
+        onPressed: _isSharing ? null : _shareGameDetails,
+      ),
+      const AppMenu(currentRoute: 'scoring'),
+    ];
+  }
+
+  /// Build home team score panel with ValueListenableBuilder
+  Widget _buildHomeScorePanel() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isTimerRunning,
+      builder: (context, timerRunning, child) {
+        return ScorePanel(
+          events: List<GameEvent>.from(gameEvents),
+          homeTeam: gameStateService.homeTeam,
+          awayTeam: gameStateService.awayTeam,
+          displayTeam: gameStateService.homeTeam,
+          isHomeTeam: true,
+          enabled: timerRunning,
+        );
+      },
+    );
+  }
+
+  /// Build away team score panel with ValueListenableBuilder
+  Widget _buildAwayScorePanel() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isTimerRunning,
+      builder: (context, timerRunning, child) {
+        return ScorePanel(
+          events: List<GameEvent>.from(gameEvents),
+          homeTeam: gameStateService.homeTeam,
+          awayTeam: gameStateService.awayTeam,
+          displayTeam: gameStateService.awayTeam,
+          isHomeTeam: false,
+          enabled: timerRunning,
+        );
+      },
     );
   }
 }

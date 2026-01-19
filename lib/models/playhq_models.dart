@@ -393,6 +393,31 @@ class Address {
     return parts.join(', ');
   }
 
+  /// Check if this address is valid for directions
+  /// Returns true for any non-empty address - Google Maps will handle
+  /// P.O. Box addresses intelligently when combined with venue name and suburb
+  bool get isValidForDirections {
+    return line1.isNotEmpty;
+  }
+
+  /// Get enhanced search query including venue name for more accurate Google Maps results
+  /// Example: "Chelsea JFC, 123 Main St, Chelsea, VIC, 3196, Australia"
+  String getSearchQueryWithVenue(String venueName) {
+    final parts = <String>[];
+
+    // Start with the venue name for better search accuracy
+    if (venueName.isNotEmpty) parts.add(venueName);
+
+    // Add address components
+    if (line1.isNotEmpty) parts.add(line1);
+    if (suburb.isNotEmpty) parts.add(suburb);
+    if (state.isNotEmpty) parts.add(state);
+    if (postcode.isNotEmpty) parts.add(postcode);
+    if (country.isNotEmpty) parts.add(country);
+
+    return parts.join(', ');
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

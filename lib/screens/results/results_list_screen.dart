@@ -5,6 +5,7 @@ import '../../services/results_service.dart';
 import '../../services/game_state_service.dart';
 import '../../widgets/results/results_summary_card.dart';
 import '../../widgets/menu/app_menu.dart';
+import '../../widgets/app_scaffold.dart';
 
 import 'results_screen.dart';
 import '../../services/color_service.dart';
@@ -250,176 +251,147 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
           _handleBackPress(); // Use the same logic as UI back button
         }
       },
-      child: Scaffold(
+      child: AppScaffold(
         extendBody: true,
-        body: Stack(
-          children: [
-            // Gradient background
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    stops: const [0.0, 0.12, 0.25, 0.5],
-                    colors: [
-                      context.colors.primaryContainer,
-                      context.colors.primaryContainer,
-                      ColorService.withAlpha(
-                        context.colors.primaryContainer,
-                        0.9,
-                      ),
-                      context.colors.surface,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            // Main content with collapsible app bar
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverAppBar(
-                    backgroundColor: context.colors.primaryContainer,
-                    foregroundColor: context.colors.onPrimaryContainer,
-                    floating: true,
-                    snap: true,
-                    pinned: false,
-                    elevation: 0,
-                    shadowColor: ColorService.transparent,
-                    surfaceTintColor: ColorService.transparent,
-                    title:
-                        _isSelectionMode
-                            ? Text('${_selectedGameIds.length} selected')
-                            : const Text('Results'),
-                    leading:
-                        _isSelectionMode
-                            ? IconButton(
-                              icon: const Icon(Icons.close_outlined),
-                              onPressed: _exitSelectionMode,
-                            )
-                            : _shouldShowBackButton()
-                            ? IconButton(
-                              icon: const Icon(Icons.arrow_back_outlined),
-                              tooltip: 'Back',
-                              onPressed: _handleBackPress,
-                            )
-                            : null,
-                    actions: [
-                      if (_isSelectionMode)
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed:
-                              _selectedGameIds.isNotEmpty
-                                  ? _deleteSelectedGames
-                                  : null,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                backgroundColor: ColorService.transparent,
+                foregroundColor: context.colors.onPrimaryContainer,
+                floating: true,
+                snap: true,
+                pinned: false,
+                elevation: 0,
+                shadowColor: ColorService.transparent,
+                surfaceTintColor: ColorService.transparent,
+                title:
+                    _isSelectionMode
+                        ? Text('${_selectedGameIds.length} selected')
+                        : const Text('Results'),
+                leading:
+                    _isSelectionMode
+                        ? IconButton(
+                          icon: const Icon(Icons.close_outlined),
+                          onPressed: _exitSelectionMode,
                         )
-                      else
-                        const AppMenu(currentRoute: 'results'),
-                    ],
-                  ),
-                ];
-              },
-              body: RefreshIndicator(
-                onRefresh: _loadGames,
-                child: CustomScrollView(
-                  controller: _scrollController,
-                  slivers: [
-                    // Main content
-                    if (_isLoading)
-                      const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else if (_gameSummaries.isEmpty)
-                      SliverFillRemaining(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.flag_outlined,
-                                size: 64,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.6),
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No games yet',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Games are automatically saved when you start scoring',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ],
+                        : _shouldShowBackButton()
+                        ? IconButton(
+                          icon: const Icon(Icons.arrow_back_outlined),
+                          tooltip: 'Back',
+                          onPressed: _handleBackPress,
+                        )
+                        : null,
+                actions: [
+                  if (_isSelectionMode)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed:
+                          _selectedGameIds.isNotEmpty
+                              ? _deleteSelectedGames
+                              : null,
+                    )
+                  else
+                    const AppMenu(currentRoute: 'results'),
+                ],
+              ),
+            ];
+          },
+          body: RefreshIndicator(
+            onRefresh: _loadGames,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Main content
+                if (_isLoading)
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (_gameSummaries.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.flag_outlined,
+                            size: 64,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
-                        ),
-                      )
-                    else
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            // Show loading indicator at the bottom
-                            if (index == _gameSummaries.length) {
-                              return const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-
-                            final gameSummary = _gameSummaries[index];
-                            return ResultsSummaryCard(
-                              gameSummary: gameSummary,
-                              isSelectionMode: _isSelectionMode,
-                              isSelected: _selectedGameIds.contains(
-                                gameSummary.id,
-                              ),
-                              onTap: () {
-                                if (_isSelectionMode) {
-                                  _toggleGameSelection(gameSummary.id);
-                                } else {
-                                  _showGameDetails(gameSummary.id);
-                                }
-                              },
-                              onLongPress: () {
-                                if (!_isSelectionMode) {
-                                  _enterSelectionMode(gameSummary.id);
-                                }
-                              },
-                            );
-                          },
-                          childCount:
-                              _gameSummaries.length +
-                              (_hasMoreGames || _isLoadingMore ? 1 : 0),
-                        ),
-                      ),
-
-                    // Add bottom padding for system navigation bar
-                    SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).padding.bottom,
+                          const SizedBox(height: 16),
+                          Text(
+                            'No games yet',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Games are automatically saved when you start scoring',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        // Show loading indicator at the bottom
+                        if (index == _gameSummaries.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final gameSummary = _gameSummaries[index];
+                        return ResultsSummaryCard(
+                          gameSummary: gameSummary,
+                          isSelectionMode: _isSelectionMode,
+                          isSelected: _selectedGameIds.contains(gameSummary.id),
+                          onTap: () {
+                            if (_isSelectionMode) {
+                              _toggleGameSelection(gameSummary.id);
+                            } else {
+                              _showGameDetails(gameSummary.id);
+                            }
+                          },
+                          onLongPress: () {
+                            if (!_isSelectionMode) {
+                              _enterSelectionMode(gameSummary.id);
+                            }
+                          },
+                        );
+                      },
+                      childCount:
+                          _gameSummaries.length +
+                          (_hasMoreGames || _isLoadingMore ? 1 : 0),
+                    ),
+                  ),
+
+                // Add bottom padding for system navigation bar
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom,
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

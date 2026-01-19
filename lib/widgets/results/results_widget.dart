@@ -11,6 +11,7 @@ import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_table_builder_service.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/team_logo.dart';
 import 'package:scorecard/services/asset_icon_service.dart';
 
 /// A unified widget for displaying game details
@@ -478,51 +479,8 @@ class _QuarterBreakdownSection extends StatelessWidget {
                       team?.logoUrl32 ?? team?.logoUrl48 ?? team?.logoUrl;
 
                   return Container(
-                    width: 32,
-                    height: 32,
                     margin: const EdgeInsets.only(right: 8),
-                    child:
-                        logoUrl != null && logoUrl.isNotEmpty
-                            ? ClipOval(
-                              child: Image.network(
-                                logoUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: ColorService.withAlpha(
-                                        context.colors.outline,
-                                        0.5,
-                                      ),
-                                    ),
-                                    child: FootballIcon(
-                                      size: 16,
-                                      color: ColorService.withAlpha(
-                                        context.colors.outline,
-                                        0.6,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                            : Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: ColorService.withAlpha(
-                                  context.colors.outline,
-                                  0.1,
-                                ),
-                              ),
-                              child: FootballIcon(
-                                size: 16,
-                                color: ColorService.withAlpha(
-                                  context.colors.outline,
-                                  0.6,
-                                ),
-                              ),
-                            ),
+                    child: TeamLogo(logoUrl: logoUrl, size: 32),
                   );
                 },
               ),

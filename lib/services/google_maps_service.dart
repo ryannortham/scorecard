@@ -18,6 +18,7 @@ class GoogleMapsService {
   ///
   /// Parameters:
   /// - [address]: The address to show on the map
+  /// - [venueName]: Optional venue name to improve search accuracy
   /// - [width]: Image width in pixels (default: 600)
   /// - [height]: Image height in pixels (default: 300)
   /// - [zoom]: Map zoom level 1-21 (default: 15)
@@ -25,6 +26,7 @@ class GoogleMapsService {
   /// - [mapType]: Map type - roadmap, satellite, hybrid, terrain (default: roadmap)
   static String getStaticMapUrl(
     Address address, {
+    String? venueName,
     int width = 600,
     int height = 300,
     int zoom = 15,
@@ -41,10 +43,15 @@ class GoogleMapsService {
       );
     }
 
-    // Use the googleMapsAddress property for better geocoding
-    final location = Uri.encodeComponent(address.googleMapsAddress);
+    // Use enhanced query with venue name if provided for better accuracy
+    final query =
+        venueName != null && venueName.isNotEmpty
+            ? address.getSearchQueryWithVenue(venueName)
+            : address.googleMapsAddress;
+
+    final location = Uri.encodeComponent(query);
     AppLogger.info(
-      'Generating map URL for: ${address.googleMapsAddress}',
+      'Generating map URL for: $query',
       component: 'GoogleMapsService',
     );
     AppLogger.info(

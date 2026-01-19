@@ -109,16 +109,12 @@ class ScoreTableRow extends StatelessWidget {
               flex: 3,
               child: Container(
                 decoration: BoxDecoration(
-                  color: ColorService.transparent,
-                  border: Border.all(
-                    color:
-                        isFutureQuarter
-                            ? ColorService.transparent
-                            : Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                    width: 2,
-                  ),
+                  color:
+                      isFutureQuarter
+                          ? ColorService.transparent
+                          : context.colors.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          ),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: Center(

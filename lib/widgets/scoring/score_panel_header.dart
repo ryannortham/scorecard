@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/models/score_models.dart';
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
-import '../../services/asset_icon_service.dart';
+import 'package:scorecard/widgets/team_logo.dart';
 import 'package:scorecard/services/color_service.dart';
 
 /// Header widget displaying team name and total score
@@ -38,7 +37,7 @@ class ScorePanelHeader extends StatelessWidget {
           child: Row(
             children: [
               // Team logo
-              _buildTeamLogo(team),
+              TeamLogo(logoUrl: team?.logoUrl, size: 32),
               const SizedBox(width: 8),
               // Team name
               Expanded(
@@ -67,62 +66,6 @@ class ScorePanelHeader extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  /// Build team logo widget (32x32 size for compact header)
-  Widget _buildTeamLogo(Team? team) {
-    final logoUrl = team?.logoUrl;
-    if (logoUrl != null && logoUrl.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          logoUrl,
-          width: 32,
-          height: 32,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildDefaultLogo();
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return SizedBox(
-              width: 32,
-              height: 32,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    return _buildDefaultLogo();
-  }
-
-  /// Build default logo when no team logo is available
-  Widget _buildDefaultLogo() {
-    return Builder(
-      builder:
-          (context) => Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: context.colors.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: FootballIcon(
-              size: 20,
-              color: context.colors.onPrimaryContainer,
-            ),
-          ),
     );
   }
 }

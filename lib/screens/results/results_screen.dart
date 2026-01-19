@@ -7,6 +7,7 @@ import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/widgets/app_scaffold.dart';
 import 'package:scorecard/widgets/menu/app_menu.dart';
 
 import 'package:scorecard/widgets/results/results_widget.dart';
@@ -92,38 +93,16 @@ class _ResultsScreenState extends State<ResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       extendBody: true,
       body: Stack(
         children: [
-          // Gradient background
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.12, 0.25, 0.5],
-                  colors: [
-                    context.colors.primaryContainer,
-                    context.colors.primaryContainer,
-                    ColorService.withAlpha(
-                      context.colors.primaryContainer,
-                      0.9,
-                    ),
-                    context.colors.surface,
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // Main content with collapsible app bar
           NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
-                  backgroundColor: context.colors.primaryContainer,
+                  backgroundColor: ColorService.transparent,
                   foregroundColor: context.colors.onPrimaryContainer,
                   floating: true,
                   snap: true,

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
-import '../../services/asset_icon_service.dart';
+import 'package:scorecard/widgets/team_logo.dart';
 import 'package:scorecard/services/color_service.dart';
 
 /// Optimized widget for displaying game summary in the results list
@@ -57,60 +57,8 @@ class ResultsSummaryCard extends StatelessWidget {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
-        final logoUrl = team?.logoUrl;
-
-        if (logoUrl != null && logoUrl.isNotEmpty) {
-          return ClipOval(
-            child: Image.network(
-              logoUrl,
-              width: 48,
-              height: 48,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return _buildDefaultLogo();
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      value:
-                          loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        }
-
-        return _buildDefaultLogo();
+        return TeamLogo(logoUrl: team?.logoUrl, size: 48);
       },
-    );
-  }
-
-  /// Build default logo when no team logo is available
-  Widget _buildDefaultLogo() {
-    return Builder(
-      builder:
-          (context) => Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: context.colors.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: FootballIcon(
-              size: 28,
-              color: context.colors.onPrimaryContainer,
-            ),
-          ),
     );
   }
 
@@ -131,7 +79,7 @@ class ResultsSummaryCard extends StatelessWidget {
         color:
             isSelected
                 ? context.colors.primaryContainer
-                : context.colors.surfaceContainer,
+                : context.colors.surface,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(

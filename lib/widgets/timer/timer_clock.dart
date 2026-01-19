@@ -197,6 +197,9 @@ class _TimerClockState extends State<TimerClock> {
                                 quarterMSec,
                                 isCountdownTimer,
                               ),
+                              fontFeatures: [
+                                const FontFeature.tabularFigures(),
+                              ],
                             ),
                           ),
                         ),
