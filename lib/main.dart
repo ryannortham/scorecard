@@ -55,12 +55,17 @@ class FootyScoreCardApp extends StatelessWidget {
             final lightColorScheme =
                 (useDynamicColors && lightDynamic != null)
                     ? lightDynamic
-                    : ColorScheme.fromSeed(seedColor: userPreferences.getThemeColor());
+                    : ColorScheme.fromSeed(
+                      seedColor: userPreferences.getThemeColor(),
+                    );
 
             final darkColorScheme =
                 (useDynamicColors && darkDynamic != null)
                     ? darkDynamic
-                    : ColorScheme.fromSeed(seedColor: userPreferences.getThemeColor(), brightness: Brightness.dark);
+                    : ColorScheme.fromSeed(
+                      seedColor: userPreferences.getThemeColor(),
+                      brightness: Brightness.dark,
+                    );
 
             return MaterialApp(
               title: 'Score Card',
@@ -68,14 +73,18 @@ class FootyScoreCardApp extends StatelessWidget {
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
                 // Ensure Material 3 surface variations are respected
-                elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(elevation: 1)),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(elevation: 1),
+                ),
                 cardTheme: const CardThemeData(elevation: 1),
               ),
               darkTheme: ThemeData(
                 colorScheme: darkColorScheme,
                 useMaterial3: true,
                 // Ensure Material 3 surface variations are respected
-                elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(elevation: 1)),
+                elevatedButtonTheme: ElevatedButtonThemeData(
+                  style: ElevatedButton.styleFrom(elevation: 1),
+                ),
                 cardTheme: const CardThemeData(elevation: 1),
               ),
               themeMode: userPreferences.themeMode,

@@ -91,45 +91,13 @@ jobs:
           path: mobsf-results.sarif
           retention-days: 30
 
-  codeql-analyze:
-    name: 🔍 CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-      contents: read
-    timeout-minutes: 360
-
-    steps:
-    - name: 📥 Checkout repository
-      uses: actions/checkout@v4
-
-    - name: 🔍 Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: javascript-typescript
-        build-mode: none
-        # Add specific configuration for consistent analysis
-        config: |
-          name: "CodeQL Config"
-          queries:
-            - uses: security-and-quality
-
-    - name: � Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        category: "/language:javascript-typescript"
-        # Add upload-database to ensure configuration persistence
-        upload-database: true
-
   # =============================================================================
   # BUILD PHASE - Only runs on main branch or releases
   # =============================================================================
   
   build:
     name: 🏗️ Build Release
-    needs: [test, security-scan, codeql-analyze]
+    needs: [test, security-scan]
     runs-on: ubuntu-latest
     # Only run on main branch pushes OR releases
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'

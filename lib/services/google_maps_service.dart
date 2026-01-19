@@ -32,14 +32,25 @@ class GoogleMapsService {
     String mapType = 'roadmap',
   }) {
     if (_apiKey.isEmpty) {
-      AppLogger.error('Google Maps API key is EMPTY!', component: 'GoogleMapsService');
-      throw Exception('Google Maps API key not found. Please check your .env file.');
+      AppLogger.error(
+        'Google Maps API key is EMPTY!',
+        component: 'GoogleMapsService',
+      );
+      throw Exception(
+        'Google Maps API key not found. Please check your .env file.',
+      );
     }
 
     // Use the googleMapsAddress property for better geocoding
     final location = Uri.encodeComponent(address.googleMapsAddress);
-    AppLogger.info('Generating map URL for: ${address.googleMapsAddress}', component: 'GoogleMapsService');
-    AppLogger.info('Encoded location: $location', component: 'GoogleMapsService');
+    AppLogger.info(
+      'Generating map URL for: ${address.googleMapsAddress}',
+      component: 'GoogleMapsService',
+    );
+    AppLogger.info(
+      'Encoded location: $location',
+      component: 'GoogleMapsService',
+    );
 
     // Build the Static Maps API URL
     final url =
@@ -52,7 +63,10 @@ class GoogleMapsService {
         '&markers=color:red%7C$location'
         '&key=$_apiKey';
 
-    AppLogger.info('Generated Static Map URL: $url', component: 'GoogleMapsService');
+    AppLogger.info(
+      'Generated Static Map URL: $url',
+      component: 'GoogleMapsService',
+    );
     return url;
   }
 
