@@ -40,6 +40,10 @@ jobs:
       - name: 📦 Install dependencies
         run: flutter pub get
 
+      - name: 🔧 Create .env file
+        run: |
+          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+
       - name: 🎨 Verify formatting
         run: dart format --output=none --set-exit-if-changed .
 
@@ -131,6 +135,10 @@ jobs:
 
       - name: 📦 Install dependencies
         run: flutter pub get
+
+      - name: 🔧 Create .env file with API key
+        run: |
+          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
 
       # Clean only if needed
       - name: 🧹 Clean build environment (if needed)
