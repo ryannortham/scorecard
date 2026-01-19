@@ -2,6 +2,24 @@
     <!-- Internet permission required for external API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Queries section required for Android 11+ to allow url_launcher to detect external apps -->
+    <queries>
+        <!-- For opening web URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <!-- For opening map/navigation apps -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+    </queries>
+
    <application
         android:label="Score Card"
         android:name="${applicationName}"

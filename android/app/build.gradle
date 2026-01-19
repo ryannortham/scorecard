@@ -35,7 +35,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "blog.ryannortham.scorecard"
-    compileSdk 35  // Updated for plugin compatibility
+    compileSdk 36  // Updated for plugin compatibility
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -57,7 +57,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 35  // Updated to fix StrandHogg 2.0 vulnerability and match compileSdk
+        targetSdkVersion 36  // Updated to fix StrandHogg 2.0 vulnerability and match compileSdk
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }

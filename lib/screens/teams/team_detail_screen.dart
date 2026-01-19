@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,11 +8,13 @@ import '../../models/score_models.dart';
 import '../../models/playhq_models.dart';
 import '../../providers/teams_provider.dart';
 import '../../providers/user_preferences_provider.dart';
+import '../../services/app_logger.dart';
 import '../../services/color_service.dart';
 import '../../services/navigation_service.dart';
 import '../../services/dialog_service.dart';
 import '../../services/asset_icon_service.dart';
 import '../../services/playhq_graphql_service.dart';
+import '../../services/google_maps_service.dart';
 
 class TeamDetailScreen extends StatefulWidget {
   const TeamDetailScreen({super.key, required this.teamName});
@@ -35,18 +39,14 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
   Future<void> _tryFetchAddressIfNeeded() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final teamIndex = teamsProvider.teams.indexWhere(
-      (team) => team.name == widget.teamName,
-    );
+    final teamIndex = teamsProvider.teams.indexWhere((team) => team.name == widget.teamName);
 
     if (teamIndex == -1) return;
 
     final team = teamsProvider.teams[teamIndex];
 
     // Only fetch if team has PlayHQ info but no address
-    if ((team.routingCode != null && team.routingCode!.isNotEmpty) &&
-        team.address == null &&
-        !_isFetchingAddress) {
+    if ((team.routingCode != null && team.routingCode!.isNotEmpty) && team.address == null && !_isFetchingAddress) {
       await _fetchAddressFromPlayHQ(teamIndex, team);
     } else if (team.playHQId != null &&
         team.playHQId!.isNotEmpty &&
@@ -70,11 +70,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
           const SnackBar(
             content: Row(
               children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                 SizedBox(width: 12),
                 Text('Fetching team address...'),
               ],
@@ -88,18 +84,14 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
       // If no routingCode stored, try to find it by searching
       if (routingCode == null || routingCode.isEmpty) {
-        final searchResponse = await PlayHQGraphQLService.searchAFLClubs(
-          team.name,
-        );
+        final searchResponse = await PlayHQGraphQLService.searchAFLClubs(team.name);
 
         if (searchResponse.results.isNotEmpty) {
           // Look for exact match by PlayHQ ID if available
           Organisation? matchingOrg;
           if (team.playHQId != null && team.playHQId!.isNotEmpty) {
             try {
-              matchingOrg = searchResponse.results.firstWhere(
-                (org) => org.id == team.playHQId,
-              );
+              matchingOrg = searchResponse.results.firstWhere((org) => org.id == team.playHQId);
             } catch (e) {
               // No exact match found, use first result
               matchingOrg = searchResponse.results.first;
@@ -113,18 +105,13 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
       if (routingCode != null && routingCode.isNotEmpty) {
         // Fetch detailed organization information
-        final orgResponse = await PlayHQGraphQLService.getOrganisationDetails(
-          routingCode,
-        );
+        final orgResponse = await PlayHQGraphQLService.getOrganisationDetails(routingCode);
 
         final address = orgResponse.organisation?.address;
 
         if (address != null && mounted) {
           // Update the team with address information
-          final teamsProvider = Provider.of<TeamsProvider>(
-            context,
-            listen: false,
-          );
+          final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
           await teamsProvider.editTeam(
             teamIndex,
             team.name,
@@ -149,30 +136,21 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         } else if (mounted) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No address information found for this team'),
-              duration: Duration(seconds: 2),
-            ),
+            const SnackBar(content: Text('No address information found for this team'), duration: Duration(seconds: 2)),
           );
         }
       } else if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not find team in PlayHQ database'),
-            duration: Duration(seconds: 2),
-          ),
+          const SnackBar(content: Text('Could not find team in PlayHQ database'), duration: Duration(seconds: 2)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error fetching address: $e'),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error fetching address: $e'), duration: const Duration(seconds: 3)));
       }
     } finally {
       if (mounted) {
@@ -189,9 +167,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     final userPreferences = Provider.of<UserPreferencesProvider>(context);
 
     // Find the team by name
-    final teamIndex = teamsProvider.teams.indexWhere(
-      (team) => team.name == widget.teamName,
-    );
+    final teamIndex = teamsProvider.teams.indexWhere((team) => team.name == widget.teamName);
 
     // If team not found, show error
     if (teamIndex == -1) {
@@ -225,10 +201,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                     colors: [
                       context.colors.primaryContainer,
                       context.colors.primaryContainer,
-                      ColorService.withAlpha(
-                        context.colors.primaryContainer,
-                        0.9,
-                      ),
+                      ColorService.withAlpha(context.colors.primaryContainer, 0.9),
                       context.colors.surface,
                     ],
                   ),
@@ -276,8 +249,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                           // Team Name
                           Text(
                             team.name,
-                            style: Theme.of(context).textTheme.headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.w500),
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w500),
                             textAlign: TextAlign.center,
                           ),
 
@@ -287,8 +259,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                           _buildActionButtons(context, isFavorite),
 
                           // Address Section - only show for PlayHQ teams
-                          if (team.playHQId != null &&
-                              team.playHQId!.isNotEmpty) ...[
+                          if (team.playHQId != null && team.playHQId!.isNotEmpty) ...[
                             if (team.address != null) ...[
                               const SizedBox(height: 4.0),
                               _buildAddressSection(team.address!),
@@ -298,10 +269,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                             ],
                           ],
 
-                          SizedBox(
-                            height:
-                                16.0 + MediaQuery.of(context).padding.bottom,
-                          ),
+                          SizedBox(height: 16.0 + MediaQuery.of(context).padding.bottom),
                         ],
                       ),
                     ),
@@ -326,26 +294,70 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  color: context.colors.primary,
-                  size: 20,
-                ),
+                Icon(Icons.location_on_outlined, color: context.colors.primary, size: 20),
                 const SizedBox(width: 8.0),
-                Text(
-                  'Address',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text('Address', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
               ],
             ),
             const SizedBox(height: 12.0),
-            Text(
-              address.displayAddress,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            Text(address.displayAddress, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 16.0),
+
+            // Google Maps Static Image
+            if (GoogleMapsService.isConfigured) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: Image.network(
+                  GoogleMapsService.getStaticMapUrl(address, width: 600, height: 250, zoom: 15),
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: double.infinity,
+                      height: 200,
+                      color: context.colors.surfaceContainerHighest,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value:
+                              loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    AppLogger.error('Map image failed to load: $error', component: 'TeamDetailScreen');
+                    AppLogger.error('Stack trace: $stackTrace', component: 'TeamDetailScreen');
+                    return Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: context.colors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.map_outlined, size: 48, color: context.colors.onSurfaceVariant),
+                          const SizedBox(height: 8.0),
+                          Text(
+                            'Map preview unavailable',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: context.colors.onSurfaceVariant),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16.0),
+            ],
+
             Center(
               child: FilledButton.icon(
                 onPressed: () => _openDirections(address),
@@ -370,59 +382,36 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.location_off_outlined,
-                  color: context.colors.onSurfaceVariant,
-                  size: 20,
-                ),
+                Icon(Icons.location_off_outlined, color: context.colors.onSurfaceVariant, size: 20),
                 const SizedBox(width: 8.0),
-                Text(
-                  'Address',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text('Address', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500)),
               ],
             ),
             const SizedBox(height: 12.0),
             Text(
               'No address information available',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: context.colors.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: context.colors.onSurfaceVariant),
             ),
             if (team.playHQId != null && team.playHQId!.isNotEmpty) ...[
               const SizedBox(height: 16.0),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed:
-                      _isFetchingAddress
-                          ? null
-                          : () => _fetchAddressFromPlayHQ(teamIndex, team),
+                  onPressed: _isFetchingAddress ? null : () => _fetchAddressFromPlayHQ(teamIndex, team),
                   icon:
                       _isFetchingAddress
-                          ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
+                          ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                           : const Icon(Icons.location_searching),
-                  label: Text(
-                    _isFetchingAddress
-                        ? 'Fetching Address...'
-                        : 'Fetch Address from PlayHQ',
-                  ),
+                  label: Text(_isFetchingAddress ? 'Fetching Address...' : 'Fetch Address from PlayHQ'),
                 ),
               ),
             ] else ...[
               const SizedBox(height: 16.0),
               Text(
                 'This team was added manually. Address information is only available for teams imported from PlayHQ.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: context.colors.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: context.colors.onSurfaceVariant, fontStyle: FontStyle.italic),
               ),
             ],
           ],
@@ -446,28 +435,15 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
               children: [
                 IconButton.filled(
                   onPressed: _toggleFavorite,
-                  icon: Icon(
-                    isFavorite
-                        ? Icons.star_outlined
-                        : Icons.star_border_outlined,
-                  ),
+                  icon: Icon(isFavorite ? Icons.star_outlined : Icons.star_border_outlined),
                   style: IconButton.styleFrom(
-                    backgroundColor:
-                        isFavorite
-                            ? context.colors.primary
-                            : context.colors.surfaceContainerHighest,
-                    foregroundColor:
-                        isFavorite
-                            ? context.colors.onPrimary
-                            : context.colors.onSurface,
+                    backgroundColor: isFavorite ? context.colors.primary : context.colors.surfaceContainerHighest,
+                    foregroundColor: isFavorite ? context.colors.onPrimary : context.colors.onSurface,
                     minimumSize: const Size(56, 56),
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                Text(
-                  'Favorite',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
+                Text('Favorite', style: Theme.of(context).textTheme.labelMedium),
               ],
             ),
 
@@ -485,10 +461,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                Text(
-                  'Edit Name',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
+                Text('Edit Name', style: Theme.of(context).textTheme.labelMedium),
               ],
             ),
 
@@ -516,28 +489,42 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Future<void> _openDirections(Address address) async {
-    final query = Uri.encodeComponent(address.googleMapsAddress);
-    final directionsUrl =
-        'https://www.google.com/maps/dir/?api=1&destination=$query';
-
     try {
-      final uri = Uri.parse(directionsUrl);
-      if (await canLaunchUrl(uri)) {
+      Uri? uri;
+
+      if (Platform.isAndroid) {
+        // Use geo: URI for Android - opens any maps app with preference for Google Maps
+        final query = Uri.encodeComponent(address.googleMapsAddress);
+        uri = Uri.parse('geo:0,0?q=$query');
+      } else if (Platform.isIOS) {
+        // Try Google Maps app first, fallback to Apple Maps
+        final query = Uri.encodeComponent(address.googleMapsAddress);
+        final googleMapsUri = Uri.parse('comgooglemaps://?q=$query');
+
+        if (await canLaunchUrl(googleMapsUri)) {
+          uri = googleMapsUri;
+        } else {
+          // Fallback to Apple Maps
+          uri = Uri.parse('http://maps.apple.com/?q=$query');
+        }
+      } else {
+        // Web and other platforms - use HTTPS URL
+        final query = Uri.encodeComponent(address.googleMapsAddress);
+        uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$query');
+      }
+
+      if (uri != null && await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open Google Maps for directions'),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Could not open maps for directions')));
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error opening directions: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error opening directions: $e')));
       }
     }
   }
@@ -564,8 +551,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                   strokeWidth: 3,
                   value:
                       loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
+                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
                           : null,
                 ),
               ),
@@ -582,26 +568,15 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: FootballIcon(
-        size: size * 0.6,
-        color: context.colors.onPrimaryContainer,
-      ),
+      decoration: BoxDecoration(color: context.colors.primaryContainer, shape: BoxShape.circle),
+      child: FootballIcon(size: size * 0.6, color: context.colors.onPrimaryContainer),
     );
   }
 
   void _toggleFavorite() {
-    final userPreferences = Provider.of<UserPreferencesProvider>(
-      context,
-      listen: false,
-    );
+    final userPreferences = Provider.of<UserPreferencesProvider>(context, listen: false);
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final teamIndex = teamsProvider.teams.indexWhere(
-      (team) => team.name == widget.teamName,
-    );
+    final teamIndex = teamsProvider.teams.indexWhere((team) => team.name == widget.teamName);
 
     if (teamIndex == -1) return;
 
@@ -616,9 +591,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
   Future<void> _editTeamName() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final teamIndex = teamsProvider.teams.indexWhere(
-      (team) => team.name == widget.teamName,
-    );
+    final teamIndex = teamsProvider.teams.indexWhere((team) => team.name == widget.teamName);
 
     if (teamIndex == -1) return;
 
@@ -635,34 +608,21 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     );
 
     if (result != null && result != currentTeam.name) {
-      await teamsProvider.editTeam(
-        teamIndex,
-        result,
-        logoUrl: currentTeam.logoUrl,
-      );
+      await teamsProvider.editTeam(teamIndex, result, logoUrl: currentTeam.logoUrl);
 
       // Navigate back and forward to refresh with new team name
       if (mounted) {
         Navigator.of(context).pop();
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => TeamDetailScreen(teamName: result),
-          ),
-        );
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TeamDetailScreen(teamName: result)));
       }
     }
   }
 
   Future<void> _deleteTeam() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final userPreferences = Provider.of<UserPreferencesProvider>(
-      context,
-      listen: false,
-    );
+    final userPreferences = Provider.of<UserPreferencesProvider>(context, listen: false);
 
-    final teamIndex = teamsProvider.teams.indexWhere(
-      (team) => team.name == widget.teamName,
-    );
+    final teamIndex = teamsProvider.teams.indexWhere((team) => team.name == widget.teamName);
 
     if (teamIndex == -1) return;
 

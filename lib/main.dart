@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
@@ -9,7 +10,7 @@ import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 import 'package:scorecard/services/app_logger.dart';
 import 'package:scorecard/services/game_state_service.dart';
 
-void main() {
+Future<void> main() async {
   // Preserve the native splash screen until the app is ready
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -17,6 +18,14 @@ void main() {
   // Initialize logging system
   AppLogger.initialize();
   AppLogger.info('Score Card app starting', component: 'Main');
+
+  // Load environment variables
+  try {
+    await dotenv.load(fileName: ".env");
+    AppLogger.info('Environment variables loaded', component: 'Main');
+  } catch (e) {
+    AppLogger.error('Failed to load .env file: $e', component: 'Main');
+  }
 
   runApp(
     MultiProvider(
@@ -46,17 +55,12 @@ class FootyScoreCardApp extends StatelessWidget {
             final lightColorScheme =
                 (useDynamicColors && lightDynamic != null)
                     ? lightDynamic
-                    : ColorScheme.fromSeed(
-                      seedColor: userPreferences.getThemeColor(),
-                    );
+                    : ColorScheme.fromSeed(seedColor: userPreferences.getThemeColor());
 
             final darkColorScheme =
                 (useDynamicColors && darkDynamic != null)
                     ? darkDynamic
-                    : ColorScheme.fromSeed(
-                      seedColor: userPreferences.getThemeColor(),
-                      brightness: Brightness.dark,
-                    );
+                    : ColorScheme.fromSeed(seedColor: userPreferences.getThemeColor(), brightness: Brightness.dark);
 
             return MaterialApp(
               title: 'Score Card',
@@ -64,18 +68,14 @@ class FootyScoreCardApp extends StatelessWidget {
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
                 // Ensure Material 3 surface variations are respected
-                elevatedButtonTheme: ElevatedButtonThemeData(
-                  style: ElevatedButton.styleFrom(elevation: 1),
-                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(elevation: 1)),
                 cardTheme: const CardThemeData(elevation: 1),
               ),
               darkTheme: ThemeData(
                 colorScheme: darkColorScheme,
                 useMaterial3: true,
                 // Ensure Material 3 surface variations are respected
-                elevatedButtonTheme: ElevatedButtonThemeData(
-                  style: ElevatedButton.styleFrom(elevation: 1),
-                ),
+                elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(elevation: 1)),
                 cardTheme: const CardThemeData(elevation: 1),
               ),
               themeMode: userPreferences.themeMode,
