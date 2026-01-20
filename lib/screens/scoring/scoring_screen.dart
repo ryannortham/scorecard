@@ -202,20 +202,7 @@ class ScoringScreenState extends State<ScoringScreen> {
       child: AppScaffold(
         body: Stack(
           children: [
-            // Main content - adaptive layout based on available height
-            LayoutBuilder(
-              builder: (context, constraints) {
-                // Threshold: below 580dp content height we need scrolling
-                // to fit timer + both score panels comfortably
-                final needsScroll = constraints.maxHeight < 580;
-
-                if (needsScroll) {
-                  return _buildScrollableLayout(context);
-                } else {
-                  return _buildFixedLayout(context);
-                }
-              },
-            ),
+            _buildScrollableLayout(context),
 
             // Screenshot widget positioned off-screen
             Positioned(
@@ -242,7 +229,6 @@ class ScoringScreenState extends State<ScoringScreen> {
     );
   }
 
-  /// Build scrollable layout for smaller screens
   Widget _buildScrollableLayout(BuildContext context) {
     return NestedScrollView(
       headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -290,46 +276,6 @@ class ScoringScreenState extends State<ScoringScreen> {
     );
   }
 
-  /// Build fixed layout for larger screens - no scrolling needed
-  Widget _buildFixedLayout(BuildContext context) {
-    return Column(
-      children: [
-        // App bar row
-        _buildStaticAppBar(context),
-
-        // Timer Panel
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
-          child: TimerWidget(key: _quarterTimerKey, isRunning: isTimerRunning),
-        ),
-
-        const SizedBox(height: 6),
-
-        // Home Team Score Panel - expanded to fill available space
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: _buildHomeScorePanel(),
-          ),
-        ),
-
-        const SizedBox(height: 6),
-
-        // Away Team Score Panel - expanded to fill available space
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: _buildAwayScorePanel(),
-          ),
-        ),
-
-        // Bottom safe area padding
-        SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
-      ],
-    );
-  }
-
-  /// Build the sliver app bar for scrollable layout
   SliverAppBar _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
       backgroundColor: ColorService.transparent,
@@ -355,39 +301,6 @@ class ScoringScreenState extends State<ScoringScreen> {
     );
   }
 
-  /// Build static app bar for fixed layout
-  Widget _buildStaticAppBar(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_outlined),
-              tooltip: 'Back',
-              color: context.colors.onPrimaryContainer,
-              onPressed: () async {
-                final shouldPop = await _onWillPop();
-                if (shouldPop && context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-            Expanded(
-              child: Text(
-                "Score Card",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            ..._buildAppBarActions(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Build app bar action buttons
   List<Widget> _buildAppBarActions() {
     return [
       IconButton(

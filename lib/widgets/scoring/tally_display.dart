@@ -43,19 +43,19 @@ class TallyDisplay extends StatelessWidget {
 
     // Show number as text if shouldUseTally is false or value is above threshold
     if (!shouldUseTally || value > _textDisplayThreshold) {
-      return _buildCenteredContent(_buildTextDisplay(theme, effectiveColor));
+      return Align(
+        alignment: Alignment.center,
+        child: _buildTextDisplay(theme, effectiveColor),
+      );
     }
 
-    return _buildCenteredContent(
-      _buildTallyIconDisplay(theme, effectiveColor, effectiveIconSize),
-    );
-  }
-
-  /// Wraps content with centered alignment for text display
-  Widget _buildCenteredContent(Widget child) {
+    // tally icons are left-aligned with padding
     return Padding(
       padding: const EdgeInsets.only(left: 4.0),
-      child: Align(alignment: Alignment.center, child: child),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: _buildTallyIconDisplay(theme, effectiveColor, effectiveIconSize),
+      ),
     );
   }
 

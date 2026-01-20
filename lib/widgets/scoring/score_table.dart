@@ -53,6 +53,10 @@ class ScoreTable extends StatelessWidget {
                 final quarter = index + 1;
                 final quarterEvents = eventsByQuarter(quarter)['team'] ?? [];
                 final runningTotals = calculateRunningTotals(quarter);
+                final previousTotals =
+                    quarter > 1
+                        ? calculateRunningTotals(quarter - 1)
+                        : {'goals': 0, 'behinds': 0, 'points': 0};
 
                 return ScoreTableRow(
                   quarter: index, // 0-based index
@@ -60,6 +64,8 @@ class ScoreTable extends StatelessWidget {
                   isCurrentQuarter:
                       quarter == currentQuarter && !isCompletedGame,
                   isFutureQuarter: quarter > currentQuarter && !isCompletedGame,
+                  previousRunningGoals: previousTotals['goals'] ?? 0,
+                  previousRunningBehinds: previousTotals['behinds'] ?? 0,
                   runningGoals: runningTotals['goals'] ?? 0,
                   runningBehinds: runningTotals['behinds'] ?? 0,
                   runningPoints: runningTotals['points'] ?? 0,
@@ -93,45 +99,31 @@ class ScoreTable extends StatelessWidget {
       child: Row(
         children: [
           // Quarter column - match data row structure exactly
-          SizedBox(
-            width: 24,
-            child: Center(
-              child: SizedBox(), // Empty but same structure as data rows
-            ),
-          ),
+          const SizedBox(width: 28, child: Center(child: SizedBox())),
           // Goals column
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Center(
-                child: Text(
-                  'Goals',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
+            child: Center(
+              child: Text(
+                'Goals',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
             ),
           ),
           // Behinds column
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Center(
-                child: Text(
-                  'Behinds',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
+            child: Center(
+              child: Text(
+                'Behinds',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
             ),
           ),
           // Points column
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Center(
-                child: Text(
-                  'Points',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
+            child: Center(
+              child: Text(
+                'Points',
+                style: Theme.of(context).textTheme.labelMedium,
               ),
             ),
           ),
@@ -145,33 +137,26 @@ class ScoreTable extends StatelessWidget {
     final dividerColor = context.colors.outline.withValues(alpha: 0.15);
 
     return Positioned.fill(
-      child: Row(
-        children: [
-          // Left padding
-          SizedBox(width: 6.0),
-          // Quarter column (24px width)
-          SizedBox(width: 24),
-          // Gap before first divider
-          SizedBox(width: 6.0),
-          // First divider (after quarter column)
-          Container(width: 1.0, color: dividerColor),
-          // Goals column - flexible space
-          Expanded(child: SizedBox()),
-          // Gap before second divider
-          SizedBox(width: 6.0),
-          // Second divider (after goals column)
-          Container(width: 1.0, color: dividerColor),
-          // Behinds column - flexible space
-          Expanded(child: SizedBox()),
-          // Gap before third divider
-          SizedBox(width: 6.0),
-          // Third divider (after behinds column)
-          Container(width: 1.0, color: dividerColor),
-          // Points column - flexible space
-          Expanded(child: SizedBox()),
-          // Right padding
-          SizedBox(width: 6.0),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        child: Row(
+          children: [
+            // Quarter column (28px width)
+            const SizedBox(width: 28),
+            // First divider (after quarter column)
+            Container(width: 1.0, color: dividerColor),
+            // Goals column - flexible space
+            const Expanded(child: SizedBox()),
+            // Second divider (after goals column)
+            Container(width: 1.0, color: dividerColor),
+            // Behinds column - flexible space
+            const Expanded(child: SizedBox()),
+            // Third divider (after behinds column)
+            Container(width: 1.0, color: dividerColor),
+            // Points column - flexible space
+            const Expanded(child: SizedBox()),
+          ],
+        ),
       ),
     );
   }
