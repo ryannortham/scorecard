@@ -11,6 +11,7 @@ import 'package:scorecard/services/game_analysis_service.dart';
 import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_table_builder_service.dart';
 import 'package:scorecard/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/results/score_worm_widget.dart';
 import 'package:scorecard/widgets/team_logo.dart';
 import 'package:scorecard/services/asset_icon_service.dart';
 
@@ -85,6 +86,11 @@ class ResultsWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _ScoreSection(game: game, isLiveData: isLiveData),
+        const SizedBox(height: 4),
+        if (isLiveData)
+          ScoreWormWidget.fromLiveData(events: liveEvents ?? [])
+        else
+          ScoreWormWidget.fromStaticData(game: game),
         const SizedBox(height: 4),
         _QuarterBreakdownSection(game: game, liveEvents: liveEvents),
       ],
@@ -442,7 +448,7 @@ class _QuarterBreakdownSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _GameCard(
-      icon: Icons.timeline,
+      icon: Icons.scoreboard_outlined,
       title: 'Quarter Breakdown',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
