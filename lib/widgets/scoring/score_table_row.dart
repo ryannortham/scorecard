@@ -5,7 +5,11 @@ import 'package:scorecard/providers/game_record.dart';
 import 'package:scorecard/providers/user_preferences_provider.dart';
 import 'package:scorecard/services/color_service.dart';
 import 'package:scorecard/widgets/scoring/progressive_display.dart';
+import 'package:scorecard/widgets/scoring/progressive_number.dart';
 import 'package:scorecard/widgets/scoring/tally_display.dart';
+
+/// Types of score columns in the table
+enum ScoreColumnType { goals, behinds, points }
 
 /// A single row displaying quarter score data
 class ScoreTableRow extends StatelessWidget {
@@ -57,19 +61,33 @@ class ScoreTableRow extends StatelessWidget {
         child: Row(
           children: [
             _buildQuarterColumn(context),
-            _buildGoalsColumn(
+            _buildScoreColumn(
               context,
-              teamGoals,
-              useTallyMode,
-              isQuarterComplete,
+              type: ScoreColumnType.goals,
+              quarterValue: teamGoals,
+              runningTotal: runningGoals,
+              previousRunning: previousRunningGoals,
+              useTallyMode: useTallyMode,
+              isQuarterComplete: isQuarterComplete,
             ),
-            _buildBehindsColumn(
+            _buildScoreColumn(
               context,
-              teamBehinds,
-              useTallyMode,
-              isQuarterComplete,
+              type: ScoreColumnType.behinds,
+              quarterValue: teamBehinds,
+              runningTotal: runningBehinds,
+              previousRunning: previousRunningBehinds,
+              useTallyMode: useTallyMode,
+              isQuarterComplete: isQuarterComplete,
             ),
-            _buildPointsColumn(context, teamPoints, useTallyMode),
+            _buildScoreColumn(
+              context,
+              type: ScoreColumnType.points,
+              quarterValue: teamPoints,
+              runningTotal: runningPoints,
+              previousRunning: 0, // not used for points
+              useTallyMode: useTallyMode,
+              isQuarterComplete: isQuarterComplete,
+            ),
           ],
         ),
       ),
@@ -89,79 +107,54 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  Widget _buildGoalsColumn(
-    BuildContext context,
-    int teamGoals,
-    bool useTallyMode,
-    bool isQuarterComplete,
-  ) {
+  /// Unified builder for goals, behinds, and points columns
+  Widget _buildScoreColumn(
+    BuildContext context, {
+    required ScoreColumnType type,
+    required int quarterValue,
+    required int runningTotal,
+    required int previousRunning,
+    required bool useTallyMode,
+    required bool isQuarterComplete,
+  }) {
     if (useTallyMode) {
       return _buildTallyColumn(
         context,
-        teamGoals,
-        runningGoals,
-        useTally: true,
-        rightPadding: 5.0,
+        quarterScore: quarterValue,
+        runningTotal: runningTotal,
+        useTally: type != ScoreColumnType.points,
+        showRunningTotal: type == ScoreColumnType.points,
+        rightPadding: type == ScoreColumnType.points ? 0.0 : 5.0,
       );
     }
-    return _buildProgressiveColumn(
-      context,
-      teamGoals,
-      previousRunningGoals,
-      isQuarterComplete,
-    );
-  }
 
-  Widget _buildBehindsColumn(
-    BuildContext context,
-    int teamBehinds,
-    bool useTallyMode,
-    bool isQuarterComplete,
-  ) {
-    if (useTallyMode) {
-      return _buildTallyColumn(
+    // Progressive/numbers mode
+    if (type == ScoreColumnType.points) {
+      return _buildProgressiveValueColumn(
         context,
-        teamBehinds,
-        runningBehinds,
-        useTally: true,
-        rightPadding: 5.0,
+        value: runningTotal,
+        isQuarterComplete: isQuarterComplete,
       );
     }
-    return _buildProgressiveColumn(
+
+    return _buildProgressiveSequenceColumn(
       context,
-      teamBehinds,
-      previousRunningBehinds,
-      isQuarterComplete,
+      count: quarterValue,
+      startingNumber: previousRunning,
+      isQuarterComplete: isQuarterComplete,
     );
   }
 
-  Widget _buildPointsColumn(
-    BuildContext context,
-    int teamPoints,
-    bool useTallyMode,
-  ) {
-    // points always use tally column style (number display with running total)
-    return _buildTallyColumn(
-      context,
-      teamPoints,
-      runningPoints,
-      useTally: false,
-      showRunningTotal: useTallyMode,
-      rightPadding: 0.0, // less padding to align with other columns
-    );
-  }
-
-  /// Builds a column with tally/number display and optional running total
+  /// Builds a column with tally/number display and optional running total box
   Widget _buildTallyColumn(
-    BuildContext context,
-    int quarterScore,
-    int runningTotal, {
+    BuildContext context, {
+    required int quarterScore,
+    required int runningTotal,
     required bool useTally,
     bool showRunningTotal = true,
     double rightPadding = 4.0,
   }) {
     const runningTotalWidth = 28.0;
-    final runningTotalRightPadding = rightPadding;
 
     return Expanded(
       child: SizedBox(
@@ -171,9 +164,7 @@ class ScoreTableRow extends StatelessWidget {
             // content area - tally marks or quarter score text
             Positioned.fill(
               right:
-                  showRunningTotal
-                      ? runningTotalWidth + runningTotalRightPadding + 4.0
-                      : 0,
+                  showRunningTotal ? runningTotalWidth + rightPadding + 4.0 : 0,
               child:
                   isFutureQuarter
                       ? const SizedBox.shrink()
@@ -186,7 +177,7 @@ class ScoreTableRow extends StatelessWidget {
             // running total box - fixed position from right edge
             if (showRunningTotal)
               Positioned(
-                right: runningTotalRightPadding,
+                right: rightPadding,
                 top: 0,
                 bottom: 0,
                 child: SizedBox(
@@ -215,13 +206,13 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  /// Builds a column with progressive number display (no running total)
-  Widget _buildProgressiveColumn(
-    BuildContext context,
-    int count,
-    int startingNumber,
-    bool isQuarterComplete,
-  ) {
+  /// Builds a column with progressive number sequence (for goals/behinds)
+  Widget _buildProgressiveSequenceColumn(
+    BuildContext context, {
+    required int count,
+    required int startingNumber,
+    required bool isQuarterComplete,
+  }) {
     return Expanded(
       child: SizedBox(
         height: double.infinity,
@@ -233,6 +224,32 @@ class ScoreTableRow extends StatelessWidget {
                     count: count,
                     startingNumber: startingNumber,
                     isQuarterComplete: isQuarterComplete,
+                    textStyle: Theme.of(context).textTheme.labelMedium,
+                  ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds a column showing a single value with optional underline (for points)
+  Widget _buildProgressiveValueColumn(
+    BuildContext context, {
+    required int value,
+    required bool isQuarterComplete,
+  }) {
+    return Expanded(
+      child: SizedBox(
+        height: double.infinity,
+        child: Center(
+          child:
+              isFutureQuarter
+                  ? const SizedBox.shrink()
+                  : ProgressiveNumber(
+                    number: value,
+                    decoration:
+                        isQuarterComplete
+                            ? NumberDecoration.underline
+                            : NumberDecoration.none,
                     textStyle: Theme.of(context).textTheme.labelMedium,
                   ),
         ),

@@ -46,7 +46,7 @@ class ScoreWormColours {
   factory ScoreWormColours.fromTheme(AppColors colors) => ScoreWormColours(
     homeLeadingColour: colors.primary,
     awayLeadingColour: colors.tertiary,
-    neutralColour: colors.outline,
+    neutralColour: colors.onSurface,
   );
 }
 
