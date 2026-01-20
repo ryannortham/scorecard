@@ -51,3 +51,6 @@ app.*.map.json
 /android/app/keystore.jks
 *.jks
 *.keystore
+
+# MCP/debugging logs
+logs/
