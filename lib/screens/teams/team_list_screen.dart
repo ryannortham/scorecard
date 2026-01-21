@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/teams_provider.dart';
 import '../../services/color_service.dart';
 import '../../providers/user_preferences_provider.dart';
-import '../../services/navigation_service.dart';
+import '../../services/dialog_service.dart';
 import '../../widgets/team_logo.dart';
 import '../../widgets/app_scaffold.dart';
 import 'team_add_screen.dart';
@@ -372,7 +372,7 @@ class _TeamListScreenState extends State<TeamListScreen> {
     final count = _selectedTeamIndices.length;
     final confirmText = count == 1 ? 'Delete Team?' : 'Delete $count Teams?';
 
-    final confirmed = await AppNavigator.showConfirmationDialog(
+    final confirmed = await DialogService.showConfirmationDialog(
       context: context,
       title: '',
       content: '',

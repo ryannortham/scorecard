@@ -5,6 +5,7 @@ import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/services/playhq_graphql_service.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/services/team_name_processor.dart';
 import 'package:scorecard/widgets/menu/app_menu.dart';
 import 'package:scorecard/widgets/app_scaffold.dart';
 
@@ -27,47 +28,6 @@ class _AddTeamConstants {
 
   // Team filtering
   static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
-}
-
-/// Helper class for processing team names
-class _TeamNameProcessor {
-  // Single optimized regex pattern that captures all variations
-  static final RegExp _teamNameRegex = RegExp(
-    r'\([^)]*\)|' // Remove brackets and content
-    r'(?:Junior\s+Football\s+Club|Junior\s+FC)\b|' // Junior variations
-    r'Football\s+.*?Netball\s+Club\b|' // Football Netball variations
-    r'Football\s+Club\b', // Football Club
-    caseSensitive: false,
-  );
-
-  static final RegExp _whitespaceRegex = RegExp(r'\s+');
-
-  /// Process a team name according to the specified rules
-  static String processTeamName(String name) {
-    // Single pass replacement with callback function
-    String processed = name.replaceAllMapped(_teamNameRegex, (match) {
-      final matchText = match.group(0)!.toLowerCase();
-
-      // Remove bracketed content
-      if (matchText.startsWith('(')) return '';
-
-      // Convert Junior variations to JFC
-      if (matchText.contains('junior')) return 'JFC';
-
-      // Convert Football Netball variations to FNC
-      if (matchText.contains('netball')) return 'FNC';
-
-      // Convert Football Club to FC
-      if (matchText.contains('football') && matchText.contains('club')) {
-        return 'FC';
-      }
-
-      return match.group(0)!; // Fallback (shouldn't happen)
-    });
-
-    // Normalize whitespace and trim
-    return processed.replaceAll(_whitespaceRegex, ' ').trim();
-  }
 }
 
 /// Screen for adding teams from PlayHQ search or custom entry
@@ -409,7 +369,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
 
   Widget _buildTeamCard(Organisation team) {
     final theme = Theme.of(context);
-    final processedName = _TeamNameProcessor.processTeamName(team.name);
+    final processedName = TeamNameProcessor.processTeamName(team.name);
 
     return Card(
       margin: const EdgeInsets.only(bottom: _AddTeamConstants.paddingMedium),
@@ -485,7 +445,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
   /// Add team to the list, handling duplicates with edit dialog
   Future<void> _addTeamToList(Organisation team) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final processedName = _TeamNameProcessor.processTeamName(team.name);
+    final processedName = TeamNameProcessor.processTeamName(team.name);
 
     // Check if team already exists
     final existingTeam = teamsProvider.findTeamByName(processedName);

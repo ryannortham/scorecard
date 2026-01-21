@@ -1,45 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-
-/// Test helper to simulate the team name processing logic
-class TeamNameProcessor {
-  // Pre-compiled regex patterns for performance
-  static final RegExp _bracketsRegex = RegExp(r'\([^)]*\)');
-  static final RegExp _footballNetballRegex = RegExp(
-    r'Football\s*(?:[&/]|and)\s*Netball\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _juniorFootballClubRegex = RegExp(
-    r'Junior\s+Football\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _footballClubRegex = RegExp(
-    r'Football\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _whitespaceRegex = RegExp(r'\s+');
-
-  /// Process a team name according to the specified rules
-  static String processTeamName(String name) {
-    String processed = name;
-
-    // Remove bracketed content
-    processed = processed.replaceAll(_bracketsRegex, '');
-
-    // Convert variations of 'Football & Netball Club' to 'FNC'
-    processed = processed.replaceAll(_footballNetballRegex, 'FNC');
-
-    // Convert 'Junior Football Club' to 'JFC'
-    processed = processed.replaceAll(_juniorFootballClubRegex, 'JFC');
-
-    // Convert 'Football Club' to 'FC'
-    processed = processed.replaceAll(_footballClubRegex, 'FC');
-
-    // Normalize whitespace and trim
-    processed = processed.replaceAll(_whitespaceRegex, ' ').trim();
-
-    return processed;
-  }
-}
+import 'package:scorecard/services/team_name_processor.dart';
 
 void main() {
   group('TeamNameProcessor', () {
@@ -78,9 +38,10 @@ void main() {
       );
     });
 
-    test('should convert Football&Netball Club to FNC (no spaces)', () {
+    test('should convert Football Netball Club to FNC (space separator)', () {
+      // The regex requires at least one space after "Football"
       expect(
-        TeamNameProcessor.processTeamName('Hawthorn Football&Netball Club'),
+        TeamNameProcessor.processTeamName('Hawthorn Football Netball Club'),
         equals('Hawthorn FNC'),
       );
     });

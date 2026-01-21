@@ -30,33 +30,10 @@ class AssetIconService {
     return icons;
   }
 
-  /// Gets total number of tally icons needed
-  static int getTallyIconCount(int value) {
-    if (value <= 0) return 0;
-    return (value / _maxTallyValue).ceil();
-  }
-
-  /// Gets all available tally icon paths
-  static List<String> getAllTallyIconPaths() {
-    return List.generate(
-      _maxTallyValue,
-      (index) => 'assets/tally/tally${index + 1}.ico',
-    );
-  }
-
   // Football Icon Methods
 
   /// Path to the football icon asset
   static const String footballIconPath = 'assets/icon/football.png';
-
-  /// Creates a football icon widget with theming support
-  static Widget createFootballIcon({
-    double size = 24.0,
-    Color? color,
-    BuildContext? context,
-  }) {
-    return FootballIcon(size: size, color: color, context: context);
-  }
 }
 
 /// A widget that displays a football icon using a PNG asset

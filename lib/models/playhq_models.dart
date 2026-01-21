@@ -542,37 +542,3 @@ class OrganisationDetailsResponse {
     );
   }
 }
-
-/// Search filter for PlayHQ API
-class SearchFilter {
-  final SearchMeta meta;
-  final OrganisationFilter organisation;
-
-  SearchFilter({required this.meta, required this.organisation});
-
-  Map<String, dynamic> toJson() {
-    return {
-      'meta': {
-        'limit': meta.totalRecords > 0 ? meta.totalRecords : 8,
-        'page': meta.page > 0 ? meta.page : 1,
-      },
-      'organisation': {
-        'query': organisation.query,
-        'types': organisation.types,
-        'sports': organisation.sports,
-      },
-    };
-  }
-}
-
-class OrganisationFilter {
-  final String query;
-  final List<String> types;
-  final List<String> sports;
-
-  OrganisationFilter({
-    required this.query,
-    required this.types,
-    required this.sports,
-  });
-}

@@ -10,7 +10,6 @@ import '../../providers/teams_provider.dart';
 import '../../providers/user_preferences_provider.dart';
 import '../../services/app_logger.dart';
 import '../../services/color_service.dart';
-import '../../services/navigation_service.dart';
 import '../../services/dialog_service.dart';
 import '../../services/playhq_graphql_service.dart';
 import '../../services/google_maps_service.dart';
@@ -689,7 +688,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
     if (teamIndex == -1) return;
 
-    final confirmed = await AppNavigator.showConfirmationDialog(
+    final confirmed = await DialogService.showConfirmationDialog(
       context: context,
       title: '',
       content: '',
