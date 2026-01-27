@@ -56,9 +56,7 @@ class GameSharingService {
       throw Exception('Could not find WidgetShotPlus boundary');
     }
 
-    final imageBytes = await boundary.screenshot(
-      pixelRatio: 2,
-    );
+    final imageBytes = await boundary.screenshot(pixelRatio: 2);
 
     if (imageBytes == null) {
       throw Exception('Failed to capture image');

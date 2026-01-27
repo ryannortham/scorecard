@@ -44,9 +44,7 @@ class TallyDisplay extends StatelessWidget {
 
     // Show number as text if shouldUseTally is false or value above threshold
     if (!shouldUseTally || value > _textDisplayThreshold) {
-      return Align(
-        child: _buildTextDisplay(theme, effectiveColor),
-      );
+      return Align(child: _buildTextDisplay(theme, effectiveColor));
     }
 
     // tally icons are left-aligned with padding
@@ -54,11 +52,7 @@ class TallyDisplay extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: _buildTallyIconDisplay(
-          theme,
-          effectiveColor,
-          effectiveIconSize,
-        ),
+        child: _buildTallyIconDisplay(theme, effectiveColor, effectiveIconSize),
       ),
     );
   }

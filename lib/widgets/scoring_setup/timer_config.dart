@@ -48,10 +48,9 @@ class TimerConfig extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(),
-          ),
+          data: SliderTheme.of(
+            context,
+          ).copyWith(trackHeight: 4, thumbShape: const RoundSliderThumbShape()),
           child: Slider(
             value: gameState.quarterMinutes.toDouble(),
             min: 1,

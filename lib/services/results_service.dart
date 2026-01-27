@@ -57,9 +57,7 @@ class ResultsService {
     // efficient: remove by id match without parsing, insert at beginning
     final gamesJson =
         (prefs.getStringList(_gamesKey) ?? [])
-          ..removeWhere(
-            (gameJson) => gameJson.contains('"id":"${game.id}"'),
-          )
+          ..removeWhere((gameJson) => gameJson.contains('"id":"${game.id}"'))
           ..insert(0, jsonEncode(game.toJson()));
 
     await prefs.setStringList(_gamesKey, gamesJson);
@@ -170,9 +168,8 @@ class ResultsService {
     final prefs = await SharedPreferences.getInstance();
 
     final gamesJson =
-        (prefs.getStringList(_gamesKey) ?? [])..removeWhere(
-          (gameJson) => gameJson.contains('"id":"$gameId"'),
-        );
+        (prefs.getStringList(_gamesKey) ?? [])
+          ..removeWhere((gameJson) => gameJson.contains('"id":"$gameId"'));
 
     await prefs.setStringList(_gamesKey, gamesJson);
   }

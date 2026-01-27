@@ -63,10 +63,7 @@ class _TimerClockState extends State<TimerClock> {
     }
 
     final absValue = displayValue < 0 ? displayValue.abs() : displayValue;
-    final timeStr = StopWatchTimer.getDisplayTime(
-      absValue,
-      hours: false,
-    );
+    final timeStr = StopWatchTimer.getDisplayTime(absValue, hours: false);
     final trimmedTime = timeStr.substring(0, timeStr.length - 1);
 
     return (displayValue < 0) ? '-$trimmedTime' : trimmedTime;

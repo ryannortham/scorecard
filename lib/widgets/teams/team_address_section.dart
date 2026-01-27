@@ -159,9 +159,7 @@ class TeamAddressSection extends StatelessWidget {
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open maps for directions'),
-            ),
+            const SnackBar(content: Text('Could not open maps for directions')),
           );
         }
       }

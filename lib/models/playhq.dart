@@ -300,12 +300,9 @@ class Tenant {
         return aSize.compareTo(bSize);
       });
 
-      final appropriateSize = sortedSizes.firstWhere(
-        (size) {
-          return size.dimensions.width >= 128 && size.dimensions.height >= 128;
-        },
-        orElse: () => sortedSizes.last,
-      );
+      final appropriateSize = sortedSizes.firstWhere((size) {
+        return size.dimensions.width >= 128 && size.dimensions.height >= 128;
+      }, orElse: () => sortedSizes.last);
 
       return appropriateSize.url;
     }
@@ -322,12 +319,9 @@ class Tenant {
         return aSize.compareTo(bSize);
       });
 
-      final appropriateSize = sortedSizes.firstWhere(
-        (size) {
-          return size.dimensions.width >= 256 && size.dimensions.height >= 256;
-        },
-        orElse: () => sortedSizes.last,
-      );
+      final appropriateSize = sortedSizes.firstWhere((size) {
+        return size.dimensions.width >= 256 && size.dimensions.height >= 256;
+      }, orElse: () => sortedSizes.last);
 
       return appropriateSize.url;
     }

@@ -134,9 +134,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 SliverToBoxAdapter(
                   child: WidgetShotPlus(
                     key: _widgetShotKey,
-                    child: ResultsWidget.fromStaticData(
-                      game: widget.game,
-                    ),
+                    child: ResultsWidget.fromStaticData(game: widget.game),
                   ),
                 ),
 

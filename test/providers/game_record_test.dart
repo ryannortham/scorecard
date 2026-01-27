@@ -23,7 +23,7 @@ void main() {
       test('should allow empty team for clock events', () {
         final event = GameEvent(
           quarter: 1,
-          time: const Duration(milliseconds: 0),
+          time: const Duration(),
           team: '',
           type: 'clock_start',
         );
@@ -510,7 +510,7 @@ void main() {
       test('should handle empty events list through round-trip', () {
         final original = GameRecord(
           id: 'game-empty',
-          date: DateTime(2024, 1, 1),
+          date: DateTime(2024),
           homeTeam: 'Home',
           awayTeam: 'Away',
           quarterMinutes: 20,

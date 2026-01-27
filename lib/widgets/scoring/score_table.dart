@@ -34,10 +34,7 @@ class ScoreTable extends StatelessWidget {
             children: [
               // Table header
               Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 4,
-                  horizontal: 6,
-                ),
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
                 decoration: BoxDecoration(
                   color: context.colors.surfaceContainerHighest,
                   borderRadius: const BorderRadius.only(

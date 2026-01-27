@@ -91,9 +91,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
   /// checks if team is not in excluded list
   bool _isNotExcludedTeam(Organisation team) {
     final nameLower = team.name.toLowerCase();
-    return !_AddTeamConstants.excludedWords.any(
-      nameLower.contains,
-    );
+    return !_AddTeamConstants.excludedWords.any(nameLower.contains);
   }
 
   @override

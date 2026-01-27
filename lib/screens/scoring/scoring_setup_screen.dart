@@ -53,9 +53,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
     super.didChangeDependencies();
 
     if (!_hasInitialized) {
-      final userPreferences = Provider.of<UserPreferencesProvider>(
-        context,
-      );
+      final userPreferences = Provider.of<UserPreferencesProvider>(context);
 
       if (userPreferences.loaded) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

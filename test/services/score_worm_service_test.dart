@@ -70,12 +70,7 @@ void main() {
     group('single scoring events', () {
       test('should produce +6 differential for single home goal', () {
         final events = [
-          createEvent(
-            quarter: 1,
-            timeMs: 60000,
-            team: homeTeam,
-            type: 'goal',
-          ),
+          createEvent(quarter: 1, timeMs: 60000, team: homeTeam, type: 'goal'),
         ];
 
         final data = ScoreWormService.generateData(
@@ -92,12 +87,7 @@ void main() {
 
       test('should produce -6 differential for single away goal', () {
         final events = [
-          createEvent(
-            quarter: 1,
-            timeMs: 60000,
-            team: awayTeam,
-            type: 'goal',
-          ),
+          createEvent(quarter: 1, timeMs: 60000, team: awayTeam, type: 'goal'),
         ];
 
         final data = ScoreWormService.generateData(
@@ -219,12 +209,7 @@ void main() {
 
       test('should position Q2 events between 1.0 and 2.0', () {
         final events = [
-          createEvent(
-            quarter: 2,
-            timeMs: 600000,
-            team: homeTeam,
-            type: 'goal',
-          ),
+          createEvent(quarter: 2, timeMs: 600000, team: homeTeam, type: 'goal'),
         ];
 
         final data = ScoreWormService.generateData(
@@ -243,12 +228,7 @@ void main() {
 
       test('should position Q3 events between 2.0 and 3.0', () {
         final events = [
-          createEvent(
-            quarter: 3,
-            timeMs: 600000,
-            team: homeTeam,
-            type: 'goal',
-          ),
+          createEvent(quarter: 3, timeMs: 600000, team: homeTeam, type: 'goal'),
         ];
 
         final data = ScoreWormService.generateData(
@@ -267,12 +247,7 @@ void main() {
 
       test('should position Q4 events between 3.0 and 4.0', () {
         final events = [
-          createEvent(
-            quarter: 4,
-            timeMs: 600000,
-            team: homeTeam,
-            type: 'goal',
-          ),
+          createEvent(quarter: 4, timeMs: 600000, team: homeTeam, type: 'goal'),
         ];
 
         final data = ScoreWormService.generateData(
@@ -389,12 +364,7 @@ void main() {
       test('should ignore clock_end events for scoring', () {
         final events = [
           createEvent(quarter: 1, timeMs: 60000, team: homeTeam, type: 'goal'),
-          createEvent(
-            quarter: 1,
-            timeMs: 1200000,
-            team: '',
-            type: 'clock_end',
-          ),
+          createEvent(quarter: 1, timeMs: 1200000, team: '', type: 'clock_end'),
         ];
 
         final data = ScoreWormService.generateData(

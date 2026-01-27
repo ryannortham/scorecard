@@ -61,9 +61,7 @@ class DialogService {
     String? description,
     int maxLength = 60,
   }) async {
-    final controller = TextEditingController(
-      text: initialValue,
-    );
+    final controller = TextEditingController(text: initialValue);
     final formKey = GlobalKey<FormState>();
 
     // Validation function

@@ -370,10 +370,7 @@ class _TeamListItem extends StatelessWidget {
       elevation: 0,
       color: itemSelected ? colorScheme.primaryContainer : colorScheme.surface,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 4,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading:
             isSelectionMode
                 ? Row(

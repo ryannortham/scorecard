@@ -55,10 +55,7 @@ class ScoreSection extends StatelessWidget {
       final gameState = context.read<GameStateService>();
       final quarter = gameState.selectedQuarter;
       final timeMs = gameState.getElapsedTimeInQuarter();
-      final timeStr = StopWatchTimer.getDisplayTime(
-        timeMs,
-        hours: false,
-      );
+      final timeStr = StopWatchTimer.getDisplayTime(timeMs, hours: false);
       final formattedTime = timeStr.substring(0, timeStr.length - 1);
       return 'In Progress: Q$quarter $formattedTime';
     }
