@@ -1,58 +1,58 @@
+// results summary card for game list display
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import 'package:scorecard/services/results_service.dart';
-import 'package:scorecard/providers/user_preferences_provider.dart';
+import 'package:scorecard/providers/preferences_provider.dart';
 import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/widgets/team_logo.dart';
-import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/services/results_service.dart';
+import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/widgets/teams/team_logo.dart';
 
-/// Optimized widget for displaying game summary in the results list
+/// displays game summary in the results list
 class ResultsSummaryCard extends StatelessWidget {
+  const ResultsSummaryCard({
+    required this.gameSummary,
+    required this.onTap,
+    super.key,
+    this.onLongPress,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+  });
   final GameSummary gameSummary;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool isSelectionMode;
   final bool isSelected;
 
-  const ResultsSummaryCard({
-    super.key,
-    required this.gameSummary,
-    required this.onTap,
-    this.onLongPress,
-    this.isSelectionMode = false,
-    this.isSelected = false,
-  });
-
-  /// Determines if the trophy icon should be shown (favorite team won)
+  /// determines if trophy icon should show for favourite team win
   bool _shouldShowTrophyIcon(
     GameSummary gameSummary,
     UserPreferencesProvider userPrefs,
   ) {
-    // Must have a favorite team set
-    if (userPrefs.favoriteTeam.isEmpty) return false;
+    if (userPrefs.favoriteTeams.isEmpty) return false;
 
-    // Check if there's a winner (no ties)
     final homePoints = gameSummary.homePoints;
     final awayPoints = gameSummary.awayPoints;
 
-    if (homePoints == awayPoints) return false; // No winner in a tie
+    if (homePoints == awayPoints) return false;
 
-    final favoriteIsHome = gameSummary.homeTeam == userPrefs.favoriteTeam;
-    final favoriteIsAway = gameSummary.awayTeam == userPrefs.favoriteTeam;
+    final favoriteIsHome = userPrefs.favoriteTeams.contains(
+      gameSummary.homeTeam,
+    );
+    final favoriteIsAway = userPrefs.favoriteTeams.contains(
+      gameSummary.awayTeam,
+    );
 
-    // Favorite team must be playing in this game
     if (!favoriteIsHome && !favoriteIsAway) return false;
 
-    // Check if favorite team won
     if (favoriteIsHome && homePoints > awayPoints) return true;
     if (favoriteIsAway && awayPoints > homePoints) return true;
 
     return false;
   }
 
-  /// Build team logo widget with 48x48 circular design
+  /// builds team logo widget
   Widget _buildTeamLogo(String teamName) {
     return Consumer<TeamsProvider>(
       builder: (context, teamsProvider, child) {
@@ -74,17 +74,16 @@ class ResultsSummaryCard extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         elevation: 0,
         color:
             isSelected
                 ? context.colors.primaryContainer
                 : context.colors.surface,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              // Selection checkbox on the left when in selection mode
               if (isSelectionMode) ...[
                 Icon(
                   isSelected
@@ -97,15 +96,12 @@ class ResultsSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              // Left column - Home team logo
               _buildTeamLogo(gameSummary.homeTeam),
               const SizedBox(width: 16),
-              // Middle column - Existing text content
               Expanded(
                 child: Column(
                   children: [
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
                           gameSummary.homeTeam,
@@ -131,11 +127,15 @@ class ResultsSummaryCard extends StatelessWidget {
                       ],
                     ),
                     Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 6),
                         Text(
-                          'Score: ${gameSummary.homeGoals}.${gameSummary.homeBehinds} (${gameSummary.homePoints}) - ${gameSummary.awayGoals}.${gameSummary.awayBehinds} (${gameSummary.awayPoints})',
+                          'Score: ${gameSummary.homeGoals}.'
+                          '${gameSummary.homeBehinds} '
+                          '(${gameSummary.homePoints}) - '
+                          '${gameSummary.awayGoals}.'
+                          '${gameSummary.awayBehinds} '
+                          '(${gameSummary.awayPoints})',
                           style: Theme.of(
                             context,
                           ).textTheme.bodyMedium?.copyWith(
@@ -146,14 +146,15 @@ class ResultsSummaryCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${dateFormat.format(gameSummary.date)} at ${timeFormat.format(gameSummary.date)}',
+                          '${dateFormat.format(gameSummary.date)} at '
+                          '${timeFormat.format(gameSummary.date)}',
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: context.colors.onSurface),
                           textAlign: TextAlign.center,
                         ),
                         if (shouldShowTrophy)
                           Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
+                            padding: const EdgeInsets.only(top: 4),
                             child: Icon(
                               Icons.emoji_events_outlined,
                               color: context.colors.secondary,
@@ -166,7 +167,6 @@ class ResultsSummaryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              // Right column - Away team logo
               _buildTeamLogo(gameSummary.awayTeam),
             ],
           ),

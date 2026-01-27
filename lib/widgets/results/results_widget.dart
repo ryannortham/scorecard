@@ -1,28 +1,15 @@
+// unified results widget for displaying game details from static or live data
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:stop_watch_timer/stop_watch_timer.dart';
-
-import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/services/game_analysis_service.dart';
+import 'package:scorecard/providers/game_record_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/services/score_table_builder_service.dart';
-import 'package:scorecard/widgets/adaptive_title.dart';
+import 'package:scorecard/widgets/results/quarter_breakdown_section.dart';
+import 'package:scorecard/widgets/results/score_section.dart';
 import 'package:scorecard/widgets/results/score_worm_widget.dart';
-import 'package:scorecard/widgets/team_logo.dart';
-import 'package:scorecard/services/asset_icon_service.dart';
 
-/// A unified widget for displaying game details
+/// unified widget for displaying game details
 class ResultsWidget extends StatelessWidget {
-  final GameRecord? staticGame;
-  final List<GameEvent>? liveEvents;
-  final ScrollController? scrollController;
-  final bool enableScrolling;
-  final bool isLiveData;
-
   const ResultsWidget({
     super.key,
     this.staticGame,
@@ -31,25 +18,30 @@ class ResultsWidget extends StatelessWidget {
     this.enableScrolling = true,
   }) : isLiveData = staticGame == null;
 
-  /// Factory constructor for static data (game results)
+  /// factory constructor for static data (game results)
   const ResultsWidget.fromStaticData({
-    super.key,
     required GameRecord game,
+    super.key,
     this.scrollController,
     this.enableScrolling = true,
   }) : staticGame = game,
        liveEvents = null,
        isLiveData = false;
 
-  /// Factory constructor for live data (current game)
+  /// factory constructor for live data (current game)
   const ResultsWidget.fromLiveData({
-    super.key,
     required List<GameEvent> events,
+    super.key,
     this.scrollController,
     this.enableScrolling = true,
   }) : staticGame = null,
        liveEvents = events,
        isLiveData = true;
+  final GameRecord? staticGame;
+  final List<GameEvent>? liveEvents;
+  final ScrollController? scrollController;
+  final bool enableScrolling;
+  final bool isLiveData;
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +77,14 @@ class ResultsWidget extends StatelessWidget {
     final content = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _ScoreSection(game: game, isLiveData: isLiveData),
+        ScoreSection(game: game, isLiveData: isLiveData),
         const SizedBox(height: 4),
         if (isLiveData)
           ScoreWormWidget.fromLiveData(events: liveEvents ?? [])
         else
           ScoreWormWidget.fromStaticData(game: game),
         const SizedBox(height: 4),
-        _QuarterBreakdownSection(game: game, liveEvents: liveEvents),
+        QuarterBreakdownSection(game: game, liveEvents: liveEvents),
       ],
     );
 
@@ -100,9 +92,9 @@ class ResultsWidget extends StatelessWidget {
       return SingleChildScrollView(
         controller: scrollController,
         padding: EdgeInsets.only(
-          left: 4.0,
-          right: 4.0,
-          top: 4.0,
+          left: 4,
+          right: 4,
+          top: 4,
           bottom: 4.0 + MediaQuery.of(context).padding.bottom,
         ),
         child: content,
@@ -110,471 +102,13 @@ class ResultsWidget extends StatelessWidget {
     } else {
       return Padding(
         padding: EdgeInsets.only(
-          left: 4.0,
-          right: 4.0,
-          top: 4.0,
+          left: 4,
+          right: 4,
+          top: 4,
           bottom: 4.0 + MediaQuery.of(context).padding.bottom,
         ),
         child: content,
       );
     }
-  }
-}
-
-/// Simple card wrapper for consistent styling
-class _GameCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Widget child;
-
-  const _GameCard({
-    required this.icon,
-    required this.title,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: context.colors.surfaceContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: context.colors.primary),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AdaptiveTitle(
-                    title: title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.left,
-                    minScaleFactor: 0.8,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Score section
-class _ScoreSection extends StatelessWidget {
-  final GameRecord game;
-  final bool isLiveData;
-
-  const _ScoreSection({required this.game, required this.isLiveData});
-
-  @override
-  Widget build(BuildContext context) {
-    final isComplete = GameAnalysisService.isGameComplete(game);
-    final title = _getScoreTitle(isComplete);
-
-    // Get trophy icon if game is complete and favorite team won
-    final userPrefs = Provider.of<UserPreferencesProvider>(context);
-    final shouldShowTrophy = GameAnalysisService.shouldShowTrophyIcon(
-      game,
-      userPrefs,
-    );
-    final icon =
-        shouldShowTrophy ? Icons.emoji_events_outlined : Icons.outlined_flag;
-
-    return _GameCard(
-      icon: icon,
-      title: title,
-      child: Column(
-        children: [
-          _TeamScoresRow(game: game),
-          const SizedBox(height: 8),
-          _GameResultBadge(game: game, isComplete: isComplete),
-          const SizedBox(height: 4),
-          Text(
-            DateFormat('EEEE, MMM d, yyyy').format(game.date),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: context.colors.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _getScoreTitle(bool isComplete) {
-    if (isLiveData) {
-      final gameState = GameStateService.instance;
-      final quarter = gameState.selectedQuarter;
-      final timeMs = gameState.getElapsedTimeInQuarter();
-      final timeStr = StopWatchTimer.getDisplayTime(
-        timeMs,
-        hours: false,
-        milliSecond: true,
-      );
-      final formattedTime = timeStr.substring(0, timeStr.length - 1);
-      return 'In Progress: Q$quarter $formattedTime';
-    }
-
-    if (isComplete) return 'Final Score';
-
-    // For static incomplete games, build title from events
-    return GameAnalysisService.buildStaticGameTitle(game);
-  }
-}
-
-/// Team scores display
-class _TeamScoresRow extends StatelessWidget {
-  final GameRecord game;
-
-  const _TeamScoresRow({required this.game});
-
-  @override
-  Widget build(BuildContext context) {
-    final homeWins = game.homePoints > game.awayPoints;
-    final awayWins = game.awayPoints > game.homePoints;
-
-    return Stack(
-      children: [
-        // Background team logos (watermarks)
-        Row(
-          children: [
-            Expanded(child: _TeamLogoWatermark(teamName: game.homeTeam)),
-            const SizedBox(width: 18),
-            Expanded(child: _TeamLogoWatermark(teamName: game.awayTeam)),
-          ],
-        ),
-        // Foreground content with proper alignment
-        Column(
-          children: [
-            // Team names row
-            IntrinsicHeight(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _TeamName(
-                      teamName: game.homeTeam,
-                      isWinner: homeWins,
-                    ),
-                  ),
-                  const SizedBox(width: 18), // Space for divider + padding
-                  Expanded(
-                    child: _TeamName(
-                      teamName: game.awayTeam,
-                      isWinner: awayWins,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Scores row
-            IntrinsicHeight(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _TeamScores(
-                      goals: game.homeGoals,
-                      behinds: game.homeBehinds,
-                      points: game.homePoints,
-                      isWinner: homeWins,
-                    ),
-                  ),
-                  const SizedBox(width: 18), // Same width as top spacing
-                  Expanded(
-                    child: _TeamScores(
-                      goals: game.awayGoals,
-                      behinds: game.awayBehinds,
-                      points: game.awayPoints,
-                      isWinner: awayWins,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        // Overlaid vertical divider
-        Positioned.fill(
-          child: Center(
-            child: FractionallySizedBox(
-              heightFactor: 0.8,
-              child: Container(
-                width: 2,
-                color: ColorService.withAlpha(context.colors.outline, 0.3),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Team name display widget
-class _TeamName extends StatelessWidget {
-  final String teamName;
-  final bool isWinner;
-
-  const _TeamName({required this.teamName, required this.isWinner});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isWinner ? context.colors.primary : null;
-    final fontWeight = isWinner ? FontWeight.w600 : null;
-
-    return Text(
-      teamName,
-      style: Theme.of(
-        context,
-      ).textTheme.titleMedium?.copyWith(color: color, fontWeight: fontWeight),
-      textAlign: TextAlign.center,
-      maxLines: null,
-      overflow: TextOverflow.visible,
-    );
-  }
-}
-
-/// Team scores display widget
-class _TeamScores extends StatelessWidget {
-  final int goals;
-  final int behinds;
-  final int points;
-  final bool isWinner;
-
-  const _TeamScores({
-    required this.goals,
-    required this.behinds,
-    required this.points,
-    required this.isWinner,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isWinner ? context.colors.primary : null;
-    final fontWeight = isWinner ? FontWeight.w600 : null;
-
-    return Column(
-      children: [
-        Text(
-          '$points',
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(
-            color: color,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          '$goals.$behinds',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: color,
-            fontWeight: fontWeight,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-}
-
-/// Game result badge
-class _GameResultBadge extends StatelessWidget {
-  final GameRecord game;
-  final bool isComplete;
-
-  const _GameResultBadge({required this.game, required this.isComplete});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDraw = game.homePoints == game.awayPoints;
-    final homeWins = game.homePoints > game.awayPoints;
-    final margin = (game.homePoints - game.awayPoints).abs();
-
-    if (isDraw && game.homePoints == 0) return const SizedBox.shrink();
-
-    String resultText;
-    if (isDraw) {
-      if (!isComplete) return const SizedBox.shrink();
-      resultText = 'Draw';
-    } else if (isComplete) {
-      resultText =
-          homeWins
-              ? '${game.homeTeam} won by $margin'
-              : '${game.awayTeam} won by $margin';
-    } else {
-      resultText =
-          homeWins
-              ? '${game.homeTeam} leads by $margin'
-              : '${game.awayTeam} leads by $margin';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(
-        resultText,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: context.colors.onPrimaryContainer,
-          fontWeight: FontWeight.w500,
-        ),
-        textAlign: TextAlign.center,
-        overflow: TextOverflow.visible,
-        softWrap: true,
-      ),
-    );
-  }
-}
-
-/// Quarter breakdown section
-class _QuarterBreakdownSection extends StatelessWidget {
-  final GameRecord game;
-  final List<GameEvent>? liveEvents;
-
-  const _QuarterBreakdownSection({required this.game, this.liveEvents});
-
-  @override
-  Widget build(BuildContext context) {
-    return _GameCard(
-      icon: Icons.scoreboard_outlined,
-      title: 'Quarter Breakdown',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTeamBreakdown(context, game.homeTeam, true),
-          const SizedBox(height: 8),
-          _buildTeamBreakdown(context, game.awayTeam, false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTeamBreakdown(
-    BuildContext context,
-    String teamName,
-    bool isHome,
-  ) {
-    final homeWins = game.homePoints > game.awayPoints;
-    final awayWins = game.awayPoints > game.homePoints;
-    final isWinner = isHome ? homeWins : awayWins;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-          child: Row(
-            children: [
-              Consumer<TeamsProvider>(
-                builder: (context, teamsProvider, child) {
-                  final team = teamsProvider.findTeamByName(teamName);
-                  // Use logoUrl32 for 32x32 display, with fallbacks
-                  final logoUrl =
-                      team?.logoUrl32 ?? team?.logoUrl48 ?? team?.logoUrl;
-
-                  return Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    child: TeamLogo(logoUrl: logoUrl, size: 32),
-                  );
-                },
-              ),
-              Expanded(
-                child: Text(
-                  teamName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isWinner ? context.colors.primary : null,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        ScoreTableBuilderService.buildScoreTable(
-          context: context,
-          game: game,
-          displayTeam: teamName,
-          isHomeTeam: isHome,
-          isLiveData: liveEvents != null,
-          liveEvents: liveEvents,
-        ),
-      ],
-    );
-  }
-}
-
-/// Team logo watermark widget
-class _TeamLogoWatermark extends StatelessWidget {
-  final String teamName;
-
-  const _TeamLogoWatermark({required this.teamName});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<TeamsProvider>(
-      builder: (context, teamsProvider, child) {
-        final team = teamsProvider.findTeamByName(teamName);
-        // Use logoUrlLarge for watermarks, with fallbacks
-        final logoUrl = team?.logoUrlLarge ?? team?.logoUrl48 ?? team?.logoUrl;
-
-        return Center(
-          child: Opacity(
-            opacity: 0.2, // Subtle watermark opacity
-            child: SizedBox(
-              width: 144,
-              height: 144,
-              child: ShaderMask(
-                shaderCallback: (Rect bounds) {
-                  return LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.black, Colors.black, Colors.transparent],
-                    stops: const [0.0, 0.4, 1.0],
-                  ).createShader(bounds);
-                },
-                blendMode: BlendMode.dstIn,
-                child:
-                    logoUrl != null && logoUrl.isNotEmpty
-                        ? ClipOval(
-                          child: Image.network(
-                            logoUrl, // Use the logo URL directly - teams should be imported with larger logos
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return _buildFallbackLogo(context);
-                            },
-                          ),
-                        )
-                        : _buildFallbackLogo(context),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFallbackLogo(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: ColorService.withAlpha(context.colors.outline, 0.1),
-      ),
-      child: FootballIcon(
-        size: 72,
-        color: ColorService.withAlpha(context.colors.outline, 0.3),
-      ),
-    );
   }
 }

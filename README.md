@@ -46,6 +46,7 @@ flutter build appbundle --release
 ### Creating a Release
 
 #### Method 1: GitHub UI (Recommended)
+
 1. Go to your GitHub repository
 2. Click "Releases" → "Create a new release"
 3. Click "Choose a tag" → Type new tag (e.g., `v1.2.3`)
@@ -54,6 +55,7 @@ flutter build appbundle --release
 6. Click "Publish release"
 
 #### Method 2: Command Line
+
 ```bash
 # Create and push a new tag
 git tag v1.2.3
@@ -66,6 +68,7 @@ gh release create v1.2.3 --title "Release 1.2.3" --notes "Bug fixes and improvem
 ### Automated Release Process
 
 When you create a release tag, the CI/CD pipeline automatically:
+
 1. ✅ **Triggers CI/CD pipeline**
 2. ✅ **Extracts version from tag** (`v1.2.3` → `1.2.3`)
 3. ✅ **Calculates version code** (`1.2.3` → `10203`)
@@ -89,6 +92,7 @@ base64 -i app-signing-keystore.jks | tr -d '\n' | pbcopy
 ```
 
 Set these secrets in GitHub:
+
 - `ANDROID_KEYSTORE`: Base64 encoded keystore file
 - `KEYSTORE_PASSWORD`: Password you set for the keystore
 - `KEY_ALIAS`: Key alias (e.g., "upload")
@@ -97,11 +101,11 @@ Set these secrets in GitHub:
 #### Google Play Console Secrets
 
 1. **Enable Google Play Android Developer API**:
-   - Go to https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com
+   - Go to <https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com>
    - Click "Enable"
 
 2. **Create Service Account**:
-   - Navigate to https://console.cloud.google.com/iam-admin/serviceaccounts
+   - Navigate to <https://console.cloud.google.com/iam-admin/serviceaccounts>
    - Click "Create Service Account"
    - Give it a name (e.g., "github-play-deploy")
 
@@ -111,7 +115,7 @@ Set these secrets in GitHub:
    - Save the downloaded file
 
 4. **Add Service Account to Play Console**:
-   - Go to https://play.google.com/console
+   - Go to <https://play.google.com/console>
    - Go to "Users and permissions" → "Invite new users"
    - Add the service account email with "Release to testing tracks" permission
 

@@ -1,30 +1,30 @@
+// renders numbers with optional strikethrough or underline decorations
+
 import 'package:flutter/material.dart';
 
-/// Visual decoration state for a progressive number
+/// visual decoration state for a progressive number
 enum NumberDecoration {
-  /// Diagonal strikethrough (forward slash) - for previous numbers
+  /// diagonal strikethrough (forward slash) - for previous numbers
   strikethrough,
 
-  /// Underline - for final number in completed quarter
+  /// underline - for final number in completed quarter
   underline,
 
-  /// No decoration - for current number in active quarter
+  /// no decoration - for current number in active quarter
   none,
 }
 
-/// Renders a single number with optional strikethrough or underline decoration.
-/// Used in progressive scoring display mode.
+/// renders a single number with optional strikethrough or underline decoration
 class ProgressiveNumber extends StatelessWidget {
-  final int number;
-  final NumberDecoration decoration;
-  final TextStyle? textStyle;
-
   const ProgressiveNumber({
-    super.key,
     required this.number,
+    super.key,
     this.decoration = NumberDecoration.none,
     this.textStyle,
   });
+  final int number;
+  final NumberDecoration decoration;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +44,11 @@ class ProgressiveNumber extends StatelessWidget {
   }
 }
 
-/// Internal widget that renders a number with a diagonal strikethrough overlay
+/// renders a number with a diagonal strikethrough overlay
 class _StrikethroughNumber extends StatelessWidget {
+  const _StrikethroughNumber({required this.number, this.textStyle});
   final int number;
   final TextStyle? textStyle;
-
-  const _StrikethroughNumber({required this.number, this.textStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -65,12 +64,11 @@ class _StrikethroughNumber extends StatelessWidget {
   }
 }
 
-/// Internal widget that renders a number with an underline below it
+/// renders a number with an underline below it
 class _UnderlinedNumber extends StatelessWidget {
+  const _UnderlinedNumber({required this.number, this.textStyle});
   final int number;
   final TextStyle? textStyle;
-
-  const _UnderlinedNumber({required this.number, this.textStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -86,13 +84,11 @@ class _UnderlinedNumber extends StatelessWidget {
   }
 }
 
-/// Custom painter that draws a diagonal line (forward slash direction)
-/// with consistent angle regardless of text width
+/// custom painter that draws a diagonal line (forward slash direction)
 class _DiagonalStrikethroughPainter extends CustomPainter {
+  _DiagonalStrikethroughPainter({required this.color, this.strokeWidth = 1.0});
   final Color color;
   final double strokeWidth;
-
-  _DiagonalStrikethroughPainter({required this.color, this.strokeWidth = 1.0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -108,7 +104,7 @@ class _DiagonalStrikethroughPainter extends CustomPainter {
     final centerY = size.height / 2;
 
     // line length based on height with small padding
-    final halfLength = (size.height * 0.45);
+    final halfLength = size.height * 0.45;
 
     // calculate endpoints using fixed angle
     final dx = halfLength * (1 / 1.73); // cos(60°) ≈ 0.577
@@ -128,12 +124,11 @@ class _DiagonalStrikethroughPainter extends CustomPainter {
   }
 }
 
-/// Custom painter that draws an underline with adjustable offset
+/// custom painter that draws an underline
 class _UnderlinePainter extends CustomPainter {
+  _UnderlinePainter({required this.color, this.strokeWidth = 1.0});
   final Color color;
   final double strokeWidth;
-
-  _UnderlinePainter({required this.color, this.strokeWidth = 1.0});
 
   @override
   void paint(Canvas canvas, Size size) {

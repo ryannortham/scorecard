@@ -1,23 +1,33 @@
+// displays progressive number sequences for goals or behinds in a quarter
+
 import 'package:flutter/material.dart';
 
 import 'package:scorecard/widgets/scoring/progressive_number.dart';
 
-/// Displays a sequence of progressive numbers for goals or behinds in a quarter.
+/// displays a sequence of progressive numbers for goals or behinds
 ///
-/// Shows numbers with appropriate decorations:
-/// - Previous numbers: diagonal strikethrough
-/// - Last number in completed quarter: underlined
-/// - Last number in active quarter: plain
+/// shows numbers with appropriate decorations:
+/// - previous numbers: diagonal strikethrough
+/// - last number in completed quarter: underlined
+/// - last number in active quarter: plain
 ///
-/// Handles overflow by showing first number, ellipsis, then last number (e.g., "1 … 10").
+/// handles overflow by showing first number, ellipsis, then last number
 class ProgressiveDisplay extends StatelessWidget {
-  /// Number of goals/behinds scored in this quarter
+  const ProgressiveDisplay({
+    required this.count,
+    required this.startingNumber,
+    required this.isQuarterComplete,
+    super.key,
+    this.textStyle,
+  });
+
+  /// number of goals/behinds scored in this quarter
   final int count;
 
-  /// Cumulative total before this quarter (determines starting number)
+  /// cumulative total before this quarter (determines starting number)
   final int startingNumber;
 
-  /// Whether this quarter is complete (last number gets underline)
+  /// whether this quarter is complete (last number gets underline)
   final bool isQuarterComplete;
 
   final TextStyle? textStyle;
@@ -27,14 +37,6 @@ class ProgressiveDisplay extends StatelessWidget {
 
   /// Max numbers to show for double digits (10-99)
   static const int _doubleDigitThreshold = 5;
-
-  const ProgressiveDisplay({
-    super.key,
-    required this.count,
-    required this.startingNumber,
-    required this.isQuarterComplete,
-    this.textStyle,
-  });
 
   /// Returns the appropriate threshold based on the last number's digit count
   int _getThreshold(int lastNumber) {

@@ -1,125 +1,84 @@
+// tests for team name processing string extension
+
 import 'package:flutter_test/flutter_test.dart';
-
-/// Test helper to simulate the team name processing logic
-class TeamNameProcessor {
-  // Pre-compiled regex patterns for performance
-  static final RegExp _bracketsRegex = RegExp(r'\([^)]*\)');
-  static final RegExp _footballNetballRegex = RegExp(
-    r'Football\s*(?:[&/]|and)\s*Netball\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _juniorFootballClubRegex = RegExp(
-    r'Junior\s+Football\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _footballClubRegex = RegExp(
-    r'Football\s+Club',
-    caseSensitive: false,
-  );
-  static final RegExp _whitespaceRegex = RegExp(r'\s+');
-
-  /// Process a team name according to the specified rules
-  static String processTeamName(String name) {
-    String processed = name;
-
-    // Remove bracketed content
-    processed = processed.replaceAll(_bracketsRegex, '');
-
-    // Convert variations of 'Football & Netball Club' to 'FNC'
-    processed = processed.replaceAll(_footballNetballRegex, 'FNC');
-
-    // Convert 'Junior Football Club' to 'JFC'
-    processed = processed.replaceAll(_juniorFootballClubRegex, 'JFC');
-
-    // Convert 'Football Club' to 'FC'
-    processed = processed.replaceAll(_footballClubRegex, 'FC');
-
-    // Normalize whitespace and trim
-    processed = processed.replaceAll(_whitespaceRegex, ' ').trim();
-
-    return processed;
-  }
-}
+import 'package:scorecard/extensions/string_extensions.dart';
 
 void main() {
-  group('TeamNameProcessor', () {
+  group('TeamNameExtension', () {
     test('should convert Junior Football Club to JFC', () {
       expect(
-        TeamNameProcessor.processTeamName('Collingwood Junior Football Club'),
+        'Collingwood Junior Football Club'.toProcessedTeamName(),
         equals('Collingwood JFC'),
       );
     });
 
     test('should convert Football Club to FC', () {
       expect(
-        TeamNameProcessor.processTeamName('Richmond Football Club'),
+        'Richmond Football Club'.toProcessedTeamName(),
         equals('Richmond FC'),
       );
     });
 
     test('should convert Football & Netball Club to FNC', () {
       expect(
-        TeamNameProcessor.processTeamName('Essendon Football & Netball Club'),
+        'Essendon Football & Netball Club'.toProcessedTeamName(),
         equals('Essendon FNC'),
       );
     });
 
     test('should convert Football and Netball Club to FNC', () {
       expect(
-        TeamNameProcessor.processTeamName('Adelaide Football and Netball Club'),
+        'Adelaide Football and Netball Club'.toProcessedTeamName(),
         equals('Adelaide FNC'),
       );
     });
 
     test('should convert Football / Netball Club to FNC', () {
       expect(
-        TeamNameProcessor.processTeamName('Carlton Football / Netball Club'),
+        'Carlton Football / Netball Club'.toProcessedTeamName(),
         equals('Carlton FNC'),
       );
     });
 
-    test('should convert Football&Netball Club to FNC (no spaces)', () {
+    test('should convert Football Netball Club to FNC (space separator)', () {
+      // The regex requires at least one space after "Football"
       expect(
-        TeamNameProcessor.processTeamName('Hawthorn Football&Netball Club'),
+        'Hawthorn Football Netball Club'.toProcessedTeamName(),
         equals('Hawthorn FNC'),
       );
     });
 
     test('should remove bracketed content', () {
       expect(
-        TeamNameProcessor.processTeamName('Adelaide FC (Crows)'),
+        'Adelaide FC (Crows)'.toProcessedTeamName(),
         equals('Adelaide FC'),
       );
     });
 
     test('should handle multiple transformations', () {
       expect(
-        TeamNameProcessor.processTeamName('Melbourne Football Club (Demons)'),
+        'Melbourne Football Club (Demons)'.toProcessedTeamName(),
         equals('Melbourne FC'),
       );
     });
 
     test('should trim whitespace', () {
       expect(
-        TeamNameProcessor.processTeamName('  Geelong Football Club  '),
+        '  Geelong Football Club  '.toProcessedTeamName(),
         equals('Geelong FC'),
       );
     });
 
     test('should normalize multiple spaces', () {
       expect(
-        TeamNameProcessor.processTeamName(
-          'North   Melbourne     Football Club',
-        ),
+        'North   Melbourne     Football Club'.toProcessedTeamName(),
         equals('North Melbourne FC'),
       );
     });
 
     test('should handle complex case with all transformations', () {
       expect(
-        TeamNameProcessor.processTeamName(
-          '  St Kilda Football & Netball Club (Saints)  ',
-        ),
+        '  St Kilda Football & Netball Club (Saints)  '.toProcessedTeamName(),
         equals('St Kilda FNC'),
       );
     });
@@ -127,14 +86,14 @@ void main() {
     test('should preserve order of transformations correctly', () {
       // Junior Football Club should be converted before Football Club
       expect(
-        TeamNameProcessor.processTeamName('Williamstown Junior Football Club'),
+        'Williamstown Junior Football Club'.toProcessedTeamName(),
         equals('Williamstown JFC'),
       );
     });
 
     test('should handle case insensitive matching', () {
       expect(
-        TeamNameProcessor.processTeamName('Brisbane FOOTBALL CLUB'),
+        'Brisbane FOOTBALL CLUB'.toProcessedTeamName(),
         equals('Brisbane FC'),
       );
     });

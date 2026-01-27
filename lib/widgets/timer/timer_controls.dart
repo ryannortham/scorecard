@@ -1,24 +1,25 @@
+// timer control buttons (reset, play/pause, next quarter)
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:scorecard/services/game_state_service.dart';
 
-/// Widget that displays the timer control buttons (Reset, Play/Pause, Next)
+/// widget that displays the timer control buttons
 class TimerControls extends StatelessWidget {
+  const TimerControls({
+    required this.onToggleTimer,
+    required this.onResetTimer,
+    required this.onNextQuarter,
+    super.key,
+    this.isRunningNotifier,
+  });
   final VoidCallback onToggleTimer;
   final VoidCallback onResetTimer;
   final VoidCallback onNextQuarter;
   final ValueNotifier<bool>? isRunningNotifier;
 
-  const TimerControls({
-    super.key,
-    required this.onToggleTimer,
-    required this.onResetTimer,
-    required this.onNextQuarter,
-    this.isRunningNotifier,
-  });
-
-  /// Determines if reset button should be enabled
+  /// determines if reset button should be enabled
   bool _isResetEnabled(GameStateService gameState) {
     // Reset button should never be enabled while timer is running
     if (gameState.isTimerRunning) return false;
@@ -31,7 +32,7 @@ class TimerControls extends StatelessWidget {
         : currentTime != 0;
   }
 
-  /// Determines if next button should be enabled
+  /// determines if next button should be enabled
   bool _isNextEnabled(GameStateService gameState) {
     final currentTime = gameState.timerRawTime;
     final quarterMSec = gameState.quarterMSec;
@@ -53,7 +54,7 @@ class TimerControls extends StatelessWidget {
         : currentTime != 0;
   }
 
-  /// Creates a button that switches to icon-only when space is limited
+  /// creates a button that switches to icon-only when space is limited
   Widget _buildAdaptiveButton({
     required VoidCallback? onPressed,
     required IconData iconData,
@@ -147,7 +148,6 @@ class TimerControls extends StatelessWidget {
                       iconData: Icons.refresh_outlined,
                       label: 'Reset',
                       isTonal: true,
-                      iconSize: 16,
                     ),
                   ),
 
@@ -155,7 +155,7 @@ class TimerControls extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child:
                           isTimerRunning
                               ? FilledButton.tonalIcon(
@@ -209,7 +209,6 @@ class TimerControls extends StatelessWidget {
                               : Icons.arrow_forward_outlined,
                       label: isLastQuarter ? 'End' : 'Next',
                       isTonal: !isOvertime,
-                      iconSize: 16,
                     ),
                   ),
                 ],

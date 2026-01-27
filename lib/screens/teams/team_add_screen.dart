@@ -1,76 +1,27 @@
+// team add screen with playhq search
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/models/playhq_models.dart';
+import 'package:scorecard/extensions/string_extensions.dart';
+import 'package:scorecard/models/playhq.dart';
 import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/services/playhq_graphql_service.dart';
-import 'package:scorecard/services/dialog_service.dart';
-import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/widgets/menu/app_menu.dart';
-import 'package:scorecard/widgets/app_scaffold.dart';
+import 'package:scorecard/services/playhq_service.dart';
+import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/widgets/common/app_menu.dart';
+import 'package:scorecard/widgets/common/app_scaffold.dart';
+import 'package:scorecard/widgets/common/dialog_service.dart';
+import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/teams/team_search_results.dart';
 
-import '../../services/asset_icon_service.dart';
-
-/// Constants for the TeamAddScreen
+// search configuration constants
 class _AddTeamConstants {
-  // Search configuration
   static const int searchDelayMs = 1000;
-
-  // UI dimensions
-  static const double logoSize = 48.0;
-  static const double defaultLogoIconSize = 28.0;
-  static const double largeIconSize = 64.0;
-  static const double circularProgressStrokeWidth = 2.0;
-
-  // Spacing
-  static const double paddingSmall = 4.0;
-  static const double paddingMedium = 8.0;
-
-  // Team filtering
   static const List<String> excludedWords = ['auskick', 'holiday', 'superkick'];
 }
 
-/// Helper class for processing team names
-class _TeamNameProcessor {
-  // Single optimized regex pattern that captures all variations
-  static final RegExp _teamNameRegex = RegExp(
-    r'\([^)]*\)|' // Remove brackets and content
-    r'(?:Junior\s+Football\s+Club|Junior\s+FC)\b|' // Junior variations
-    r'Football\s+.*?Netball\s+Club\b|' // Football Netball variations
-    r'Football\s+Club\b', // Football Club
-    caseSensitive: false,
-  );
-
-  static final RegExp _whitespaceRegex = RegExp(r'\s+');
-
-  /// Process a team name according to the specified rules
-  static String processTeamName(String name) {
-    // Single pass replacement with callback function
-    String processed = name.replaceAllMapped(_teamNameRegex, (match) {
-      final matchText = match.group(0)!.toLowerCase();
-
-      // Remove bracketed content
-      if (matchText.startsWith('(')) return '';
-
-      // Convert Junior variations to JFC
-      if (matchText.contains('junior')) return 'JFC';
-
-      // Convert Football Netball variations to FNC
-      if (matchText.contains('netball')) return 'FNC';
-
-      // Convert Football Club to FC
-      if (matchText.contains('football') && matchText.contains('club')) {
-        return 'FC';
-      }
-
-      return match.group(0)!; // Fallback (shouldn't happen)
-    });
-
-    // Normalize whitespace and trim
-    return processed.replaceAll(_whitespaceRegex, ' ').trim();
-  }
-}
-
-/// Screen for adding teams from PlayHQ search or custom entry
+/// screen for adding teams from playhq search or custom entry
 class TeamAddScreen extends StatefulWidget {
   const TeamAddScreen({super.key});
 
@@ -118,7 +69,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
         _searchResults = _filterSearchResults(response.results);
         _errorMessage = null;
       });
-    } catch (e) {
+    } on Exception catch (e) {
       setState(() {
         _isLoading = false;
         _searchResults = [];
@@ -127,53 +78,38 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     }
   }
 
-  /// Filter search results to only include valid teams
+  /// filters search results to only include valid teams
   List<Organisation> _filterSearchResults(List<Organisation> results) {
     return results.where(_hasValidLogo).where(_isNotExcludedTeam).toList();
   }
 
-  /// Check if team has a valid logo
+  /// checks if team has a valid logo
   bool _hasValidLogo(Organisation team) {
     return (team.logoUrlLarge ?? team.logoUrl48)?.isNotEmpty ?? false;
   }
 
-  /// Check if team is not in excluded list
+  /// checks if team is not in excluded list
   bool _isNotExcludedTeam(Organisation team) {
     final nameLower = team.name.toLowerCase();
     return !_AddTeamConstants.excludedWords.any(
-      (word) => nameLower.contains(word),
+      nameLower.contains,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return AppScaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            SliverAppBar(
-              backgroundColor: ColorService.transparent,
-              foregroundColor: colorScheme.onPrimaryContainer,
-              floating: true,
-              snap: true,
-              pinned: false,
-              elevation: 0,
-              shadowColor: ColorService.transparent,
-              surfaceTintColor: ColorService.transparent,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_outlined),
-                tooltip: 'Back',
-                onPressed: () {
-                  // Unfocus search bar before navigating back
-                  _searchFocusNode.unfocus();
-                  Navigator.of(context).pop();
-                },
-              ),
+            AppSliverAppBar.withBackButton(
               title: const Text('Add Team'),
-              actions: [const AppMenu(currentRoute: 'add_team')],
+              onBackPressed: () {
+                // Unfocus search bar before navigating back
+                _searchFocusNode.unfocus();
+                Navigator.of(context).pop();
+              },
+              actions: const [AppMenu(currentRoute: 'add_team')],
             ),
           ];
         },
@@ -181,18 +117,20 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(_AddTeamConstants.paddingMedium),
+                padding: const EdgeInsets.all(
+                  TeamSearchConstants.paddingMedium,
+                ),
                 child: Column(
                   children: [
                     // Search bar
                     Padding(
                       padding: const EdgeInsets.all(
-                        _AddTeamConstants.paddingMedium,
+                        TeamSearchConstants.paddingMedium,
                       ),
                       child: SearchBarTheme(
-                        data: SearchBarThemeData(
-                          elevation: const WidgetStatePropertyAll(0),
-                          side: const WidgetStatePropertyAll(BorderSide.none),
+                        data: const SearchBarThemeData(
+                          elevation: WidgetStatePropertyAll(0),
+                          side: WidgetStatePropertyAll(BorderSide.none),
                         ),
                         child: SearchBar(
                           controller: _materialSearchController,
@@ -206,7 +144,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                                       icon: const Icon(Icons.clear_outlined),
                                       onPressed: () {
                                         _materialSearchController.clear();
-                                        _performSearch('');
+                                        unawaited(_performSearch(''));
                                       },
                                     ),
                                   ]
@@ -217,14 +155,14 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                               () {},
                             ); // Rebuild to show/hide clear button
 
-                            // Perform search after a short delay to avoid too many requests
+                            // Perform search after a short delay
                             Future.delayed(
                               const Duration(
                                 milliseconds: _AddTeamConstants.searchDelayMs,
                               ),
                               () {
                                 if (_materialSearchController.text == value) {
-                                  _performSearch(value);
+                                  unawaited(_performSearch(value));
                                 }
                               },
                             );
@@ -236,7 +174,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                     // Button group for search and custom entry
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: _AddTeamConstants.paddingMedium,
+                        horizontal: TeamSearchConstants.paddingMedium,
                       ),
                       child: Row(
                         children: [
@@ -255,11 +193,13 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                               icon:
                                   _isLoading
                                       ? const SizedBox(
-                                        width: _AddTeamConstants.paddingMedium,
-                                        height: _AddTeamConstants.paddingMedium,
+                                        width:
+                                            TeamSearchConstants.paddingMedium,
+                                        height:
+                                            TeamSearchConstants.paddingMedium,
                                         child: CircularProgressIndicator(
                                           strokeWidth:
-                                              _AddTeamConstants
+                                              TeamSearchConstants
                                                   .circularProgressStrokeWidth,
                                         ),
                                       )
@@ -270,7 +210,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                             ),
                           ),
                           const SizedBox(
-                            width: _AddTeamConstants.paddingMedium,
+                            width: TeamSearchConstants.paddingMedium,
                           ),
                           Expanded(
                             flex: 2,
@@ -289,10 +229,19 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: _AddTeamConstants.paddingMedium),
+                    const SizedBox(height: TeamSearchConstants.paddingMedium),
 
                     // Results
-                    _buildResultsSection(),
+                    TeamSearchResults(
+                      hasSearched: _hasSearched,
+                      isLoading: _isLoading,
+                      errorMessage: _errorMessage,
+                      searchResults: _searchResults,
+                      searchQuery: _materialSearchController.text,
+                      onTeamTap: _addTeamToList,
+                      onRetry:
+                          () => _performSearch(_materialSearchController.text),
+                    ),
                   ],
                 ),
               ),
@@ -303,195 +252,21 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     );
   }
 
-  Widget _buildResultsSection() {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
-
-    if (!_hasSearched) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_outlined,
-              size: _AddTeamConstants.largeIconSize,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_isLoading) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: _AddTeamConstants.paddingMedium),
-            Text('Searching teams...', style: textTheme.bodyMedium),
-          ],
-        ),
-      );
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: _AddTeamConstants.largeIconSize,
-              color: colorScheme.error,
-            ),
-            const SizedBox(height: _AddTeamConstants.paddingMedium),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: _AddTeamConstants.paddingMedium,
-              ),
-              child: Text(
-                _errorMessage!,
-                textAlign: TextAlign.center,
-                style: textTheme.bodyLarge?.copyWith(color: colorScheme.error),
-              ),
-            ),
-            const SizedBox(height: _AddTeamConstants.paddingMedium),
-            ElevatedButton(
-              onPressed: () => _performSearch(_materialSearchController.text),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (_searchResults.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FootballIcon(
-              size: _AddTeamConstants.largeIconSize,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(height: _AddTeamConstants.paddingMedium),
-            Text(
-              'No teams found for "${_materialSearchController.text}"',
-              style: textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: _AddTeamConstants.paddingSmall),
-            Text(
-              'Try a different search term',
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(_AddTeamConstants.paddingMedium),
-      itemCount: _searchResults.length,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final team = _searchResults[index];
-        return _buildTeamCard(team);
-      },
-    );
-  }
-
-  Widget _buildTeamCard(Organisation team) {
-    final theme = Theme.of(context);
-    final processedName = _TeamNameProcessor.processTeamName(team.name);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: _AddTeamConstants.paddingMedium),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(_AddTeamConstants.paddingMedium),
-        leading: _buildTeamLogo(team),
-        title: Text(
-          processedName,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        onTap: () => _addTeamToList(team),
-      ),
-    );
-  }
-
-  Widget _buildTeamLogo(Organisation team) {
-    final logoUrl = _getBestLogoUrl(team);
-
-    if (logoUrl != null) {
-      return ClipOval(
-        child: Image.network(
-          logoUrl,
-          width: _AddTeamConstants.logoSize,
-          height: _AddTeamConstants.logoSize,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildDefaultLogo(),
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return SizedBox(
-              width: _AddTeamConstants.logoSize,
-              height: _AddTeamConstants.logoSize,
-              child: Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: _AddTeamConstants.circularProgressStrokeWidth,
-                  value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                ),
-              ),
-            );
-          },
-        ),
-      );
-    }
-
-    return _buildDefaultLogo();
-  }
-
-  /// Get the best available logo URL from the team
+  /// gets the best available logo url from the team
   String? _getBestLogoUrl(Organisation team) {
     return team.logoUrlLarge ?? team.logoUrl48;
   }
 
-  Widget _buildDefaultLogo() {
-    return Container(
-      width: _AddTeamConstants.logoSize,
-      height: _AddTeamConstants.logoSize,
-      decoration: BoxDecoration(
-        color: context.colors.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: FootballIcon(
-        size: _AddTeamConstants.defaultLogoIconSize,
-        color: context.colors.onPrimaryContainer,
-      ),
-    );
-  }
-
-  /// Add team to the list, handling duplicates with edit dialog
+  /// adds team to the list, handling duplicates with edit dialog
   Future<void> _addTeamToList(Organisation team) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final processedName = _TeamNameProcessor.processTeamName(team.name);
+    final processedName = team.name.toProcessedTeamName();
 
     // Check if team already exists
     final existingTeam = teamsProvider.findTeamByName(processedName);
 
     if (existingTeam != null) {
-      // Show edit dialog for existing team, passing the logo info from search result
+      // Show edit dialog for existing team, passing the logo info from search
       await _showEditTeamDialog(existingTeam.name, team);
     } else {
       // Add new team directly, fetching address details
@@ -499,7 +274,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     }
   }
 
-  /// Fetch address details from PlayHQ and add team
+  /// fetches address details from playhq and adds team
   Future<void> _addTeamWithAddressDetails(
     String teamName,
     Organisation org,
@@ -507,18 +282,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     try {
       // Show loading indicator
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Row(
-              children: [
-                CircularProgressIndicator.adaptive(),
-                SizedBox(width: 16),
-                Text('Fetching team details...'),
-              ],
-            ),
-            duration: Duration(seconds: 3),
-          ),
-        );
+        SnackBarService.showLoading(context, 'Fetching team details...');
       }
 
       // Fetch detailed organization information including address
@@ -539,17 +303,13 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
         playHQId: org.id,
         routingCode: org.routingCode,
       );
-    } catch (e) {
+    } on Exception catch (e) {
       // If address fetch fails, still add the team without address
       if (mounted) {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Could not fetch address details, but team was added: $e',
-            ),
-            duration: const Duration(seconds: 3),
-          ),
+        SnackBarService.showInfo(
+          context,
+          'Could not fetch address details, but team was added: $e',
+          duration: const Duration(seconds: 3),
         );
       }
 
@@ -565,7 +325,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     }
   }
 
-  /// Helper method to add team and handle success flow
+  /// adds team and handles success flow
   Future<void> _addTeamAndFinish(
     String teamName, {
     String? logoUrl,
@@ -577,7 +337,6 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     String? routingCode,
   }) async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     await teamsProvider.addTeam(
@@ -592,19 +351,14 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     );
 
     if (mounted) {
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text('Added "$teamName" to your teams'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      SnackBarService.showSuccess(context, 'Added "$teamName" to your teams');
 
       // Return the team name so it can be auto-selected
       navigator.pop(teamName);
     }
   }
 
-  /// Show dialog for creating a new team with custom name (from search results)
+  /// shows dialog for creating a new team with custom name
   Future<void> _showEditTeamDialog(
     String currentName,
     Organisation originalTeam,
@@ -616,13 +370,11 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       title: 'Add Team',
       initialValue: currentName,
       hasTeamWithName: teamsProvider.hasTeamWithName,
-      currentTeamName: null, // Don't allow any existing team names
       confirmText: 'Add Team',
-      cancelText: 'Cancel',
     );
 
     if (result != null) {
-      // Always create a new team (never modify existing) with logo from search result
+      // Always create a new team (never modify existing) with logo from search
       await _addTeamAndFinish(
         result,
         logoUrl: _getBestLogoUrl(originalTeam),
@@ -633,7 +385,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     }
   }
 
-  /// Show dialog for custom team entry
+  /// shows dialog for custom team entry
   Future<void> _showCustomEntryDialog() async {
     final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
 
@@ -643,7 +395,6 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       initialValue: null,
       hasTeamWithName: teamsProvider.hasTeamWithName,
       confirmText: 'Add Team',
-      cancelText: 'Cancel',
       description: 'Enter a custom team name:',
     );
 

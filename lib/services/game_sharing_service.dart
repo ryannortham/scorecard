@@ -1,33 +1,32 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:gal/gal.dart';
+// screenshot capture and sharing functionality
+
 import 'dart:io';
 
-import 'package:scorecard/services/app_logger.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:scorecard/services/logger_service.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
-/// Service responsible for handling game sharing functionality
-/// including screenshot capture, image sharing, and debug mode image saving
+/// handles game screenshot capture, sharing, and debug mode saving
 class GameSharingService {
-  final GlobalKey screenshotWidgetKey;
-  final GameStateService gameStateService;
-
   GameSharingService({
     required this.screenshotWidgetKey,
-    required this.gameStateService,
+    required this.homeTeam,
+    required this.awayTeam,
   });
+  final GlobalKey screenshotWidgetKey;
+  final String homeTeam;
+  final String awayTeam;
 
-  /// Share game details with screenshot
   Future<void> shareGameDetails() async {
     try {
-      // Save image locally in debug mode first
       if (kDebugMode) {
         try {
           await _saveImageInDebugMode();
-        } catch (e) {
+        } on Exception catch (e) {
           AppLogger.error(
             'Failed to save image locally',
             component: 'GameSharingService',
@@ -48,7 +47,6 @@ class GameSharingService {
     }
   }
 
-  /// Capture screenshot from widget
   Future<Uint8List> _captureScreenshot() async {
     final boundary =
         screenshotWidgetKey.currentContext?.findRenderObject()
@@ -59,9 +57,7 @@ class GameSharingService {
     }
 
     final imageBytes = await boundary.screenshot(
-      format: ShotFormat.png,
-      quality: 100,
-      pixelRatio: 2.0,
+      pixelRatio: 2,
     );
 
     if (imageBytes == null) {
@@ -71,7 +67,6 @@ class GameSharingService {
     return imageBytes;
   }
 
-  /// Capture and share using WidgetShotPlus
   Future<void> _shareWithWidgetShotPlus(String shareText) async {
     try {
       final imageBytes = await _captureScreenshot();
@@ -86,7 +81,7 @@ class GameSharingService {
       await SharePlus.instance.share(
         ShareParams(files: [XFile(file.path)], text: shareText),
       );
-    } catch (e) {
+    } on Exception catch (e) {
       AppLogger.error(
         'Error sharing widget',
         component: 'GameSharingService',
@@ -98,7 +93,6 @@ class GameSharingService {
     }
   }
 
-  /// Save image in debug mode (without UI state management)
   Future<void> _saveImageInDebugMode() async {
     try {
       final imageBytes = await _captureScreenshot();
@@ -117,25 +111,17 @@ class GameSharingService {
         component: 'GameSharingService',
         error: e,
       );
-      rethrow; // Re-throw to be handled by caller
+      rethrow;
     }
   }
 
-  /// Generate a descriptive filename for the image
   String _generateFileName() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final cleanHome = gameStateService.homeTeam.replaceAll(
-      RegExp(r'[^\w]'),
-      '',
-    );
-    final cleanAway = gameStateService.awayTeam.replaceAll(
-      RegExp(r'[^\w]'),
-      '',
-    );
+    final cleanHome = homeTeam.replaceAll(RegExp(r'[^\w]'), '');
+    final cleanAway = awayTeam.replaceAll(RegExp(r'[^\w]'), '');
     return '${cleanHome}_v_${cleanAway}_$timestamp.png';
   }
 
-  /// Build share text with game details
   String _buildShareText() {
     return 'Game Results';
   }

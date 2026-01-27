@@ -1,10 +1,17 @@
+// manages saved teams with persistence
+
+import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:scorecard/models/playhq.dart';
+import 'package:scorecard/models/score.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:scorecard/models/score_models.dart';
-import 'package:scorecard/models/playhq_models.dart';
 
 class TeamsProvider extends ChangeNotifier {
+  TeamsProvider() {
+    unawaited(loadTeams());
+  }
   List<Team> _teams = [];
   bool _loaded = false;
 
@@ -12,28 +19,26 @@ class TeamsProvider extends ChangeNotifier {
   List<String> get teamNames => _teams.map((team) => team.name).toList();
   bool get loaded => _loaded;
 
-  TeamsProvider() {
-    loadTeams();
-  }
-
   Future<void> loadTeams() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // First try to load new format (teams with logos)
     final teamsJson = prefs.getStringList('teams');
+
     if (teamsJson != null) {
       _teams =
           teamsJson
-              .map((jsonString) => Team.fromJson(jsonDecode(jsonString)))
+              .map(
+                (jsonString) => Team.fromJson(
+                  jsonDecode(jsonString) as Map<String, dynamic>,
+                ),
+              )
               .toList();
     } else {
-      // Fallback to old format (just team names) for backward compatibility
+      // migrate from old format if present
       final teamNames = prefs.getStringList('teamNames') ?? [];
       _teams = teamNames.map((name) => Team(name: name)).toList();
-      // Migrate to new format
       if (teamNames.isNotEmpty) {
         await _saveTeams();
-        await prefs.remove('teamNames'); // Clean up old format
+        await prefs.remove('teamNames');
       }
     }
 
@@ -107,16 +112,13 @@ class TeamsProvider extends ChangeNotifier {
     }
   }
 
-  /// Find team by name
   Team? findTeamByName(String name) {
-    try {
-      return _teams.firstWhere((team) => team.name == name);
-    } catch (e) {
-      return null;
-    }
+    return _teams.cast<Team?>().firstWhere(
+      (team) => team?.name == name,
+      orElse: () => null,
+    );
   }
 
-  /// Check if team name already exists
   bool hasTeamWithName(String name) {
     return _teams.any((team) => team.name == name);
   }

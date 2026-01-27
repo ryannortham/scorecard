@@ -1,27 +1,27 @@
+// score table widget displaying quarter-by-quarter scores
+
 import 'package:flutter/material.dart';
-
-import 'package:scorecard/providers/game_record.dart';
+import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/widgets/scoring/score_table_row.dart';
-import 'package:scorecard/services/color_service.dart';
 
-/// Score table widget that displays quarter-by-quarter scores
+/// score table widget that displays quarter-by-quarter scores
 class ScoreTable extends StatelessWidget {
-  final List<GameEvent> events;
-  final String displayTeam;
-  final int currentQuarter;
-  final bool isCompletedGame;
-  final Map<String, List<GameEvent>> Function(int quarter) eventsByQuarter;
-  final Map<String, int> Function(int upToQuarter) calculateRunningTotals;
-
   const ScoreTable({
-    super.key,
     required this.events,
     required this.displayTeam,
     required this.currentQuarter,
     required this.isCompletedGame,
     required this.eventsByQuarter,
     required this.calculateRunningTotals,
+    super.key,
   });
+  final List<GameEvent> events;
+  final String displayTeam;
+  final int currentQuarter;
+  final bool isCompletedGame;
+  final Map<String, List<GameEvent>> Function(int quarter) eventsByQuarter;
+  final Map<String, int> Function(int upToQuarter) calculateRunningTotals;
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +35,14 @@ class ScoreTable extends StatelessWidget {
               // Table header
               Container(
                 padding: const EdgeInsets.symmetric(
-                  vertical: 4.0,
-                  horizontal: 6.0,
+                  vertical: 4,
+                  horizontal: 6,
                 ),
                 decoration: BoxDecoration(
                   color: context.colors.surfaceContainerHighest,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8.0),
-                    topRight: Radius.circular(8.0),
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
                   ),
                 ),
                 child: _buildHeaderRow(context),
@@ -74,12 +74,12 @@ class ScoreTable extends StatelessWidget {
 
               // Bottom border
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                padding: const EdgeInsets.symmetric(vertical: 4),
                 decoration: BoxDecoration(
                   color: context.colors.surfaceContainerHighest,
                   borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(8.0),
-                    bottomRight: Radius.circular(8.0),
+                    bottomLeft: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
                   ),
                 ),
               ),
@@ -93,7 +93,7 @@ class ScoreTable extends StatelessWidget {
     );
   }
 
-  /// Builds the header row with proper column alignment
+  /// builds the header row with proper column alignment
   Widget _buildHeaderRow(BuildContext context) {
     return IntrinsicHeight(
       child: Row(
@@ -132,27 +132,27 @@ class ScoreTable extends StatelessWidget {
     );
   }
 
-  /// Builds continuous vertical dividers that span the entire table height
+  /// builds continuous vertical dividers that span the entire table height
   Widget _buildVerticalDividers(BuildContext context) {
     final dividerColor = context.colors.outline.withValues(alpha: 0.15);
 
     return Positioned.fill(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6.0),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Row(
           children: [
             // Quarter column (28px width)
             const SizedBox(width: 28),
             // First divider (after quarter column)
-            Container(width: 1.0, color: dividerColor),
+            Container(width: 1, color: dividerColor),
             // Goals column - flexible space
             const Expanded(child: SizedBox()),
             // Second divider (after goals column)
-            Container(width: 1.0, color: dividerColor),
+            Container(width: 1, color: dividerColor),
             // Behinds column - flexible space
             const Expanded(child: SizedBox()),
             // Third divider (after behinds column)
-            Container(width: 1.0, color: dividerColor),
+            Container(width: 1, color: dividerColor),
             // Points column - flexible space
             const Expanded(child: SizedBox()),
           ],

@@ -1,4 +1,4 @@
-.PHONY: deps format format-check lint test build clean check
+.PHONY: deps format format-check lint lint-fix test build clean check
 
 # Default target - run all CI checks
 check: format-check lint test
@@ -19,6 +19,10 @@ format-check:
 # Run static analysis
 lint:
 	flutter analyze
+
+# Auto-fix lint issues where possible
+lint-fix:
+	dart fix --apply
 
 # Run tests
 test:

@@ -1,67 +1,91 @@
+// main timer widget with controls and quarter end handling
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-import 'package:scorecard/services/dialog_service.dart';
+import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/screens/scoring/scoring_screen.dart';
-import 'package:scorecard/widgets/timer/timer_controls.dart';
+import 'package:scorecard/widgets/common/dialog_service.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
+import 'package:scorecard/widgets/timer/timer_controls.dart';
 
+/// main timer widget with clock display and control buttons
 class TimerWidget extends StatefulWidget {
+  const TimerWidget({super.key, this.isRunning, this.onQuarterEnd});
   final ValueNotifier<bool>? isRunning;
-  const TimerWidget({super.key, this.isRunning});
+  final void Function(int quarter)? onQuarterEnd;
 
   @override
   TimerWidgetState createState() => TimerWidgetState();
 }
 
 class TimerWidgetState extends State<TimerWidget> {
-  final GameStateService _gameStateService = GameStateService.instance;
+  GameStateService? _gameStateService;
+  bool _listenerAdded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final newService = context.read<GameStateService>();
+
+    if (_gameStateService != newService) {
+      // Remove old listener if exists
+      if (_listenerAdded && _gameStateService != null) {
+        _gameStateService!.removeListener(_onTimerStateChanged);
+      }
+
+      _gameStateService = newService;
+      _gameStateService!.addListener(_onTimerStateChanged);
+      _listenerAdded = true;
+      widget.isRunning?.value = _gameStateService!.isTimerRunning;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-
-    _gameStateService.addListener(_onTimerStateChanged);
-
-    widget.isRunning?.value = _gameStateService.isTimerRunning;
   }
 
   void _onTimerStateChanged() {
     if (mounted) {
-      widget.isRunning?.value = _gameStateService.isTimerRunning;
+      widget.isRunning?.value = _gameStateService!.isTimerRunning;
     }
   }
 
   @override
   void dispose() {
-    _gameStateService.removeListener(_onTimerStateChanged);
+    if (_listenerAdded && _gameStateService != null) {
+      _gameStateService!.removeListener(_onTimerStateChanged);
+    }
     super.dispose();
   }
 
   void toggleTimer() {
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
 
-    _gameStateService.setTimerRunning(!_gameStateService.isTimerRunning);
+    _gameStateService!.setTimerRunning(
+      isRunning: !_gameStateService!.isTimerRunning,
+    );
 
-    widget.isRunning?.value = _gameStateService.isTimerRunning;
+    widget.isRunning?.value = _gameStateService!.isTimerRunning;
   }
 
   void resetTimer() {
-    HapticFeedback.selectionClick();
+    unawaited(HapticFeedback.selectionClick());
 
-    _gameStateService.resetTimer();
+    _gameStateService!.resetTimer();
 
     widget.isRunning?.value = false;
   }
 
   Future<void> _handleNextQuarter() async {
-    final currentQuarter = _gameStateService.selectedQuarter;
+    final currentQuarter = _gameStateService!.selectedQuarter;
     final isLastQuarter = currentQuarter == 4;
-    final remainingTime = _gameStateService.getRemainingTimeInQuarter();
+    final remainingTime = _gameStateService!.getRemainingTimeInQuarter();
     final shouldSkipConfirmation = remainingTime <= 30000; // 30 seconds
 
-    bool confirmed = shouldSkipConfirmation;
+    var confirmed = shouldSkipConfirmation;
 
     if (!shouldSkipConfirmation) {
       final actionText = isLastQuarter ? 'End Game?' : 'End Quarter?';
@@ -77,21 +101,18 @@ class TimerWidgetState extends State<TimerWidget> {
     if (!confirmed || !mounted) return;
 
     // Provide haptic feedback for quarter/game end
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
 
-    final scoringState = context.findAncestorStateOfType<ScoringScreenState>();
-    if (scoringState == null) return;
-
-    scoringState.recordQuarterEnd(currentQuarter);
+    widget.onQuarterEnd?.call(currentQuarter);
 
     if (currentQuarter == 4) return; // Game complete
 
     // Transition to next quarter
-    if (_gameStateService.isTimerRunning) {
-      _gameStateService.setTimerRunning(false);
+    if (_gameStateService!.isTimerRunning) {
+      _gameStateService!.setTimerRunning(isRunning: false);
     }
 
-    _gameStateService.setSelectedQuarter(currentQuarter + 1);
+    _gameStateService!.setSelectedQuarter(currentQuarter + 1);
     resetTimer();
   }
 

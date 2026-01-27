@@ -1,14 +1,21 @@
-import 'package:flutter/material.dart';
-import '../../services/app_logger.dart';
-import '../../services/dialog_service.dart';
-import '../../services/results_service.dart';
-import '../../services/game_state_service.dart';
-import '../../widgets/results/results_summary_card.dart';
-import '../../widgets/menu/app_menu.dart';
-import '../../widgets/app_scaffold.dart';
+// results list screen with selection mode support
 
-import 'results_screen.dart';
-import '../../services/color_service.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:scorecard/extensions/context_extensions.dart';
+import 'package:scorecard/mixins/selection_controller.dart';
+import 'package:scorecard/screens/results/results_screen.dart';
+import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/logger_service.dart';
+import 'package:scorecard/services/results_service.dart';
+import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/widgets/common/app_menu.dart';
+import 'package:scorecard/widgets/common/app_scaffold.dart';
+import 'package:scorecard/widgets/common/dialog_service.dart';
+import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/results/results_summary_card.dart';
 
 class ResultsListScreen extends StatefulWidget {
   const ResultsListScreen({super.key});
@@ -17,7 +24,8 @@ class ResultsListScreen extends StatefulWidget {
   State<ResultsListScreen> createState() => _ResultsListScreenState();
 }
 
-class _ResultsListScreenState extends State<ResultsListScreen> {
+class _ResultsListScreenState extends State<ResultsListScreen>
+    with SelectionController<String, ResultsListScreen> {
   List<GameSummary> _gameSummaries = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -25,14 +33,10 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
   final int _pageSize = 20;
   final ScrollController _scrollController = ScrollController();
 
-  // Selection mode state
-  bool _isSelectionMode = false;
-  final Set<String> _selectedGameIds = {};
-
   @override
   void initState() {
     super.initState();
-    _loadGames();
+    unawaited(_loadGames());
     _scrollController.addListener(_onScroll);
   }
 
@@ -42,29 +46,15 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
     super.dispose();
   }
 
-  /// Handles back button press by trying to pop or navigating to Scoring tab
+  /// handles back button press
   void _handleBackPress() {
-    // Try to pop first
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    } else {
-      // If we can't pop, we're in a NavigationShell tab context
-      // Navigate to the Scoring tab (index 0) as the default "back" behavior
-      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-    }
-  }
-
-  /// Determines if the back button should be shown.
-  /// Returns true - we always want to show the back button, but handle it appropriately
-  bool _shouldShowBackButton() {
-    // Always show the back button - let _handleBackPress decide what to do
-    return true;
+    context.handleBackPress();
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      _loadMoreGames();
+      unawaited(_loadMoreGames());
     }
   }
 
@@ -96,7 +86,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
 
   Future<void> _loadGamePage(int offset) async {
     try {
-      final gameStateService = GameStateService.instance;
+      final gameStateService = context.read<GameStateService>();
 
       final newSummaries = await ResultsService.loadGameSummaries(
         limit: _pageSize,
@@ -115,7 +105,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
           _hasMoreGames = newSummaries.length == _pageSize;
         });
       }
-    } catch (e) {
+    } on Exception catch (e) {
       AppLogger.error(
         'Error loading game summaries',
         component: 'GameResults',
@@ -128,49 +118,16 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         });
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error loading games: $e'),
-              backgroundColor: context.colors.error,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          SnackBarService.showError(context, 'Error loading games: $e');
         }
       }
     }
   }
 
-  void _enterSelectionMode(String gameId) {
-    setState(() {
-      _isSelectionMode = true;
-      _selectedGameIds.add(gameId);
-    });
-  }
-
-  void _exitSelectionMode() {
-    setState(() {
-      _isSelectionMode = false;
-      _selectedGameIds.clear();
-    });
-  }
-
-  void _toggleGameSelection(String gameId) {
-    setState(() {
-      if (_selectedGameIds.contains(gameId)) {
-        _selectedGameIds.remove(gameId);
-        if (_selectedGameIds.isEmpty) {
-          _exitSelectionMode();
-        }
-      } else {
-        _selectedGameIds.add(gameId);
-      }
-    });
-  }
-
   Future<void> _deleteSelectedGames() async {
-    if (_selectedGameIds.isEmpty) return;
+    if (!hasSelection) return;
 
-    final count = _selectedGameIds.length;
+    final count = selectedCount;
     final confirmText = count == 1 ? 'Delete Game?' : 'Delete $count Games?';
 
     final shouldDelete = await DialogService.showConfirmationDialog(
@@ -184,26 +141,24 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
     if (shouldDelete) {
       try {
         // Delete all selected games
-        final gameIdsToDelete = List<String>.from(_selectedGameIds);
+        final gameIdsToDelete = List<String>.from(selectedItems);
         for (final gameId in gameIdsToDelete) {
           await ResultsService.deleteGame(gameId);
         }
 
-        _exitSelectionMode();
+        exitSelectionMode();
         await _loadGames(); // Refresh the list
 
         if (mounted && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${gameIdsToDelete.length} games deleted successfully',
-              ),
-              backgroundColor: context.colors.primary,
-              duration: const Duration(seconds: 2),
-            ),
+          final count = gameIdsToDelete.length;
+          SnackBarService.showSuccess(
+            context,
+            count == 1
+                ? 'Game deleted successfully'
+                : '$count games deleted successfully',
           );
         }
-      } catch (e) {
+      } on Exception catch (e) {
         AppLogger.error(
           'Failed to delete games from results',
           error: e,
@@ -211,13 +166,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         );
 
         if (mounted && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error deleting games: $e'),
-              backgroundColor: context.colors.error,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          SnackBarService.showError(context, 'Error deleting games: $e');
         }
       }
     }
@@ -232,7 +181,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
       );
 
       // If the game was deleted (result is true), refresh the list
-      if (result == true && mounted) {
+      if ((result ?? false) && mounted) {
         await _loadGames();
       }
     }
@@ -245,8 +194,8 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return; // Already handled
 
-        if (_isSelectionMode) {
-          _exitSelectionMode();
+        if (isSelectionMode) {
+          exitSelectionMode();
         } else {
           _handleBackPress(); // Use the same logic as UI back button
         }
@@ -256,45 +205,18 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
-              SliverAppBar(
-                backgroundColor: ColorService.transparent,
-                foregroundColor: context.colors.onPrimaryContainer,
-                floating: true,
-                snap: true,
-                pinned: false,
-                elevation: 0,
-                shadowColor: ColorService.transparent,
-                surfaceTintColor: ColorService.transparent,
-                title:
-                    _isSelectionMode
-                        ? Text('${_selectedGameIds.length} selected')
-                        : const Text('Results'),
-                leading:
-                    _isSelectionMode
-                        ? IconButton(
-                          icon: const Icon(Icons.close_outlined),
-                          onPressed: _exitSelectionMode,
-                        )
-                        : _shouldShowBackButton()
-                        ? IconButton(
-                          icon: const Icon(Icons.arrow_back_outlined),
-                          tooltip: 'Back',
-                          onPressed: _handleBackPress,
-                        )
-                        : null,
-                actions: [
-                  if (_isSelectionMode)
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed:
-                          _selectedGameIds.isNotEmpty
-                              ? _deleteSelectedGames
-                              : null,
-                    )
-                  else
-                    const AppMenu(currentRoute: 'results'),
-                ],
-              ),
+              if (isSelectionMode)
+                AppSliverAppBar.selectionMode(
+                  selectedCount: selectedCount,
+                  onClose: exitSelectionMode,
+                  onDelete: hasSelection ? _deleteSelectedGames : null,
+                )
+              else
+                AppSliverAppBar.withBackButton(
+                  title: const Text('Results'),
+                  onBackPressed: _handleBackPress,
+                  actions: const [AppMenu(currentRoute: 'results')],
+                ),
             ];
           },
           body: RefreshIndicator(
@@ -333,7 +255,8 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Games are automatically saved when you start scoring',
+                            'Games are automatically saved when you '
+                            'start scoring',
                             style: Theme.of(
                               context,
                             ).textTheme.bodyMedium?.copyWith(
@@ -353,7 +276,7 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                         // Show loading indicator at the bottom
                         if (index == _gameSummaries.length) {
                           return const Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(16),
                             child: Center(child: CircularProgressIndicator()),
                           );
                         }
@@ -361,18 +284,18 @@ class _ResultsListScreenState extends State<ResultsListScreen> {
                         final gameSummary = _gameSummaries[index];
                         return ResultsSummaryCard(
                           gameSummary: gameSummary,
-                          isSelectionMode: _isSelectionMode,
-                          isSelected: _selectedGameIds.contains(gameSummary.id),
+                          isSelectionMode: isSelectionMode,
+                          isSelected: isSelected(gameSummary.id),
                           onTap: () {
-                            if (_isSelectionMode) {
-                              _toggleGameSelection(gameSummary.id);
+                            if (isSelectionMode) {
+                              toggleSelection(gameSummary.id);
                             } else {
-                              _showGameDetails(gameSummary.id);
+                              unawaited(_showGameDetails(gameSummary.id));
                             }
                           },
                           onLongPress: () {
-                            if (!_isSelectionMode) {
-                              _enterSelectionMode(gameSummary.id);
+                            if (!isSelectionMode) {
+                              enterSelectionMode(gameSummary.id);
                             }
                           },
                         );
