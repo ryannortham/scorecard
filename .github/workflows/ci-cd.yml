@@ -145,8 +145,11 @@ jobs:
       - name: 📋 Extract version info
         id: version
         run: |
-          VERSION_NAME=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          # Extract version from pubspec and strip trailing .0 (e.g., "1.0.0" -> "1.0")
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          BASE_VERSION=$(echo "$PUBSPEC_VERSION" | sed 's/\.0$//')
           VERSION_CODE="$GITHUB_RUN_NUMBER"
+          VERSION_NAME="${BASE_VERSION}.${VERSION_CODE}"
           
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
@@ -172,7 +175,7 @@ jobs:
       - name: 📤 Upload AAB artifact
         uses: actions/upload-artifact@v6
         with:
-          name: release-aab-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}
+          name: release-aab-${{ steps.version.outputs.version_name }}
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
@@ -193,7 +196,7 @@ jobs:
       - name: 📥 Download AAB artifact
         uses: actions/download-artifact@v7
         with:
-          name: release-aab-${{ needs.build.outputs.version_name }}-${{ needs.build.outputs.version_code }}
+          name: release-aab-${{ needs.build.outputs.version_name }}
           path: build/app/outputs/bundle/release/
 
       - name: 🔍 Verify AAB and version info
@@ -223,4 +226,4 @@ jobs:
           track: internal
           status: draft
           inAppUpdatePriority: 2
-          releaseName: ${{ needs.build.outputs.version_name }} (${{ needs.build.outputs.version_code }})
+          releaseName: ${{ needs.build.outputs.version_name }}

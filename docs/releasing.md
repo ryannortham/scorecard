@@ -12,26 +12,38 @@ Scorecard uses a simple continuous delivery workflow:
 
 ## Versioning
 
+Version names follow the format `MAJOR.MINOR.PATCH` where:
+
+- **MAJOR.MINOR** comes from `pubspec.yaml` (the trailing `.0` is stripped)
+- **PATCH** is the CI build number (auto-incremented)
+
 | Component | Source | Example |
 |-----------|--------|---------|
-| Version name | `pubspec.yaml` | `1.0.0` |
-| Version code | CI build number | `294`, `295`, etc. |
+| Version name | `{major}.{minor}.{build_number}` | `1.0.95` |
+| Version code | CI build number | `95` |
+| Release name | Same as version name | `1.0.95` |
 
-The version code auto-increments with each CI build. You never need to manage it manually.
+This ensures consistency across GitHub Actions, Play Console, and the app itself.
 
 ### Bumping Version
 
-Update `pubspec.yaml` when starting a new version cycle:
+Update `pubspec.yaml` when starting a new minor or major version:
 
 ```yaml
 # Before
 version: 1.0.0
 
-# After
+# After (minor bump)
 version: 1.1.0
+
+# Or (major bump)
+version: 2.0.0
 ```
 
-All subsequent builds will use the new version name.
+Subsequent builds will be `1.1.96`, `1.1.97`, etc. (or `2.0.96`, `2.0.97`, etc.).
+
+> **Note:** Flutter requires three-part version numbers in pubspec.yaml. The CI pipeline
+> strips the trailing `.0` when constructing the version name.
 
 ## Workflow
 
@@ -120,8 +132,8 @@ To update Play Store listing:
 For tracking purposes, you can tag releases after promoting to production:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.95
+git push origin v1.0.95
 ```
 
 This is optional and doesn't affect the CI/CD pipeline.
