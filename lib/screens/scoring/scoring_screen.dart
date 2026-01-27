@@ -1,24 +1,27 @@
+// main scoring screen with timer and score panels
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
-
-import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/services/app_logger.dart';
-import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/services/dialog_service.dart';
-import 'package:scorecard/services/results_service.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/screens/results/results_screen.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
-import 'package:scorecard/widgets/app_scaffold.dart';
+import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/logger_service.dart';
+import 'package:scorecard/services/results_service.dart';
+import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/widgets/common/app_menu.dart';
+import 'package:scorecard/widgets/common/app_scaffold.dart';
+import 'package:scorecard/widgets/common/dialog_service.dart';
+import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/results/results_widget.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
 import 'package:scorecard/widgets/timer/timer_widget.dart';
-import 'package:scorecard/widgets/results/results_widget.dart';
-import 'package:scorecard/widgets/menu/app_menu.dart';
-
-import '../results/results_screen.dart';
+import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 class ScoringScreen extends StatefulWidget {
-  const ScoringScreen({super.key, required this.title});
+  const ScoringScreen({required this.title, super.key});
   final String title;
 
   @override
@@ -28,7 +31,6 @@ class ScoringScreen extends StatefulWidget {
 class ScoringScreenState extends State<ScoringScreen> {
   late GameStateService gameStateService;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
-  final GameStateService _gameStateService = GameStateService.instance;
 
   // Screenshot functionality
   final GlobalKey _screenshotWidgetKey = GlobalKey();
@@ -39,7 +41,7 @@ class ScoringScreenState extends State<ScoringScreen> {
   final GlobalKey _quarterTimerKey = GlobalKey();
 
   // Game events list
-  List<GameEvent> get gameEvents => _gameStateService.gameEvents;
+  List<GameEvent> get gameEvents => gameStateService.gameEvents;
 
   @override
   void didChangeDependencies() {
@@ -49,12 +51,13 @@ class ScoringScreenState extends State<ScoringScreen> {
     // Initialize sharing service
     _gameSharingService = GameSharingService(
       screenshotWidgetKey: _screenshotWidgetKey,
-      gameStateService: gameStateService,
+      homeTeam: gameStateService.homeTeam,
+      awayTeam: gameStateService.awayTeam,
     );
 
     // Initialize the game if not already started
-    if (_gameStateService.currentGameId == null) {
-      _gameStateService.startNewGame();
+    if (gameStateService.currentGameId == null) {
+      unawaited(gameStateService.startNewGame());
     }
   }
 
@@ -67,29 +70,30 @@ class ScoringScreenState extends State<ScoringScreen> {
   void _onTimerRunningChanged() {
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        gameStateService.setTimerRunning(isTimerRunning.value);
+        gameStateService.setTimerRunning(isRunning: isTimerRunning.value);
       });
     }
   }
 
-  /// Record end of quarter event
+  /// records end of quarter event
   void recordQuarterEnd(int quarter) {
-    _gameStateService.recordQuarterEnd(quarter);
-    gameStateService.setTimerRunning(false);
+    gameStateService
+      ..recordQuarterEnd(quarter)
+      ..setTimerRunning(isRunning: false);
 
     if (quarter == 4) {
       _handleGameCompletion();
     }
   }
 
-  /// Handle game completion by navigating to game details screen
+  /// handles game completion by navigating to results
   void _handleGameCompletion() {
-    if (!_gameStateService.isGameComplete()) return;
+    if (!gameStateService.isGameComplete()) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
-      final gameId = _gameStateService.currentGameId;
+      final gameId = gameStateService.currentGameId;
       if (gameId == null) {
         AppLogger.warning(
           'No current game ID found. Cannot navigate to game details',
@@ -98,7 +102,7 @@ class ScoringScreenState extends State<ScoringScreen> {
         return;
       }
 
-      await _gameStateService.forceFinalSave();
+      await gameStateService.forceFinalSave();
 
       final allGames = await ResultsService.loadGames();
       final gameRecord = allGames.firstWhere(
@@ -118,11 +122,11 @@ class ScoringScreenState extends State<ScoringScreen> {
         },
       );
 
-      _gameStateService.resetGame();
+      gameStateService.resetGame();
 
       if (mounted) {
         await Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
+          MaterialPageRoute<void>(
             builder: (context) => ResultsScreen(game: gameRecord),
           ),
         );
@@ -136,12 +140,12 @@ class ScoringScreenState extends State<ScoringScreen> {
     super.dispose();
   }
 
-  /// Handle back button behavior with confirmation dialog
+  /// handles back button with confirmation dialog
   Future<bool> _onWillPop() async {
     if (!mounted) return false;
 
     // Check if there are any game events recorded (any activity including timer/quarter events)
-    final hasGameActivity = _gameStateService.gameEvents.isNotEmpty;
+    final hasGameActivity = gameStateService.gameEvents.isNotEmpty;
 
     // If no game activity, allow exit without confirmation
     if (!hasGameActivity) {
@@ -159,12 +163,10 @@ class ScoringScreenState extends State<ScoringScreen> {
     return result;
   }
 
-  /// Show error message to user
+  /// shows error message to user
   void _showErrorMessage(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: context.colors.error),
-      );
+      SnackBarService.showError(context, message);
     }
   }
 
@@ -175,7 +177,7 @@ class ScoringScreenState extends State<ScoringScreen> {
 
     try {
       await _gameSharingService.shareGameDetails();
-    } catch (e) {
+    } on Exception catch (e) {
       AppLogger.error(
         'Error sharing game details',
         component: 'Scoring',
@@ -239,10 +241,11 @@ class ScoringScreenState extends State<ScoringScreen> {
           // Timer Panel
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
               child: TimerWidget(
                 key: _quarterTimerKey,
                 isRunning: isTimerRunning,
+                onQuarterEnd: recordQuarterEnd,
               ),
             ),
           ),
@@ -252,7 +255,7 @@ class ScoringScreenState extends State<ScoringScreen> {
           // Home Team Score Table
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: _buildHomeScorePanel(),
             ),
           ),
@@ -262,7 +265,7 @@ class ScoringScreenState extends State<ScoringScreen> {
           // Away Team Score Table
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: _buildAwayScorePanel(),
             ),
           ),
@@ -276,27 +279,15 @@ class ScoringScreenState extends State<ScoringScreen> {
     );
   }
 
-  SliverAppBar _buildSliverAppBar(BuildContext context) {
-    return SliverAppBar(
-      backgroundColor: ColorService.transparent,
-      foregroundColor: context.colors.onPrimaryContainer,
-      floating: true,
-      snap: true,
-      pinned: false,
-      elevation: 0,
-      shadowColor: ColorService.transparent,
-      surfaceTintColor: ColorService.transparent,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_outlined),
-        tooltip: 'Back',
-        onPressed: () async {
-          final shouldPop = await _onWillPop();
-          if (shouldPop && context.mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
-      title: Text("Score Card", style: Theme.of(context).textTheme.titleLarge),
+  Widget _buildSliverAppBar(BuildContext context) {
+    return AppSliverAppBar.withBackButton(
+      title: Text('Score Card', style: Theme.of(context).textTheme.titleLarge),
+      onBackPressed: () async {
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       actions: _buildAppBarActions(),
     );
   }
@@ -319,7 +310,7 @@ class ScoringScreenState extends State<ScoringScreen> {
     ];
   }
 
-  /// Build home team score panel with ValueListenableBuilder
+  /// builds home team score panel
   Widget _buildHomeScorePanel() {
     return ValueListenableBuilder<bool>(
       valueListenable: isTimerRunning,
@@ -336,7 +327,7 @@ class ScoringScreenState extends State<ScoringScreen> {
     );
   }
 
-  /// Build away team score panel with ValueListenableBuilder
+  /// builds away team score panel
   Widget _buildAwayScorePanel() {
     return ValueListenableBuilder<bool>(
       valueListenable: isTimerRunning,

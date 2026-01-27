@@ -1,13 +1,16 @@
+// widget displaying timer value with progress indicator and overtime handling
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/theme/colors.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:vibration/vibration.dart';
 
-import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/services/color_service.dart';
-import 'package:scorecard/providers/user_preferences_provider.dart';
-
-/// Widget that displays the timer value and progress indicator
+/// widget that displays the timer value and progress indicator
 class TimerClock extends StatefulWidget {
   const TimerClock({super.key});
 
@@ -23,15 +26,15 @@ class _TimerClockState extends State<TimerClock> {
   @override
   void initState() {
     super.initState();
-    _checkVibrationCapability();
+    unawaited(_checkVibrationCapability());
   }
 
-  /// Check vibration capability once and cache the result
-  void _checkVibrationCapability() async {
+  /// checks vibration capability once and caches the result
+  Future<void> _checkVibrationCapability() async {
     _hasVibrator = await Vibration.hasVibrator();
   }
 
-  /// Gets the appropriate color for the timer display based on current state
+  /// gets the appropriate colour for the timer display based on current state
   Color _getTimerColor(
     BuildContext context,
     int currentTime,
@@ -43,7 +46,7 @@ class _TimerClockState extends State<TimerClock> {
     return isOvertime ? context.colors.error : context.colors.onSurface;
   }
 
-  /// Formats the timer display string based on user preference, not game state
+  /// formats the timer display string based on user preference
   String _formatTimerClock(
     int elapsedTime,
     bool displayAsCountdown,
@@ -63,14 +66,13 @@ class _TimerClockState extends State<TimerClock> {
     final timeStr = StopWatchTimer.getDisplayTime(
       absValue,
       hours: false,
-      milliSecond: true,
     );
     final trimmedTime = timeStr.substring(0, timeStr.length - 1);
 
     return (displayValue < 0) ? '-$trimmedTime' : trimmedTime;
   }
 
-  /// Triggers vibration when timer reaches quarter end/overtime (optimized)
+  /// triggers vibration when timer reaches quarter end/overtime
   void _checkForOvertimeVibration(
     int currentTime,
     int quarterMSec,
@@ -113,12 +115,12 @@ class _TimerClockState extends State<TimerClock> {
     _previousTimerValue = currentTime;
   }
 
-  /// Triggers vibration pattern for overtime (non-blocking)
+  /// triggers vibration pattern for overtime
   void _triggerOvertimeVibration() {
     // Check if vibration is available (using cached result)
-    if (_hasVibrator == true) {
+    if (_hasVibrator ?? false) {
       // Use fire-and-forget to avoid blocking the UI thread
-      Vibration.vibrate(pattern: [0, 200, 100, 400]);
+      unawaited(Vibration.vibrate(pattern: [0, 200, 100, 400]));
     }
   }
 
@@ -127,7 +129,7 @@ class _TimerClockState extends State<TimerClock> {
     return Consumer2<GameStateService, UserPreferencesProvider>(
       builder: (context, gameState, userPreferences, _) {
         return StreamBuilder<int>(
-          stream: GameStateService.instance.timerStream,
+          stream: gameState.timerStream,
           initialData: gameState.timerRawTime,
           builder: (context, snapshot) {
             final timerValue = snapshot.data ?? gameState.timerRawTime;
@@ -155,12 +157,11 @@ class _TimerClockState extends State<TimerClock> {
               children: [
                 const SizedBox(height: 4),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
                     children: [
                       // Left section for quarter text
                       Expanded(
-                        flex: 1,
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -205,7 +206,7 @@ class _TimerClockState extends State<TimerClock> {
                         ),
                       ),
                       // Right section for balance
-                      const Expanded(flex: 1, child: SizedBox()),
+                      const Expanded(child: SizedBox()),
                     ],
                   ),
                 ),

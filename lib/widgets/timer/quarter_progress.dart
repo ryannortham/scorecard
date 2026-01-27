@@ -1,24 +1,27 @@
+// quarter progress indicator showing current and completed quarters
+
 import 'package:flutter/material.dart';
-import 'package:scorecard/services/color_service.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/theme/colors.dart';
 
+/// quarter progress indicator widget
 class QuarterProgress extends StatelessWidget {
   const QuarterProgress({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GameStateService>(
-      builder: (context, gameStateService, child) {
-        final currentQuarter = gameStateService.selectedQuarter;
-
+    // Use Selector to only rebuild when selectedQuarter changes
+    return Selector<GameStateService, int>(
+      selector: (_, service) => service.selectedQuarter,
+      builder: (context, currentQuarter, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             color: context.colors.surfaceContainerHigh,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8.0),
-              topRight: Radius.circular(8.0),
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
             ),
           ),
           child: Row(
@@ -34,8 +37,8 @@ class QuarterProgress extends StatelessWidget {
                           ? const EdgeInsets.only(right: 4)
                           : EdgeInsets.zero,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 4.0,
-                    vertical: 4.0,
+                    horizontal: 4,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
                     color:
@@ -47,13 +50,13 @@ class QuarterProgress extends StatelessWidget {
                     borderRadius:
                         quarterNumber == 1
                             ? const BorderRadius.only(
-                              topLeft: Radius.circular(12.0),
-                              bottomLeft: Radius.circular(12.0),
+                              topLeft: Radius.circular(12),
+                              bottomLeft: Radius.circular(12),
                             )
                             : quarterNumber == 4
                             ? const BorderRadius.only(
-                              topRight: Radius.circular(12.0),
-                              bottomRight: Radius.circular(12.0),
+                              topRight: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
                             )
                             : BorderRadius.zero,
                   ),

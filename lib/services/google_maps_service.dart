@@ -1,10 +1,11 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import '../models/playhq_models.dart';
-import 'app_logger.dart';
+// google maps static api url generation
 
-/// Service for generating Google Maps Static API URLs
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:scorecard/models/playhq.dart';
+import 'package:scorecard/services/logger_service.dart';
+
+/// generates google maps static api urls for address display
 class GoogleMapsService {
-  /// Get the Google Maps API key from environment variables
   static String get _apiKey {
     final key = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
     AppLogger.info(
@@ -14,16 +15,7 @@ class GoogleMapsService {
     return key;
   }
 
-  /// Generate a static map image URL for the given address
-  ///
-  /// Parameters:
-  /// - [address]: The address to show on the map
-  /// - [venueName]: Optional venue name to improve search accuracy
-  /// - [width]: Image width in pixels (default: 600)
-  /// - [height]: Image height in pixels (default: 300)
-  /// - [zoom]: Map zoom level 1-21 (default: 15)
-  /// - [scale]: Image scale factor 1 or 2 for retina displays (default: 2)
-  /// - [mapType]: Map type - roadmap, satellite, hybrid, terrain (default: roadmap)
+  /// generates static map image url for the given address
   static String getStaticMapUrl(
     Address address, {
     String? venueName,
@@ -43,7 +35,6 @@ class GoogleMapsService {
       );
     }
 
-    // Use enhanced query with venue name if provided for better accuracy
     final query =
         venueName != null && venueName.isNotEmpty
             ? address.getSearchQueryWithVenue(venueName)
@@ -59,7 +50,6 @@ class GoogleMapsService {
       component: 'GoogleMapsService',
     );
 
-    // Build the Static Maps API URL
     final url =
         'https://maps.googleapis.com/maps/api/staticmap?'
         'center=$location'
@@ -77,6 +67,5 @@ class GoogleMapsService {
     return url;
   }
 
-  /// Check if the API key is configured
   static bool get isConfigured => _apiKey.isNotEmpty;
 }

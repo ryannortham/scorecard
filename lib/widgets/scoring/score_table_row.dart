@@ -1,30 +1,21 @@
+// single row displaying quarter score data
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/providers/user_preferences_provider.dart';
-import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/widgets/scoring/progressive_display.dart';
 import 'package:scorecard/widgets/scoring/progressive_number.dart';
 import 'package:scorecard/widgets/scoring/tally_display.dart';
 
-/// Types of score columns in the table
+/// types of score columns in the table
 enum ScoreColumnType { goals, behinds, points }
 
-/// A single row displaying quarter score data
+/// single row displaying quarter score data
 class ScoreTableRow extends StatelessWidget {
-  final int quarter; // 0-based quarter index
-  final List<GameEvent> quarterEvents;
-  final bool isCurrentQuarter;
-  final bool isFutureQuarter;
-  final int previousRunningGoals;
-  final int previousRunningBehinds;
-  final int runningGoals;
-  final int runningBehinds;
-  final int runningPoints;
-
   const ScoreTableRow({
-    super.key,
     required this.quarter,
     required this.quarterEvents,
     required this.isCurrentQuarter,
@@ -34,7 +25,17 @@ class ScoreTableRow extends StatelessWidget {
     required this.runningGoals,
     required this.runningBehinds,
     required this.runningPoints,
+    super.key,
   });
+  final int quarter; // 0-based quarter index
+  final List<GameEvent> quarterEvents;
+  final bool isCurrentQuarter;
+  final bool isFutureQuarter;
+  final int previousRunningGoals;
+  final int previousRunningBehinds;
+  final int runningGoals;
+  final int runningBehinds;
+  final int runningPoints;
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +50,8 @@ class ScoreTableRow extends StatelessWidget {
     final isQuarterComplete = !isCurrentQuarter && !isFutureQuarter;
 
     return Container(
-      height: 32.0,
-      padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 4.0),
+      height: 32,
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color:
             isCurrentQuarter
@@ -107,7 +108,7 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  /// Unified builder for goals, behinds, and points columns
+  /// unified builder for goals, behinds, and points columns
   Widget _buildScoreColumn(
     BuildContext context, {
     required ScoreColumnType type,
@@ -145,7 +146,7 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  /// Builds a column with tally/number display and optional running total box
+  /// builds a column with tally/number display and optional running total box
   Widget _buildTallyColumn(
     BuildContext context, {
     required int quarterScore,
@@ -189,7 +190,7 @@ class ScoreTableRow extends StatelessWidget {
                               ? ColorService.transparent
                               : context.colors.surfaceContainerHighest
                                   .withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(4.0),
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Center(
                       child: Text(
@@ -206,7 +207,7 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  /// Builds a column with progressive number sequence (for goals/behinds)
+  /// builds a column with progressive number sequence (for goals/behinds)
   Widget _buildProgressiveSequenceColumn(
     BuildContext context, {
     required int count,
@@ -231,7 +232,8 @@ class ScoreTableRow extends StatelessWidget {
     );
   }
 
-  /// Builds a column showing a single value with optional underline (for points)
+  /// builds a column showing a single value with optional underline (for
+  /// points)
   Widget _buildProgressiveValueColumn(
     BuildContext context, {
     required int value,

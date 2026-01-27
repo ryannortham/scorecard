@@ -1,16 +1,28 @@
+// score panel widget displaying team scores by quarter
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:scorecard/providers/game_record_provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/providers/game_record.dart';
-import 'package:scorecard/services/app_logger.dart';
-import 'package:scorecard/widgets/scoring/score_panel_header.dart';
+import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/widgets/scoring/score_counter.dart';
-import 'score_table.dart';
+import 'package:scorecard/widgets/scoring/score_panel_header.dart';
+import 'package:scorecard/widgets/scoring/score_table.dart';
 
-/// Simplified score panel widget that displays team scores by quarter
-/// Uses atomic components for better maintainability
+/// score panel widget that displays team scores by quarter
 class ScorePanel extends StatelessWidget {
+  const ScorePanel({
+    required this.events,
+    required this.homeTeam,
+    required this.awayTeam,
+    required this.displayTeam,
+    required this.isHomeTeam,
+    super.key,
+    this.enabled = true,
+    this.showCounters = true,
+    this.currentQuarter,
+    this.isCompletedGame = false,
+  });
   final List<GameEvent> events;
   final String homeTeam;
   final String awayTeam;
@@ -20,19 +32,6 @@ class ScorePanel extends StatelessWidget {
   final bool showCounters;
   final int? currentQuarter;
   final bool isCompletedGame;
-
-  const ScorePanel({
-    super.key,
-    required this.events,
-    required this.homeTeam,
-    required this.awayTeam,
-    required this.displayTeam,
-    required this.isHomeTeam,
-    this.enabled = true,
-    this.showCounters = true,
-    this.currentQuarter,
-    this.isCompletedGame = false,
-  });
 
   Map<String, List<GameEvent>> _eventsByQuarter(int quarter) {
     try {
@@ -49,22 +48,22 @@ class ScorePanel extends StatelessWidget {
               )
               .toList();
       return {'team': teamEvents};
-    } catch (e) {
+    } on Exception catch (e) {
       AppLogger.warning(
         'Error calculating quarter scores',
         component: 'ScorePanel',
-        data: 'Quarter $quarter, Team: $displayTeam',
+        data: 'Quarter $quarter, Team: $displayTeam, Error: $e',
       );
       return {'team': []};
     }
   }
 
-  /// Calculate running totals up to a specific quarter
+  /// calculates running totals up to a specific quarter
   Map<String, int> _calculateRunningTotals(int upToQuarter) {
-    int totalGoals = 0;
-    int totalBehinds = 0;
+    var totalGoals = 0;
+    var totalBehinds = 0;
 
-    for (int q = 1; q <= upToQuarter; q++) {
+    for (var q = 1; q <= upToQuarter; q++) {
       final quarterEvents = _eventsByQuarter(q)['team'] ?? [];
       totalGoals += quarterEvents.where((e) => e.type == 'goal').length;
       totalBehinds += quarterEvents.where((e) => e.type == 'behind').length;
@@ -79,9 +78,11 @@ class ScorePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<GameStateService>(
-      builder: (context, gameStateService, _) {
-        final currentQ = currentQuarter ?? gameStateService.selectedQuarter;
+    // Use Selector to only rebuild when selectedQuarter changes
+    return Selector<GameStateService, int>(
+      selector: (_, service) => service.selectedQuarter,
+      builder: (context, selectedQuarter, _) {
+        final currentQ = currentQuarter ?? selectedQuarter;
 
         return Card(
           elevation: 0,
@@ -92,7 +93,7 @@ class ScorePanel extends StatelessWidget {
 
               // Content with padding
               Padding(
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.all(4),
                 child: Column(
                   children: [
                     const SizedBox(height: 4),

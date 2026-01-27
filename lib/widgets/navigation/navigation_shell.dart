@@ -1,10 +1,12 @@
+// navigation shell that wraps screens with bottom navigation
+
 import 'package:flutter/material.dart';
+import 'package:scorecard/screens/results/results_list_screen.dart';
 import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
 import 'package:scorecard/screens/teams/team_list_screen.dart';
-import 'package:scorecard/screens/results/results_list_screen.dart';
-import 'app_bottom_navigation_bar.dart';
+import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
-/// Navigation shell that wraps screens with bottom navigation
+/// wraps screens with bottom navigation and scroll handling
 class NavigationShell extends StatefulWidget {
   const NavigationShell({super.key});
 
@@ -92,7 +94,7 @@ class _NavigationShellState extends State<NavigationShell>
         body: _buildPage(
           _currentIndex,
         ), // Direct widget switching instead of PageView
-        bottomNavigationBar: AppBottomNavigationBar(
+        bottomNavigationBar: BottomNavBar(
           currentIndex: _currentIndex,
           onDestinationSelected: _onDestinationSelected,
           isVisible: _isNavigationVisible,

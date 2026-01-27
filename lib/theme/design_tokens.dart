@@ -1,36 +1,51 @@
-/// Centralised design system constants for the Score Card application.
-///
-/// These tokens ensure consistent spacing, radii, and durations across the app.
-library;
+// centralised design system constants
 
-/// Spacing constants for consistent padding and margins.
+/// spacing constants for consistent padding and margins
 class AppSpacing {
   AppSpacing._();
 
-  static const double xs = 4.0;
-  static const double sm = 8.0;
-  static const double md = 12.0;
-  static const double lg = 16.0;
-  static const double xl = 24.0;
-  static const double xxl = 32.0;
+  static const double xxs = 2;
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+  static const double xxl = 32;
+  static const double xxxl = 48;
 }
 
-/// Border radius constants for consistent rounded corners.
+/// border radius constants for consistent rounded corners
 class AppRadius {
   AppRadius._();
 
-  static const double sm = 8.0;
-  static const double md = 12.0;
-  static const double lg = 16.0;
-  static const double xl = 24.0;
-  static const double pill = 32.0;
+  static const double xs = 4;
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+  static const double pill = 32;
 }
 
-/// Animation duration constants for consistent motion.
+/// animation duration constants for consistent motion
 class AppDurations {
   AppDurations._();
 
+  static const Duration instant = Duration.zero;
   static const Duration fast = Duration(milliseconds: 150);
   static const Duration normal = Duration(milliseconds: 300);
   static const Duration slow = Duration(milliseconds: 450);
+
+  // snackbar durations
+  static const Duration snackbarShort = Duration(seconds: 2);
+  static const Duration snackbarMedium = Duration(seconds: 3);
+  static const Duration snackbarLong = Duration(seconds: 4);
+}
+
+/// game-specific constants
+class AppGameConstants {
+  AppGameConstants._();
+
+  static const int pointsPerGoal = 6;
+  static const int pointsPerBehind = 1;
+  static const int quartersPerGame = 4;
 }

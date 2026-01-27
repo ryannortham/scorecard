@@ -1,22 +1,26 @@
+// counter widget for incrementing and decrementing goals or behinds
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/services/color_service.dart';
+import 'package:scorecard/theme/colors.dart';
 
+/// counter widget for scoring goals or behinds
 class ScoreCounter extends StatefulWidget {
+  const ScoreCounter({
+    required this.label,
+    required this.isGoal,
+    required this.isHomeTeam,
+    super.key,
+    this.enabled = true,
+  });
   final String label;
   final bool isGoal;
   final bool isHomeTeam;
   final bool enabled;
-
-  const ScoreCounter({
-    super.key,
-    required this.label,
-    required this.isGoal,
-    required this.isHomeTeam,
-    this.enabled = true,
-  });
 
   @override
   ScoreCounterState createState() => ScoreCounterState();
@@ -28,8 +32,8 @@ class ScoreCounterState extends State<ScoreCounter> {
     return Consumer<GameStateService>(
       builder: (context, gameStateService, _) {
         final currentCount = gameStateService.getScore(
-          widget.isHomeTeam,
-          widget.isGoal,
+          isHomeTeam: widget.isHomeTeam,
+          isGoal: widget.isGoal,
         );
 
         return Column(
@@ -58,7 +62,7 @@ class ScoreCounterState extends State<ScoreCounter> {
                         alpha: 0.12,
                       ), // Material 3 disabled surface opacity
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32.0),
+                borderRadius: BorderRadius.circular(32),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -70,8 +74,8 @@ class ScoreCounterState extends State<ScoreCounter> {
                           widget.enabled &&
                           currentCount > 0 &&
                           gameStateService.hasEventInCurrentQuarter(
-                            widget.isHomeTeam,
-                            widget.isGoal,
+                            isHomeTeam: widget.isHomeTeam,
+                            isGoal: widget.isGoal,
                           );
 
                       return IconButton(
@@ -150,12 +154,13 @@ class ScoreCounterState extends State<ScoreCounter> {
 
   void _updateCount(int newCount) {
     // Provide tactile feedback for score changes
-    HapticFeedback.lightImpact();
-
-    // Use the game state service directly
-    final gameStateService = GameStateService.instance;
+    unawaited(HapticFeedback.lightImpact());
 
     // The game state service handles all event logic internally
-    gameStateService.updateScore(widget.isHomeTeam, widget.isGoal, newCount);
+    context.read<GameStateService>().updateScore(
+      isHomeTeam: widget.isHomeTeam,
+      isGoal: widget.isGoal,
+      newCount: newCount,
+    );
   }
 }

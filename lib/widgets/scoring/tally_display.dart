@@ -1,13 +1,23 @@
+// widget that displays tally icons for numeric values
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/asset_icon_service.dart';
-import '../../services/color_service.dart';
-import '../../providers/user_preferences_provider.dart';
+import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/services/asset_service.dart';
+import 'package:scorecard/theme/colors.dart';
 
-/// A widget that displays tally icons for a given numeric value
-/// Can be forced to show text instead of tally icons
+/// displays tally icons for a given numeric value, with optional text fallback
 class TallyDisplay extends StatelessWidget {
-  /// The threshold above which to display numbers as text instead of tally icons
+  const TallyDisplay({
+    required this.value,
+    super.key,
+    this.iconSize,
+    this.color,
+    this.textStyle,
+    this.useTally = true,
+  });
+
+  /// threshold above which to display numbers as text instead of tally icons
   static const int _textDisplayThreshold = 10;
 
   final int value;
@@ -15,15 +25,6 @@ class TallyDisplay extends StatelessWidget {
   final Color? color;
   final TextStyle? textStyle;
   final bool useTally;
-
-  const TallyDisplay({
-    super.key,
-    required this.value,
-    this.iconSize,
-    this.color,
-    this.textStyle,
-    this.useTally = true,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +42,28 @@ class TallyDisplay extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Show number as text if shouldUseTally is false or value is above threshold
+    // Show number as text if shouldUseTally is false or value above threshold
     if (!shouldUseTally || value > _textDisplayThreshold) {
       return Align(
-        alignment: Alignment.center,
         child: _buildTextDisplay(theme, effectiveColor),
       );
     }
 
     // tally icons are left-aligned with padding
     return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
+      padding: const EdgeInsets.only(left: 4),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: _buildTallyIconDisplay(theme, effectiveColor, effectiveIconSize),
+        child: _buildTallyIconDisplay(
+          theme,
+          effectiveColor,
+          effectiveIconSize,
+        ),
       ),
     );
   }
 
-  /// Builds the text display for large values or when useTally is false
+  /// builds the text display for large values or when useTally is false
   Widget _buildTextDisplay(ThemeData theme, Color effectiveColor) {
     final effectiveTextStyle =
         textStyle ??
@@ -69,20 +73,20 @@ class TallyDisplay extends StatelessWidget {
     return Text(value.toString(), style: effectiveTextStyle);
   }
 
-  /// Builds the tally icon display for smaller values
+  /// builds the tally icon display for smaller values
   Widget _buildTallyIconDisplay(
     ThemeData theme,
     Color effectiveColor,
     double effectiveIconSize,
   ) {
-    final tallyIcons = AssetIconService.getTallyIconPaths(value);
+    final tallyIcons = AssetService.getTallyIconPaths(value);
 
     if (tallyIcons.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Wrap(
-      spacing: 2.0, // Add small spacing between icons
+      spacing: 2, // Add small spacing between icons
       children:
           tallyIcons
               .map(
@@ -96,7 +100,7 @@ class TallyDisplay extends StatelessWidget {
     );
   }
 
-  /// Builds a single tally icon
+  /// builds a single tally icon
   Widget _buildTallyIcon(
     String iconPath,
     Color effectiveColor,
