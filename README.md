@@ -98,6 +98,7 @@ make check         # Run all CI checks (format, lint, test)
 ## Documentation
 
 - **[Development Guide](docs/development.md)** - Detailed setup, build process, and development workflow
+- **[Releasing](docs/releasing.md)** - Release workflow and Play Store deployment
 - **[Architecture](docs/architecture.md)** - Project structure, design patterns, and key services
 - **[PlayHQ API](docs/playhq_api.md)** - PlayHQ GraphQL API documentation and integration details
 

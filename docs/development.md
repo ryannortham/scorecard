@@ -239,10 +239,8 @@ flutter test --coverage
 
 ```text
 test/
-├── models/              # Model tests
-├── providers/           # Provider tests
+├── viewmodels/          # ViewModel tests
 ├── services/            # Service tests
-├── extensions/          # Extension tests
 └── widgets/             # Widget tests (future)
 ```
 

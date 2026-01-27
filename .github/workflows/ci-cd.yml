@@ -5,8 +5,6 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  release:
-    types: [published]
   schedule:
     - cron: '30 2 * * 1'  # Weekly security scan
 
@@ -101,20 +99,19 @@ jobs:
           retention-days: 30
 
   # =============================================================================
-  # BUILD PHASE - Only runs on main branch or releases
+  # BUILD PHASE - Only runs on main branch pushes
   # =============================================================================
   
   build:
     name: 🏗️ Build Release
     needs: [test, security-scan]
     runs-on: ubuntu-latest
-    # Only run on main branch pushes OR releases
-    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
+    # Build on all pushes and PRs (but not scheduled runs)
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
       version_code: ${{ steps.version.outputs.version_code }}
-      track: ${{ steps.version.outputs.track }}
     
     steps:
       - name: 📥 Checkout repository
@@ -145,38 +142,15 @@ jobs:
         run: |
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
 
-      # Clean only if needed
-      - name: 🧹 Clean build environment (if needed)
-        run: |
-          echo "🧹 Cleaning build environment"
-          flutter clean
-          rm -rf android/app/build/
-          rm -rf android/.gradle/configuration-cache/
-        continue-on-error: true
-
       - name: 📋 Extract version info
         id: version
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            VERSION_NAME="${{ github.event.release.tag_name }}"
-            VERSION_NAME="${VERSION_NAME#v}"
-            # For releases, use run number + 100 to ensure it's always higher than 56
-            VERSION_CODE="$((100 + GITHUB_RUN_NUMBER))"
-            TRACK="internal"
-          else
-            # Extract version from pubspec.yaml
-            PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
-            VERSION_NAME="$PUBSPEC_VERSION-dev.${GITHUB_SHA::8}"
-            # For dev builds, use run number + 200 to ensure it's higher than any release
-            VERSION_CODE="$((200 + GITHUB_RUN_NUMBER))"
-            TRACK="internal"
-          fi
+          VERSION_NAME=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          VERSION_CODE="$GITHUB_RUN_NUMBER"
           
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "track=$TRACK" >> $GITHUB_OUTPUT
           echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
-          echo "🚀 Track: $TRACK"
 
       - name: 🔑 Setup Android signing
         run: |
@@ -198,20 +172,19 @@ jobs:
       - name: 📤 Upload AAB artifact
         uses: actions/upload-artifact@v6
         with:
-          name: release-aab-${{ steps.version.outputs.version_name }}
+          name: release-aab-${{ steps.version.outputs.version_name }}-${{ steps.version.outputs.version_code }}
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
   # =============================================================================
-  # DEPLOY PHASE - Only runs after successful build on main/releases
+  # DEPLOY PHASE - Only runs after successful build on main
   # =============================================================================
   
   deploy:
     name: 🚀 Deploy to Play Store
     needs: build
     runs-on: ubuntu-latest
-    # Only run on main branch pushes OR releases
-    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'release'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
       - name: 📥 Checkout repository
@@ -220,81 +193,34 @@ jobs:
       - name: 📥 Download AAB artifact
         uses: actions/download-artifact@v7
         with:
-          name: release-aab-${{ needs.build.outputs.version_name }}
+          name: release-aab-${{ needs.build.outputs.version_name }}-${{ needs.build.outputs.version_code }}
           path: build/app/outputs/bundle/release/
 
       - name: 🔍 Verify AAB and version info
         run: |
           echo "📱 Deploying version: ${{ needs.build.outputs.version_name }}"
           echo "🔢 Version code: ${{ needs.build.outputs.version_code }}"
-          echo "🚀 Track: ${{ needs.build.outputs.track }}"
           echo "📦 AAB file:"
           ls -la build/app/outputs/bundle/release/
           
-          # Verify AAB file exists and is valid
           if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
             echo "❌ AAB file not found!"
             exit 1
           fi
           
-          # Check file size (should be reasonable)
           AAB_SIZE=$(stat -c%s build/app/outputs/bundle/release/app-release.aab)
           echo "📦 AAB size: ${AAB_SIZE} bytes"
           if [ $AAB_SIZE -lt 1000000 ]; then
             echo "⚠️ Warning: AAB file seems small (< 1MB)"
           fi
 
-      - name: 🏷️ Create GitHub Release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/app/outputs/bundle/release/app-release.aab
-          tag_name: ${{ github.event.release.tag_name }}
-          name: Release ${{ needs.build.outputs.version_name }}
-          body: |
-            🚀 **Release ${{ needs.build.outputs.version_name }}**
-            
-            **Build Information:**
-            - Version Name: `${{ needs.build.outputs.version_name }}`
-            - Version Code: `${{ needs.build.outputs.version_code }}`
-            - Build Date: `${{ github.event.head_commit.timestamp }}`
-            - Commit SHA: `${{ github.sha }}`
-            
-            **Downloads:**
-            - Android App Bundle (AAB) attached below
-            - Available on Google Play Internal Testing
-            
-            See the [changelog](./android/fastlane/metadata/android/en-US/changelogs/default.txt) for details.
-
       - name: 🚀 Upload to Play Store
-        id: upload-play-store
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: ${{ secrets.PACKAGE_NAME }}
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: ${{ needs.build.outputs.track }}
+          track: internal
           status: draft
           inAppUpdatePriority: 2
-          whatsNewDirectory: android/fastlane/metadata/android/en-US/changelogs
-          releaseName: ${{ needs.build.outputs.version_name }}
-        continue-on-error: true
-
-      - name: ⏳ Wait before retry
-        if: steps.upload-play-store.outcome == 'failure'
-        run: |
-          echo "⏳ Waiting 30 seconds before retrying Play Store upload..."
-          sleep 30
-
-      - name: 🔄 Retry Play Store Upload
-        if: steps.upload-play-store.outcome == 'failure'
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: ${{ secrets.PACKAGE_NAME }}
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: ${{ needs.build.outputs.track }}
-          status: draft 
-          inAppUpdatePriority: 2
-          whatsNewDirectory: android/fastlane/metadata/android/en-US/changelogs
-          releaseName: ${{ needs.build.outputs.version_name }}-retry
+          releaseName: ${{ needs.build.outputs.version_name }} (${{ needs.build.outputs.version_code }})
