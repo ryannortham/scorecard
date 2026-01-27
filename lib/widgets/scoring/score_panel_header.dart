@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/adaptive_title.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
@@ -20,7 +20,7 @@ class ScorePanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TeamsProvider>(
+    return Consumer<TeamsViewModel>(
       builder: (context, teamsProvider, child) {
         // Look up the team object to get the logo
         final team = teamsProvider.findTeamByName(teamName);
@@ -50,7 +50,7 @@ class ScorePanelHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              Consumer<GameStateService>(
+              Consumer<GameViewModel>(
                 builder: (context, gameStateService, _) {
                   final goals = gameStateService.getScore(
                     isHomeTeam: isHomeTeam,

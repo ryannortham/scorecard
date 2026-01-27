@@ -50,6 +50,11 @@ jobs:
       - name: 🔍 Analyze project source
         run: flutter analyze
 
+      - name: 📝 Lint markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v22
+        with:
+          globs: '**/*.md'
+
       - name: 🧪 Run tests
         run: |
           if [ -d "test" ]; then
@@ -259,7 +264,7 @@ jobs:
             - Android App Bundle (AAB) attached below
             - Available on Google Play Internal Testing
             
-            See the [changelog](./android/whatsnew/whatsnew-en-US) for details.
+            See the [changelog](./android/fastlane/metadata/android/en-US/changelogs/default.txt) for details.
 
       - name: 🚀 Upload to Play Store
         id: upload-play-store
@@ -271,7 +276,7 @@ jobs:
           track: ${{ needs.build.outputs.track }}
           status: draft
           inAppUpdatePriority: 2
-          whatsNewDirectory: android/whatsnew
+          whatsNewDirectory: android/fastlane/metadata/android/en-US/changelogs
           releaseName: ${{ needs.build.outputs.version_name }}
         continue-on-error: true
 
@@ -291,5 +296,5 @@ jobs:
           track: ${{ needs.build.outputs.track }}
           status: draft 
           inAppUpdatePriority: 2
-          whatsNewDirectory: android/whatsnew
+          whatsNewDirectory: android/fastlane/metadata/android/en-US/changelogs
           releaseName: ${{ needs.build.outputs.version_name }}-retry

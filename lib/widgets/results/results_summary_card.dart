@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/services/results_service.dart';
+import 'package:scorecard/models/game_summary.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
 /// displays game summary in the results list
@@ -28,7 +28,7 @@ class ResultsSummaryCard extends StatelessWidget {
   /// determines if trophy icon should show for favourite team win
   bool _shouldShowTrophyIcon(
     GameSummary gameSummary,
-    UserPreferencesProvider userPrefs,
+    PreferencesViewModel userPrefs,
   ) {
     if (userPrefs.favoriteTeams.isEmpty) return false;
 
@@ -54,7 +54,7 @@ class ResultsSummaryCard extends StatelessWidget {
 
   /// builds team logo widget
   Widget _buildTeamLogo(String teamName) {
-    return Consumer<TeamsProvider>(
+    return Consumer<TeamsViewModel>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
         return TeamLogo(logoUrl: team?.logoUrl, size: 48);
@@ -64,7 +64,7 @@ class ResultsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userPrefs = Provider.of<UserPreferencesProvider>(context);
+    final userPrefs = Provider.of<PreferencesViewModel>(context);
     final shouldShowTrophy = _shouldShowTrophyIcon(gameSummary, userPrefs);
 
     final dateFormat = DateFormat('dd/MM/yyyy');

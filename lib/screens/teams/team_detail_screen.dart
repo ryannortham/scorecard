@@ -7,13 +7,13 @@ import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/context_extensions.dart';
 import 'package:scorecard/models/playhq.dart';
 import 'package:scorecard/models/score.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/playhq_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
 import 'package:scorecard/widgets/teams/team_action_buttons.dart';
 import 'package:scorecard/widgets/teams/team_address_section.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
@@ -41,7 +41,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Future<void> _tryFetchAddressIfNeeded() async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final teamIndex = teamsProvider.teams.indexWhere(
       (team) => team.name == widget.teamName,
     );
@@ -109,7 +109,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
         if (address != null && mounted) {
           // Update the team with address information
-          final teamsProvider = Provider.of<TeamsProvider>(
+          final teamsProvider = Provider.of<TeamsViewModel>(
             context,
             listen: false,
           );
@@ -158,8 +158,8 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final teamsProvider = Provider.of<TeamsProvider>(context);
-    final userPreferences = Provider.of<UserPreferencesProvider>(context);
+    final teamsProvider = Provider.of<TeamsViewModel>(context);
+    final userPreferences = Provider.of<PreferencesViewModel>(context);
 
     // Find the team by name
     final teamIndex = teamsProvider.teams.indexWhere(
@@ -188,7 +188,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
-              AppSliverAppBar.withBackButton(
+              StyledSliverAppBar.withBackButton(
                 title: const Text('Team Details'),
                 onBackPressed: () => context.handleBackPress(),
               ),
@@ -263,11 +263,11 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Future<void> _toggleFavorite() async {
-    final userPreferences = Provider.of<UserPreferencesProvider>(
+    final userPreferences = Provider.of<PreferencesViewModel>(
       context,
       listen: false,
     );
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final teamIndex = teamsProvider.teams.indexWhere(
       (team) => team.name == widget.teamName,
     );
@@ -288,7 +288,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Future<void> _editTeamName() async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final teamIndex = teamsProvider.teams.indexWhere(
       (team) => team.name == widget.teamName,
     );
@@ -325,8 +325,8 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   }
 
   Future<void> _deleteTeam() async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final userPreferences = Provider.of<UserPreferencesProvider>(
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
+    final userPreferences = Provider.of<PreferencesViewModel>(
       context,
       listen: false,
     );

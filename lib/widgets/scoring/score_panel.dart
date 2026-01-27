@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/services/logger_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/scoring/score_counter.dart';
 import 'package:scorecard/widgets/scoring/score_panel_header.dart';
 import 'package:scorecard/widgets/scoring/score_table.dart';
@@ -79,7 +79,7 @@ class ScorePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Use Selector to only rebuild when selectedQuarter changes
-    return Selector<GameStateService, int>(
+    return Selector<GameViewModel, int>(
       selector: (_, service) => service.selectedQuarter,
       builder: (context, selectedQuarter, _) {
         final currentQ = currentQuarter ?? selectedQuarter;

@@ -2,8 +2,8 @@
 
 import 'dart:math';
 
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/models/score_worm.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
 
 /// transforms game events into score worm visualisation data
 class ScoreWormService {

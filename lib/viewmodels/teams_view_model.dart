@@ -1,17 +1,25 @@
 // manages saved teams with persistence
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:scorecard/models/playhq.dart';
 import 'package:scorecard/models/score.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scorecard/repositories/shared_prefs_team_repository.dart';
+import 'package:scorecard/repositories/team_repository.dart';
 
-class TeamsProvider extends ChangeNotifier {
-  TeamsProvider() {
+/// Manages team data with persistence via [TeamRepository].
+class TeamsViewModel extends ChangeNotifier {
+  /// Creates a TeamsViewModel with an optional [TeamRepository].
+  ///
+  /// If no repository is provided, defaults to [SharedPrefsTeamRepository].
+  /// Pass a mock repository for testing.
+  TeamsViewModel({TeamRepository? repository})
+    : _repository = repository ?? SharedPrefsTeamRepository() {
     unawaited(loadTeams());
   }
+
+  final TeamRepository _repository;
   List<Team> _teams = [];
   bool _loaded = false;
 
@@ -20,25 +28,15 @@ class TeamsProvider extends ChangeNotifier {
   bool get loaded => _loaded;
 
   Future<void> loadTeams() async {
-    final prefs = await SharedPreferences.getInstance();
-    final teamsJson = prefs.getStringList('teams');
+    _teams = await _repository.loadTeams();
 
-    if (teamsJson != null) {
-      _teams =
-          teamsJson
-              .map(
-                (jsonString) => Team.fromJson(
-                  jsonDecode(jsonString) as Map<String, dynamic>,
-                ),
-              )
-              .toList();
-    } else {
-      // migrate from old format if present
-      final teamNames = prefs.getStringList('teamNames') ?? [];
-      _teams = teamNames.map((name) => Team(name: name)).toList();
-      if (teamNames.isNotEmpty) {
-        await _saveTeams();
-        await prefs.remove('teamNames');
+    if (_teams.isEmpty) {
+      // Migrate from old format if present
+      final legacyNames = await _repository.loadLegacyTeamNames();
+      if (legacyNames != null && legacyNames.isNotEmpty) {
+        _teams = legacyNames.map((name) => Team(name: name)).toList();
+        await _repository.saveTeams(_teams);
+        await _repository.removeLegacyTeamNames();
       }
     }
 
@@ -47,9 +45,7 @@ class TeamsProvider extends ChangeNotifier {
   }
 
   Future<void> _saveTeams() async {
-    final prefs = await SharedPreferences.getInstance();
-    final teamsJson = _teams.map((team) => jsonEncode(team.toJson())).toList();
-    await prefs.setStringList('teams', teamsJson);
+    await _repository.saveTeams(_teams);
   }
 
   Future<void> addTeam(

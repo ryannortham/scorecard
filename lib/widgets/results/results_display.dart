@@ -2,15 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/results/quarter_breakdown_section.dart';
 import 'package:scorecard/widgets/results/score_section.dart';
-import 'package:scorecard/widgets/results/score_worm_widget.dart';
+import 'package:scorecard/widgets/results/score_worm.dart';
 
 /// unified widget for displaying game details
-class ResultsWidget extends StatelessWidget {
-  const ResultsWidget({
+class ResultsDisplay extends StatelessWidget {
+  const ResultsDisplay({
     super.key,
     this.staticGame,
     this.liveEvents,
@@ -19,7 +19,7 @@ class ResultsWidget extends StatelessWidget {
   }) : isLiveData = staticGame == null;
 
   /// factory constructor for static data (game results)
-  const ResultsWidget.fromStaticData({
+  const ResultsDisplay.fromStaticData({
     required GameRecord game,
     super.key,
     this.scrollController,
@@ -29,7 +29,7 @@ class ResultsWidget extends StatelessWidget {
        isLiveData = false;
 
   /// factory constructor for live data (current game)
-  const ResultsWidget.fromLiveData({
+  const ResultsDisplay.fromLiveData({
     required List<GameEvent> events,
     super.key,
     this.scrollController,
@@ -46,7 +46,7 @@ class ResultsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLiveData) {
-      return Consumer<GameStateService>(
+      return Consumer<GameViewModel>(
         builder: (context, gameState, child) {
           final game = _buildLiveGame(gameState);
           return _buildContent(context, game);
@@ -57,7 +57,7 @@ class ResultsWidget extends StatelessWidget {
     }
   }
 
-  GameRecord _buildLiveGame(GameStateService gameState) {
+  GameRecord _buildLiveGame(GameViewModel gameState) {
     return GameRecord(
       id: 'current-game',
       date: gameState.gameDate,
@@ -80,9 +80,9 @@ class ResultsWidget extends StatelessWidget {
         ScoreSection(game: game, isLiveData: isLiveData),
         const SizedBox(height: 4),
         if (isLiveData)
-          ScoreWormWidget.fromLiveData(events: liveEvents ?? [])
+          ScoreWorm.fromLiveData(events: liveEvents ?? [])
         else
-          ScoreWormWidget.fromStaticData(game: game),
+          ScoreWorm.fromStaticData(game: game),
         const SizedBox(height: 4),
         QuarterBreakdownSection(game: game, liveEvents: liveEvents),
       ],

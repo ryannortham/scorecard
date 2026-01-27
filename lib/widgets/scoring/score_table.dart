@@ -1,7 +1,7 @@
 // score table widget displaying quarter-by-quarter scores
 
 import 'package:flutter/material.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/widgets/scoring/score_table_row.dart';
 

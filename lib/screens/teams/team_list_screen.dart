@@ -5,18 +5,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/context_extensions.dart';
-import 'package:scorecard/mixins/selection_controller.dart';
+import 'package:scorecard/mixins/selection_mixin.dart';
 import 'package:scorecard/models/score.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/screens/teams/team_add_screen.dart';
 import 'package:scorecard/screens/teams/team_detail_screen.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
 class TeamListScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class TeamListScreen extends StatefulWidget {
 }
 
 class _TeamListScreenState extends State<TeamListScreen>
-    with SelectionController<int, TeamListScreen> {
+    with SelectionMixin<int, TeamListScreen> {
   bool _hasNavigatedToAddTeam = false;
   bool _hasInitiallyLoaded = false;
 
@@ -47,7 +47,7 @@ class _TeamListScreenState extends State<TeamListScreen>
   }
 
   Future<void> _checkForEmptyTeamsList() async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final teamToExclude = ModalRoute.of(context)?.settings.arguments as String?;
     final filteredTeams =
         teamsProvider.teams
@@ -91,8 +91,8 @@ class _TeamListScreenState extends State<TeamListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final teamsProvider = Provider.of<TeamsProvider>(context);
-    final userPreferences = Provider.of<UserPreferencesProvider>(context);
+    final teamsProvider = Provider.of<TeamsViewModel>(context);
+    final userPreferences = Provider.of<PreferencesViewModel>(context);
     final teamToExclude = ModalRoute.of(context)?.settings.arguments as String?;
     final teams =
         teamsProvider.teams
@@ -126,13 +126,13 @@ class _TeamListScreenState extends State<TeamListScreen>
               headerSliverBuilder: (context, innerBoxIsScrolled) {
                 return [
                   if (isSelectionMode)
-                    AppSliverAppBar.selectionMode(
+                    StyledSliverAppBar.selectionMode(
                       selectedCount: selectedCount,
                       onClose: exitSelectionMode,
                       onDelete: hasSelection ? _deleteSelectedTeams : null,
                     )
                   else
-                    AppSliverAppBar.withBackButton(
+                    StyledSliverAppBar.withBackButton(
                       title: Text(widget.title),
                       onBackPressed: _handleBackPress,
                       actions: const [AppMenu(currentRoute: 'teams')],
@@ -252,8 +252,8 @@ class _TeamListScreenState extends State<TeamListScreen>
   Future<void> _deleteSelectedTeams() async {
     if (!hasSelection) return;
 
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
-    final userPreferences = Provider.of<UserPreferencesProvider>(
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
+    final userPreferences = Provider.of<PreferencesViewModel>(
       context,
       listen: false,
     );

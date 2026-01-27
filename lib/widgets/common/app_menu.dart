@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 
 /// material 3 menu for app settings access
 class AppMenu extends StatelessWidget {
@@ -14,7 +14,7 @@ class AppMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserPreferencesProvider>(
+    return Consumer<PreferencesViewModel>(
       builder: (context, userPreferences, _) {
         return MenuAnchor(
           menuChildren: [
@@ -175,7 +175,7 @@ class AppMenu extends StatelessWidget {
   /// builds colour theme menu items
   List<Widget> _buildColorThemeMenuItems(
     BuildContext context,
-    UserPreferencesProvider userPreferences,
+    PreferencesViewModel userPreferences,
   ) {
     final colorOptions = ColorService.getColorOptions(
       supportsDynamicColors: userPreferences.supportsDynamicColors,
@@ -243,11 +243,11 @@ class AppMenu extends StatelessWidget {
   /// toggles timer mode between countdown and count up
   Future<void> _toggleTimerMode(
     BuildContext context,
-    UserPreferencesProvider userPreferences,
+    PreferencesViewModel userPreferences,
     bool newValue,
   ) async {
     // Read context before async gap
-    final gameState = context.read<GameStateService>();
+    final gameState = context.read<GameViewModel>();
 
     await userPreferences.setIsCountdownTimer(value: newValue);
 

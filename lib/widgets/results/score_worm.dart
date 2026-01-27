@@ -2,16 +2,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/models/score_worm.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/score_worm_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/results/score_worm_components.dart';
 
 /// displays score differential over time
-class ScoreWormWidget extends StatelessWidget {
-  const ScoreWormWidget._({
+class ScoreWorm extends StatelessWidget {
+  const ScoreWorm._({
     required this.isLiveData,
     super.key,
     this.staticGame,
@@ -19,11 +19,11 @@ class ScoreWormWidget extends StatelessWidget {
   });
 
   /// factory constructor for static data (completed games)
-  const ScoreWormWidget.fromStaticData({required GameRecord game, Key? key})
+  const ScoreWorm.fromStaticData({required GameRecord game, Key? key})
     : this._(key: key, staticGame: game, liveEvents: null, isLiveData: false);
 
   /// factory constructor for live data (current game)
-  const ScoreWormWidget.fromLiveData({
+  const ScoreWorm.fromLiveData({
     required List<GameEvent> events,
     Key? key,
   }) : this._(key: key, staticGame: null, liveEvents: events, isLiveData: true);
@@ -34,7 +34,7 @@ class ScoreWormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLiveData) {
-      return Consumer<GameStateService>(
+      return Consumer<GameViewModel>(
         builder: (context, gameState, child) {
           final game = _buildLiveGame(gameState);
           final liveProgress = _calculateLiveProgress(gameState);
@@ -46,7 +46,7 @@ class ScoreWormWidget extends StatelessWidget {
     }
   }
 
-  GameRecord _buildLiveGame(GameStateService gameState) {
+  GameRecord _buildLiveGame(GameViewModel gameState) {
     return GameRecord(
       id: 'current-game',
       date: gameState.gameDate,
@@ -62,7 +62,7 @@ class ScoreWormWidget extends StatelessWidget {
     );
   }
 
-  double _calculateLiveProgress(GameStateService gameState) {
+  double _calculateLiveProgress(GameViewModel gameState) {
     final quarter = gameState.selectedQuarter;
     final elapsedMs = gameState.getElapsedTimeInQuarter();
     final quarterMs = gameState.quarterMSec;
@@ -110,7 +110,7 @@ class ScoreWormWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            _ScoreWormLayout(
+            _ScoreWormLayoutInternal(
               data: data,
               colours: colours,
               tickValues: tickValues,
@@ -127,7 +127,7 @@ class ScoreWormWidget extends StatelessWidget {
 
   int _getCurrentQuarter(BuildContext context, GameRecord game) {
     if (isLiveData) {
-      return context.read<GameStateService>().selectedQuarter;
+      return context.read<GameViewModel>().selectedQuarter;
     }
     if (game.events.isEmpty) return 1;
     return game.events.map((e) => e.quarter).reduce((a, b) => a > b ? a : b);
@@ -135,8 +135,8 @@ class ScoreWormWidget extends StatelessWidget {
 }
 
 /// score worm layout using row/column structure
-class _ScoreWormLayout extends StatelessWidget {
-  const _ScoreWormLayout({
+class _ScoreWormLayoutInternal extends StatelessWidget {
+  const _ScoreWormLayoutInternal({
     required this.data,
     required this.colours,
     required this.tickValues,

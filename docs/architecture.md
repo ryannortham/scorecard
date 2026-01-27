@@ -2,7 +2,13 @@
 
 ## Overview
 
-Scorecard follows a clean, layered architecture pattern with clear separation of concerns. The app uses **Provider** for state management and follows Flutter's recommended best practices for building maintainable, testable applications.
+Scorecard follows a clean, layered **MVVM (Model-View-ViewModel)** architecture pattern with clear separation of concerns. The app uses **Provider** for state management and follows Flutter's recommended best practices for building maintainable, testable applications.
+
+The architecture distinguishes between:
+
+- **ViewModels** - Stateful `ChangeNotifier` classes managing UI state
+- **Services** - Stateless utility classes for external integrations and helpers
+- **Repositories** - Data access layer abstracting persistence
 
 ## Project Structure
 
@@ -14,16 +20,21 @@ lib/
 │   ├── game_record_extensions.dart
 │   └── string_extensions.dart
 ├── mixins/                      # Reusable behaviour mixins
-│   └── selection_controller.dart
-├── models/                      # Data models
+│   └── selection_mixin.dart
+├── models/                      # Data models (immutable data structures)
+│   ├── game_record.dart
+│   ├── game_summary.dart
 │   ├── playhq.dart
 │   ├── score.dart
 │   └── score_worm.dart
-├── providers/                   # State management (Provider pattern)
-│   ├── game_record_provider.dart
-│   ├── preferences_provider.dart
-│   └── teams_provider.dart
-├── screens/                     # Top-level screen widgets
+├── repositories/                # Data access layer (Repository pattern)
+│   ├── game_repository.dart
+│   ├── preferences_repository.dart
+│   ├── shared_prefs_game_repository.dart
+│   ├── shared_prefs_preferences_repository.dart
+│   ├── shared_prefs_team_repository.dart
+│   └── team_repository.dart
+├── screens/                     # Top-level screen widgets (Views)
 │   ├── results/
 │   │   ├── results_list_screen.dart
 │   │   └── results_screen.dart
@@ -34,21 +45,25 @@ lib/
 │       ├── team_add_screen.dart
 │       ├── team_detail_screen.dart
 │       └── team_list_screen.dart
-├── services/                    # Business logic and external integrations
+├── services/                    # STATELESS utilities and external integrations
 │   ├── asset_service.dart
-│   ├── game_persistence_manager.dart
+│   ├── dialog_service.dart
 │   ├── game_sharing_service.dart
-│   ├── game_state_service.dart
 │   ├── google_maps_service.dart
 │   ├── logger_service.dart
 │   ├── playhq_service.dart
-│   ├── results_service.dart
+│   ├── score_table_builder_service.dart
 │   ├── score_worm_service.dart
-│   ├── snackbar_service.dart
-│   └── timer_manager.dart
+│   └── snackbar_service.dart
 ├── theme/                       # Theme configuration
 │   ├── colors.dart
 │   └── design_tokens.dart
+├── viewmodels/                  # STATEFUL ChangeNotifiers (UI state management)
+│   ├── game_persistence_manager.dart  # Internal helper for GameViewModel
+│   ├── game_view_model.dart
+│   ├── preferences_view_model.dart
+│   ├── teams_view_model.dart
+│   └── timer_manager.dart             # Internal helper for GameViewModel
 └── widgets/                     # Reusable UI components
     ├── common/
     ├── navigation/
@@ -59,64 +74,109 @@ lib/
     └── timer/
 ```
 
+## MVVM Architecture
+
+### ViewModels (Stateful)
+
+ViewModels are `ChangeNotifier` classes that manage UI state. They are the single source of truth for their respective domains and notify listeners when state changes.
+
+Located in `lib/viewmodels/`:
+
+1. **`GameViewModel`** (`viewmodels/game_view_model.dart`)
+   - Manages active game state during scoring sessions
+   - Handles score updates, quarter progression, timer state
+   - Uses `GameRepository` for persistence (injectable for testing)
+   - Central source of truth for live games
+   - Internal helpers: `TimerManager`, `GamePersistenceManager`
+
+2. **`PreferencesViewModel`** (`viewmodels/preferences_view_model.dart`)
+   - Manages user preferences (theme, settings, favourite teams)
+   - Uses `PreferencesRepository` for persistence (injectable for testing)
+   - Notifies listeners on preference changes
+
+3. **`TeamsViewModel`** (`viewmodels/teams_view_model.dart`)
+   - Manages team data and team list
+   - Uses `TeamRepository` for persistence (injectable for testing)
+
+### Services (Stateless)
+
+Services are stateless utility classes that provide functionality without managing state. They handle external integrations, data transformations, and side effects.
+
+Located in `lib/services/`:
+
+- **`AssetService`** - Manages team logos and local assets
+- **`DialogService`** - Material 3 compliant dialogs and prompts
+- **`GameSharingService`** - Handles exporting and sharing game results
+- **`GoogleMapsService`** - Venue location and mapping functionality
+- **`LoggerService`** - Centralised logging with component-based categorisation
+- **`PlayHQService`** - Integration with PlayHQ API for team search and data
+- **`ScoreTableBuilderService`** - Builds score table widgets with proper data handling
+- **`ScoreWormService`** - Generates score progression visualisations
+- **`SnackbarService`** - User feedback and notification management
+
+### Repositories (Data Access)
+
+The repository pattern abstracts data persistence, enabling testability:
+
+Located in `lib/repositories/`:
+
+- **`GameRepository`** - Interface for game data CRUD operations
+- **`TeamRepository`** - Interface for team data persistence
+- **`PreferencesRepository`** - Interface for user preferences
+
+Default implementations use SharedPreferences:
+
+- `SharedPrefsGameRepository`
+- `SharedPrefsTeamRepository`
+- `SharedPrefsPreferencesRepository`
+
 ## State Management
 
 ### Provider Pattern
 
-The app uses the **Provider** package for state management, with three primary providers:
-
-1. **`UserPreferencesProvider`** (`providers/preferences_provider.dart`)
-   - Manages user preferences (theme, settings)
-   - Persisted using SharedPreferences
-   - Notifies listeners on preference changes
-
-2. **`GameStateService`** (`services/game_state_service.dart`)
-   - Manages active game state during scoring
-   - Handles score updates, quarter progression, timer state
-   - Central source of truth for live games
-
-3. **`TeamsProvider`** (`providers/teams_provider.dart`)
-   - Manages team data and favourites
-   - Integrates with PlayHQ API for team search
-   - Persists team data locally
-
-### Provider Initialisation
-
-Providers are initialised at app startup in `main.dart`:
+The app uses the **Provider** package for state management with ViewModels:
 
 ```dart
 MultiProvider(
   providers: [
-    ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
-    ChangeNotifierProvider(create: (_) => GameStateService()),
-    ChangeNotifierProvider(create: (_) => TeamsProvider()),
+    Provider<GameRepository>(create: (_) => SharedPrefsGameRepository()),
+    ChangeNotifierProvider(create: (_) => PreferencesViewModel()),
+    ChangeNotifierProvider(create: (_) => GameViewModel()),
+    ChangeNotifierProvider(create: (_) => TeamsViewModel()),
   ],
   child: const FootyScoreCardApp(),
 )
 ```
 
-## Key Services
+### Accessing ViewModels
 
-### Game Management
+```dart
+// With listening (rebuilds on changes)
+final teams = Provider.of<TeamsViewModel>(context);
+final teams = context.watch<TeamsViewModel>();
 
-- **`GameStateService`** - Active game state management during scoring sessions
-- **`GamePersistenceManager`** - Saves and loads game records to/from local storage
-- **`GameSharingService`** - Handles exporting and sharing game results
+// Without listening (one-time access)
+final gameState = Provider.of<GameViewModel>(context, listen: false);
+final gameState = context.read<GameViewModel>();
+```
 
-### External Integrations
+### Dependency Injection for Testing
 
-- **`PlayHQService`** - Integration with PlayHQ API for team search and data
-- **`GoogleMapsService`** - Venue location and mapping functionality
-- **`AssetService`** - Manages team logos and local assets
+ViewModels accept optional repository parameters for testing:
 
-### Utilities
+```dart
+class TeamsViewModel extends ChangeNotifier {
+  TeamsViewModel({TeamRepository? repository})
+    : _repository = repository ?? SharedPrefsTeamRepository();
+}
 
-- **`TimerManager`** - Game timer functionality with quarter/period support
-- **`ScoreWormService`** - Generates score progression visualisations
-- **`ResultsService`** - Processes and formats game results
-- **`LoggerService`** - Centralised logging with component-based categorisation
-- **`SnackbarService`** - User feedback and notification management
-- **`DialogService`** - Modal dialogue handling
+// Production
+final viewModel = TeamsViewModel(); // Uses SharedPrefsTeamRepository
+
+// Testing
+final mockRepo = MockTeamRepository(initialTeams: [Team(name: 'Test')]);
+final viewModel = TeamsViewModel(repository: mockRepo);
+```
 
 ## Navigation
 
@@ -127,54 +187,59 @@ The app uses a custom navigation shell with bottom navigation bar:
 
 ### Main Routes
 
-1. **Scoring Setup** → Create new games, select teams, configure timer
-2. **Teams** → Manage favourite teams, search PlayHQ, team details
-3. **Results** → View game history, detailed results, score worm visualisations
+1. **Scoring Setup** - Create new games, select teams, configure timer
+2. **Teams** - Manage favourite teams, search PlayHQ, team details
+3. **Results** - View game history, detailed results, score worm visualisations
 
 ## Data Flow
 
 ```text
 User Interaction
-      ↓
-UI Widget (Screen/Component)
-      ↓
-Provider (State Management)
-      ↓
-Service (Business Logic)
-      ↓
-Model (Data Structure)
-      ↓
-Persistence (Hive/SharedPreferences)
+      |
+      v
+UI Widget (Screen/Component) --- View
+      |
+      v
+ViewModel (State Management) --- ViewModel
+      |
+      v
+Repository (Data Access)     --- Model/Data Layer
+      |
+      v
+Persistence (SharedPreferences)
 ```
 
 ### Example: Creating a New Game
 
 1. User configures game in `ScoringSetupScreen`
-2. Screen updates `GameStateService` provider
-3. Provider validates and stores game state
+2. Screen updates `GameViewModel` via Provider
+3. ViewModel validates and stores game state
 4. User navigates to `ScoringScreen`
-5. Screen reads from `GameStateService` via `Provider.of<GameStateService>(context)`
-6. Score updates trigger `notifyListeners()` in provider
+5. Screen reads from `GameViewModel` via `context.watch<GameViewModel>()`
+6. Score updates trigger `notifyListeners()` in ViewModel
 7. `GamePersistenceManager` saves state periodically
-8. On game completion, `ResultsService` processes final results
+8. On game completion, results are persisted via `GameRepository`
 
 ## Design Patterns
 
 ### Repository Pattern
 
-Services act as repositories, abstracting data access from UI components:
+Data access is abstracted behind repository interfaces, enabling:
 
-- `PlayHQService` - External API repository
-- `GamePersistenceManager` - Local storage repository
-- `TeamsProvider` - Team data repository
+- **Testability** - Mock implementations can be injected for unit tests
+- **Flexibility** - Storage backend can be swapped (e.g., SQLite, cloud sync)
+- **Separation of concerns** - Business logic decoupled from persistence details
 
-### Service Locator
+Repository structure:
 
-While Provider handles state management, services are accessed through dependency injection via Provider:
-
-```dart
-final gameState = Provider.of<GameStateService>(context, listen: false);
-final teams = Provider.of<TeamsProvider>(context);
+```text
+repositories/
+├── game_repository.dart                    # Abstract interface
+├── shared_prefs_game_repository.dart       # SharedPreferences implementation
+├── team_repository.dart                    # Abstract interface
+├── shared_prefs_team_repository.dart       # SharedPreferences implementation
+├── preferences_repository.dart             # Abstract interface + PreferencesData
+└── shared_prefs_preferences_repository.dart # SharedPreferences implementation
 ```
 
 ### Extension Methods
@@ -189,7 +254,7 @@ Custom extensions enhance readability and reduce boilerplate:
 
 Reusable behaviour is shared via mixins:
 
-- `SelectionController` - Manages selection state for team picker
+- `SelectionMixin` - Manages selection state for team picker widgets
 
 ## Theme & Styling
 
@@ -209,18 +274,39 @@ The app uses Material Design 3 with dynamic colour support:
 
 ## Testing Strategy
 
+### Test Structure
+
+```text
+test/
+├── mocks/                          # Mock implementations
+│   ├── mock_game_repository.dart
+│   ├── mock_preferences_repository.dart
+│   └── mock_team_repository.dart
+├── models/                         # Model tests
+│   ├── game_record_test.dart
+│   └── score_test.dart
+├── repositories/                   # Repository tests
+│   └── mock_game_repository_test.dart
+├── services/                       # Service tests
+│   └── game_state_service_test.dart
+├── viewmodels/                     # ViewModel tests
+│   ├── preferences_view_model_test.dart
+│   └── teams_view_model_test.dart
+└── ...
+```
+
 ### Unit Tests
 
 - Model serialisation/deserialisation
 - Service business logic
-- Provider state transitions
+- ViewModel state transitions (using mock repositories)
 - Extension method utilities
 
 ### Widget Tests
 
 - Individual component rendering
 - User interaction handling
-- Provider integration
+- ViewModel integration
 
 ### Integration Tests
 
@@ -240,7 +326,7 @@ make test
 2. **Debouncing** - Search inputs debounced to reduce API calls
 3. **Efficient Rebuilds** - `Consumer` widgets limit rebuild scope
 4. **Image Caching** - Team logos cached via `AssetService`
-5. **Persistence** - Hive used for fast local storage (vs SQLite overhead)
+5. **Persistence** - SharedPreferences used for fast local storage
 
 ## Error Handling
 
@@ -248,16 +334,6 @@ make test
 - **Try-Catch Blocks** - Service methods handle exceptions gracefully
 - **`SnackbarService`** - User-friendly error messages
 - **Fallback UI** - Empty states and error widgets for failed data loads
-
-## Future Architecture Improvements
-
-Potential enhancements for future iterations:
-
-- **Dependency Injection** - Consider GetIt or Riverpod for improved testability
-- **Repository Layer** - Formalise repository pattern for all data access
-- **Use Cases/Interactors** - Add business logic layer between UI and services
-- **Clean Architecture** - Full clean architecture separation (presentation/domain/data)
-- **BLoC Pattern** - Consider BLoC for more complex state scenarios
 
 ---
 

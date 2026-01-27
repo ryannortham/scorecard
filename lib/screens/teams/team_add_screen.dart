@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/string_extensions.dart';
 import 'package:scorecard/models/playhq.dart';
-import 'package:scorecard/providers/teams_provider.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/playhq_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
 import 'package:scorecard/widgets/teams/team_search_results.dart';
 
 // search configuration constants
@@ -100,7 +100,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            AppSliverAppBar.withBackButton(
+            StyledSliverAppBar.withBackButton(
               title: const Text('Add Team'),
               onBackPressed: () {
                 // Unfocus search bar before navigating back
@@ -257,7 +257,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
 
   /// adds team to the list, handling duplicates with edit dialog
   Future<void> _addTeamToList(Organisation team) async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final processedName = team.name.toProcessedTeamName();
 
     // Check if team already exists
@@ -334,7 +334,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     String? playHQId,
     String? routingCode,
   }) async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
     final navigator = Navigator.of(context);
 
     await teamsProvider.addTeam(
@@ -361,7 +361,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     String currentName,
     Organisation originalTeam,
   ) async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
 
     final result = await DialogService.showTeamNameDialog(
       context: context,
@@ -385,7 +385,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
 
   /// shows dialog for custom team entry
   Future<void> _showCustomEntryDialog() async {
-    final teamsProvider = Provider.of<TeamsProvider>(context, listen: false);
+    final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
 
     final result = await DialogService.showTeamNameDialog(
       context: context,

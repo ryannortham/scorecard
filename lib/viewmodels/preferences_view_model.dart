@@ -5,14 +5,22 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:scorecard/repositories/preferences_repository.dart';
+import 'package:scorecard/repositories/shared_prefs_preferences_repository.dart';
 import 'package:scorecard/theme/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// manages app settings and game setup preferences
-class UserPreferencesProvider extends ChangeNotifier {
-  UserPreferencesProvider() {
+/// Manages app settings and game setup preferences via `PreferencesRepository`.
+class PreferencesViewModel extends ChangeNotifier {
+  /// Creates a PreferencesViewModel with an optional `PreferencesRepository`.
+  ///
+  /// If no repository is provided, defaults to
+  /// `SharedPrefsPreferencesRepository`. Pass a mock repository for testing.
+  PreferencesViewModel({PreferencesRepository? repository})
+    : _repository = repository ?? SharedPrefsPreferencesRepository() {
     unawaited(_initializeProvider());
   }
+
+  final PreferencesRepository _repository;
 
   // app settings
   List<String> _favoriteTeams = [];
@@ -27,15 +35,6 @@ class UserPreferencesProvider extends ChangeNotifier {
   // loading state
   bool _loaded = false;
   bool? _dynamicColorsSupported;
-
-  // shared preferences keys
-  static const String _favoriteTeamsKey = 'favorite_teams';
-  static const String _legacyFavoriteTeamKey = 'favorite_team'; // For migration
-  static const String _themeModeKey = 'theme_mode';
-  static const String _colorThemeKey = 'color_theme';
-  static const String _useTallysKey = 'use_tallys';
-  static const String _quarterMinutesKey = 'game_setup_quarter_minutes';
-  static const String _countdownTimerKey = 'game_setup_countdown_timer';
 
   // app settings getters
   List<String> get favoriteTeams => List.unmodifiable(_favoriteTeams);
@@ -64,37 +63,26 @@ class UserPreferencesProvider extends ChangeNotifier {
 
   Future<void> _loadPreferencesAsync() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // Migrate from legacy single favourite to multiple favourites
-      final legacyFavorite = prefs.getString(_legacyFavoriteTeamKey);
+      // Check for legacy single favourite and migrate if needed
+      final legacyFavorite = await _repository.loadLegacyFavoriteTeam();
       if (legacyFavorite != null && legacyFavorite.isNotEmpty) {
         // Migrate old single favourite to new list format
         _favoriteTeams = [legacyFavorite];
-        // Save in new format and remove old key
-        await prefs.setStringList(_favoriteTeamsKey, _favoriteTeams);
-        await prefs.remove(_legacyFavoriteTeamKey);
+        await _savePreferences();
+        await _repository.removeLegacyFavoriteTeam();
       } else {
-        // Load from new format
-        _favoriteTeams = prefs.getStringList(_favoriteTeamsKey) ?? [];
+        // Load from repository
+        final data = await _repository.load();
+        _favoriteTeams = List<String>.from(data.favoriteTeams);
+        _themeMode = data.themeMode;
+        _colorTheme = ColorService.validateTheme(
+          data.colorTheme.isEmpty ? ColorService.defaultTheme : data.colorTheme,
+          supportsDynamicColors: supportsDynamicColors,
+        );
+        _useTallys = data.useTallys;
+        _quarterMinutes = data.quarterMinutes;
+        _isCountdownTimer = data.isCountdownTimer;
       }
-
-      final themeModeString = prefs.getString(_themeModeKey) ?? 'system';
-      _themeMode = ThemeMode.values.firstWhere(
-        (mode) => mode.name == themeModeString,
-        orElse: () => ThemeMode.system,
-      );
-
-      _colorTheme =
-          prefs.getString(_colorThemeKey) ?? ColorService.defaultTheme;
-      _colorTheme = ColorService.validateTheme(
-        _colorTheme,
-        supportsDynamicColors: supportsDynamicColors,
-      );
-
-      _useTallys = prefs.getBool(_useTallysKey) ?? true;
-      _quarterMinutes = prefs.getInt(_quarterMinutesKey) ?? 15;
-      _isCountdownTimer = prefs.getBool(_countdownTimerKey) ?? true;
 
       _loaded = true;
       notifyListeners();
@@ -109,13 +97,15 @@ class UserPreferencesProvider extends ChangeNotifier {
   }
 
   Future<void> _savePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_favoriteTeamsKey, _favoriteTeams);
-    await prefs.setString(_themeModeKey, _themeMode.name);
-    await prefs.setString(_colorThemeKey, _colorTheme);
-    await prefs.setBool(_useTallysKey, _useTallys);
-    await prefs.setInt(_quarterMinutesKey, _quarterMinutes);
-    await prefs.setBool(_countdownTimerKey, _isCountdownTimer);
+    final data = PreferencesData(
+      favoriteTeams: _favoriteTeams,
+      themeMode: _themeMode,
+      colorTheme: _colorTheme,
+      useTallys: _useTallys,
+      quarterMinutes: _quarterMinutes,
+      isCountdownTimer: _isCountdownTimer,
+    );
+    await _repository.save(data);
   }
 
   // app settings setters

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/widgets/results/team_logo_watermark.dart';
 import 'package:scorecard/widgets/results/team_name.dart';

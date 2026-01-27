@@ -1,7 +1,7 @@
 // tests for game record models (GameEvent, GameRecord)
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 
 void main() {
   group('GameEvent', () {

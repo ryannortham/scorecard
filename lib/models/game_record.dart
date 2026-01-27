@@ -1,5 +1,8 @@
 // game event and record models for persistence
 
+import 'package:uuid/uuid.dart';
+
+/// Represents a single scoring or clock event during a game.
 class GameEvent {
   GameEvent({
     required this.quarter,
@@ -16,6 +19,7 @@ class GameEvent {
       type: json['type'] as String,
     );
   }
+
   final int quarter;
   final Duration time;
   final String team; // empty for clock events
@@ -32,6 +36,7 @@ class GameEvent {
   }
 }
 
+/// Complete game record with all events and final scores.
 class GameRecord {
   GameRecord({
     required this.id,
@@ -46,6 +51,34 @@ class GameRecord {
     required this.awayGoals,
     required this.awayBehinds,
   });
+
+  /// Creates a new game record with a generated UUID.
+  factory GameRecord.create({
+    required DateTime date,
+    required String homeTeam,
+    required String awayTeam,
+    required int quarterMinutes,
+    required bool isCountdownTimer,
+    required List<GameEvent> events,
+    required int homeGoals,
+    required int homeBehinds,
+    required int awayGoals,
+    required int awayBehinds,
+  }) {
+    return GameRecord(
+      id: const Uuid().v4(),
+      date: date,
+      homeTeam: homeTeam,
+      awayTeam: awayTeam,
+      quarterMinutes: quarterMinutes,
+      isCountdownTimer: isCountdownTimer,
+      events: events,
+      homeGoals: homeGoals,
+      homeBehinds: homeBehinds,
+      awayGoals: awayGoals,
+      awayBehinds: awayBehinds,
+    );
+  }
 
   factory GameRecord.fromJson(Map<String, dynamic> json) {
     return GameRecord(
@@ -65,6 +98,7 @@ class GameRecord {
       awayBehinds: json['awayBehinds'] as int,
     );
   }
+
   final String id;
   final DateTime date;
   final String homeTeam;

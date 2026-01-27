@@ -6,16 +6,16 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/game_record_extensions.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
 import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
-import 'package:scorecard/widgets/results/results_widget.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
+import 'package:scorecard/widgets/results/results_display.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 /// displays game details with sharing and celebration
@@ -69,7 +69,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
   void _checkAndTriggerConfetti() {
     if (_hasTriggeredConfetti) return;
 
-    final userPrefs = Provider.of<UserPreferencesProvider>(
+    final userPrefs = Provider.of<PreferencesViewModel>(
       context,
       listen: false,
     );
@@ -105,7 +105,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
           NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
-                AppSliverAppBar.withBackButton(
+                StyledSliverAppBar.withBackButton(
                   title: const Text('Results'),
                   onBackPressed: () => Navigator.of(context).pop(),
                   actions: [
@@ -134,7 +134,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 SliverToBoxAdapter(
                   child: WidgetShotPlus(
                     key: _widgetShotKey,
-                    child: ResultsWidget.fromStaticData(game: widget.game),
+                    child: ResultsDisplay.fromStaticData(game: widget.game),
                   ),
                 ),
 
@@ -158,7 +158,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
                 child: IntrinsicHeight(
                   child: SizedBox(
                     width: 400,
-                    child: ResultsWidget.fromStaticData(
+                    child: ResultsDisplay.fromStaticData(
                       game: widget.game,
                       enableScrolling: false,
                     ),

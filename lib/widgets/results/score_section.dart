@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/game_record_extensions.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/widgets/results/game_card.dart';
 import 'package:scorecard/widgets/results/game_result_badge.dart';
 import 'package:scorecard/widgets/results/team_scores_row.dart';
@@ -24,7 +24,7 @@ class ScoreSection extends StatelessWidget {
     final isComplete = game.isComplete;
     final title = _getScoreTitle(context, isComplete);
 
-    final userPrefs = Provider.of<UserPreferencesProvider>(context);
+    final userPrefs = Provider.of<PreferencesViewModel>(context);
     final shouldShowTrophy = game.shouldShowTrophy(userPrefs);
     final icon =
         shouldShowTrophy ? Icons.emoji_events_outlined : Icons.outlined_flag;
@@ -52,7 +52,7 @@ class ScoreSection extends StatelessWidget {
 
   String _getScoreTitle(BuildContext context, bool isComplete) {
     if (isLiveData) {
-      final gameState = context.read<GameStateService>();
+      final gameState = context.read<GameViewModel>();
       final quarter = gameState.selectedQuarter;
       final timeMs = gameState.getElapsedTimeInQuarter();
       final timeStr = StopWatchTimer.getDisplayTime(timeMs, hours: false);

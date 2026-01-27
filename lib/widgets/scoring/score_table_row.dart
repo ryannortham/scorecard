@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/widgets/scoring/progressive_display.dart';
 import 'package:scorecard/widgets/scoring/progressive_number.dart';
 import 'package:scorecard/widgets/scoring/tally_display.dart';
@@ -39,7 +38,7 @@ class ScoreTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userPreferences = Provider.of<UserPreferencesProvider>(context);
+    final userPreferences = Provider.of<PreferencesViewModel>(context);
     final useTallyMode = userPreferences.useTallys;
 
     final teamGoals = quarterEvents.where((e) => e.type == 'goal').length;

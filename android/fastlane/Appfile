@@ -1,0 +1,3 @@
+# App identifier for Google Play Store
+json_key_file("fastlane/service-account.json")
+package_name("blog.ryannortham.scorecard")

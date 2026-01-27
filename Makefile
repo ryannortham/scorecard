@@ -1,7 +1,7 @@
-.PHONY: deps format format-check lint lint-fix test build clean check
+.PHONY: deps format format-check lint lint-fix lint-md lint-md-fix test build clean check
 
 # Default target - run all CI checks
-check: format-check lint test
+check: format-check lint lint-md test
 	@echo "✓ All checks passed"
 
 # Install dependencies
@@ -23,6 +23,14 @@ lint:
 # Auto-fix lint issues where possible
 lint-fix:
 	dart fix --apply
+
+# Lint markdown files
+lint-md:
+	markdownlint '**/*.md'
+
+# Auto-fix markdown lint issues
+lint-md-fix:
+	markdownlint '**/*.md' --fix
 
 # Run tests
 test:

@@ -1,0 +1,12 @@
+# Generated directories
+node_modules/
+build/
+.dart_tool/
+.pub-cache/
+
+# Platform-specific (may contain generated markdown)
+android/
+ios/
+
+# OpenCode tooling
+.opencode/

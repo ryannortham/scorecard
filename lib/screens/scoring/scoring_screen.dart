@@ -4,20 +4,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/repositories/game_repository.dart';
 import 'package:scorecard/screens/results/results_screen.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/services/logger_service.dart';
-import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
-import 'package:scorecard/widgets/results/results_widget.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
+import 'package:scorecard/widgets/results/results_display.dart';
 import 'package:scorecard/widgets/scoring/scoring.dart';
-import 'package:scorecard/widgets/timer/timer_widget.dart';
+import 'package:scorecard/widgets/timer/timer_display.dart';
 import 'package:widget_screenshot_plus/widget_screenshot_plus.dart';
 
 class ScoringScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class ScoringScreen extends StatefulWidget {
 }
 
 class ScoringScreenState extends State<ScoringScreen> {
-  late GameStateService gameStateService;
+  late GameViewModel gameStateService;
   final ValueNotifier<bool> isTimerRunning = ValueNotifier<bool>(false);
 
   // Screenshot functionality
@@ -37,7 +37,7 @@ class ScoringScreenState extends State<ScoringScreen> {
   bool _isSharing = false;
   late GameSharingService _gameSharingService;
 
-  // Timer key for TimerWidget
+  // Timer key for TimerDisplay
   final GlobalKey _quarterTimerKey = GlobalKey();
 
   // Game events list
@@ -46,7 +46,7 @@ class ScoringScreenState extends State<ScoringScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    gameStateService = Provider.of<GameStateService>(context);
+    gameStateService = Provider.of<GameViewModel>(context);
 
     // Initialize sharing service
     _gameSharingService = GameSharingService(
@@ -102,25 +102,19 @@ class ScoringScreenState extends State<ScoringScreen> {
         return;
       }
 
+      final gameRepository = context.read<GameRepository>();
       await gameStateService.forceFinalSave();
 
-      final allGames = await ResultsService.loadGames();
-      final gameRecord = allGames.firstWhere(
-        (game) => game.id == gameId,
-        orElse: () {
-          AppLogger.warning(
-            'Could not find game with ID $gameId, using fallback search',
-            component: 'Scoring',
-            data:
-                '${gameStateService.homeTeam} vs ${gameStateService.awayTeam}',
-          );
-          return allGames.firstWhere(
-            (game) =>
-                game.homeTeam == gameStateService.homeTeam &&
-                game.awayTeam == gameStateService.awayTeam,
-          );
-        },
-      );
+      final gameRecord = await gameRepository.loadGameById(gameId);
+
+      if (gameRecord == null) {
+        AppLogger.warning(
+          'Could not find game with ID $gameId after save',
+          component: 'Scoring',
+          data: '${gameStateService.homeTeam} vs ${gameStateService.awayTeam}',
+        );
+        return;
+      }
 
       gameStateService.resetGame();
 
@@ -216,7 +210,7 @@ class ScoringScreenState extends State<ScoringScreen> {
                   child: IntrinsicHeight(
                     child: SizedBox(
                       width: 400,
-                      child: ResultsWidget.fromLiveData(
+                      child: ResultsDisplay.fromLiveData(
                         events: gameEvents,
                         enableScrolling: false,
                       ),
@@ -242,7 +236,7 @@ class ScoringScreenState extends State<ScoringScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-              child: TimerWidget(
+              child: TimerDisplay(
                 key: _quarterTimerKey,
                 isRunning: isTimerRunning,
                 onQuarterEnd: recordQuarterEnd,
@@ -280,7 +274,7 @@ class ScoringScreenState extends State<ScoringScreen> {
   }
 
   Widget _buildSliverAppBar(BuildContext context) {
-    return AppSliverAppBar.withBackButton(
+    return StyledSliverAppBar.withBackButton(
       title: Text('Score Card', style: Theme.of(context).textTheme.titleLarge),
       onBackPressed: () async {
         final shouldPop = await _onWillPop();

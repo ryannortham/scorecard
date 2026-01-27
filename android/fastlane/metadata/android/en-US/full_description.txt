@@ -1,0 +1,33 @@
+A reliable scoring app for Australian rules football.
+
+Built for goal umpires, team managers, and coaches who need straightforward score tracking without fuss.
+
+SCORING
+• Record goals and behinds with a single tap
+• Automatic points calculation
+• Quarter-by-quarter totals
+• Choose between tally marks or progressive number display
+• Works offline during games
+
+SCORE WORM
+• Visual match summary showing scoring flow
+• Quarter breakdowns and margins
+• Useful for post-game review
+
+CUSTOMISATION
+• Full colour theming - match your team colours
+• Tally or progressive scoring display styles
+• Configurable quarter length
+
+TEAM MANAGEMENT
+• Create and save teams
+• Import teams from PlayHQ
+• Google Maps integration for finding away venues
+• Mark favourite teams for quick setup
+
+SHARE RESULTS
+• Share live scores or final results
+• Send directly to team group chats and social media
+• Export match summaries
+
+No accounts required. No ads. Just open and score.

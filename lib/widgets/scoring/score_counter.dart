@@ -5,8 +5,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 
 /// counter widget for scoring goals or behinds
 class ScoreCounter extends StatefulWidget {
@@ -29,7 +29,7 @@ class ScoreCounter extends StatefulWidget {
 class ScoreCounterState extends State<ScoreCounter> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<GameStateService>(
+    return Consumer<GameViewModel>(
       builder: (context, gameStateService, _) {
         final currentCount = gameStateService.getScore(
           isHomeTeam: widget.isHomeTeam,
@@ -157,7 +157,7 @@ class ScoreCounterState extends State<ScoreCounter> {
     unawaited(HapticFeedback.lightImpact());
 
     // The game state service handles all event logic internally
-    context.read<GameStateService>().updateScore(
+    context.read<GameViewModel>().updateScore(
       isHomeTeam: widget.isHomeTeam,
       isGoal: widget.isGoal,
       newCount: newCount,

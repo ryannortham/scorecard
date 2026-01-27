@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 
 /// quarter progress indicator widget
 class QuarterProgress extends StatelessWidget {
@@ -12,7 +12,7 @@ class QuarterProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Use Selector to only rebuild when selectedQuarter changes
-    return Selector<GameStateService, int>(
+    return Selector<GameViewModel, int>(
       selector: (_, service) => service.selectedQuarter,
       builder: (context, currentQuarter, child) {
         return Container(

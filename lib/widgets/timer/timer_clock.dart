@@ -4,9 +4,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:vibration/vibration.dart';
 
@@ -123,7 +123,7 @@ class _TimerClockState extends State<TimerClock> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameStateService, UserPreferencesProvider>(
+    return Consumer2<GameViewModel, PreferencesViewModel>(
       builder: (context, gameState, userPreferences, _) {
         return StreamBuilder<int>(
           stream: gameState.timerStream,

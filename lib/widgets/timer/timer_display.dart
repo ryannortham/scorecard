@@ -5,29 +5,29 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
+import 'package:scorecard/services/dialog_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/timer/timer_clock.dart';
 import 'package:scorecard/widgets/timer/timer_controls.dart';
 
 /// main timer widget with clock display and control buttons
-class TimerWidget extends StatefulWidget {
-  const TimerWidget({super.key, this.isRunning, this.onQuarterEnd});
+class TimerDisplay extends StatefulWidget {
+  const TimerDisplay({super.key, this.isRunning, this.onQuarterEnd});
   final ValueNotifier<bool>? isRunning;
   final void Function(int quarter)? onQuarterEnd;
 
   @override
-  TimerWidgetState createState() => TimerWidgetState();
+  TimerDisplayState createState() => TimerDisplayState();
 }
 
-class TimerWidgetState extends State<TimerWidget> {
-  GameStateService? _gameStateService;
+class TimerDisplayState extends State<TimerDisplay> {
+  GameViewModel? _gameStateService;
   bool _listenerAdded = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final newService = context.read<GameStateService>();
+    final newService = context.read<GameViewModel>();
 
     if (_gameStateService != newService) {
       // Remove old listener if exists
@@ -116,6 +116,21 @@ class TimerWidgetState extends State<TimerWidget> {
     resetTimer();
   }
 
+  Future<void> _handleBackQuarter() async {
+    final confirmed = await DialogService.showConfirmationDialog(
+      context: context,
+      title: '',
+      content: '',
+      confirmText: 'Go Back?',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    unawaited(HapticFeedback.selectionClick());
+
+    _gameStateService!.goToPreviousQuarter();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -127,6 +142,7 @@ class TimerWidgetState extends State<TimerWidget> {
             onToggleTimer: toggleTimer,
             onResetTimer: resetTimer,
             onNextQuarter: _handleNextQuarter,
+            onBackQuarter: _handleBackQuarter,
             isRunningNotifier: widget.isRunning,
           ),
         ],

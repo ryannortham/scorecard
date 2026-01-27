@@ -4,10 +4,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 
 /// widget for configuring timer settings (quarter minutes and timer type)
 class TimerConfig extends StatelessWidget {
@@ -15,7 +14,7 @@ class TimerConfig extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<GameStateService, UserPreferencesProvider>(
+    return Consumer2<GameViewModel, PreferencesViewModel>(
       builder: (context, gameState, userPreferences, child) {
         if (!userPreferences.loaded) {
           return const Center(child: CircularProgressIndicator());
@@ -34,8 +33,8 @@ class TimerConfig extends StatelessWidget {
 
   Widget _buildQuarterMinutesSection(
     BuildContext context,
-    GameStateService gameState,
-    UserPreferencesProvider userPreferences,
+    GameViewModel gameState,
+    PreferencesViewModel userPreferences,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

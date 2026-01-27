@@ -5,14 +5,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
 import 'package:scorecard/screens/scoring/scoring_screen.dart';
-import 'package:scorecard/services/game_state_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
 import 'package:scorecard/widgets/common/football_icon.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
 import 'package:scorecard/widgets/scoring_setup/date_card.dart';
 import 'package:scorecard/widgets/scoring_setup/start_scoring_fab.dart';
 import 'package:scorecard/widgets/scoring_setup/teams_card.dart';
@@ -53,7 +53,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
     super.didChangeDependencies();
 
     if (!_hasInitialized) {
-      final userPreferences = Provider.of<UserPreferencesProvider>(context);
+      final userPreferences = Provider.of<PreferencesViewModel>(context);
 
       if (userPreferences.loaded) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -65,8 +65,8 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
   }
 
   void _initializeGameState() {
-    final gameState = Provider.of<GameStateService>(context, listen: false);
-    final userPreferences = Provider.of<UserPreferencesProvider>(
+    final gameState = Provider.of<GameViewModel>(context, listen: false);
+    final userPreferences = Provider.of<PreferencesViewModel>(
       context,
       listen: false,
     );
@@ -95,7 +95,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
 
   /// updates a single field in game configuration
   void _updateGameConfig(
-    GameStateService gameState, {
+    GameViewModel gameState, {
     String? homeTeam,
     String? awayTeam,
     DateTime? gameDate,
@@ -110,7 +110,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
   }
 
   void _startScoring() {
-    final gameState = Provider.of<GameStateService>(context, listen: false);
+    final gameState = Provider.of<GameViewModel>(context, listen: false);
 
     _updateGameConfig(
       gameState,
@@ -142,7 +142,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserPreferencesProvider>(
+    return Consumer<PreferencesViewModel>(
       builder: (context, userPreferences, child) {
         if (!userPreferences.loaded) {
           return const Scaffold(
@@ -151,7 +151,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
           );
         }
 
-        return Consumer<GameStateService>(
+        return Consumer<GameViewModel>(
           builder: (context, gameState, child) {
             return AppScaffold(
               extendBody: true,
@@ -188,7 +188,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return AppSliverAppBar(
+    return StyledSliverAppBar(
       automaticallyImplyLeading: false,
       title: Row(
         mainAxisSize: MainAxisSize.min,
@@ -205,7 +205,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
     );
   }
 
-  Widget _buildFormContent(BuildContext context, GameStateService gameState) {
+  Widget _buildFormContent(BuildContext context, GameViewModel gameState) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final availableHeight =

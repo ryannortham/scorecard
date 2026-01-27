@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 
 /// widget that displays the timer control buttons
 class TimerControls extends StatelessWidget {
@@ -11,16 +11,18 @@ class TimerControls extends StatelessWidget {
     required this.onToggleTimer,
     required this.onResetTimer,
     required this.onNextQuarter,
+    this.onBackQuarter,
     super.key,
     this.isRunningNotifier,
   });
   final VoidCallback onToggleTimer;
   final VoidCallback onResetTimer;
   final VoidCallback onNextQuarter;
+  final VoidCallback? onBackQuarter;
   final ValueNotifier<bool>? isRunningNotifier;
 
   /// determines if reset button should be enabled
-  bool _isResetEnabled(GameStateService gameState) {
+  bool _isResetEnabled(GameViewModel gameState) {
     // Reset button should never be enabled while timer is running
     if (gameState.isTimerRunning) return false;
 
@@ -33,7 +35,7 @@ class TimerControls extends StatelessWidget {
   }
 
   /// determines if next button should be enabled
-  bool _isNextEnabled(GameStateService gameState) {
+  bool _isNextEnabled(GameViewModel gameState) {
     final currentTime = gameState.timerRawTime;
     final quarterMSec = gameState.quarterMSec;
 
@@ -52,6 +54,16 @@ class TimerControls extends StatelessWidget {
     return gameState.isCountdownTimer
         ? currentTime != quarterMSec
         : currentTime != 0;
+  }
+
+  /// determines if back button should show instead of reset
+  /// Shows when timer is at initial value (reset state) and not in Q1
+  bool _shouldShowBackButton(GameViewModel gameState) {
+    if (gameState.isTimerRunning) return false;
+    if (gameState.selectedQuarter <= 1) return false;
+
+    // Show back when reset is disabled (timer at initial value)
+    return !_isResetEnabled(gameState);
   }
 
   /// creates a button that switches to icon-only when space is limited
@@ -118,7 +130,7 @@ class TimerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Consumer<GameStateService>(
+      child: Consumer<GameViewModel>(
         builder: (context, gameState, _) {
           return ValueListenableBuilder<bool>(
             valueListenable:
@@ -128,6 +140,7 @@ class TimerControls extends StatelessWidget {
               final isNextEnabled = _isNextEnabled(gameState);
               final currentQuarter = gameState.selectedQuarter;
               final isLastQuarter = currentQuarter == 4;
+              final showBackButton = _shouldShowBackButton(gameState);
 
               // Check if we're in overtime for button styling
               final currentTime = gameState.timerRawTime;
@@ -140,15 +153,23 @@ class TimerControls extends StatelessWidget {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Reset Button
+                  // Reset/Back Button
                   Expanded(
                     flex: 2,
-                    child: _buildAdaptiveButton(
-                      onPressed: isResetEnabled ? onResetTimer : null,
-                      iconData: Icons.refresh_outlined,
-                      label: 'Reset',
-                      isTonal: true,
-                    ),
+                    child:
+                        showBackButton
+                            ? _buildAdaptiveButton(
+                              onPressed: onBackQuarter,
+                              iconData: Icons.arrow_back_outlined,
+                              label: 'Back',
+                              isTonal: true,
+                            )
+                            : _buildAdaptiveButton(
+                              onPressed: isResetEnabled ? onResetTimer : null,
+                              iconData: Icons.refresh_outlined,
+                              label: 'Reset',
+                              isTonal: true,
+                            ),
                   ),
 
                   // Play/Pause Button

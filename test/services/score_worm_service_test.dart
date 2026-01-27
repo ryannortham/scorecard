@@ -1,7 +1,7 @@
 // tests for score worm service - chart data generation
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/services/score_worm_service.dart';
 
 void main() {

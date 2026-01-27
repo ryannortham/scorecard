@@ -119,11 +119,8 @@ class ProgressiveDisplay extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ProgressiveNumber(
-          number: lastNumber,
-          decoration:
-              isQuarterComplete
-                  ? NumberDecoration.underline
-                  : NumberDecoration.none,
+          number: firstNumber,
+          decoration: NumberDecoration.strikethrough,
           textStyle: textStyle,
         ),
         Padding(

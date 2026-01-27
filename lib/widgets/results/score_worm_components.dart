@@ -2,10 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:scorecard/models/score_worm.dart';
-import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/results/score_worm_painters.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
@@ -16,7 +15,7 @@ class ScoreWormTeamLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TeamsProvider>(
+    return Consumer<TeamsViewModel>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
         final logoUrl = team?.logoUrl32 ?? team?.logoUrl48 ?? team?.logoUrl;

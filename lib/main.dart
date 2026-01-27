@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/repositories/game_repository.dart';
+import 'package:scorecard/repositories/shared_prefs_game_repository.dart';
 import 'package:scorecard/services/logger_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 
 Future<void> main() async {
@@ -31,9 +33,10 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserPreferencesProvider()),
-        ChangeNotifierProvider(create: (_) => GameStateService()),
-        ChangeNotifierProvider(create: (_) => TeamsProvider()),
+        Provider<GameRepository>(create: (_) => SharedPrefsGameRepository()),
+        ChangeNotifierProvider(create: (_) => PreferencesViewModel()),
+        ChangeNotifierProvider(create: (_) => GameViewModel()),
+        ChangeNotifierProvider(create: (_) => TeamsViewModel()),
       ],
       child: const FootyScoreCardApp(),
     ),
@@ -45,7 +48,7 @@ class FootyScoreCardApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserPreferencesProvider>(
+    return Consumer<PreferencesViewModel>(
       builder: (context, userPreferences, child) {
         return DynamicColorBuilder(
           builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {

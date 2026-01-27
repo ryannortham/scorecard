@@ -1,7 +1,7 @@
 // game record analysis extension methods
 
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 
 /// analysis methods for game records
 extension GameRecordAnalysis on GameRecord {
@@ -18,7 +18,7 @@ extension GameRecordAnalysis on GameRecord {
   }
 
   /// whether trophy should show for favourite team win
-  bool shouldShowTrophy(UserPreferencesProvider userPrefs) {
+  bool shouldShowTrophy(PreferencesViewModel userPrefs) {
     // Game must be complete
     if (!isComplete) return false;
 

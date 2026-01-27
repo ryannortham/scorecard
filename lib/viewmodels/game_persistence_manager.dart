@@ -2,12 +2,22 @@
 
 import 'dart:async';
 
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/repositories/game_repository.dart';
+import 'package:scorecard/repositories/shared_prefs_game_repository.dart';
 import 'package:scorecard/services/logger_service.dart';
-import 'package:scorecard/services/results_service.dart';
 
-/// manages game persistence with intelligent batching
+/// Manages game persistence with intelligent batching via [GameRepository].
 class GamePersistenceManager {
+  /// Creates a GamePersistenceManager with an optional [GameRepository].
+  ///
+  /// If no repository is provided, defaults to [SharedPrefsGameRepository].
+  /// Pass a mock repository for testing.
+  GamePersistenceManager({GameRepository? gameRepository})
+    : _gameRepository = gameRepository ?? SharedPrefsGameRepository();
+
+  final GameRepository _gameRepository;
+
   Timer? _saveTimer;
   bool _hasPendingSave = false;
   int _eventsSinceLastSave = 0;
@@ -48,7 +58,7 @@ class GamePersistenceManager {
     if (_currentGameId != null) return _currentGameId;
 
     try {
-      final gameRecord = ResultsService.createGameRecord(
+      final gameRecord = GameRecord.create(
         date: gameDate,
         homeTeam: homeTeam,
         awayTeam: awayTeam,
@@ -285,7 +295,7 @@ class GamePersistenceManager {
         awayBehinds: awayBehinds,
       );
 
-      await ResultsService.saveGame(gameRecord);
+      await _gameRepository.saveGame(gameRecord);
       AppLogger.info(
         'Force saved final game record',
         component: 'GamePersistence',
@@ -338,7 +348,7 @@ class GamePersistenceManager {
         awayBehinds: awayBehinds,
       );
 
-      await ResultsService.saveGame(gameRecord);
+      await _gameRepository.saveGame(gameRecord);
     } on Exception catch (e) {
       AppLogger.error(
         'Error updating game record',

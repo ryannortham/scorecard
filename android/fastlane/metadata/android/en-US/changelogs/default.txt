@@ -1,0 +1,2 @@
+• Improved score tracking interface
+• Bug fixes and performance improvements

@@ -2,7 +2,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scorecard/extensions/game_record_extensions.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
+import 'package:scorecard/models/game_record.dart';
 
 void main() {
   /// helper to create a game event
@@ -556,7 +556,7 @@ void main() {
     });
   });
 
-  // Note: shouldShowTrophy tests require mocking UserPreferencesProvider
+  // Note: shouldShowTrophy tests require mocking PreferencesViewModel
   // which depends on SharedPreferences. These would be better as integration
   // tests or with a proper mocking framework like mocktail.
   //

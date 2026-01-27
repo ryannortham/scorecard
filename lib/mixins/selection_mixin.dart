@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 /// provides selection mode state and actions for list widgets
-mixin SelectionController<T, W extends StatefulWidget> on State<W> {
+mixin SelectionMixin<T, W extends StatefulWidget> on State<W> {
   bool _isSelectionMode = false;
   final Set<T> _selectedItems = {};
 

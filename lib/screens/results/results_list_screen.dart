@@ -5,16 +5,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/context_extensions.dart';
-import 'package:scorecard/mixins/selection_controller.dart';
+import 'package:scorecard/mixins/selection_mixin.dart';
+import 'package:scorecard/models/game_summary.dart';
+import 'package:scorecard/repositories/game_repository.dart';
 import 'package:scorecard/screens/results/results_screen.dart';
-import 'package:scorecard/services/game_state_service.dart';
+import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/logger_service.dart';
-import 'package:scorecard/services/results_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
+import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
-import 'package:scorecard/widgets/common/dialog_service.dart';
-import 'package:scorecard/widgets/common/sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
 import 'package:scorecard/widgets/results/results_summary_card.dart';
 
 class ResultsListScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class ResultsListScreen extends StatefulWidget {
 }
 
 class _ResultsListScreenState extends State<ResultsListScreen>
-    with SelectionController<String, ResultsListScreen> {
+    with SelectionMixin<String, ResultsListScreen> {
   List<GameSummary> _gameSummaries = [];
   bool _isLoading = true;
   bool _isLoadingMore = false;
@@ -86,9 +87,10 @@ class _ResultsListScreenState extends State<ResultsListScreen>
 
   Future<void> _loadGamePage(int offset) async {
     try {
-      final gameStateService = context.read<GameStateService>();
+      final gameStateService = context.read<GameViewModel>();
+      final gameRepository = context.read<GameRepository>();
 
-      final newSummaries = await ResultsService.loadGameSummaries(
+      final newSummaries = await gameRepository.loadGameSummaries(
         limit: _pageSize,
         offset: offset,
         excludeGameId: gameStateService.currentGameId,
@@ -129,6 +131,7 @@ class _ResultsListScreenState extends State<ResultsListScreen>
 
     final count = selectedCount;
     final confirmText = count == 1 ? 'Delete Game?' : 'Delete $count Games?';
+    final gameRepository = context.read<GameRepository>();
 
     final shouldDelete = await DialogService.showConfirmationDialog(
       context: context,
@@ -143,7 +146,7 @@ class _ResultsListScreenState extends State<ResultsListScreen>
         // Delete all selected games
         final gameIdsToDelete = List<String>.from(selectedItems);
         for (final gameId in gameIdsToDelete) {
-          await ResultsService.deleteGame(gameId);
+          await gameRepository.deleteGame(gameId);
         }
 
         exitSelectionMode();
@@ -174,7 +177,8 @@ class _ResultsListScreenState extends State<ResultsListScreen>
 
   Future<void> _showGameDetails(String gameId) async {
     // Load the full game data only when needed
-    final game = await ResultsService.loadGameById(gameId);
+    final gameRepository = context.read<GameRepository>();
+    final game = await gameRepository.loadGameById(gameId);
     if (game != null && mounted) {
       final result = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
@@ -206,13 +210,13 @@ class _ResultsListScreenState extends State<ResultsListScreen>
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               if (isSelectionMode)
-                AppSliverAppBar.selectionMode(
+                StyledSliverAppBar.selectionMode(
                   selectedCount: selectedCount,
                   onClose: exitSelectionMode,
                   onDelete: hasSelection ? _deleteSelectedGames : null,
                 )
               else
-                AppSliverAppBar.withBackButton(
+                StyledSliverAppBar.withBackButton(
                   title: const Text('Results'),
                   onBackPressed: _handleBackPress,
                   actions: const [AppMenu(currentRoute: 'results')],

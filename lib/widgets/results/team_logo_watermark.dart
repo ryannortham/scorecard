@@ -3,9 +3,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:scorecard/providers/teams_provider.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/football_icon.dart';
 
 /// team logo watermark widget
@@ -23,7 +22,7 @@ class TeamLogoWatermark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TeamsProvider>(
+    return Consumer<TeamsViewModel>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
         final logoUrl = team?.logoUrlLarge ?? team?.logoUrl48 ?? team?.logoUrl;

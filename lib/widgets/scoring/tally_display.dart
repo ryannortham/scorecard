@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/preferences_provider.dart';
 import 'package:scorecard/services/asset_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
 
 /// displays tally icons for a given numeric value, with optional text fallback
 class TallyDisplay extends StatelessWidget {
@@ -34,7 +34,7 @@ class TallyDisplay extends StatelessWidget {
     final effectiveIconSize = iconSize ?? 24.0;
 
     // Get the user preference for using tallys
-    final userPreferences = Provider.of<UserPreferencesProvider>(context);
+    final userPreferences = Provider.of<PreferencesViewModel>(context);
     final shouldUseTally = useTally && userPreferences.useTallys;
 
     // Handle zero or negative values - show nothing (blank)

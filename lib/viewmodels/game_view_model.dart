@@ -3,19 +3,30 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/services/game_persistence_manager.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/repositories/game_repository.dart';
 import 'package:scorecard/services/logger_service.dart';
-import 'package:scorecard/services/timer_manager.dart';
 import 'package:scorecard/theme/design_tokens.dart';
+import 'package:scorecard/viewmodels/game_persistence_manager.dart';
+import 'package:scorecard/viewmodels/timer_manager.dart';
 
-/// main game state orchestrator coordinating timer, score, and persistence
-class GameStateService extends ChangeNotifier {
-  GameStateService();
+/// Main game state ViewModel coordinating timer, score, and persistence.
+///
+/// Accepts optional `GameRepository` for testing. If not provided, the
+/// `GamePersistenceManager` will use its default `SharedPrefsGameRepository`.
+class GameViewModel extends ChangeNotifier {
+  GameViewModel({
+    TimerManager? timerManager,
+    GamePersistenceManager? persistenceManager,
+    GameRepository? gameRepository,
+  }) : _timerManager = timerManager ?? TimerManager(),
+       _persistenceManager =
+           persistenceManager ??
+           GamePersistenceManager(gameRepository: gameRepository);
 
   // managers
-  final TimerManager _timerManager = TimerManager();
-  final GamePersistenceManager _persistenceManager = GamePersistenceManager();
+  final TimerManager _timerManager;
+  final GamePersistenceManager _persistenceManager;
 
   // score state
   int _homeGoals = 0;
@@ -321,6 +332,55 @@ class GameStateService extends ChangeNotifier {
       resetTimer();
       notifyListeners();
     }
+  }
+
+  /// Navigate back to the previous quarter for corrections.
+  /// Removes the clock_end event and restores timer to where the quarter ended.
+  /// Returns false if already in Q1.
+  bool goToPreviousQuarter() {
+    if (_selectedQuarter <= 1) return false;
+
+    final targetQuarter = _selectedQuarter - 1;
+
+    // Find the clock_end event to get the quarter end time before removing it
+    final clockEndIdx = _gameEvents.lastIndexWhere(
+      (e) => e.quarter == targetQuarter && e.type == 'clock_end',
+    );
+
+    int? quarterEndTimeMs;
+    if (clockEndIdx != -1) {
+      quarterEndTimeMs = _gameEvents[clockEndIdx].time.inMilliseconds;
+      _gameEvents.removeAt(clockEndIdx);
+    }
+
+    // Update quarter
+    _selectedQuarter = targetQuarter;
+    _isTimerRunning = false;
+
+    // Restore timer to where the quarter ended
+    if (quarterEndTimeMs != null) {
+      final timerValue =
+          _isCountdownTimer
+              ? quarterMSec -
+                  quarterEndTimeMs // Convert elapsed to countdown
+              : quarterEndTimeMs; // Count-up uses elapsed directly
+      _timerManager.setTimerRawTime(timerValue);
+    } else {
+      // Fallback: reset to full quarter time
+      _timerManager.reset(quarterMSec);
+    }
+
+    AppLogger.info(
+      'Navigated back to quarter $targetQuarter for corrections',
+      component: 'GameState',
+    );
+
+    _notifyTimerStateListeners();
+    _notifyGameEventListeners();
+    _scheduleSave();
+    notifyListeners();
+
+    return true;
   }
 
   bool isGameComplete() {

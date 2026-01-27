@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:scorecard/theme/colors.dart';
 
 /// sliver app bar with consistent styling across the app
-class AppSliverAppBar extends StatelessWidget {
-  const AppSliverAppBar({
+class StyledSliverAppBar extends StatelessWidget {
+  const StyledSliverAppBar({
     super.key,
     this.title,
     this.leading,
@@ -14,13 +14,13 @@ class AppSliverAppBar extends StatelessWidget {
   });
 
   /// creates app bar with a standard back button
-  factory AppSliverAppBar.withBackButton({
+  factory StyledSliverAppBar.withBackButton({
     required Widget title,
     required VoidCallback onBackPressed,
     Key? key,
     List<Widget>? actions,
   }) {
-    return AppSliverAppBar(
+    return StyledSliverAppBar(
       key: key,
       title: title,
       leading: IconButton(
@@ -33,13 +33,13 @@ class AppSliverAppBar extends StatelessWidget {
   }
 
   /// creates app bar for selection mode with close button
-  factory AppSliverAppBar.selectionMode({
+  factory StyledSliverAppBar.selectionMode({
     required int selectedCount,
     required VoidCallback onClose,
     required VoidCallback? onDelete,
     Key? key,
   }) {
-    return AppSliverAppBar(
+    return StyledSliverAppBar(
       key: key,
       title: Text('$selectedCount selected'),
       leading: IconButton(

@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/providers/game_record_provider.dart';
-import 'package:scorecard/providers/teams_provider.dart';
+import 'package:scorecard/models/game_record.dart';
+import 'package:scorecard/services/score_table_builder_service.dart';
 import 'package:scorecard/theme/colors.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/results/game_card.dart';
-import 'package:scorecard/widgets/scoring/score_table_builder.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
 /// quarter breakdown section showing score tables for each team
@@ -51,7 +51,7 @@ class QuarterBreakdownSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           child: Row(
             children: [
-              Consumer<TeamsProvider>(
+              Consumer<TeamsViewModel>(
                 builder: (context, teamsProvider, child) {
                   final team = teamsProvider.findTeamByName(teamName);
                   final logoUrl =
@@ -75,7 +75,7 @@ class QuarterBreakdownSection extends StatelessWidget {
             ],
           ),
         ),
-        ScoreTableBuilder.buildScoreTable(
+        ScoreTableBuilderService.buildScoreTable(
           context: context,
           game: game,
           displayTeam: teamName,
