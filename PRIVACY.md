@@ -7,6 +7,7 @@
 **Personal Information:** We do not collect any personal information such as names, email addresses, or contact details.
 
 **Technical Information:** We may collect anonymous technical data to improve app performance:
+
 - Crash reports (no personal data included)
 - Usage analytics (anonymous usage patterns)
 - App performance metrics

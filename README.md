@@ -1,4 +1,4 @@
-# 📊 Scorecard
+# Scorecard
 
 > Modern AFL score tracking app for goal umpires and fans
 
@@ -7,33 +7,33 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.35.3-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?logo=dart)](https://dart.dev)
 
-## ✨ Features
+## Features
 
-### 🏉 Live Scoring
+### Live Scoring
 
 - Real-time goal and behind tracking for AFL matches
 - Quarter-by-quarter score management with running totals
 - Automatic points calculation and validation
 
-### 📈 Score Visualisation
+### Score Visualisation
 
 - Interactive score worm chart showing match flow
 - Quarter-by-quarter breakdown and statistics
 - Running differentials and momentum tracking
 
-### 👥 Team Management
+### Team Management
 
 - Create and manage teams with logos and branding
 - Mark multiple favourite teams for quick access
 - Comprehensive team details and history
 
-### 💾 Game History
+### Game History
 
 - Save and review completed matches
 - Search and filter past games
 - Share results and statistics
 
-## 📱 Screenshots
+## Screenshots
 
 <table>
   <tr>
@@ -44,7 +44,7 @@
   </tr>
 </table>
 
-## 🚀 Quick Start
+## Quick Start
 
 ### For Users
 
@@ -83,7 +83,7 @@ make build         # Build debug APK
 make check         # Run all CI checks (format, lint, test)
 ```
 
-## 🏗️ Built With
+## Built With
 
 | Category             | Technology              |
 |----------------------|-------------------------|
@@ -95,22 +95,19 @@ make check         # Run all CI checks (format, lint, test)
 | **CI/CD**            | GitHub Actions          |
 | **Deployment**       | Google Play Store       |
 
-## 📖 Documentation
+## Documentation
 
 - **[Development Guide](docs/development.md)** - Detailed setup, build process, and development workflow
 - **[Architecture](docs/architecture.md)** - Project structure, design patterns, and key services
 - **[PlayHQ API](docs/playhq_api.md)** - PlayHQ GraphQL API documentation and integration details
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - [Material Design 3](https://m3.material.io/) by Google
 - [Flutter](https://flutter.dev) framework and community
 - [PlayHQ](https://www.playhq.com/) for team data integration
-
----
-
-Made with ❤️ for the AFL community
+- Australian Football League community
