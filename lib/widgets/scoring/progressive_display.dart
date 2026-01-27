@@ -32,8 +32,8 @@ class ProgressiveDisplay extends StatelessWidget {
 
   final TextStyle? textStyle;
 
-  /// Max numbers to show for single digits (1-9)
-  static const int _singleDigitThreshold = 9;
+  /// Max numbers to show for single digits (1-8)
+  static const int _singleDigitThreshold = 8;
 
   /// Max numbers to show for double digits (10-99)
   static const int _doubleDigitThreshold = 5;
@@ -62,10 +62,7 @@ class ProgressiveDisplay extends StatelessWidget {
     if (count == 1) {
       return ProgressiveNumber(
         number: lastNumber,
-        decoration:
-            isQuarterComplete
-                ? NumberDecoration.underline
-                : NumberDecoration.none,
+        decoration: isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none,
         textStyle: textStyle,
       );
     }
@@ -93,10 +90,7 @@ class ProgressiveDisplay extends StatelessWidget {
 
             NumberDecoration decoration;
             if (isLast) {
-              decoration =
-                  isQuarterComplete
-                      ? NumberDecoration.underline
-                      : NumberDecoration.none;
+              decoration = isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none;
             } else {
               decoration = NumberDecoration.strikethrough;
             }
@@ -129,10 +123,7 @@ class ProgressiveDisplay extends StatelessWidget {
         ),
         ProgressiveNumber(
           number: lastNumber,
-          decoration:
-              isQuarterComplete
-                  ? NumberDecoration.underline
-                  : NumberDecoration.none,
+          decoration: isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none,
           textStyle: textStyle,
         ),
       ],
