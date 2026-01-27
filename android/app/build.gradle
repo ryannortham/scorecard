@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+    id "org.jetbrains.kotlin.android"
 }
 
 def localProperties = new Properties()
@@ -86,7 +86,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
+    // AGP 9.0+ includes Kotlin support automatically
     // Removed Play Core libraries for Android 14 compatibility
     // These were causing backwards-incompatible broadcast receiver issues
     // App bundles and basic Play Store features work without these libraries
