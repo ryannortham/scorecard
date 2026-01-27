@@ -223,7 +223,10 @@ void main() {
         final json = team.toJson();
 
         expect(json['address'], isNotNull);
-        expect(json['address']['line1'], equals('123 Street'));
+        expect(
+          (json['address'] as Map<String, dynamic>)['line1'],
+          equals('123 Street'),
+        );
       });
     });
 

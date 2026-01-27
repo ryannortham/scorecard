@@ -23,7 +23,7 @@ void main() {
       test('should allow empty team for clock events', () {
         final event = GameEvent(
           quarter: 1,
-          time: const Duration(),
+          time: Duration.zero,
           team: '',
           type: 'clock_start',
         );

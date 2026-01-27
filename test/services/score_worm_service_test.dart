@@ -435,8 +435,8 @@ void main() {
           quarterMinutes: quarterMinutes,
         );
 
-        // Should process in order: Q1@60s (home+6), Q1@120s (away-6), Q2@60s (home+6)
-        // Final: Home 12, Away 6, Diff = +6
+        // Should process in order: Q1@60s (home+6), Q1@120s (away-6),
+        // Q2@60s (home+6). Final: Home 12, Away 6, Diff = +6
         expect(data.points.last.differential, equals(6));
       });
     });

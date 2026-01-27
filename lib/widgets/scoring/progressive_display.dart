@@ -62,7 +62,10 @@ class ProgressiveDisplay extends StatelessWidget {
     if (count == 1) {
       return ProgressiveNumber(
         number: lastNumber,
-        decoration: isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none,
+        decoration:
+            isQuarterComplete
+                ? NumberDecoration.underline
+                : NumberDecoration.none,
         textStyle: textStyle,
       );
     }
@@ -90,7 +93,10 @@ class ProgressiveDisplay extends StatelessWidget {
 
             NumberDecoration decoration;
             if (isLast) {
-              decoration = isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none;
+              decoration =
+                  isQuarterComplete
+                      ? NumberDecoration.underline
+                      : NumberDecoration.none;
             } else {
               decoration = NumberDecoration.strikethrough;
             }
@@ -113,8 +119,11 @@ class ProgressiveDisplay extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ProgressiveNumber(
-          number: firstNumber,
-          decoration: NumberDecoration.strikethrough,
+          number: lastNumber,
+          decoration:
+              isQuarterComplete
+                  ? NumberDecoration.underline
+                  : NumberDecoration.none,
           textStyle: textStyle,
         ),
         Padding(
@@ -123,7 +132,10 @@ class ProgressiveDisplay extends StatelessWidget {
         ),
         ProgressiveNumber(
           number: lastNumber,
-          decoration: isQuarterComplete ? NumberDecoration.underline : NumberDecoration.none,
+          decoration:
+              isQuarterComplete
+                  ? NumberDecoration.underline
+                  : NumberDecoration.none,
           textStyle: textStyle,
         ),
       ],
