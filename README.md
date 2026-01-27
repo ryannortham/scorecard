@@ -1,149 +1,116 @@
-# Score Card
+# 📊 Scorecard
 
-AFL goal umpires app for keeping track of game scores.
+> Modern AFL score tracking app for goal umpires and fans
 
-## Features
+[![CI/CD](https://github.com/ryannortham/scorecard/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/ryannortham/scorecard/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Flutter](https://img.shields.io/badge/Flutter-3.35.3-02569B?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.9.2-0175C2?logo=dart)](https://dart.dev)
 
-- **Score Tracking**: Track goals, behinds, and total points for multiple teams
-- **Quarter Management**: Organize scoring by quarters with running totals
-- **Game Results**: Save and review past games
-- **Team Management**: Create and manage team information
-- **Material Design**: Modern UI following Material 3 design principles
+## ✨ Features
 
-## Development
+### 🏉 Live Scoring
 
-### Requirements
+- Real-time goal and behind tracking for AFL matches
+- Quarter-by-quarter score management with running totals
+- Automatic points calculation and validation
 
-- Flutter 3.0 or higher
-- Dart 3.0 or higher
-- Android Studio / VS Code with Flutter extensions
+### 📈 Score Visualisation
 
-### Setup
+- Interactive score worm chart showing match flow
+- Quarter-by-quarter breakdown and statistics
+- Running differentials and momentum tracking
 
-1. Clone the repository
-2. Run `flutter pub get` to install dependencies
-3. Run `flutter run` to start the development server
+### 👥 Team Management
 
-### Building
+- Create and manage teams with logos and branding
+- Mark multiple favourite teams for quick access
+- Comprehensive team details and history
 
-```bash
-# Debug build
-flutter build apk --debug
+### 💾 Game History
 
-# Release build
-flutter build appbundle --release
-```
+- Save and review completed matches
+- Search and filter past games
+- Share results and statistics
 
-## Release Management
+## 📱 Screenshots
 
-### Versioning Strategy
+<table>
+  <tr>
+    <td><img src="docs/screenshots/setup.png" alt="Game Setup" width="200"/><br/><em>Game Setup</em></td>
+    <td><img src="docs/screenshots/scoring.png" alt="Live Scoring" width="200"/><br/><em>Live Scoring</em></td>
+    <td><img src="docs/screenshots/results.png" alt="Results" width="200"/><br/><em>Game Results</em></td>
+    <td><img src="docs/screenshots/team_details.png" alt="Team Details" width="200"/><br/><em>Team Details</em></td>
+  </tr>
+</table>
 
-- **Semantic Versioning**: `MAJOR.MINOR.PATCH` (e.g., `1.2.3`)
-- **Version Code**: Automatically calculated from semantic version
-  - Formula: `MAJOR * 10000 + MINOR * 100 + PATCH`
-  - Example: `1.2.3` → Version Code `10203`
+## 🚀 Quick Start
 
-### Creating a Release
+### For Users
 
-#### Method 1: GitHub UI (Recommended)
+Download from the Google Play Store (coming soon)
 
-1. Go to your GitHub repository
-2. Click "Releases" → "Create a new release"
-3. Click "Choose a tag" → Type new tag (e.g., `v1.2.3`)
-4. Set release title: `Release 1.2.3`
-5. Add release notes describing changes
-6. Click "Publish release"
+### For Developers
 
-#### Method 2: Command Line
+**Prerequisites:**
 
-```bash
-# Create and push a new tag
-git tag v1.2.3
-git push origin v1.2.3
+- Flutter 3.35.3 or higher
+- Dart 3.9.2 or higher
+- Android Studio or VS Code with Flutter extensions
 
-# Then create release on GitHub UI or use GitHub CLI
-gh release create v1.2.3 --title "Release 1.2.3" --notes "Bug fixes and improvements"
-```
-
-### Automated Release Process
-
-When you create a release tag, the CI/CD pipeline automatically:
-
-1. ✅ **Triggers CI/CD pipeline**
-2. ✅ **Extracts version from tag** (`v1.2.3` → `1.2.3`)
-3. ✅ **Calculates version code** (`1.2.3` → `10203`)
-4. ✅ **Builds AAB with correct version**
-5. ✅ **Creates GitHub release** with AAB attached
-6. ✅ **Uploads to Play Store Internal Testing**
-7. ✅ **Stores build artifact** for 30 days
-
-## Deployment
-
-### Required GitHub Secrets
-
-#### Android Signing Secrets
+**Installation:**
 
 ```bash
-# Generate a new keystore (run this locally)
-keytool -genkey -v -keystore app-signing-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+# Clone the repository
+git clone https://github.com/ryannortham/scorecard.git
+cd scorecard
 
-# Convert keystore to base64 for GitHub secrets
-base64 -i app-signing-keystore.jks | tr -d '\n' | pbcopy
+# Install dependencies
+make deps
+
+# Run the app
+flutter run
 ```
 
-Set these secrets in GitHub:
+**Development Commands:**
 
-- `ANDROID_KEYSTORE`: Base64 encoded keystore file
-- `KEYSTORE_PASSWORD`: Password you set for the keystore
-- `KEY_ALIAS`: Key alias (e.g., "upload")
-- `KEY_PASSWORD`: Password you set for the key
-
-#### Google Play Console Secrets
-
-1. **Enable Google Play Android Developer API**:
-   - Go to <https://console.cloud.google.com/apis/library/androidpublisher.googleapis.com>
-   - Click "Enable"
-
-2. **Create Service Account**:
-   - Navigate to <https://console.cloud.google.com/iam-admin/serviceaccounts>
-   - Click "Create Service Account"
-   - Give it a name (e.g., "github-play-deploy")
-
-3. **Generate Service Account Key**:
-   - Click on the service account → "Keys" tab
-   - Click "Add Key" → "Create new key" → Choose "JSON"
-   - Save the downloaded file
-
-4. **Add Service Account to Play Console**:
-   - Go to <https://play.google.com/console>
-   - Go to "Users and permissions" → "Invite new users"
-   - Add the service account email with "Release to testing tracks" permission
-
-5. **Set GitHub Secret**:
-   - `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`: Contents of the JSON key file
-
-## Architecture
-
-### Project Structure
-
-```
-lib/
-├── main.dart                 # App entry point
-├── models/                   # Data models
-├── providers/                # State management (Provider pattern)
-├── screens/                  # Main app screens
-├── services/                 # Business logic and external services
-└── widgets/                  # Reusable UI components
-    ├── game_setup/          # Game setup related widgets
-    └── scoring/             # Scoring interface widgets
+```bash
+make deps          # Install dependencies
+make format        # Format code
+make lint          # Run static analysis
+make test          # Run tests
+make build         # Build debug APK
+make check         # Run all CI checks (format, lint, test)
 ```
 
-### Key Services
+## 🏗️ Built With
 
-- **GameRecordBuilder**: Handles game state and score calculations
-- **ResultsService**: Manages saving and loading game results
-- **NavigationService**: Handles app-wide navigation
+| Category             | Technology              |
+|----------------------|-------------------------|
+| **Framework**        | Flutter 3.35.3          |
+| **Language**         | Dart 3.9.2              |
+| **State Management** | Provider                |
+| **UI Design**        | Material Design 3       |
+| **Storage**          | SharedPreferences, Hive |
+| **CI/CD**            | GitHub Actions          |
+| **Deployment**       | Google Play Store       |
 
-## License
+## 📖 Documentation
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+- **[Development Guide](docs/development.md)** - Detailed setup, build process, and development workflow
+- **[Architecture](docs/architecture.md)** - Project structure, design patterns, and key services
+- **[PlayHQ API](docs/playhq_api.md)** - PlayHQ GraphQL API documentation and integration details
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Material Design 3](https://m3.material.io/) by Google
+- [Flutter](https://flutter.dev) framework and community
+- [PlayHQ](https://www.playhq.com/) for team data integration
+
+---
+
+Made with ❤️ for the AFL community

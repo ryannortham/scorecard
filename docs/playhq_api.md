@@ -1,12 +1,14 @@
 # PlayHQ GraphQL API Documentation
 
 ## Endpoint
-```
+
+```http
 POST https://search.playhq.com/graphql
 ```
 
 ## Headers
-```
+
+```http
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0
 Accept: */*
 Accept-Language: en-US,en;q=0.5
@@ -145,6 +147,7 @@ query search($filter: SearchFilter!) {
 ## Usage in Flutter App
 
 The GraphQL service is implemented in:
+
 - **Models**: `lib/models/playhq_models.dart`
 - **Service**: `lib/services/playhq_graphql_service.dart`  
 - **UI**: `lib/screens/add_team.dart`

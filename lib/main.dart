@@ -68,6 +68,7 @@ class FootyScoreCardApp extends StatelessWidget {
 
             return MaterialApp(
               title: 'Score Card',
+              debugShowCheckedModeBanner: false,
               theme: ThemeData(
                 colorScheme: lightColorScheme,
                 useMaterial3: true,
