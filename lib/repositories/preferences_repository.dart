@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 class PreferencesData {
   const PreferencesData({
     this.favoriteTeams = const [],
-    this.themeMode = ThemeMode.system,
+    this.themeMode = ThemeMode.dark,
     this.colorTheme = '',
-    this.useTallys = true,
+    this.useTallys = false,
     this.quarterMinutes = 15,
     this.isCountdownTimer = true,
   });

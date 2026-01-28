@@ -143,7 +143,7 @@ class AppMenu extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Color'),
+                  const Text('Colour'),
                   Text(
                     _getColorThemeName(userPreferences.colorTheme),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(

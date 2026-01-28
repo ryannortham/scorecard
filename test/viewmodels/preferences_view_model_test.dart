@@ -40,9 +40,9 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
           expect(provider.favoriteTeams, isEmpty);
-          expect(provider.themeMode, equals(ThemeMode.system));
+          expect(provider.themeMode, equals(ThemeMode.dark));
           expect(provider.quarterMinutes, equals(15));
-          expect(provider.useTallys, isTrue);
+          expect(provider.useTallys, isFalse);
           expect(provider.isCountdownTimer, isTrue);
         },
       );

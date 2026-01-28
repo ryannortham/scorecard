@@ -18,17 +18,17 @@ class SharedPrefsPreferencesRepository implements PreferencesRepository {
   Future<PreferencesData> load() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final themeModeString = prefs.getString(_themeModeKey) ?? 'system';
+    final themeModeString = prefs.getString(_themeModeKey) ?? 'dark';
     final themeMode = ThemeMode.values.firstWhere(
       (mode) => mode.name == themeModeString,
-      orElse: () => ThemeMode.system,
+      orElse: () => ThemeMode.dark,
     );
 
     return PreferencesData(
       favoriteTeams: prefs.getStringList(_favoriteTeamsKey) ?? [],
       themeMode: themeMode,
       colorTheme: prefs.getString(_colorThemeKey) ?? '',
-      useTallys: prefs.getBool(_useTallysKey) ?? true,
+      useTallys: prefs.getBool(_useTallysKey) ?? false,
       quarterMinutes: prefs.getInt(_quarterMinutesKey) ?? 15,
       isCountdownTimer: prefs.getBool(_countdownTimerKey) ?? true,
     );
