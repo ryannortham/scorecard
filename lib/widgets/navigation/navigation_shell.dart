@@ -1,43 +1,38 @@
 // navigation shell that wraps screens with bottom navigation
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:scorecard/screens/results/results_list_screen.dart';
-import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
-import 'package:scorecard/screens/teams/team_list_screen.dart';
+import 'package:go_router/go_router.dart';
 import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
 /// wraps screens with bottom navigation and scroll handling
 class NavigationShell extends StatefulWidget {
-  const NavigationShell({super.key});
+  const NavigationShell({
+    required this.navigationShell,
+    required this.children,
+    super.key,
+  });
+
+  final StatefulNavigationShell navigationShell;
+  final List<Widget> children;
 
   @override
   State<NavigationShell> createState() => _NavigationShellState();
 }
 
-class _NavigationShellState extends State<NavigationShell>
-    with TickerProviderStateMixin {
-  int _currentIndex = 0;
+class _NavigationShellState extends State<NavigationShell> {
   bool _isNavigationVisible = true;
-  ScrollController? _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollController?.dispose();
-    super.dispose();
-  }
+  final List<int> _tabHistory = [0]; // Start with Scoring tab
 
   void _onDestinationSelected(int index) {
-    if (index == _currentIndex) return;
-
-    setState(() {
-      _currentIndex = index;
-    });
-    // No need for PageController animation - we'll switch directly
+    // Only add to history if switching to a different tab
+    if (index != widget.navigationShell.currentIndex) {
+      _tabHistory.add(index);
+    }
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
   }
 
   bool _onScrollNotification(ScrollNotification notification) {
@@ -69,37 +64,73 @@ class _NavigationShellState extends State<NavigationShell>
     return false;
   }
 
-  Widget _buildPage(int index) {
-    switch (index) {
-      case 0:
-        return const ScoringSetupScreen();
-      case 1:
-        return TeamListScreen(
-          title: 'Teams',
-          onTeamSelected: (_) {}, // No action needed for main teams view
-        );
-      case 2:
-        return const ResultsListScreen();
-      default:
-        return const ScoringSetupScreen();
-    }
+  void _goToPreviousTab() {
+    _tabHistory.removeLast();
   }
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: _onScrollNotification,
-      child: Scaffold(
-        extendBody: true,
-        body: _buildPage(
-          _currentIndex,
-        ), // Direct widget switching instead of PageView
-        bottomNavigationBar: BottomNavBar(
-          currentIndex: _currentIndex,
-          onDestinationSelected: _onDestinationSelected,
-          isVisible: _isNavigationVisible,
+    return PopScope(
+      canPop: _tabHistory.length <= 1, // Allow exit only from initial tab
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return; // App is exiting, nothing to do
+
+        // Go back to previous tab
+        if (_tabHistory.length > 1) {
+          setState(_goToPreviousTab);
+          widget.navigationShell.goBranch(_tabHistory.last);
+        }
+      },
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScrollNotification,
+        child: Scaffold(
+          extendBody: true,
+          body: AnimatedBranchContainer(
+            currentIndex: widget.navigationShell.currentIndex,
+            children: widget.children,
+          ),
+          bottomNavigationBar: BottomNavBar(
+            currentIndex: widget.navigationShell.currentIndex,
+            onDestinationSelected: _onDestinationSelected,
+            isVisible: _isNavigationVisible,
+          ),
         ),
       ),
     );
   }
+}
+
+/// Custom branch Navigator container that provides animated transitions
+/// when switching branches.
+class AnimatedBranchContainer extends StatelessWidget {
+  const AnimatedBranchContainer({
+    required this.currentIndex,
+    required this.children,
+    super.key,
+  });
+
+  /// The index (in [children]) of the branch Navigator to display.
+  final int currentIndex;
+
+  /// The children (branch Navigators) to display in this container.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children:
+          children.mapIndexed((int index, Widget navigator) {
+            return AnimatedOpacity(
+              opacity: index == currentIndex ? 1 : 0,
+              duration: const Duration(milliseconds: 200),
+              child: _branchNavigatorWrapper(index, navigator),
+            );
+          }).toList(),
+    );
+  }
+
+  Widget _branchNavigatorWrapper(int index, Widget navigator) => IgnorePointer(
+    ignoring: index != currentIndex,
+    child: TickerMode(enabled: index == currentIndex, child: navigator),
+  );
 }

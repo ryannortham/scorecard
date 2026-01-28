@@ -180,6 +180,41 @@ jobs:
           path: build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+  build-ios:
+    name: 🍎 Build iOS
+    needs: [test, security-scan]
+    runs-on: macos-latest
+    # Only build iOS on main branch pushes to conserve macOS runner minutes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v6
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔧 Create .env file
+        run: |
+          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+
+      - name: 🍎 Build iOS (no signing)
+        run: flutter build ios --release --no-codesign
+
+      - name: 📤 Upload iOS build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ios-build-${{ github.run_number }}
+          path: build/ios/iphoneos/Runner.app
+          retention-days: 7
+
   # =============================================================================
   # DEPLOY PHASE - Only runs after successful build on main
   # =============================================================================

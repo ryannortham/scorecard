@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/string_extensions.dart';
 import 'package:scorecard/models/playhq.dart';
@@ -105,7 +106,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
               onBackPressed: () {
                 // Unfocus search bar before navigating back
                 _searchFocusNode.unfocus();
-                Navigator.of(context).pop();
+                context.pop();
               },
               actions: const [AppMenu(currentRoute: 'add_team')],
             ),
@@ -335,7 +336,6 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
     String? routingCode,
   }) async {
     final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
-    final navigator = Navigator.of(context);
 
     await teamsProvider.addTeam(
       teamName,
@@ -352,7 +352,7 @@ class _TeamAddScreenState extends State<TeamAddScreen> {
       SnackBarService.showSuccess(context, 'Added "$teamName" to your teams');
 
       // Return the team name so it can be auto-selected
-      navigator.pop(teamName);
+      context.pop(teamName);
     }
   }
 

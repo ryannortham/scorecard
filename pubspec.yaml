@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cached_network_image: ^3.3.1
+  collection: ^1.18.0
   confetti: ^0.8.0
   device_info_plus: ^12.3.0
   dynamic_color: ^1.7.0
@@ -37,6 +38,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   flutter_native_splash: ^2.4.1
   gal: ^2.3.0
+  go_router: ^14.6.2
   http: ^1.2.2
   intl: ^0.20.2
   logging: ^1.3.0
@@ -52,6 +54,7 @@ dependencies:
   widget_screenshot_plus: ^0.0.6
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
 
@@ -112,4 +115,12 @@ flutter_native_splash:
     image: assets/icon/splash.png
     image_dark: assets/icon/splash.png
 
+  ios: true
+
   web: false
+
+flutter_launcher_icons:
+  android: false
+  ios: true
+  image_path_ios: "assets/icon/play_store_512.png"
+  remove_alpha_ios: true

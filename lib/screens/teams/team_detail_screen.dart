@@ -3,8 +3,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/extensions/context_extensions.dart';
 import 'package:scorecard/models/playhq.dart';
 import 'package:scorecard/models/score.dart';
 import 'package:scorecard/services/dialog_service.dart';
@@ -177,86 +177,78 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     final team = teamsProvider.teams[teamIndex];
     final isFavorite = userPreferences.isFavoriteTeam(team.name);
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        context.handleBackPress();
-      },
-      child: AppScaffold(
-        extendBody: true,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              StyledSliverAppBar.withBackButton(
-                title: const Text('Team Details'),
-                onBackPressed: () => context.handleBackPress(),
-              ),
-            ];
-          },
-          body: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 24),
+    return AppScaffold(
+      extendBody: true,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            StyledSliverAppBar.withBackButton(
+              title: const Text('Team Details'),
+              onBackPressed: () => context.pop(),
+            ),
+          ];
+        },
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
 
-                      // Team Logo
-                      TeamLogo(logoUrl: team.logoUrl, size: 120),
+                    // Team Logo
+                    TeamLogo(logoUrl: team.logoUrl, size: 120),
 
-                      const SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
-                      // Team Name
-                      Text(
-                        team.name,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w500),
-                        textAlign: TextAlign.center,
-                      ),
+                    // Team Name
+                    Text(
+                      team.name,
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.center,
+                    ),
 
-                      const SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
-                      // Action Buttons
-                      TeamActionButtons(
-                        isFavorite: isFavorite,
-                        onToggleFavorite: _toggleFavorite,
-                        onEdit: _editTeamName,
-                        onDelete: _deleteTeam,
-                      ),
+                    // Action Buttons
+                    TeamActionButtons(
+                      isFavorite: isFavorite,
+                      onToggleFavorite: _toggleFavorite,
+                      onEdit: _editTeamName,
+                      onDelete: _deleteTeam,
+                    ),
 
-                      // Address Section - only show for PlayHQ teams
-                      if (team.playHQId != null &&
-                          team.playHQId!.isNotEmpty) ...[
-                        if (team.address != null &&
-                            team.address!.isValidForDirections) ...[
-                          const SizedBox(height: 4),
-                          TeamAddressSection(
-                            address: team.address!,
-                            teamName: team.name,
-                          ),
-                        ] else if (team.address == null) ...[
-                          const SizedBox(height: 4),
-                          TeamNoAddressSection(
-                            hasPlayHQId: true,
-                            isFetching: _isFetchingAddress,
-                            onFetchAddress:
-                                () => _fetchAddressFromPlayHQ(teamIndex, team),
-                          ),
-                        ],
-                        // If address exists but is invalid (P.O. Box), skip
+                    // Address Section - only show for PlayHQ teams
+                    if (team.playHQId != null && team.playHQId!.isNotEmpty) ...[
+                      if (team.address != null &&
+                          team.address!.isValidForDirections) ...[
+                        const SizedBox(height: 4),
+                        TeamAddressSection(
+                          address: team.address!,
+                          teamName: team.name,
+                        ),
+                      ] else if (team.address == null) ...[
+                        const SizedBox(height: 4),
+                        TeamNoAddressSection(
+                          hasPlayHQId: true,
+                          isFetching: _isFetchingAddress,
+                          onFetchAddress:
+                              () => _fetchAddressFromPlayHQ(teamIndex, team),
+                        ),
                       ],
-
-                      SizedBox(
-                        height: 16.0 + MediaQuery.of(context).padding.bottom,
-                      ),
+                      // If address exists but is invalid (P.O. Box), skip
                     ],
-                  ),
+
+                    SizedBox(
+                      height: 16.0 + MediaQuery.of(context).padding.bottom,
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

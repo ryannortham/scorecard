@@ -3,9 +3,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/screens/scoring/scoring_screen.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/preferences_view_model.dart';
@@ -125,13 +125,7 @@ class _ScoringSetupScreenState extends State<ScoringSetupScreen> {
       )
       ..resetGame();
 
-    unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => const ScoringScreen(title: 'Scoring'),
-        ),
-      ),
-    );
+    unawaited(context.push('/scoring-game'));
   }
 
   @override

@@ -117,11 +117,14 @@ class TimerDisplayState extends State<TimerDisplay> {
   }
 
   Future<void> _handleBackQuarter() async {
+    final currentQuarter = _gameStateService!.selectedQuarter;
+    final previousQuarter = currentQuarter - 1;
+
     final confirmed = await DialogService.showConfirmationDialog(
       context: context,
       title: '',
       content: '',
-      confirmText: 'Go Back?',
+      confirmText: 'Go Back to Q$previousQuarter?',
     );
 
     if (!confirmed || !mounted) return;

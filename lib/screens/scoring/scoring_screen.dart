@@ -3,10 +3,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/models/game_record.dart';
 import 'package:scorecard/repositories/game_repository.dart';
-import 'package:scorecard/screens/results/results_screen.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/game_sharing_service.dart';
 import 'package:scorecard/services/logger_service.dart';
@@ -119,11 +119,7 @@ class ScoringScreenState extends State<ScoringScreen> {
       gameStateService.resetGame();
 
       if (mounted) {
-        await Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (context) => ResultsScreen(game: gameRecord),
-          ),
-        );
+        context.pushReplacement('/results/${gameRecord.id}', extra: gameRecord);
       }
     });
   }
@@ -192,7 +188,7 @@ class ScoringScreenState extends State<ScoringScreen> {
 
         final shouldPop = await _onWillPop();
         if (shouldPop && context.mounted) {
-          Navigator.of(context).pop();
+          context.pop();
         }
       },
       child: AppScaffold(
@@ -279,7 +275,7 @@ class ScoringScreenState extends State<ScoringScreen> {
       onBackPressed: () async {
         final shouldPop = await _onWillPop();
         if (shouldPop && context.mounted) {
-          Navigator.of(context).pop();
+          context.pop();
         }
       },
       actions: _buildAppBarActions(),

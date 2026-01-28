@@ -9,11 +9,11 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/repositories/game_repository.dart';
 import 'package:scorecard/repositories/shared_prefs_game_repository.dart';
+import 'package:scorecard/router/app_router.dart';
 import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/viewmodels/teams_view_model.dart';
-import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 
 Future<void> main() async {
   // preserve splash screen until app is ready
@@ -69,7 +69,8 @@ class FootyScoreCardApp extends StatelessWidget {
                       brightness: Brightness.dark,
                     );
 
-            return MaterialApp(
+            return MaterialApp.router(
+              routerConfig: appRouter,
               title: 'Score Card',
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
@@ -89,7 +90,9 @@ class FootyScoreCardApp extends StatelessWidget {
                 cardTheme: const CardThemeData(elevation: 1),
               ),
               themeMode: userPreferences.themeMode,
-              home: const SplashWrapper(),
+              builder: (context, child) {
+                return SplashWrapper(child: child);
+              },
             );
           },
         );
@@ -100,7 +103,9 @@ class FootyScoreCardApp extends StatelessWidget {
 
 /// handles native splash screen removal with fade transition
 class SplashWrapper extends StatefulWidget {
-  const SplashWrapper({super.key});
+  const SplashWrapper({required this.child, super.key});
+
+  final Widget? child;
 
   @override
   State<SplashWrapper> createState() => _SplashWrapperState();
@@ -123,6 +128,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
 
   @override
   Widget build(BuildContext context) {
-    return const NavigationShell();
+    return widget.child ?? const SizedBox.shrink();
   }
 }

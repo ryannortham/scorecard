@@ -45,38 +45,3 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 }
-
-/// navigation destinations enum for type safety
-enum NavigationTab {
-  scoring(0),
-  teams(1),
-  results(2);
-
-  const NavigationTab(this.tabIndex);
-  final int tabIndex;
-
-  static NavigationTab fromIndex(int index) {
-    return NavigationTab.values.firstWhere(
-      (tab) => tab.tabIndex == index,
-      orElse: () => NavigationTab.scoring,
-    );
-  }
-
-  static NavigationTab? fromRoute(String route) {
-    switch (route) {
-      case 'game_setup':
-      case 'scoring':
-        return NavigationTab.scoring;
-      case 'teams':
-      case 'team_list':
-      case 'add_team':
-        return NavigationTab.teams;
-      case 'game_history':
-      case 'game_details':
-      case 'results':
-        return NavigationTab.results;
-      default:
-        return null;
-    }
-  }
-}

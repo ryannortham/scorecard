@@ -2,9 +2,10 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/models/score.dart';
-import 'package:scorecard/screens/teams/team_list_screen.dart';
+import 'package:scorecard/router/app_router.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/football_icon.dart';
@@ -32,18 +33,11 @@ class _TeamSelectorState extends State<TeamSelector> {
     required String title,
     required String? excludeTeam,
   }) async {
-    final result = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => TeamListScreen(
-              title: title,
-              onTeamSelected: (teamName) {
-                // This callback gets called when a team is selected
-                // No action needed; Navigator.pop will handle the return
-              },
-            ),
-        settings: RouteSettings(arguments: excludeTeam),
+    final result = await context.push<String>(
+      '/team-select',
+      extra: TeamSelectionExtra(
+        title: title,
+        excludeTeam: excludeTeam,
       ),
     );
     return result;

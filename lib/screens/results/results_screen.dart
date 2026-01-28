@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/extensions/game_record_extensions.dart';
 import 'package:scorecard/models/game_record.dart';
@@ -107,7 +108,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
               return [
                 StyledSliverAppBar.withBackButton(
                   title: const Text('Results'),
-                  onBackPressed: () => Navigator.of(context).pop(),
+                  onBackPressed: () => context.pop(),
                   actions: [
                     IconButton(
                       icon:

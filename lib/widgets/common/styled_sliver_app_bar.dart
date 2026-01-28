@@ -24,7 +24,7 @@ class StyledSliverAppBar extends StatelessWidget {
       key: key,
       title: title,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_outlined),
+        icon: Icon(Icons.adaptive.arrow_back_outlined),
         tooltip: 'Back',
         onPressed: onBackPressed,
       ),
@@ -68,6 +68,7 @@ class StyledSliverAppBar extends StatelessWidget {
       shadowColor: ColorService.transparent,
       surfaceTintColor: ColorService.transparent,
       automaticallyImplyLeading: automaticallyImplyLeading,
+      centerTitle: false,
       title: title,
       leading: leading,
       actions: actions,

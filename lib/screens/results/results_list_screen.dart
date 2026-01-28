@@ -3,12 +3,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/extensions/context_extensions.dart';
 import 'package:scorecard/mixins/selection_mixin.dart';
 import 'package:scorecard/models/game_summary.dart';
 import 'package:scorecard/repositories/game_repository.dart';
-import 'package:scorecard/screens/results/results_screen.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
@@ -45,11 +44,6 @@ class _ResultsListScreenState extends State<ResultsListScreen>
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  /// handles back button press
-  void _handleBackPress() {
-    context.handleBackPress();
   }
 
   void _onScroll() {
@@ -180,9 +174,7 @@ class _ResultsListScreenState extends State<ResultsListScreen>
     final gameRepository = context.read<GameRepository>();
     final game = await gameRepository.loadGameById(gameId);
     if (game != null && mounted) {
-      final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (context) => ResultsScreen(game: game)),
-      );
+      final result = await context.push<bool>('/results/$gameId', extra: game);
 
       // If the game was deleted (result is true), refresh the list
       if ((result ?? false) && mounted) {
@@ -193,15 +185,16 @@ class _ResultsListScreenState extends State<ResultsListScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Block back navigation only during selection mode
+    // (this is always a tab root, not a modal)
     return PopScope(
-      canPop: false, // We'll handle all pop attempts manually
+      canPop: !isSelectionMode,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return; // Already handled
+        if (didPop) return; // Already handled by system
 
+        // Handle back when canPop is false (selection mode)
         if (isSelectionMode) {
           exitSelectionMode();
-        } else {
-          _handleBackPress(); // Use the same logic as UI back button
         }
       },
       child: AppScaffold(
@@ -216,10 +209,11 @@ class _ResultsListScreenState extends State<ResultsListScreen>
                   onDelete: hasSelection ? _deleteSelectedGames : null,
                 )
               else
-                StyledSliverAppBar.withBackButton(
-                  title: const Text('Results'),
-                  onBackPressed: _handleBackPress,
-                  actions: const [AppMenu(currentRoute: 'results')],
+                // Tab root - no back button needed
+                const StyledSliverAppBar(
+                  automaticallyImplyLeading: false,
+                  title: Text('Results'),
+                  actions: [AppMenu(currentRoute: 'results')],
                 ),
             ];
           },

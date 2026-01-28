@@ -3,12 +3,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/extensions/context_extensions.dart';
 import 'package:scorecard/mixins/selection_mixin.dart';
 import 'package:scorecard/models/score.dart';
-import 'package:scorecard/screens/teams/team_add_screen.dart';
-import 'package:scorecard/screens/teams/team_detail_screen.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
 import 'package:scorecard/theme/colors.dart';
@@ -22,11 +20,16 @@ import 'package:scorecard/widgets/teams/team_logo.dart';
 class TeamListScreen extends StatefulWidget {
   const TeamListScreen({
     required this.title,
-    required this.onTeamSelected,
+    this.excludeTeam,
     super.key,
   });
+
   final String title;
-  final void Function(String) onTeamSelected;
+  final String? excludeTeam;
+
+  /// Whether this screen is being used as a team selector
+  /// (not the main Teams tab)
+  bool get isSelectionScreen => title != 'Teams';
 
   @override
   State<TeamListScreen> createState() => _TeamListScreenState();
@@ -48,10 +51,9 @@ class _TeamListScreenState extends State<TeamListScreen>
 
   Future<void> _checkForEmptyTeamsList() async {
     final teamsProvider = Provider.of<TeamsViewModel>(context, listen: false);
-    final teamToExclude = ModalRoute.of(context)?.settings.arguments as String?;
     final filteredTeams =
         teamsProvider.teams
-            .where((team) => team.name != teamToExclude)
+            .where((team) => team.name != widget.excludeTeam)
             .toList();
 
     // Only auto-navigate if:
@@ -64,21 +66,18 @@ class _TeamListScreenState extends State<TeamListScreen>
         teamsProvider.loaded &&
         !_hasNavigatedToAddTeam &&
         !_hasInitiallyLoaded &&
-        ((widget.title == 'Teams' && teamsProvider.teams.isEmpty) ||
-            (widget.title != 'Teams' && filteredTeams.isEmpty));
+        ((!widget.isSelectionScreen && teamsProvider.teams.isEmpty) ||
+            (widget.isSelectionScreen && filteredTeams.isEmpty));
 
     if (shouldAutoNavigate) {
       _hasNavigatedToAddTeam = true;
 
-      final addedTeamName = await Navigator.of(context).push<String>(
-        MaterialPageRoute(builder: (context) => const TeamAddScreen()),
-      );
+      final addedTeamName = await context.push<String>('/team-add');
 
       // If a team was added and this is a team selection screen, auto-select it
-      if (addedTeamName != null && widget.title != 'Teams') {
-        widget.onTeamSelected(addedTeamName);
+      if (addedTeamName != null && widget.isSelectionScreen) {
         if (mounted) {
-          Navigator.of(context).pop(addedTeamName);
+          context.pop(addedTeamName);
         }
       }
     }
@@ -93,10 +92,9 @@ class _TeamListScreenState extends State<TeamListScreen>
   Widget build(BuildContext context) {
     final teamsProvider = Provider.of<TeamsViewModel>(context);
     final userPreferences = Provider.of<PreferencesViewModel>(context);
-    final teamToExclude = ModalRoute.of(context)?.settings.arguments as String?;
     final teams =
         teamsProvider.teams
-            .where((team) => team.name != teamToExclude)
+            .where((team) => team.name != widget.excludeTeam)
             .toList();
 
     // Check again when the provider updates (in case teams are loaded later)
@@ -106,16 +104,22 @@ class _TeamListScreenState extends State<TeamListScreen>
       });
     }
 
-    return PopScope(
-      canPop: false, // We'll handle all pop attempts manually
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return; // Already handled
+    // Allow iOS swipe back when:
+    // 1. Not in selection mode AND
+    // 2. This is a modal selector screen (not the tab root)
+    final canPopNormally = !isSelectionMode && widget.isSelectionScreen;
 
+    return PopScope(
+      canPop: canPopNormally,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return; // Already handled by system
+
+        // Handle back when canPop is false
         if (isSelectionMode) {
           exitSelectionMode();
-        } else {
-          _handleBackPress(); // Use the same logic as UI back button
         }
+        // For tab root when not in selection mode, do nothing
+        // (system back handled by NavigationShell)
       },
       child: AppScaffold(
         extendBody: true,
@@ -131,7 +135,15 @@ class _TeamListScreenState extends State<TeamListScreen>
                       onClose: exitSelectionMode,
                       onDelete: hasSelection ? _deleteSelectedTeams : null,
                     )
+                  else if (!widget.isSelectionScreen)
+                    // Tab root - no back button needed
+                    StyledSliverAppBar(
+                      automaticallyImplyLeading: false,
+                      title: Text(widget.title),
+                      actions: const [AppMenu(currentRoute: 'teams')],
+                    )
                   else
+                    // Modal team selector - show back button
                     StyledSliverAppBar.withBackButton(
                       title: Text(widget.title),
                       onBackPressed: _handleBackPress,
@@ -162,24 +174,24 @@ class _TeamListScreenState extends State<TeamListScreen>
                             realIndex: realIndex,
                             itemSelected: itemSelected,
                             isSelectionMode: isSelectionMode,
-                            isTeamsScreen: widget.title == 'Teams',
+                            isTeamsScreen: !widget.isSelectionScreen,
                             isFavorite: userPreferences.isFavoriteTeam(
                               team.name,
                             ),
                             onTap: () {
                               if (isSelectionMode) {
                                 toggleSelection(realIndex);
-                              } else if (widget.title != 'Teams') {
+                              } else if (widget.isSelectionScreen) {
                                 // Team selection mode - select team and return
-                                widget.onTeamSelected(team.name);
-                                Navigator.pop(context, team.name);
+                                context.pop(team.name);
                               } else {
                                 // Teams mode - navigate to team detail
                                 _navigateToTeamDetail(team.name);
                               }
                             },
                             onLongPress: () {
-                              if (!isSelectionMode && widget.title == 'Teams') {
+                              if (!isSelectionMode &&
+                                  !widget.isSelectionScreen) {
                                 enterSelectionMode(realIndex);
                               }
                             },
@@ -221,21 +233,13 @@ class _TeamListScreenState extends State<TeamListScreen>
                 elevation: 0,
                 heroTag: 'add_team_fab',
                 onPressed: () async {
-                  final navigator = Navigator.of(context);
-                  final addedTeamName = await navigator.push<String>(
-                    MaterialPageRoute(
-                      builder: (context) => const TeamAddScreen(),
-                    ),
-                  );
+                  final router = GoRouter.of(context);
+                  final addedTeamName = await router.push<String>('/team-add');
+                  if (!mounted) return;
 
                   // If a team was added and this is team selection, auto-select
-                  if (addedTeamName != null && widget.title != 'Teams') {
-                    widget.onTeamSelected(addedTeamName);
-                    if (mounted) {
-                      navigator.pop(
-                        addedTeamName,
-                      ); // Return the team name when popping
-                    }
+                  if (addedTeamName != null && widget.isSelectionScreen) {
+                    router.pop(addedTeamName);
                   }
                 },
                 tooltip: 'Add Team',
@@ -323,18 +327,12 @@ class _TeamListScreenState extends State<TeamListScreen>
   }
 
   void _navigateToTeamDetail(String teamName) {
-    unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (context) => TeamDetailScreen(teamName: teamName),
-        ),
-      ),
-    );
+    unawaited(context.push('/team/${Uri.encodeComponent(teamName)}'));
   }
 
   /// handles back button press
   void _handleBackPress() {
-    context.handleBackPress();
+    context.pop();
   }
 }
 

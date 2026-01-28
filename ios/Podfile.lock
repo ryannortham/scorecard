@@ -1,0 +1,80 @@
+PODS:
+  - device_info_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_native_splash (2.4.3):
+    - Flutter
+  - gal (1.0.0):
+    - Flutter
+    - FlutterMacOS
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - share_plus (0.0.1):
+    - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - sqflite_darwin (0.0.4):
+    - Flutter
+    - FlutterMacOS
+  - url_launcher_ios (0.0.1):
+    - Flutter
+  - vibration (3.0.0):
+    - Flutter
+  - widget_screenshot_plus (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
+  - gal (from `.symlinks/plugins/gal/darwin`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - vibration (from `.symlinks/plugins/vibration/ios`)
+  - widget_screenshot_plus (from `.symlinks/plugins/widget_screenshot_plus/ios`)
+
+EXTERNAL SOURCES:
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  Flutter:
+    :path: Flutter
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
+  gal:
+    :path: ".symlinks/plugins/gal/darwin"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sqflite_darwin:
+    :path: ".symlinks/plugins/sqflite_darwin/darwin"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  vibration:
+    :path: ".symlinks/plugins/vibration/ios"
+  widget_screenshot_plus:
+    :path: ".symlinks/plugins/widget_screenshot_plus/ios"
+
+SPEC CHECKSUMS:
+  device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+  gal: baecd024ebfd13c441269ca7404792a7152fde89
+  path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
+  share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
+  vibration: ca8104a8875b9c493e15b21b04e456befd0ff6eb
+  widget_screenshot_plus: 27c1cef194133fc5be6d5a42488f75f0281a3fff
+
+PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce
+
+COCOAPODS: 1.16.2
