@@ -4,6 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
+/// Direction of tab navigation for transitions
+enum NavigationDirection { 
+  /// Moving forward in history (new tab selected)
+  forward, 
+  /// Moving backward in history (back button/swipe)
+  backward, 
+  /// No direction (initial state)
+  none 
+}
+
 /// wraps screens with bottom navigation and handles tab history and scroll visibility
 class NavigationShell extends StatefulWidget {
   const NavigationShell({
@@ -16,14 +26,17 @@ class NavigationShell extends StatefulWidget {
   final Widget child;
 
   @override
-  State<NavigationShell> createState() => _NavigationShellState();
+  State<NavigationShell> createState() => NavigationShellState();
 }
 
-class _NavigationShellState extends State<NavigationShell> {
+class NavigationShellState extends State<NavigationShell> {
   bool _isNavigationVisible = true;
   final List<int> _tabHistory = [0]; // Start with Scoring tab (index 0)
   bool _isInternalNavigating = false;
   bool _swipeHandled = false;
+  
+  /// Current direction of navigation for transitions
+  NavigationDirection currentDirection = NavigationDirection.none;
 
   @override
   void didUpdateWidget(NavigationShell oldWidget) {
@@ -33,7 +46,10 @@ class _NavigationShellState extends State<NavigationShell> {
     final newIndex = widget.navigationShell.currentIndex;
     if (newIndex != oldWidget.navigationShell.currentIndex) {
       if (!_isInternalNavigating) {
+        currentDirection = NavigationDirection.forward;
         _updateHistory(newIndex);
+      } else {
+        currentDirection = NavigationDirection.backward;
       }
       _isInternalNavigating = false;
     }
