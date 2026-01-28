@@ -3,9 +3,10 @@
 This plan outlines the steps to refactor the navigation using `go_router` to resolve tab history, iOS swipe-to-back, and visibility issues.
 
 ## Phase 1: Analysis and Foundation
-- [ ] Task: Analyze current `AppRouter` and `main.dart` implementation.
-- [ ] Task: Research `go_router` best practices for tab history and hiding shell UI on child routes.
-- [ ] Task: Conductor - User Manual Verification 'Analysis and Foundation' (Protocol in workflow.md)
+- [x] Task: Analyze current `AppRouter` and `main.dart` implementation.
+- [x] Task: Research `go_router` best practices for tab history and hiding shell UI on child routes.
+- [x] Task: Conductor - User Manual Verification 'Analysis and Foundation' (Protocol in workflow.md)
+  [checkpoint: f47f90c]
 
 ## Phase 2: Core Navigation Refactoring
 - [ ] Task: Define the new `go_router` structure with Game Setup as the root node.
