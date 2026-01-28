@@ -148,7 +148,8 @@ jobs:
           # Extract version from pubspec and strip trailing .0 (e.g., "1.0.0" -> "1.0")
           PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
           BASE_VERSION=$(echo "$PUBSPEC_VERSION" | sed 's/\.0$//')
-          VERSION_CODE="$GITHUB_RUN_NUMBER"
+          # Offset ensures version codes continue above historical max (was 293)
+          VERSION_CODE=$((200 + GITHUB_RUN_NUMBER))
           VERSION_NAME="${BASE_VERSION}.${VERSION_CODE}"
           
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT

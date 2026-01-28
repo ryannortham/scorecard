@@ -1,6 +1,6 @@
-# Scorecard
+# Footy Score Card
 
-> Modern AFL score tracking app for goal umpires and fans
+> Australian rules score tracking app designed for goal umpires, team managers, and coaches.
 
 [![CI/CD](https://github.com/ryannortham/scorecard/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/ryannortham/scorecard/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 ### Live Scoring
 
-- Real-time goal and behind tracking for AFL matches
+- Real-time goal and behind tracking for Australian rules football matches
 - Quarter-by-quarter score management with running totals
 - Automatic points calculation and validation
 

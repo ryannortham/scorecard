@@ -15,15 +15,15 @@ Scorecard uses a simple continuous delivery workflow:
 Version names follow the format `MAJOR.MINOR.PATCH` where:
 
 - **MAJOR.MINOR** comes from `pubspec.yaml` (the trailing `.0` is stripped)
-- **PATCH** is the CI build number (auto-incremented)
+- **PATCH** is the CI build number plus offset (auto-incremented)
 
-| Component | Source | Example |
-|-----------|--------|---------|
-| Version name | `{major}.{minor}.{build_number}` | `1.0.95` |
-| Version code | CI build number | `95` |
-| Release name | Same as version name | `1.0.95` |
+| Component | Source | Example (run #97) |
+|-----------|--------|-------------------|
+| Version name | `{major}.{minor}.{200 + run_number}` | `1.0.297` |
+| Version code | `200 + run_number` | `297` |
+| Release name | Same as version name | `1.0.297` |
 
-This ensures consistency across GitHub Actions, Play Console, and the app itself.
+The offset of 200 ensures version codes continue above historical releases (max was 293).
 
 ### Bumping Version
 
@@ -40,7 +40,7 @@ version: 1.1.0
 version: 2.0.0
 ```
 
-Subsequent builds will be `1.1.96`, `1.1.97`, etc. (or `2.0.96`, `2.0.97`, etc.).
+Subsequent builds will be `1.1.297`, `1.1.298`, etc. (or `2.0.297`, `2.0.298`, etc.).
 
 > **Note:** Flutter requires three-part version numbers in pubspec.yaml. The CI pipeline
 > strips the trailing `.0` when constructing the version name.
