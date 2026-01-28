@@ -9,16 +9,16 @@ This plan outlines the steps to refactor the navigation using `go_router` to res
   [checkpoint: f47f90c]
 
 ## Phase 2: Core Navigation Refactoring
-- [ ] Task: Define the new `go_router` structure with Game Setup as the root node.
-    - [ ] Write Tests: Verify root route points to Game Setup and other routes are accessible.
-    - [ ] Implement Feature: Update `AppRouter` configuration.
-- [ ] Task: Implement `StatefulShellRoute` for tabs while maintaining a custom navigation history stack.
-    - [ ] Write Tests: Verify tab switching and history tracking logic.
-    - [ ] Implement Feature: Refactor tab navigation to use the new shell route and history management.
-- [ ] Task: Ensure the Bottom Navigation Bar is hidden on child screens.
-    - [ ] Write Tests: Verify visibility of navigation bar on root vs child screens.
-    - [ ] Implement Feature: Adjust route hierarchy so child screens are pushed above the shell.
-- [ ] Task: Conductor - User Manual Verification 'Core Navigation Refactoring' (Protocol in workflow.md)
+- [x] Task: Define the new `go_router` structure with Game Setup as the root node.
+    - [x] Write Tests: Verify root route points to Game Setup and other routes are accessible.
+    - [x] Implement Feature: Update `AppRouter` configuration.
+- [x] Task: Implement `StatefulShellRoute` for tabs while maintaining a custom navigation history stack.
+    - [x] Write Tests: Verify tab switching and history tracking logic.
+    - [x] Implement Feature: Refactor tab navigation to use the new shell route and history management.
+- [x] Task: Ensure the Bottom Navigation Bar is hidden on child screens.
+    - [x] Write Tests: Verify visibility of navigation bar on root vs child screens.
+    - [x] Implement Feature: Adjust route hierarchy so child screens are pushed above the shell.
+- [x] Task: Conductor - User Manual Verification 'Core Navigation Refactoring' (Protocol in workflow.md)
 
 ## Phase 3: Platform-Specific Refinements
 - [ ] Task: Fix iOS Swipe-to-Back and ensure it integrates with the tab history.

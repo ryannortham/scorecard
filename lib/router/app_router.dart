@@ -39,25 +39,26 @@ class TeamSelectionExtra {
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/scoring',
+  debugLogDiagnostics: true,
   routes: [
-    StatefulShellRoute(
+    StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        // Pass through - actual container is built in navigatorContainerBuilder
-        return navigationShell;
-      },
-      navigatorContainerBuilder: (context, navigationShell, children) {
         return NavigationShell(
           navigationShell: navigationShell,
-          children: children,
+          // Note: navigationShell.children is not available in indexedStack builder directly in some versions
+          // but we can pass it via navigatorContainerBuilder or just use the shell itself.
+          // The current implementation uses navigatorContainerBuilder which is fine.
+          child: navigationShell,
         );
       },
       branches: [
-        // Scoring tab
+        // Scoring tab (Home/Root)
         StatefulShellBranch(
           navigatorKey: _scoringNavigatorKey,
           routes: [
             GoRoute(
               path: '/scoring',
+              name: 'scoring',
               builder: (context, state) => const ScoringSetupScreen(),
             ),
           ],
@@ -68,6 +69,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/teams',
+              name: 'teams',
               builder: (context, state) => const TeamListScreen(title: 'Teams'),
             ),
           ],
@@ -78,20 +80,24 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/results',
+              name: 'results',
               builder: (context, state) => const ResultsListScreen(),
             ),
           ],
         ),
       ],
     ),
-    // Detail screens outside the shell (full screen, no tab bar)
+    
+    // Child screens (pushed above the tab bar)
     GoRoute(
       path: '/scoring-game',
+      name: 'scoring-game',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const ScoringScreen(title: 'Scoring'),
     ),
     GoRoute(
       path: '/team/:teamName',
+      name: 'team-detail',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final teamName = state.pathParameters['teamName'] ?? '';
@@ -100,11 +106,13 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/team-add',
+      name: 'team-add',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const TeamAddScreen(),
     ),
     GoRoute(
       path: '/team-select',
+      name: 'team-select',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final extra = state.extra as TeamSelectionExtra?;
@@ -116,6 +124,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/results/:gameId',
+      name: 'results-detail',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
         final game = state.extra! as GameRecord;

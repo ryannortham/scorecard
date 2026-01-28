@@ -185,136 +185,136 @@ class _ResultsListScreenState extends State<ResultsListScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Block back navigation only during selection mode
-    // (this is always a tab root, not a modal)
-    return PopScope(
-      canPop: !isSelectionMode,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return; // Already handled by system
-
-        // Handle back when canPop is false (selection mode)
-        if (isSelectionMode) {
-          exitSelectionMode();
-        }
-      },
-      child: AppScaffold(
-        extendBody: true,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              if (isSelectionMode)
-                StyledSliverAppBar.selectionMode(
-                  selectedCount: selectedCount,
-                  onClose: exitSelectionMode,
-                  onDelete: hasSelection ? _deleteSelectedGames : null,
+    final body = AppScaffold(
+      extendBody: true,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            if (isSelectionMode)
+              StyledSliverAppBar.selectionMode(
+                selectedCount: selectedCount,
+                onClose: exitSelectionMode,
+                onDelete: hasSelection ? _deleteSelectedGames : null,
+              )
+            else
+              // Tab root - no back button needed
+              const StyledSliverAppBar(
+                automaticallyImplyLeading: false,
+                title: Text('Results'),
+                actions: [AppMenu(currentRoute: 'results')],
+              ),
+          ];
+        },
+        body: RefreshIndicator(
+          onRefresh: _loadGames,
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              // Main content
+              if (_isLoading)
+                const SliverFillRemaining(
+                  child: Center(child: CircularProgressIndicator()),
                 )
-              else
-                // Tab root - no back button needed
-                const StyledSliverAppBar(
-                  automaticallyImplyLeading: false,
-                  title: Text('Results'),
-                  actions: [AppMenu(currentRoute: 'results')],
-                ),
-            ];
-          },
-          body: RefreshIndicator(
-            onRefresh: _loadGames,
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                // Main content
-                if (_isLoading)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (_gameSummaries.isEmpty)
-                  SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.flag_outlined,
-                            size: 64,
+              else if (_gameSummaries.isEmpty)
+                SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.flag_outlined,
+                          size: 64,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No games yet',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleMedium?.copyWith(
                             color: Theme.of(
                               context,
                             ).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No games yet',
-                            style: Theme.of(
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Games are automatically saved when you '
+                          'start scoring',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(
                               context,
-                            ).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
+                            ).colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Games are automatically saved when you '
-                            'start scoring',
-                            style: Theme.of(
-                              context,
-                            ).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        // Show loading indicator at the bottom
-                        if (index == _gameSummaries.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-
-                        final gameSummary = _gameSummaries[index];
-                        return ResultsSummaryCard(
-                          gameSummary: gameSummary,
-                          isSelectionMode: isSelectionMode,
-                          isSelected: isSelected(gameSummary.id),
-                          onTap: () {
-                            if (isSelectionMode) {
-                              toggleSelection(gameSummary.id);
-                            } else {
-                              unawaited(_showGameDetails(gameSummary.id));
-                            }
-                          },
-                          onLongPress: () {
-                            if (!isSelectionMode) {
-                              enterSelectionMode(gameSummary.id);
-                            }
-                          },
-                        );
-                      },
-                      childCount:
-                          _gameSummaries.length +
-                          (_hasMoreGames || _isLoadingMore ? 1 : 0),
+                        ),
+                      ],
                     ),
                   ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      // Show loading indicator at the bottom
+                      if (index == _gameSummaries.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
 
-                // Add bottom padding for system navigation bar
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: MediaQuery.of(context).padding.bottom,
+                      final gameSummary = _gameSummaries[index];
+                      return ResultsSummaryCard(
+                        gameSummary: gameSummary,
+                        isSelectionMode: isSelectionMode,
+                        isSelected: isSelected(gameSummary.id),
+                        onTap: () {
+                          if (isSelectionMode) {
+                            toggleSelection(gameSummary.id);
+                          } else {
+                            unawaited(_showGameDetails(gameSummary.id));
+                          }
+                        },
+                        onLongPress: () {
+                          if (!isSelectionMode) {
+                            enterSelectionMode(gameSummary.id);
+                          }
+                        },
+                      );
+                    },
+                    childCount:
+                        _gameSummaries.length +
+                        (_hasMoreGames || _isLoadingMore ? 1 : 0),
                   ),
                 ),
-              ],
-            ),
+
+              // Add bottom padding for system navigation bar
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).padding.bottom,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
+
+    if (isSelectionMode) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          exitSelectionMode();
+        },
+        child: body,
+      );
+    }
+
+    return body;
   }
 }

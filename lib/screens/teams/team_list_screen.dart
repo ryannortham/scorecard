@@ -104,153 +104,156 @@ class _TeamListScreenState extends State<TeamListScreen>
       });
     }
 
-    // Allow iOS swipe back when:
-    // 1. Not in selection mode AND
-    // 2. This is a modal selector screen (not the tab root)
-    final canPopNormally = !isSelectionMode && widget.isSelectionScreen;
-
-    return PopScope(
-      canPop: canPopNormally,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return; // Already handled by system
-
-        // Handle back when canPop is false
-        if (isSelectionMode) {
-          exitSelectionMode();
-        }
-        // For tab root when not in selection mode, do nothing
-        // (system back handled by NavigationShell)
-      },
-      child: AppScaffold(
-        extendBody: true,
-        body: Stack(
-          children: [
-            // Main content with collapsible app bar
-            NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  if (isSelectionMode)
-                    StyledSliverAppBar.selectionMode(
-                      selectedCount: selectedCount,
-                      onClose: exitSelectionMode,
-                      onDelete: hasSelection ? _deleteSelectedTeams : null,
-                    )
-                  else if (!widget.isSelectionScreen)
-                    // Tab root - no back button needed
-                    StyledSliverAppBar(
-                      automaticallyImplyLeading: false,
-                      title: Text(widget.title),
-                      actions: const [AppMenu(currentRoute: 'teams')],
-                    )
-                  else
-                    // Modal team selector - show back button
-                    StyledSliverAppBar.withBackButton(
-                      title: Text(widget.title),
-                      onBackPressed: _handleBackPress,
-                      actions: const [AppMenu(currentRoute: 'teams')],
+    final body = AppScaffold(
+      extendBody: true,
+      body: Stack(
+        children: [
+          // Main content with collapsible app bar
+          NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                if (isSelectionMode)
+                  StyledSliverAppBar.selectionMode(
+                    selectedCount: selectedCount,
+                    onClose: exitSelectionMode,
+                    onDelete: hasSelection ? _deleteSelectedTeams : null,
+                  )
+                else if (!widget.isSelectionScreen)
+                  // Tab root - no back button needed
+                  StyledSliverAppBar(
+                    automaticallyImplyLeading: false,
+                    title: Text(widget.title),
+                    actions: const [AppMenu(currentRoute: 'teams')],
+                  )
+                else
+                  // Modal team selector - show back button
+                  StyledSliverAppBar.withBackButton(
+                    title: Text(widget.title),
+                    onBackPressed: _handleBackPress,
+                    actions: const [AppMenu(currentRoute: 'teams')],
+                  ),
+              ];
+            },
+            body: CustomScrollView(
+              slivers: [
+                // Main content
+                if (teamsProvider.loaded)
+                  SliverPadding(
+                    padding: EdgeInsets.only(
+                      left: 4,
+                      right: 4,
+                      top: 4,
+                      bottom: 4.0 + MediaQuery.of(context).padding.bottom,
                     ),
-                ];
-              },
-              body: CustomScrollView(
-                slivers: [
-                  // Main content
-                  if (teamsProvider.loaded)
-                    SliverPadding(
-                      padding: EdgeInsets.only(
-                        left: 4,
-                        right: 4,
-                        top: 4,
-                        bottom: 4.0 + MediaQuery.of(context).padding.bottom,
-                      ),
-                      sliver: SliverList.builder(
-                        itemCount: teams.length,
-                        itemBuilder: (context, index) {
-                          final team = teams[index];
-                          final realIndex = teamsProvider.teams.indexOf(team);
-                          final itemSelected = isSelected(realIndex);
+                    sliver: SliverList.builder(
+                      itemCount: teams.length,
+                      itemBuilder: (context, index) {
+                        final team = teams[index];
+                        final realIndex = teamsProvider.teams.indexOf(team);
+                        final itemSelected = isSelected(realIndex);
 
-                          return _TeamListItem(
-                            team: team,
-                            realIndex: realIndex,
-                            itemSelected: itemSelected,
-                            isSelectionMode: isSelectionMode,
-                            isTeamsScreen: !widget.isSelectionScreen,
-                            isFavorite: userPreferences.isFavoriteTeam(
+                        return _TeamListItem(
+                          team: team,
+                          realIndex: realIndex,
+                          itemSelected: itemSelected,
+                          isSelectionMode: isSelectionMode,
+                          isTeamsScreen: !widget.isSelectionScreen,
+                          isFavorite: userPreferences.isFavoriteTeam(
+                            team.name,
+                          ),
+                          onTap: () {
+                            if (isSelectionMode) {
+                              toggleSelection(realIndex);
+                            } else if (widget.isSelectionScreen) {
+                              // Team selection mode - select team and return
+                              context.pop(team.name);
+                            } else {
+                              // Teams mode - navigate to team detail
+                              _navigateToTeamDetail(team.name);
+                            }
+                          },
+                          onLongPress: () {
+                            if (!isSelectionMode &&
+                                !widget.isSelectionScreen) {
+                              enterSelectionMode(realIndex);
+                            }
+                          },
+                          onFavoriteToggle: () async {
+                            final wasAdded =
+                                !userPreferences.isFavoriteTeam(team.name);
+                            await userPreferences.toggleFavoriteTeam(
                               team.name,
-                            ),
-                            onTap: () {
-                              if (isSelectionMode) {
-                                toggleSelection(realIndex);
-                              } else if (widget.isSelectionScreen) {
-                                // Team selection mode - select team and return
-                                context.pop(team.name);
-                              } else {
-                                // Teams mode - navigate to team detail
-                                _navigateToTeamDetail(team.name);
-                              }
-                            },
-                            onLongPress: () {
-                              if (!isSelectionMode &&
-                                  !widget.isSelectionScreen) {
-                                enterSelectionMode(realIndex);
-                              }
-                            },
-                            onFavoriteToggle: () async {
-                              final wasAdded =
-                                  !userPreferences.isFavoriteTeam(team.name);
-                              await userPreferences.toggleFavoriteTeam(
-                                team.name,
+                            );
+
+                            if (mounted && context.mounted) {
+                              SnackBarService.showSuccess(
+                                context,
+                                wasAdded
+                                    ? 'Added to favourites'
+                                    : 'Removed from favourites',
                               );
-
-                              if (mounted && context.mounted) {
-                                SnackBarService.showSuccess(
-                                  context,
-                                  wasAdded
-                                      ? 'Added to favourites'
-                                      : 'Removed from favourites',
-                                );
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    )
-                  else
-                    const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
+                            }
+                          },
+                        );
+                      },
                     ),
-                ],
-              ),
+                  )
+                else
+                  const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+              ],
             ),
+          ),
 
-            // Fixed position FAB
-            Positioned(
-              right: 16,
-              bottom: 140, // Fixed position well above nav bar
-              child: FloatingActionButton.extended(
-                backgroundColor: context.colors.primary,
-                foregroundColor: context.colors.onPrimary,
-                elevation: 0,
-                heroTag: 'add_team_fab',
-                onPressed: () async {
-                  final router = GoRouter.of(context);
-                  final addedTeamName = await router.push<String>('/team-add');
-                  if (!mounted) return;
+          // Fixed position FAB
+          Positioned(
+            right: 16,
+            bottom: 140, // Fixed position well above nav bar
+            child: FloatingActionButton.extended(
+              backgroundColor: context.colors.primary,
+              foregroundColor: context.colors.onPrimary,
+              elevation: 0,
+              heroTag: 'add_team_fab',
+              onPressed: () async {
+                final router = GoRouter.of(context);
+                final addedTeamName = await router.push<String>('/team-add');
+                if (!mounted) return;
 
-                  // If a team was added and this is team selection, auto-select
-                  if (addedTeamName != null && widget.isSelectionScreen) {
-                    router.pop(addedTeamName);
-                  }
-                },
-                tooltip: 'Add Team',
-                icon: const Icon(Icons.add_outlined),
-                label: const Text('Add Team'),
-              ),
+                // If a team was added and this is team selection, auto-select
+                if (addedTeamName != null && widget.isSelectionScreen) {
+                  router.pop(addedTeamName);
+                }
+              },
+              tooltip: 'Add Team',
+              icon: const Icon(Icons.add_outlined),
+              label: const Text('Add Team'),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+
+    // Block back navigation only during selection mode
+    // (this is always a tab root, not a modal)
+    if (isSelectionMode) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          exitSelectionMode();
+        },
+        child: body,
+      );
+    }
+
+    // For modal selection screens, we allow standard back navigation
+    if (widget.isSelectionScreen) {
+      return body; // System Navigator handles this
+    }
+
+    // For tab root when not in selection mode, let it bubble to NavigationShell
+    return body;
   }
 
   Future<void> _deleteSelectedTeams() async {

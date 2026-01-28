@@ -1,20 +1,19 @@
 // navigation shell that wraps screens with bottom navigation
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
-/// wraps screens with bottom navigation and scroll handling
+/// wraps screens with bottom navigation and handles tab history and scroll visibility
 class NavigationShell extends StatefulWidget {
   const NavigationShell({
     required this.navigationShell,
-    required this.children,
+    required this.child,
     super.key,
   });
 
   final StatefulNavigationShell navigationShell;
-  final List<Widget> children;
+  final Widget child;
 
   @override
   State<NavigationShell> createState() => _NavigationShellState();
@@ -22,13 +21,31 @@ class NavigationShell extends StatefulWidget {
 
 class _NavigationShellState extends State<NavigationShell> {
   bool _isNavigationVisible = true;
-  final List<int> _tabHistory = [0]; // Start with Scoring tab
+  final List<int> _tabHistory = [0]; // Start with Scoring tab (index 0)
+  bool _isInternalNavigating = false;
+  bool _swipeHandled = false;
 
-  void _onDestinationSelected(int index) {
-    // Only add to history if switching to a different tab
-    if (index != widget.navigationShell.currentIndex) {
+  @override
+  void didUpdateWidget(NavigationShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // If the index changed (regardless of how), update history
+    final newIndex = widget.navigationShell.currentIndex;
+    if (newIndex != oldWidget.navigationShell.currentIndex) {
+      if (!_isInternalNavigating) {
+        _updateHistory(newIndex);
+      }
+      _isInternalNavigating = false;
+    }
+  }
+
+  void _updateHistory(int index) {
+    if (_tabHistory.isEmpty || _tabHistory.last != index) {
       _tabHistory.add(index);
     }
+  }
+
+  void _onDestinationSelected(int index) {
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
@@ -64,30 +81,57 @@ class _NavigationShellState extends State<NavigationShell> {
     return false;
   }
 
-  void _goToPreviousTab() {
-    _tabHistory.removeLast();
+  void _popTab() {
+    if (_tabHistory.length > 1) {
+      setState(() {
+        _tabHistory.removeLast(); // Remove current
+        final previousIndex = _tabHistory.last;
+        _isInternalNavigating = true;
+        widget.navigationShell.goBranch(previousIndex);
+      });
+    } else if (widget.navigationShell.currentIndex != 0) {
+      _isInternalNavigating = true;
+      widget.navigationShell.goBranch(0);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: _tabHistory.length <= 1, // Allow exit only from initial tab
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return; // App is exiting, nothing to do
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
-        // Go back to previous tab
-        if (_tabHistory.length > 1) {
-          setState(_goToPreviousTab);
-          widget.navigationShell.goBranch(_tabHistory.last);
-        }
+    return PopScope(
+      // Can only pop (exit app) if we are on the first tab and history is exhausted
+      canPop: _tabHistory.length <= 1 && widget.navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _popTab();
       },
       child: NotificationListener<ScrollNotification>(
         onNotification: _onScrollNotification,
         child: Scaffold(
           extendBody: true,
-          body: AnimatedBranchContainer(
-            currentIndex: widget.navigationShell.currentIndex,
-            children: widget.children,
+          body: Stack(
+            children: [
+              widget.child,
+              // Edge swipe detector for iOS
+              if (isIOS)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: 40,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onHorizontalDragStart: (_) => _swipeHandled = false,
+                    onHorizontalDragUpdate: (details) {
+                      if (!_swipeHandled && details.delta.dx > 10) {
+                        _swipeHandled = true;
+                        _popTab();
+                      }
+                    },
+                  ),
+                ),
+            ],
           ),
           bottomNavigationBar: BottomNavBar(
             currentIndex: widget.navigationShell.currentIndex,
@@ -98,39 +142,4 @@ class _NavigationShellState extends State<NavigationShell> {
       ),
     );
   }
-}
-
-/// Custom branch Navigator container that provides animated transitions
-/// when switching branches.
-class AnimatedBranchContainer extends StatelessWidget {
-  const AnimatedBranchContainer({
-    required this.currentIndex,
-    required this.children,
-    super.key,
-  });
-
-  /// The index (in [children]) of the branch Navigator to display.
-  final int currentIndex;
-
-  /// The children (branch Navigators) to display in this container.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children:
-          children.mapIndexed((int index, Widget navigator) {
-            return AnimatedOpacity(
-              opacity: index == currentIndex ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              child: _branchNavigatorWrapper(index, navigator),
-            );
-          }).toList(),
-    );
-  }
-
-  Widget _branchNavigatorWrapper(int index, Widget navigator) => IgnorePointer(
-    ignoring: index != currentIndex,
-    child: TickerMode(enabled: index == currentIndex, child: navigator),
-  );
 }
