@@ -19,17 +19,20 @@ This plan outlines the steps to refactor the navigation using `go_router` to res
     - [x] Write Tests: Verify visibility of navigation bar on root vs child screens.
     - [x] Implement Feature: Adjust route hierarchy so child screens are pushed above the shell.
 - [x] Task: Conductor - User Manual Verification 'Core Navigation Refactoring' (Protocol in workflow.md)
+  [checkpoint: b5e1556]
 
 ## Phase 3: Platform-Specific Refinements
-- [ ] Task: Fix iOS Swipe-to-Back and ensure it integrates with the tab history.
-    - [ ] Write Tests: (Manual Verification focus) Verify gesture behavior on iOS.
-    - [ ] Implement Feature: Adjust `Page` builders and transitions for iOS compatibility.
-- [ ] Task: Refine Android Back Button behavior for tabs and app exit.
-    - [ ] Write Tests: Verify back button on Game Setup exits app and on tabs goes to previous tab.
-    - [ ] Implement Feature: Implement custom `BackButtonDispatcher` or `PopScope` logic.
-- [ ] Task: Conductor - User Manual Verification 'Platform-Specific Refinements' (Protocol in workflow.md)
+- [x] Task: Fix iOS Swipe-to-Back and ensure it integrates with the tab history.
+    - [x] Write Tests: (Manual Verification focus) Verify gesture behavior on iOS.
+    - [x] Implement Feature: Adjust `Page` builders and transitions for iOS compatibility.
+- [x] Task: Refine Android Back Button behavior for tabs and app exit.
+    - [x] Write Tests: Verify back button on Game Setup exits app and on tabs goes to previous tab.
+    - [x] Implement Feature: Implement custom `BackButtonDispatcher` or `PopScope` logic.
+- [x] Task: Conductor - User Manual Verification 'Platform-Specific Refinements' (Protocol in workflow.md)
+  [checkpoint: e73d422]
 
 ## Phase 4: Final Verification and Cleanup
-- [ ] Task: Perform comprehensive cross-platform testing (Android and iOS).
-- [ ] Task: Remove any legacy navigation code and unused dependencies.
-- [ ] Task: Conductor - User Manual Verification 'Final Verification and Cleanup' (Protocol in workflow.md)
+- [x] Task: Perform comprehensive cross-platform testing (Android and iOS).
+- [x] Task: Remove any legacy navigation code and unused dependencies.
+- [x] Task: Conductor - User Manual Verification 'Final Verification and Cleanup' (Protocol in workflow.md)
+  [checkpoint: 76809]
