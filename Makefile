@@ -24,13 +24,13 @@ lint:
 lint-fix:
 	dart fix --apply
 
-# Lint markdown files
+# Lint markdown files (matches CI: includes dotfiles, recursive glob)
 lint-md:
-	markdownlint '**/*.md'
+	markdownlint --dot "**/*.md"
 
 # Auto-fix markdown lint issues
 lint-md-fix:
-	markdownlint '**/*.md' --fix
+	markdownlint --dot --fix "**/*.md"
 
 # Run tests
 test:
