@@ -82,7 +82,7 @@ class ResultsSummaryCard extends StatelessWidget {
         color:
             isSelected
                 ? context.colors.primaryContainer
-                : context.colors.surface,
+                : context.colors.surfaceContainer,
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(

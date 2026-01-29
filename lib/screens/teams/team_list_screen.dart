@@ -365,7 +365,10 @@ class _TeamListItem extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: itemSelected ? colorScheme.primaryContainer : colorScheme.surface,
+      color:
+          itemSelected
+              ? colorScheme.primaryContainer
+              : colorScheme.surfaceContainer,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         leading:
