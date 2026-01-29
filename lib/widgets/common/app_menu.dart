@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/constants/app_version.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/preferences_view_model.dart';
@@ -146,6 +147,26 @@ class AppMenu extends StatelessWidget {
                   const Text('Colour'),
                   Text(
                     _getColorThemeName(userPreferences.colorTheme),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(),
+
+            // About
+            MenuItemButton(
+              leadingIcon: const Icon(Icons.info_outline),
+              onPressed: () {},
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('About'),
+                  Text(
+                    'Version: $appVersion',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

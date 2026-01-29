@@ -211,6 +211,13 @@ jobs:
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
 
+      - name: 📝 Generate version config
+        run: |
+          cat > lib/constants/app_version.dart << EOF
+          const String appVersion = '${{ steps.version.outputs.version_name }}';
+          const int buildNumber = ${{ steps.version.outputs.version_code }};
+          EOF
+
       - name: 🔑 Setup Android signing
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/keystore.jks
