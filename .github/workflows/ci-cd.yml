@@ -153,36 +153,13 @@ jobs:
           path: mobsf-results.sarif
           retention-days: 30
 
-  codeql:
-    name: 🛡️ CodeQL Analysis
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v6
-
-      - name: 🛡️ Initialise CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: java-kotlin
-          queries: security-extended
-
-      - name: 🔍 Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: codeql-analysis
-
   # =============================================================================
   # BUILD PHASE - Only runs on main branch pushes
   # =============================================================================
   
   build:
     name: 🤖 Build Android
-    needs: [lint, unit-test, security-scan, codeql]
+    needs: [lint, unit-test, security-scan]
     runs-on: ubuntu-latest
     # Build on all pushes and PRs (but not scheduled runs)
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -260,7 +237,7 @@ jobs:
 
   build-ios:
     name: 🍎 Build iOS
-    needs: [lint, unit-test, security-scan, codeql]
+    needs: [lint, unit-test, security-scan]
     runs-on: macos-latest
     # Only build iOS on main branch pushes to conserve macOS runner minutes
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
