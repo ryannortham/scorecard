@@ -64,7 +64,8 @@ class NavigationShell extends StatefulWidget {
   State<NavigationShell> createState() => NavigationShellState();
 }
 
-class NavigationShellState extends State<NavigationShell> {
+class NavigationShellState extends State<NavigationShell>
+    with WidgetsBindingObserver {
   bool _isNavigationVisible = true;
   late final List<int> _tabHistory;
 
@@ -82,12 +83,28 @@ class NavigationShellState extends State<NavigationShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabHistory = [widget.navigationShell.currentIndex];
     AppLogger.debug(
       'NavigationShell: Initialized with index '
       '${widget.navigationShell.currentIndex}',
       component: 'Navigation',
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_isNavigationVisible) {
+      setState(() {
+        _isNavigationVisible = true;
+      });
+    }
   }
 
   @override
@@ -106,6 +123,9 @@ class NavigationShellState extends State<NavigationShell> {
 
       // Clear the pending direction after applying
       _pendingDirection = null;
+
+      // Reset tab bar visibility when switching tabs
+      _isNavigationVisible = true;
 
       AppLogger.debug(
         'NavigationShell: Index changed to $newIndex. '
