@@ -3,6 +3,9 @@
 // These tests measure the performance of navigating between screens and tabs.
 // Run with: flutter test test/benchmark/ --reporter expanded
 
+@Tags(['benchmark'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

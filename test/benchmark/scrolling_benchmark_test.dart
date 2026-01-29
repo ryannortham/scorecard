@@ -3,6 +3,9 @@
 // These tests measure widget build and scroll performance for list screens.
 // Run with: flutter test test/benchmark/ --reporter expanded
 
+@Tags(['benchmark'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scorecard/models/game_summary.dart';

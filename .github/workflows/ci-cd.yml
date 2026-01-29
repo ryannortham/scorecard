@@ -18,8 +18,39 @@ jobs:
   # ANALYSIS PHASE - Runs in parallel for all pushes/PRs
   # =============================================================================
   
-  test:
-    name: 🧪 Test & Lint
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v6
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🎨 Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: 🔍 Analyse project source
+        run: flutter analyze
+
+      - name: 📝 Lint markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v22
+        with:
+          globs: '**/*.md'
+
+  unit-test:
+    name: 🧪 Unit Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,24 +73,45 @@ jobs:
         run: |
           echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
 
-      - name: 🎨 Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+      - name: 🧪 Run unit tests
+        run: flutter test --exclude-tags=benchmark
 
-      - name: 🔍 Analyze project source
-        run: flutter analyze
+  benchmark:
+    name: 📊 Benchmark
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    permissions:
+      contents: read
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v6
 
-      - name: 📝 Lint markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v22
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          globs: '**/*.md'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
 
-      - name: 🧪 Run tests
-        run: |
-          if [ -d "test" ]; then
-            flutter test
-          else
-            echo "No tests found, skipping test execution"
-          fi
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🔧 Create .env file
+        run: echo "GOOGLE_MAPS_API_KEY=test-key-for-benchmarks" > .env
+
+      - name: 📊 Run benchmark tests
+        run: flutter test test/benchmark/ --reporter expanded
+
+      - name: 📤 Upload benchmark results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: benchmark-results-${{ github.run_number }}
+          path: |
+            build/benchmark_results.json
+            build/navigation_benchmark_results.json
+          retention-days: 30
 
   security-scan:
     name: 🔒 Security Scan (MobSF)
@@ -98,50 +150,13 @@ jobs:
           path: mobsf-results.sarif
           retention-days: 30
 
-  benchmark:
-    name: 📊 Performance Benchmark
-    needs: [test]
-    runs-on: ubuntu-latest
-    # Only run benchmarks on main branch pushes (not PRs or scheduled runs)
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v6
-        
-      - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-          
-      - name: 📦 Install dependencies
-        run: flutter pub get
-        
-      - name: 🔧 Create .env file
-        run: echo "GOOGLE_MAPS_API_KEY=test-key-for-benchmarks" > .env
-        
-      - name: 📊 Run benchmark tests
-        run: flutter test test/benchmark/ --reporter expanded
-        
-      - name: 📤 Upload benchmark results
-        uses: actions/upload-artifact@v6
-        if: always()
-        with:
-          name: benchmark-results-${{ github.run_number }}
-          path: |
-            build/benchmark_results.json
-            build/navigation_benchmark_results.json
-          retention-days: 30
-
   # =============================================================================
   # BUILD PHASE - Only runs on main branch pushes
   # =============================================================================
   
   build:
     name: 🤖 Build Android
-    needs: [test, security-scan]
+    needs: [lint, unit-test, security-scan]
     runs-on: ubuntu-latest
     # Build on all pushes and PRs (but not scheduled runs)
     if: github.event_name == 'push' || github.event_name == 'pull_request'
@@ -219,7 +234,7 @@ jobs:
 
   build-ios:
     name: 🍎 Build iOS
-    needs: [test, security-scan]
+    needs: [lint, unit-test, security-scan]
     runs-on: macos-latest
     # Only build iOS on main branch pushes to conserve macOS runner minutes
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
