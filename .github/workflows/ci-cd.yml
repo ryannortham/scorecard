@@ -103,7 +103,7 @@ jobs:
   # =============================================================================
   
   build:
-    name: 🏗️ Build Release
+    name: 🤖 Build Android
     needs: [test, security-scan]
     runs-on: ubuntu-latest
     # Build on all pushes and PRs (but not scheduled runs)
