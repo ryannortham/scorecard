@@ -41,14 +41,14 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/scoring',
   debugLogDiagnostics: true,
   routes: [
-    StatefulShellRoute.indexedStack(
+    StatefulShellRoute(
       builder: (context, state, navigationShell) {
+        return navigationShell;
+      },
+      navigatorContainerBuilder: (context, navigationShell, children) {
         return NavigationShell(
           navigationShell: navigationShell,
-          // Note: navigationShell.children is not available in indexedStack builder directly in some versions
-          // but we can pass it via navigatorContainerBuilder or just use the shell itself.
-          // The current implementation uses navigatorContainerBuilder which is fine.
-          child: navigationShell,
+          children: children,
         );
       },
       branches: [

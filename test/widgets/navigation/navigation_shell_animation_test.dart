@@ -18,13 +18,14 @@ void main() {
             });
             return NavigationShell(
               navigationShell: mockShell,
-              child: const Text('Body'),
+              children: const [Text('Scoring'), Text('Teams'), Text('Results')],
             );
           },
         ),
       ),
     );
 
+    // Initial state
     final state = tester.state<NavigationShellState>(find.byType(NavigationShell));
     expect(state.currentDirection, NavigationDirection.none);
 
@@ -50,7 +51,7 @@ void main() {
             });
             return NavigationShell(
               navigationShell: mockShell,
-              child: const Text('Body'),
+              children: const [Text('Scoring'), Text('Teams'), Text('Results')],
             );
           },
         ),
@@ -72,12 +73,32 @@ void main() {
     expect(currentIndex, 0);
     expect(state.currentDirection, NavigationDirection.backward);
   });
-}
 
-// Internal classes for testing - need to be accessible or mocked
-// Since _NavigationShellState is private, I might need to make it public or use a different approach.
-// For now, I'll assume I'll make it public for testing or add a getter to the widget if possible.
-// Actually, I'll make it public: NavigationShellState.
+  testWidgets('NavigationShell should use AnimatedBranchContainer for tab transitions', (WidgetTester tester) async {
+    int currentIndex = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            final mockShell = _FakeStatefulNavigationShell(currentIndex, (index) {
+              setState(() {
+                currentIndex = index;
+              });
+            });
+            return NavigationShell(
+              navigationShell: mockShell,
+              children: const [Text('Scoring'), Text('Teams'), Text('Results')],
+            );
+          },
+        ),
+      ),
+    );
+
+    // Should find an AnimatedBranchContainer
+    expect(find.byType(AnimatedBranchContainer), findsOneWidget);
+  });
+}
 
 class _FakeStatefulNavigationShell extends Fake implements StatefulNavigationShell {
   _FakeStatefulNavigationShell(this._currentIndex, this._onGoBranch);
