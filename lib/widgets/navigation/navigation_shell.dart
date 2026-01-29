@@ -1,21 +1,26 @@
 // navigation shell that wraps screens with bottom navigation
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
 /// Direction of tab navigation for transitions
-enum NavigationDirection { 
+enum NavigationDirection {
   /// Moving forward in history (new tab selected)
-  forward, 
+  forward,
+
   /// Moving backward in history (back button/swipe)
-  backward, 
+  backward,
+
   /// No direction (initial state)
-  none 
+  none,
 }
 
-/// wraps screens with bottom navigation and handles tab history and scroll visibility
+/// wraps screens with bottom navigation and handles tab history and
+/// scroll visibility
 class NavigationShell extends StatefulWidget {
   const NavigationShell({
     required this.navigationShell,
@@ -32,16 +37,23 @@ class NavigationShell extends StatefulWidget {
 
 class NavigationShellState extends State<NavigationShell> {
   bool _isNavigationVisible = true;
-  final List<int> _tabHistory = [0]; // Start with Scoring tab (index 0)
+  late final List<int> _tabHistory;
   bool _isInternalNavigating = false;
-  
+
   /// Current direction of navigation for transitions
   NavigationDirection currentDirection = NavigationDirection.none;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize history with the starting tab
+    _tabHistory = [widget.navigationShell.currentIndex];
+  }
+
+  @override
   void didUpdateWidget(NavigationShell oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // If the index changed (regardless of how), update history
     final newIndex = widget.navigationShell.currentIndex;
     if (newIndex != oldWidget.navigationShell.currentIndex) {
@@ -103,10 +115,6 @@ class NavigationShellState extends State<NavigationShell> {
         _tabHistory.removeLast(); // Remove current
         final targetIndex = _tabHistory.last;
         _isInternalNavigating = true;
-        
-        // Remove the target from history because didUpdateWidget will add it back
-        _tabHistory.removeLast(); 
-        
         widget.navigationShell.goBranch(targetIndex);
       });
     } else if (widget.navigationShell.currentIndex != 0) {
@@ -121,19 +129,24 @@ class NavigationShellState extends State<NavigationShell> {
   Widget build(BuildContext context) {
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
-    return PopScope(
-      // Can only pop (exit app) if we are on the first tab and history is exhausted
-      canPop: _tabHistory.length <= 1 && widget.navigationShell.currentIndex == 0,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _popTab();
-      },
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _onScrollNotification,
-        child: Scaffold(
-          extendBody: true,
-          body: Stack(
+    // canPop is true only when on home tab with no more history
+    final canPop =
+        _tabHistory.length <= 1 && widget.navigationShell.currentIndex == 0;
+
+    return Scaffold(
+      extendBody: true,
+      body: PopScope(
+        canPop: canPop,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _popTab();
+        },
+        child: NotificationListener<ScrollNotification>(
+          onNotification: _onScrollNotification,
+          child: Stack(
             children: [
+              // Use a custom container that animates between branches without
+              // duplicating global keys.
               AnimatedBranchContainer(
                 currentIndex: widget.navigationShell.currentIndex,
                 direction: currentDirection,
@@ -148,23 +161,24 @@ class NavigationShellState extends State<NavigationShell> {
                   bottom: 0,
                   width: 40,
                   child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onHorizontalDragUpdate: (details) {
-                      // Detect a rightward swipe from the left edge
-                      if (details.delta.dx > 10) {
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragEnd: (details) {
+                      if (details.primaryVelocity != null &&
+                          details.primaryVelocity! > 100) {
                         _popTab();
                       }
                     },
+                    child: const SizedBox.expand(),
                   ),
                 ),
             ],
           ),
-          bottomNavigationBar: BottomNavBar(
-            currentIndex: widget.navigationShell.currentIndex,
-            onDestinationSelected: _onDestinationSelected,
-            isVisible: _isNavigationVisible,
-          ),
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: widget.navigationShell.currentIndex,
+        onDestinationSelected: _onDestinationSelected,
+        isVisible: _isNavigationVisible,
       ),
     );
   }
@@ -189,17 +203,18 @@ class AnimatedBranchContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: children.mapIndexed((int index, Widget child) {
-        final bool isSelected = index == currentIndex;
-        
-        return _AnimatedBranchItem(
-          index: index,
-          isSelected: isSelected,
-          direction: direction,
-          isIOS: isIOS,
-          child: child,
-        );
-      }).toList(),
+      children:
+          children.mapIndexed((int index, Widget child) {
+            final isSelected = index == currentIndex;
+
+            return _AnimatedBranchItem(
+              index: index,
+              isSelected: isSelected,
+              direction: direction,
+              isIOS: isIOS,
+              child: child,
+            );
+          }).toList(),
     );
   }
 }
@@ -223,26 +238,17 @@ class _AnimatedBranchItem extends StatefulWidget {
   State<_AnimatedBranchItem> createState() => _AnimatedBranchItemState();
 }
 
-class _AnimatedBranchItemState extends State<_AnimatedBranchItem> with SingleTickerProviderStateMixin {
+class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _animation;
-  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: widget.isIOS 
-          ? const Duration(milliseconds: 350) 
-          : const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOutCubic,
-    );
-    _updateAnimations();
-    
     if (widget.isSelected) {
       _controller.value = 1.0;
     }
@@ -251,30 +257,13 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem> with SingleTic
   @override
   void didUpdateWidget(_AnimatedBranchItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isSelected != oldWidget.isSelected || widget.direction != oldWidget.direction) {
-      _updateAnimations();
+    if (widget.isSelected != oldWidget.isSelected) {
       if (widget.isSelected) {
-        _controller.forward();
+        unawaited(_controller.forward(from: 0));
       } else {
-        _controller.reverse();
+        unawaited(_controller.reverse(from: 1));
       }
     }
-  }
-
-  void _updateAnimations() {
-    final bool isBackward = widget.direction == NavigationDirection.backward;
-    
-    Offset begin;
-    if (widget.isIOS) {
-      begin = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
-    } else {
-      begin = isBackward ? const Offset(0, -0.02) : const Offset(0, 0.02);
-    }
-
-    _slideAnimation = Tween<Offset>(
-      begin: begin,
-      end: Offset.zero,
-    ).animate(_animation);
   }
 
   @override
@@ -285,16 +274,66 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem> with SingleTic
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: TickerMode(
-          enabled: widget.isSelected || _controller.isAnimating,
-          child: IgnorePointer(
-            ignoring: !widget.isSelected,
-            child: widget.child,
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final value = _controller.value;
+
+        // If not selected and animation finished, hide completely
+        if (value <= 0 && !widget.isSelected) {
+          return const SizedBox.shrink();
+        }
+
+        // Handle initial state with no direction
+        if (widget.direction == NavigationDirection.none) {
+          return Opacity(
+            opacity: widget.isSelected ? 1.0 : 0.0,
+            child: widget.isSelected ? child : const SizedBox.shrink(),
+          );
+        }
+
+        final isBackward = widget.direction == NavigationDirection.backward;
+
+        Offset offset;
+        if (widget.isSelected) {
+          // Incoming widget
+          final begin = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
+          offset =
+              Offset.lerp(
+                begin,
+                Offset.zero,
+                Curves.easeInOutCubic.transform(value),
+              )!;
+        } else {
+          // Outgoing widget
+          final end = isBackward ? const Offset(1, 0) : const Offset(-1, 0);
+          offset =
+              Offset.lerp(
+                end,
+                Offset.zero,
+                Curves.easeInOutCubic.transform(value),
+              )!;
+        }
+
+        // Apply platform specific feel
+        if (!widget.isIOS) {
+          // Android: subtle move + fade
+          offset = offset * 0.05;
+        }
+
+        return FractionalTranslation(
+          translation: offset,
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: child,
           ),
+        );
+      },
+      child: TickerMode(
+        enabled: widget.isSelected || _controller.isAnimating,
+        child: IgnorePointer(
+          ignoring: !widget.isSelected,
+          child: widget.child,
         ),
       ),
     );

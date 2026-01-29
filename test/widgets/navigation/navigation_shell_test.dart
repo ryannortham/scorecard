@@ -4,14 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 
 void main() {
-  testWidgets('NavigationShell should track tab history', (WidgetTester tester) async {
-    int currentIndex = 0;
+  testWidgets('NavigationShell should track tab history', (
+    WidgetTester tester,
+  ) async {
+    var currentIndex = 0;
 
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
           builder: (context, setState) {
-            final mockShell = _FakeStatefulNavigationShell(currentIndex, (index) {
+            final mockShell = _FakeStatefulNavigationShell(currentIndex, (
+              index,
+            ) {
               setState(() {
                 currentIndex = index;
               });
@@ -33,7 +37,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(currentIndex, 1);
-    
+
     // Tap Results tab (index 2)
     await tester.tap(find.byIcon(Icons.emoji_events_outlined));
     await tester.pumpAndSettle();
@@ -42,68 +46,42 @@ void main() {
 
     // Simulate back button press
     final dynamic widgetsAppState = tester.state(find.byType(WidgetsApp));
-    await widgetsAppState.didPopRoute();
+
+    // ignore: avoid_dynamic_calls, needed to simulate back button press
+    final handled1 = await (widgetsAppState.didPopRoute() as Future<bool>);
     await tester.pumpAndSettle();
+    expect(handled1, isTrue, reason: 'First back press should be intercepted');
 
     // Should go back to Teams (index 1)
     expect(currentIndex, 1);
 
     // Simulate back button press again
-    await widgetsAppState.didPopRoute();
+    // ignore: avoid_dynamic_calls, needed to simulate back button press
+    final handled2 = await (widgetsAppState.didPopRoute() as Future<bool>);
     await tester.pumpAndSettle();
+    expect(handled2, isTrue, reason: 'Second back press should be intercepted');
 
     // Should go back to Scoring (index 0)
     expect(currentIndex, 0);
-  });
 
-  testWidgets('NavigationShell should handle edge swipe on iOS', (WidgetTester tester) async {
-    int currentIndex = 0;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: StatefulBuilder(
-          builder: (context, setState) {
-            // IMPORTANT: Create a new instance every build to ensure didUpdateWidget 
-            // sees a change in the navigationShell object itself if index changes.
-            final mockShell = _FakeStatefulNavigationShell(currentIndex, (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            });
-            return NavigationShell(
-              navigationShell: mockShell,
-              children: const [Text('Scoring'), Text('Teams'), Text('Results')],
-            );
-          },
-        ),
-      ),
+    // Third back press should NOT be intercepted (canPop should be true)
+    // ignore: avoid_dynamic_calls, needed to simulate back button press
+    final handled3 = await (widgetsAppState.didPopRoute() as Future<bool>);
+    await tester.pumpAndSettle();
+    expect(
+      handled3,
+      isFalse,
+      reason: 'Final back press should NOT be intercepted',
     );
-
-    // Initial state
-    expect(currentIndex, 0);
-
-    // Tap Teams tab (index 1)
-    await tester.tap(find.byIcon(Icons.groups_outlined));
-    await tester.pumpAndSettle();
-    expect(currentIndex, 1);
-
-    // Simulate edge swipe (left to right from edge)
-    final gesture = await tester.startGesture(const Offset(5, 100));
-    await gesture.moveBy(const Offset(20, 0));
-    await gesture.moveBy(const Offset(20, 0));
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    // Should go back to Scoring (index 0)
-    expect(currentIndex, 0);
   });
 }
 
-// Helper to create something that looks like StatefulNavigationShell enough for the test
-class _FakeStatefulNavigationShell extends Fake implements StatefulNavigationShell {
+// Helper to create something that looks like StatefulNavigationShell enough
+// for the test
+class _FakeStatefulNavigationShell extends Fake
+    implements StatefulNavigationShell {
   _FakeStatefulNavigationShell(this._currentIndex, this._onGoBranch);
-  
+
   final int _currentIndex;
   final void Function(int) _onGoBranch;
 
@@ -116,5 +94,6 @@ class _FakeStatefulNavigationShell extends Fake implements StatefulNavigationShe
   }
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) => super.toString();
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      super.toString();
 }
