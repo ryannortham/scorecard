@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/constants/hero_tags.dart';
 import 'package:scorecard/theme/colors.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/teams_view_model.dart';
@@ -36,8 +37,14 @@ class ScorePanelHeader extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Team logo
-              TeamLogo(logoUrl: team?.logoUrl),
+              // Team logo with Hero animation
+              Hero(
+                tag:
+                    isHomeTeam
+                        ? scoringHomeLogoHeroTag
+                        : scoringAwayLogoHeroTag,
+                child: TeamLogo(logoUrl: team?.logoUrl),
+              ),
               const SizedBox(width: 8),
               // Team name
               Expanded(

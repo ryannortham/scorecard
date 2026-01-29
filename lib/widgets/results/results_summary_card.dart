@@ -67,6 +67,9 @@ class ResultsSummaryCard extends StatelessWidget {
     final userPrefs = Provider.of<PreferencesViewModel>(context);
     final shouldShowTrophy = _shouldShowTrophyIcon(gameSummary, userPrefs);
 
+    final homeWins = gameSummary.homePoints > gameSummary.awayPoints;
+    final awayWins = gameSummary.awayPoints > gameSummary.homePoints;
+
     final dateFormat = DateFormat('dd/MM/yyyy');
     final timeFormat = DateFormat('HH:mm');
 
@@ -105,8 +108,12 @@ class ResultsSummaryCard extends StatelessWidget {
                       children: [
                         Text(
                           gameSummary.homeTeam,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: homeWins ? context.colors.primary : null,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         Text(
@@ -120,8 +127,12 @@ class ResultsSummaryCard extends StatelessWidget {
                         ),
                         Text(
                           gameSummary.awayTeam,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: awayWins ? context.colors.primary : null,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -129,20 +140,44 @@ class ResultsSummaryCard extends StatelessWidget {
                     Column(
                       children: [
                         const SizedBox(height: 6),
-                        Text(
-                          'Score: ${gameSummary.homeGoals}.'
-                          '${gameSummary.homeBehinds} '
-                          '(${gameSummary.homePoints}) - '
-                          '${gameSummary.awayGoals}.'
-                          '${gameSummary.awayBehinds} '
-                          '(${gameSummary.awayPoints})',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: context.colors.onSurface,
-                          ),
+                        RichText(
                           textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: context.colors.onSurface,
+                            ),
+                            children: [
+                              const TextSpan(text: 'Score: '),
+                              TextSpan(
+                                text:
+                                    '${gameSummary.homeGoals}.'
+                                    '${gameSummary.homeBehinds} '
+                                    '(${gameSummary.homePoints})',
+                                style:
+                                    homeWins
+                                        ? TextStyle(
+                                          color: context.colors.primary,
+                                        )
+                                        : null,
+                              ),
+                              const TextSpan(text: ' - '),
+                              TextSpan(
+                                text:
+                                    '${gameSummary.awayGoals}.'
+                                    '${gameSummary.awayBehinds} '
+                                    '(${gameSummary.awayPoints})',
+                                style:
+                                    awayWins
+                                        ? TextStyle(
+                                          color: context.colors.primary,
+                                        )
+                                        : null,
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(

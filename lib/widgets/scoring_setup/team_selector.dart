@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/constants/hero_tags.dart';
 import 'package:scorecard/models/score.dart';
 import 'package:scorecard/router/app_router.dart';
 import 'package:scorecard/theme/colors.dart';
@@ -48,6 +49,7 @@ class _TeamSelectorState extends State<TeamSelector> {
     required String? teamName,
     required VoidCallback onTap,
     required VoidCallback? onClear,
+    required bool isHome,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -77,6 +79,7 @@ class _TeamSelectorState extends State<TeamSelector> {
                 onTap,
                 onClear,
                 colorScheme,
+                isHome: isHome,
               ),
     );
   }
@@ -86,13 +89,14 @@ class _TeamSelectorState extends State<TeamSelector> {
     String teamName,
     VoidCallback onTap,
     VoidCallback? onClear,
-    ColorScheme colorScheme,
-  ) {
+    ColorScheme colorScheme, {
+    required bool isHome,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          _buildTeamLogo(team),
+          _buildTeamLogo(team, isHome: isHome),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -151,9 +155,12 @@ class _TeamSelectorState extends State<TeamSelector> {
     );
   }
 
-  Widget _buildTeamLogo(Team? team) {
+  Widget _buildTeamLogo(Team? team, {required bool isHome}) {
+    final heroTag = isHome ? scoringHomeLogoHeroTag : scoringAwayLogoHeroTag;
+
+    Widget logo;
     if (team?.logoUrl != null && team!.logoUrl!.isNotEmpty) {
-      return ClipOval(
+      logo = ClipOval(
         child: CachedNetworkImage(
           imageUrl: team.logoUrl!,
           width: 48,
@@ -162,9 +169,14 @@ class _TeamSelectorState extends State<TeamSelector> {
           errorWidget: (context, url, error) => _buildDefaultLogo(),
         ),
       );
+    } else {
+      logo = _buildDefaultLogo();
     }
 
-    return _buildDefaultLogo();
+    return Hero(
+      tag: heroTag,
+      child: logo,
+    );
   }
 
   Widget _buildDefaultLogo() {
@@ -208,6 +220,7 @@ class _TeamSelectorState extends State<TeamSelector> {
                     widget.homeTeam != null
                         ? () => widget.onHomeTeamChanged(null)
                         : null,
+                isHome: true,
               ),
 
               const SizedBox(height: 8),
@@ -229,6 +242,7 @@ class _TeamSelectorState extends State<TeamSelector> {
                     widget.awayTeam != null
                         ? () => widget.onAwayTeamChanged(null)
                         : null,
+                isHome: false,
               ),
             ],
           ),

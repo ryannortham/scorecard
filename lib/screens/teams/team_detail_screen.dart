@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/constants/hero_tags.dart';
 import 'package:scorecard/models/playhq.dart';
 import 'package:scorecard/models/score.dart';
 import 'package:scorecard/services/dialog_service.dart';
@@ -198,7 +199,10 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                     const SizedBox(height: 24),
 
                     // Team Logo
-                    TeamLogo(logoUrl: team.logoUrl, size: 120),
+                    Hero(
+                      tag: teamLogoHeroTag(widget.teamName),
+                      child: TeamLogo(logoUrl: team.logoUrl, size: 120),
+                    ),
 
                     const SizedBox(height: 32),
 

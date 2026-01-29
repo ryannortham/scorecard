@@ -383,10 +383,16 @@ class _TeamListItem extends StatelessWidget {
                               : colorScheme.outline,
                     ),
                     const SizedBox(width: 8),
-                    TeamLogo(logoUrl: team.logoUrl, size: 48),
+                    Hero(
+                      tag: teamLogoHeroTag(team.name),
+                      child: TeamLogo(logoUrl: team.logoUrl, size: 48),
+                    ),
                   ],
                 )
-                : TeamLogo(logoUrl: team.logoUrl, size: 48),
+                : Hero(
+                  tag: teamLogoHeroTag(team.name),
+                  child: TeamLogo(logoUrl: team.logoUrl, size: 48),
+                ),
         title: Text(team.name, style: Theme.of(context).textTheme.bodyMedium),
         onTap: onTap,
         onLongPress: onLongPress,
