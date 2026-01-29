@@ -12,6 +12,8 @@ import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
+import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
 import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
@@ -257,39 +259,70 @@ class _ResultsListScreenState extends State<ResultsListScreen>
                   ),
                 )
               else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      // Show loading indicator at the bottom
-                      if (index == _gameSummaries.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
+                // Use Consumer2 once at the list level to pre-fetch team and
+                // preference data, avoiding individual Consumer/Provider.of
+                // calls in each ResultsSummaryCard which would cause all cards
+                // to rebuild when any team or preference changes.
+                Consumer2<TeamsViewModel, PreferencesViewModel>(
+                  builder: (context, teamsProvider, prefsProvider, child) {
+                    // Pre-compute a lookup map for team logos (O(1) lookup)
+                    final teamLogoMap = <String, String>{
+                      for (final team in teamsProvider.teams)
+                        team.name: team.logoUrl ?? '',
+                    };
+                    final favoriteTeams = prefsProvider.favoriteTeams;
 
-                      final gameSummary = _gameSummaries[index];
-                      return ResultsSummaryCard(
-                        gameSummary: gameSummary,
-                        isSelectionMode: isSelectionMode,
-                        isSelected: isSelected(gameSummary.id),
-                        onTap: () {
-                          if (isSelectionMode) {
-                            toggleSelection(gameSummary.id);
-                          } else {
-                            unawaited(_showGameDetails(gameSummary.id));
-                          }
+                    return SliverFixedExtentList(
+                      // Fixed item height improves scroll performance
+                      itemExtent: 150,
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final gameSummary = _gameSummaries[index];
+
+                          // Pre-fetch team logos and trophy visibility
+                          final homeLogoUrl =
+                              teamLogoMap[gameSummary.homeTeam] ?? '';
+                          final awayLogoUrl =
+                              teamLogoMap[gameSummary.awayTeam] ?? '';
+                          final shouldShowTrophy =
+                              ResultsSummaryCard.computeShouldShowTrophy(
+                                gameSummary,
+                                favoriteTeams,
+                              );
+
+                          return ResultsSummaryCard(
+                            gameSummary: gameSummary,
+                            isSelectionMode: isSelectionMode,
+                            isSelected: isSelected(gameSummary.id),
+                            homeTeamLogoUrl: homeLogoUrl,
+                            awayTeamLogoUrl: awayLogoUrl,
+                            shouldShowTrophy: shouldShowTrophy,
+                            onTap: () {
+                              if (isSelectionMode) {
+                                toggleSelection(gameSummary.id);
+                              } else {
+                                unawaited(_showGameDetails(gameSummary.id));
+                              }
+                            },
+                            onLongPress: () {
+                              if (!isSelectionMode) {
+                                enterSelectionMode(gameSummary.id);
+                              }
+                            },
+                          );
                         },
-                        onLongPress: () {
-                          if (!isSelectionMode) {
-                            enterSelectionMode(gameSummary.id);
-                          }
-                        },
-                      );
-                    },
-                    childCount:
-                        _gameSummaries.length +
-                        (_hasMoreGames || _isLoadingMore ? 1 : 0),
+                        childCount: _gameSummaries.length,
+                      ),
+                    );
+                  },
+                ),
+
+              // Loading indicator at the bottom (separate sliver)
+              if (_hasMoreGames || _isLoadingMore)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
                 ),
 

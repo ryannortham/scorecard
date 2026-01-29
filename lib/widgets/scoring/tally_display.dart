@@ -33,9 +33,12 @@ class TallyDisplay extends StatelessWidget {
     final effectiveColor = ColorService.semiTransparent(baseColor, 0.9);
     final effectiveIconSize = iconSize ?? 24.0;
 
-    // Get the user preference for using tallys
-    final userPreferences = Provider.of<PreferencesViewModel>(context);
-    final shouldUseTally = useTally && userPreferences.useTallys;
+    // Use context.select to only rebuild when useTallys changes,
+    // not on every PreferencesViewModel change
+    final userPreferseTally = context.select<PreferencesViewModel, bool>(
+      (prefs) => prefs.useTallys,
+    );
+    final shouldUseTally = useTally && userPreferseTally;
 
     // Handle zero or negative values - show nothing (blank)
     if (value <= 0) {

@@ -147,53 +147,69 @@ class _TeamListScreenState extends State<TeamListScreen>
                       top: 4,
                       bottom: 4.0 + MediaQuery.of(context).padding.bottom,
                     ),
-                    sliver: SliverList.builder(
-                      itemCount: teams.length,
-                      itemBuilder: (context, index) {
-                        final team = teams[index];
-                        final realIndex = teamsProvider.teams.indexOf(team);
-                        final itemSelected = isSelected(realIndex);
+                    sliver: Builder(
+                      builder: (context) {
+                        // Pre-compute team index map for O(1) lookup instead
+                        // of calling indexOf() for each item which is O(n)
+                        // per item (O(n²) for the whole list).
+                        final teamIndexMap = <String, int>{
+                          for (var i = 0; i < teamsProvider.teams.length; i++)
+                            teamsProvider.teams[i].name: i,
+                        };
 
-                        return _TeamListItem(
-                          team: team,
-                          realIndex: realIndex,
-                          itemSelected: itemSelected,
-                          isSelectionMode: isSelectionMode,
-                          isTeamsScreen: !widget.isSelectionScreen,
-                          isFavorite: userPreferences.isFavoriteTeam(
-                            team.name,
-                          ),
-                          onTap: () {
-                            if (isSelectionMode) {
-                              toggleSelection(realIndex);
-                            } else if (widget.isSelectionScreen) {
-                              // Team selection mode - select team and return
-                              context.pop(team.name);
-                            } else {
-                              // Teams mode - navigate to team detail
-                              _navigateToTeamDetail(team.name);
-                            }
-                          },
-                          onLongPress: () {
-                            if (!isSelectionMode && !widget.isSelectionScreen) {
-                              enterSelectionMode(realIndex);
-                            }
-                          },
-                          onFavoriteToggle: () async {
-                            final wasAdded =
-                                !userPreferences.isFavoriteTeam(team.name);
-                            await userPreferences.toggleFavoriteTeam(
-                              team.name,
+                        // Fixed item extent improves scroll performance
+                        return SliverFixedExtentList.builder(
+                          itemExtent: 72,
+                          itemCount: teams.length,
+                          itemBuilder: (context, index) {
+                            final team = teams[index];
+                            // O(1) lookup instead of O(n) indexOf
+                            final realIndex = teamIndexMap[team.name] ?? index;
+                            final itemSelected = isSelected(realIndex);
+
+                            return _TeamListItem(
+                              team: team,
+                              realIndex: realIndex,
+                              itemSelected: itemSelected,
+                              isSelectionMode: isSelectionMode,
+                              isTeamsScreen: !widget.isSelectionScreen,
+                              isFavorite: userPreferences.isFavoriteTeam(
+                                team.name,
+                              ),
+                              onTap: () {
+                                if (isSelectionMode) {
+                                  toggleSelection(realIndex);
+                                } else if (widget.isSelectionScreen) {
+                                  // Team selection mode - select and return
+                                  context.pop(team.name);
+                                } else {
+                                  // Teams mode - navigate to team detail
+                                  _navigateToTeamDetail(team.name);
+                                }
+                              },
+                              onLongPress: () {
+                                if (!isSelectionMode &&
+                                    !widget.isSelectionScreen) {
+                                  enterSelectionMode(realIndex);
+                                }
+                              },
+                              onFavoriteToggle: () async {
+                                final wasAdded =
+                                    !userPreferences.isFavoriteTeam(team.name);
+                                await userPreferences.toggleFavoriteTeam(
+                                  team.name,
+                                );
+
+                                if (mounted && context.mounted) {
+                                  SnackBarService.showSuccess(
+                                    context,
+                                    wasAdded
+                                        ? 'Added to favourites'
+                                        : 'Removed from favourites',
+                                  );
+                                }
+                              },
                             );
-
-                            if (mounted && context.mounted) {
-                              SnackBarService.showSuccess(
-                                context,
-                                wasAdded
-                                    ? 'Added to favourites'
-                                    : 'Removed from favourites',
-                              );
-                            }
                           },
                         );
                       },

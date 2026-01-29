@@ -44,6 +44,9 @@ class TeamLogoWatermark extends StatelessWidget {
                           child: CachedNetworkImage(
                             imageUrl: logoUrl,
                             fit: BoxFit.cover,
+                            // Limit decoded image size (2x for retina)
+                            memCacheWidth: 288,
+                            memCacheHeight: 288,
                             errorWidget: (context, url, error) {
                               return _buildFallbackLogo(context);
                             },

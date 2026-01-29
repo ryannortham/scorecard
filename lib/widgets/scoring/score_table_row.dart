@@ -38,11 +38,22 @@ class ScoreTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userPreferences = Provider.of<PreferencesViewModel>(context);
-    final useTallyMode = userPreferences.useTallys;
+    // Use context.select to only rebuild when useTallys changes,
+    // not on every PreferencesViewModel change
+    final useTallyMode = context.select<PreferencesViewModel, bool>(
+      (prefs) => prefs.useTallys,
+    );
 
-    final teamGoals = quarterEvents.where((e) => e.type == 'goal').length;
-    final teamBehinds = quarterEvents.where((e) => e.type == 'behind').length;
+    // Single-pass counting instead of two separate .where() calls
+    var teamGoals = 0;
+    var teamBehinds = 0;
+    for (final event in quarterEvents) {
+      if (event.type == 'goal') {
+        teamGoals++;
+      } else if (event.type == 'behind') {
+        teamBehinds++;
+      }
+    }
     final teamPoints = teamGoals * 6 + teamBehinds;
 
     // quarter is complete if it's not current and not future

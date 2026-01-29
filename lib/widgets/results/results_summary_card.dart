@@ -10,6 +10,16 @@ import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
 /// displays game summary in the results list
+///
+/// For optimal performance, pass [homeTeamLogoUrl], [awayTeamLogoUrl], and
+/// [shouldShowTrophy] directly from the parent widget. This avoids each card
+/// subscribing to [TeamsViewModel] and [PreferencesViewModel] individually,
+/// which would cause all visible cards to rebuild when any team or
+/// preference changes.
+///
+/// If these optional parameters are not provided, the widget falls back to
+/// using Provider to fetch the data (legacy behaviour, less performant
+/// in lists).
 class ResultsSummaryCard extends StatelessWidget {
   const ResultsSummaryCard({
     required this.gameSummary,
@@ -18,31 +28,44 @@ class ResultsSummaryCard extends StatelessWidget {
     this.onLongPress,
     this.isSelectionMode = false,
     this.isSelected = false,
+    this.homeTeamLogoUrl,
+    this.awayTeamLogoUrl,
+    this.shouldShowTrophy,
   });
+
   final GameSummary gameSummary;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
   final bool isSelectionMode;
   final bool isSelected;
 
-  /// determines if trophy icon should show for favourite team win
-  bool _shouldShowTrophyIcon(
+  /// Pre-fetched logo URL for the home team.
+  /// If null, falls back to Provider lookup.
+  final String? homeTeamLogoUrl;
+
+  /// Pre-fetched logo URL for the away team.
+  /// If null, falls back to Provider lookup.
+  final String? awayTeamLogoUrl;
+
+  /// Pre-computed trophy visibility. If null, falls back to Provider lookup.
+  final bool? shouldShowTrophy;
+
+  /// Computes whether trophy icon should show for favourite team win.
+  /// This is a static helper that can be called by parent widgets to
+  /// pre-compute the value and pass it via [shouldShowTrophy].
+  static bool computeShouldShowTrophy(
     GameSummary gameSummary,
-    PreferencesViewModel userPrefs,
+    List<String> favoriteTeams,
   ) {
-    if (userPrefs.favoriteTeams.isEmpty) return false;
+    if (favoriteTeams.isEmpty) return false;
 
     final homePoints = gameSummary.homePoints;
     final awayPoints = gameSummary.awayPoints;
 
     if (homePoints == awayPoints) return false;
 
-    final favoriteIsHome = userPrefs.favoriteTeams.contains(
-      gameSummary.homeTeam,
-    );
-    final favoriteIsAway = userPrefs.favoriteTeams.contains(
-      gameSummary.awayTeam,
-    );
+    final favoriteIsHome = favoriteTeams.contains(gameSummary.homeTeam);
+    final favoriteIsAway = favoriteTeams.contains(gameSummary.awayTeam);
 
     if (!favoriteIsHome && !favoriteIsAway) return false;
 
@@ -52,8 +75,27 @@ class ResultsSummaryCard extends StatelessWidget {
     return false;
   }
 
-  /// builds team logo widget
-  Widget _buildTeamLogo(String teamName) {
+  /// Legacy method for backward compatibility - uses Provider lookup
+  bool _shouldShowTrophyIcon(
+    GameSummary gameSummary,
+    PreferencesViewModel userPrefs,
+  ) {
+    return computeShouldShowTrophy(gameSummary, userPrefs.favoriteTeams);
+  }
+
+  /// Builds team logo widget with pre-fetched URL if available
+  Widget _buildTeamLogo(
+    BuildContext context,
+    String teamName,
+    String? logoUrl,
+  ) {
+    // If logoUrl was pre-fetched (including empty string meaning no logo),
+    // use it directly without subscribing to TeamsViewModel
+    if (logoUrl != null) {
+      return TeamLogo(logoUrl: logoUrl.isNotEmpty ? logoUrl : null, size: 48);
+    }
+
+    // Fall back to Consumer for backward compatibility
     return Consumer<TeamsViewModel>(
       builder: (context, teamsProvider, child) {
         final team = teamsProvider.findTeamByName(teamName);
@@ -64,8 +106,14 @@ class ResultsSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userPrefs = Provider.of<PreferencesViewModel>(context);
-    final shouldShowTrophy = _shouldShowTrophyIcon(gameSummary, userPrefs);
+    // Use pre-computed trophy value if provided, otherwise fall back to
+    // Provider
+    final showTrophy =
+        shouldShowTrophy ??
+        _shouldShowTrophyIcon(
+          gameSummary,
+          Provider.of<PreferencesViewModel>(context),
+        );
 
     final homeWins = gameSummary.homePoints > gameSummary.awayPoints;
     final awayWins = gameSummary.awayPoints > gameSummary.homePoints;
@@ -99,7 +147,7 @@ class ResultsSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              _buildTeamLogo(gameSummary.homeTeam),
+              _buildTeamLogo(context, gameSummary.homeTeam, homeTeamLogoUrl),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -187,7 +235,7 @@ class ResultsSummaryCard extends StatelessWidget {
                               ?.copyWith(color: context.colors.onSurface),
                           textAlign: TextAlign.center,
                         ),
-                        if (shouldShowTrophy)
+                        if (showTrophy)
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Icon(
@@ -202,7 +250,7 @@ class ResultsSummaryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              _buildTeamLogo(gameSummary.awayTeam),
+              _buildTeamLogo(context, gameSummary.awayTeam, awayTeamLogoUrl),
             ],
           ),
         ),

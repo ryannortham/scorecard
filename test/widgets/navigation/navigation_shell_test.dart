@@ -314,6 +314,101 @@ void main() {
     );
   });
 
+  group('NavigationShellInfo.updateShouldNotify', () {
+    testWidgets('should notify when state changes (tab navigation)', (
+      WidgetTester tester,
+    ) async {
+      var rebuildCount = 0;
+      var currentIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              final mockShell = _FakeStatefulNavigationShell(currentIndex, (
+                index,
+              ) {
+                setState(() {
+                  currentIndex = index;
+                });
+              });
+              return NavigationShell(
+                navigationShell: mockShell,
+                children: [
+                  _RebuildCountingScreen(
+                    onBuild: () => rebuildCount++,
+                    title: 'Scoring',
+                  ),
+                  const _TestScreen(title: 'Teams', index: 1),
+                  const _TestScreen(title: 'Results', index: 2),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+      final initialRebuildCount = rebuildCount;
+
+      // Navigate to Teams tab - this SHOULD cause a rebuild
+      await tester.tap(find.byIcon(Icons.groups_outlined));
+      await tester.pumpAndSettle();
+
+      // Navigate back - this SHOULD cause another rebuild
+      await tester.tap(find.byTooltip('Back'));
+      await tester.pumpAndSettle();
+
+      // Rebuilds should have occurred during navigation
+      expect(rebuildCount, greaterThan(initialRebuildCount));
+    });
+
+    testWidgets(
+      'should provide access to canPopTab via NavigationShellInfo.of',
+      (
+        WidgetTester tester,
+      ) async {
+        var currentIndex = 0;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (context, setState) {
+                final mockShell = _FakeStatefulNavigationShell(currentIndex, (
+                  index,
+                ) {
+                  setState(() {
+                    currentIndex = index;
+                  });
+                });
+                return NavigationShell(
+                  navigationShell: mockShell,
+                  children: const [
+                    _TestScreen(title: 'Scoring', index: 0),
+                    _TestScreen(title: 'Teams', index: 1),
+                    _TestScreen(title: 'Results', index: 2),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        // Initially at index 0, canPopTab should be false (no history)
+        expect(find.byTooltip('Back'), findsNothing);
+
+        // Navigate to Teams tab
+        await tester.tap(find.byIcon(Icons.groups_outlined));
+        await tester.pumpAndSettle();
+
+        // Now canPopTab should be true (can go back)
+        expect(find.byTooltip('Back'), findsOneWidget);
+      },
+    );
+  });
+
   group('handleBack() helper method', () {
     testWidgets('handleBack calls popTab when not in selection mode', (
       WidgetTester tester,
@@ -457,4 +552,37 @@ class _FakeStatefulNavigationShell extends Fake
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       super.toString();
+}
+
+/// Helper screen that tracks rebuild count for testing updateShouldNotify
+class _RebuildCountingScreen extends StatelessWidget {
+  const _RebuildCountingScreen({
+    required this.onBuild,
+    required this.title,
+  });
+
+  final VoidCallback onBuild;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    onBuild();
+    final navState = NavigationShellInfo.of(context);
+    final canPop = navState?.canPopTab ?? false;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        leading:
+            canPop
+                ? IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => navState?.popTab(),
+                  tooltip: 'Back',
+                )
+                : null,
+      ),
+      body: Center(child: Text(title)),
+    );
+  }
 }

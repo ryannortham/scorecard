@@ -67,6 +67,9 @@ class TeamAddressSection extends StatelessWidget {
                   width: double.infinity,
                   height: 200,
                   fit: BoxFit.cover,
+                  // Limit decoded image size in memory cache
+                  memCacheWidth: 800,
+                  memCacheHeight: 400,
                   placeholder:
                       (context, url) => Container(
                         width: double.infinity,

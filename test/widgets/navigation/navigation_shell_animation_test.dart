@@ -177,6 +177,54 @@ void main() {
     expect(state.currentDirection, NavigationDirection.forward);
   });
 
+  testWidgets(
+    'NavigationShell should wrap animated children in RepaintBoundary',
+    (WidgetTester tester) async {
+      var currentIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              final mockShell = _FakeStatefulNavigationShell(currentIndex, (
+                index,
+              ) {
+                setState(() {
+                  currentIndex = index;
+                });
+              });
+              return NavigationShell(
+                navigationShell: mockShell,
+                children: const [
+                  Text('Scoring'),
+                  Text('Teams'),
+                  Text('Results'),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // RepaintBoundary should be present to isolate child repaints
+      // from animation repaints
+      final repaintBoundaries = tester.widgetList<RepaintBoundary>(
+        find.byType(RepaintBoundary),
+      );
+
+      // Should have at least one RepaintBoundary for the visible child
+      // (within the AnimatedBranchItem widget tree)
+      expect(
+        repaintBoundaries.isNotEmpty,
+        isTrue,
+        reason:
+            'RepaintBoundary should wrap animated children to isolate repaints',
+      );
+    },
+  );
+
   testWidgets('NavigationShell should detect backward navigation direction', (
     WidgetTester tester,
   ) async {

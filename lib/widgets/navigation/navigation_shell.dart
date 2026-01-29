@@ -40,7 +40,11 @@ class NavigationShellInfo extends InheritedWidget {
 
   @override
   bool updateShouldNotify(NavigationShellInfo oldWidget) {
-    return true;
+    // Only notify dependents when the state reference actually changes.
+    // Previously this always returned true, causing unnecessary rebuilds
+    // of all widgets depending on NavigationShellInfo during every
+    // animation frame.
+    return state != oldWidget.state;
   }
 }
 
@@ -380,11 +384,16 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
           return _buildAndroidSharedAxisVerticalTransition(value, child);
         }
       },
-      child: TickerMode(
-        enabled: widget.isSelected || _controller.isAnimating,
-        child: IgnorePointer(
-          ignoring: !widget.isSelected,
-          child: widget.child,
+      // RepaintBoundary isolates child repaints from animation repaints,
+      // preventing expensive list widgets from being repainted during
+      // tab transitions.
+      child: RepaintBoundary(
+        child: TickerMode(
+          enabled: widget.isSelected || _controller.isAnimating,
+          child: IgnorePointer(
+            ignoring: !widget.isSelected,
+            child: widget.child,
+          ),
         ),
       ),
     );

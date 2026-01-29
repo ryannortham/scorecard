@@ -166,6 +166,9 @@ class _TeamSelectorState extends State<TeamSelector> {
           width: 48,
           height: 48,
           fit: BoxFit.cover,
+          // Limit decoded image size in memory cache (2x for retina)
+          memCacheWidth: 96,
+          memCacheHeight: 96,
           errorWidget: (context, url, error) => _buildDefaultLogo(),
         ),
       );

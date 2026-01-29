@@ -43,3 +43,20 @@ build:
 # Clean build artifacts
 clean:
 	flutter clean
+
+# Run performance benchmark tests
+benchmark:
+	@echo "Running performance benchmarks..."
+	flutter test test/benchmark/ --reporter expanded
+	@echo ""
+	@echo "Results written to build/benchmark_results.json"
+
+# View benchmark results
+benchmark-report:
+	@echo ""
+	@if [ -f "build/benchmark_results.json" ]; then \
+		cat build/benchmark_results.json; \
+	else \
+		echo "No results found. Run 'make benchmark' first."; \
+	fi
+	@echo ""

@@ -30,21 +30,30 @@ class TeamLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (logoUrl != null && logoUrl!.isNotEmpty) {
-      return ClipOval(
-        child: CachedNetworkImage(
-          imageUrl: logoUrl!,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-          placeholder:
-              (context, url) => SizedBox(
-                width: size,
-                height: size,
-                child: const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
+      // Use 2x size for retina displays
+      final cacheSize = (size * 2).toInt();
+
+      // RepaintBoundary isolates repaints during image loading transitions
+      return RepaintBoundary(
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: logoUrl!,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            // Limit decoded image size in memory cache for performance
+            memCacheWidth: cacheSize,
+            memCacheHeight: cacheSize,
+            placeholder:
+                (context, url) => SizedBox(
+                  width: size,
+                  height: size,
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
                 ),
-              ),
-          errorWidget: (context, url, error) => _buildFallback(context),
+            errorWidget: (context, url, error) => _buildFallback(context),
+          ),
         ),
       );
     }

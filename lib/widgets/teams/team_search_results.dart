@@ -133,6 +133,8 @@ class TeamSearchResults extends StatelessWidget {
       itemCount: searchResults.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      // Fixed item height improves scroll performance
+      itemExtent: 72,
       itemBuilder: (context, index) {
         final team = searchResults[index];
         return _TeamSearchCard(team: team, onTap: () => onTeamTap(team));
@@ -187,6 +189,9 @@ class _TeamSearchLogo extends StatelessWidget {
           width: TeamSearchConstants.logoSize,
           height: TeamSearchConstants.logoSize,
           fit: BoxFit.cover,
+          // Limit decoded image size in memory cache (2x for retina)
+          memCacheWidth: (TeamSearchConstants.logoSize * 2).toInt(),
+          memCacheHeight: (TeamSearchConstants.logoSize * 2).toInt(),
           placeholder:
               (context, url) => const SizedBox(
                 width: TeamSearchConstants.logoSize,
