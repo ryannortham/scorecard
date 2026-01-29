@@ -58,3 +58,10 @@ app.*.map.json
 
 # MCP/debugging logs
 logs/
+
+# Eclipse/Buildship IDE files (Android Studio legacy)
+**/.project
+**/.settings/
+
+# Android build output
+android/build/
