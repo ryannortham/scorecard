@@ -1,6 +1,7 @@
 // floating action button for starting a scoring session
 
 import 'package:flutter/material.dart';
+import 'package:scorecard/constants/hero_tags.dart';
 import 'package:scorecard/theme/colors.dart';
 
 /// fab for starting the scoring session
@@ -30,7 +31,7 @@ class StartScoringFab extends StatelessWidget {
                 : context.colors.onSurface.withValues(alpha: 0.38),
         elevation: 0,
         disabledElevation: 0,
-        heroTag: 'start_scoring_fab',
+        heroTag: primaryActionFabHeroTag,
         onPressed: onPressed,
         icon: const Icon(Icons.outlined_flag),
         label: const Text('Start Scoring'),

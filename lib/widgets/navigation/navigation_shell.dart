@@ -1,10 +1,13 @@
 // navigation shell that wraps screens with bottom navigation
 
 import 'dart:async';
+import 'dart:ui' show lerpDouble;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
 /// Direction of tab navigation for transitions
@@ -17,6 +20,28 @@ enum NavigationDirection {
 
   /// No direction (initial state)
   none,
+}
+
+/// Inherited widget to provide navigation shell state to children
+class NavigationShellInfo extends InheritedWidget {
+  const NavigationShellInfo({
+    required this.state,
+    required super.child,
+    super.key,
+  });
+
+  final NavigationShellState state;
+
+  static NavigationShellState? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<NavigationShellInfo>()
+        ?.state;
+  }
+
+  @override
+  bool updateShouldNotify(NavigationShellInfo oldWidget) {
+    return true;
+  }
 }
 
 /// wraps screens with bottom navigation and handles tab history and
@@ -38,32 +63,53 @@ class NavigationShell extends StatefulWidget {
 class NavigationShellState extends State<NavigationShell> {
   bool _isNavigationVisible = true;
   late final List<int> _tabHistory;
-  bool _isInternalNavigating = false;
+
+  /// Pending navigation direction to be applied on the next index change.
+  /// This replaces the boolean flag pattern for more explicit state management.
+  NavigationDirection? _pendingDirection;
 
   /// Current direction of navigation for transitions
   NavigationDirection currentDirection = NavigationDirection.none;
 
+  /// Whether the tab history can be popped
+  bool get canPopTab =>
+      _tabHistory.length > 1 || widget.navigationShell.currentIndex != 0;
+
   @override
   void initState() {
     super.initState();
-    // Initialize history with the starting tab
     _tabHistory = [widget.navigationShell.currentIndex];
+    AppLogger.debug(
+      'NavigationShell: Initialized with index '
+      '${widget.navigationShell.currentIndex}',
+      component: 'Navigation',
+    );
   }
 
   @override
   void didUpdateWidget(NavigationShell oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If the index changed (regardless of how), update history
     final newIndex = widget.navigationShell.currentIndex;
     if (newIndex != oldWidget.navigationShell.currentIndex) {
-      if (!_isInternalNavigating) {
-        currentDirection = NavigationDirection.forward;
+      // Use pending direction if set, otherwise default to forward
+      currentDirection = _pendingDirection ?? NavigationDirection.forward;
+
+      // Only update history for forward navigation (new tab selections)
+      if (currentDirection == NavigationDirection.forward) {
         _updateHistory(newIndex);
-      } else {
-        currentDirection = NavigationDirection.backward;
       }
-      _isInternalNavigating = false;
+
+      // Clear the pending direction after applying
+      _pendingDirection = null;
+
+      AppLogger.debug(
+        'NavigationShell: Index changed to $newIndex. '
+        'Direction: $currentDirection. History: $_tabHistory',
+        component: 'Navigation',
+      );
+
+      setState(() {});
     }
   }
 
@@ -84,7 +130,6 @@ class NavigationShellState extends State<NavigationShell> {
     if (notification is ScrollUpdateNotification) {
       final delta = notification.scrollDelta ?? 0;
 
-      // Hide on scroll down, show on scroll up
       if (delta > 0 && _isNavigationVisible) {
         setState(() {
           _isNavigationVisible = false;
@@ -96,7 +141,6 @@ class NavigationShellState extends State<NavigationShell> {
       }
     }
 
-    // Always show when at the top
     if (notification is ScrollUpdateNotification) {
       final scrollController = notification.metrics;
       if (scrollController.pixels <= 0 && !_isNavigationVisible) {
@@ -109,19 +153,53 @@ class NavigationShellState extends State<NavigationShell> {
     return false;
   }
 
-  void _popTab() {
+  /// Handles back navigation with optional selection mode support.
+  ///
+  /// If [isInSelectionMode] is true and [onExitSelectionMode] is provided,
+  /// calls [onExitSelectionMode] instead of navigating back. Otherwise,
+  /// delegates to [popTab] for tab history navigation.
+  ///
+  /// This method simplifies back navigation handling in tab root screens
+  /// by combining selection mode and tab history navigation into a single call.
+  void handleBack({
+    bool isInSelectionMode = false,
+    VoidCallback? onExitSelectionMode,
+  }) {
+    if (isInSelectionMode && onExitSelectionMode != null) {
+      AppLogger.debug(
+        'NavigationShell: handleBack - exiting selection mode',
+        component: 'Navigation',
+      );
+      onExitSelectionMode();
+    } else {
+      popTab();
+    }
+  }
+
+  /// Pops the tab history
+  void popTab() {
+    AppLogger.debug(
+      'NavigationShell: popTab called. History: $_tabHistory',
+      component: 'Navigation',
+    );
     if (_tabHistory.length > 1) {
       setState(() {
-        _tabHistory.removeLast(); // Remove current
+        _tabHistory.removeLast();
         final targetIndex = _tabHistory.last;
-        _isInternalNavigating = true;
+        _pendingDirection = NavigationDirection.backward;
         widget.navigationShell.goBranch(targetIndex);
       });
     } else if (widget.navigationShell.currentIndex != 0) {
       setState(() {
-        _isInternalNavigating = true;
+        _pendingDirection = NavigationDirection.backward;
         widget.navigationShell.goBranch(0);
       });
+    } else {
+      AppLogger.debug(
+        'NavigationShell: Home tab reached. Exiting app.',
+        component: 'Navigation',
+      );
+      unawaited(SystemNavigator.pop());
     }
   }
 
@@ -129,63 +207,67 @@ class NavigationShellState extends State<NavigationShell> {
   Widget build(BuildContext context) {
     final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
 
-    // canPop is true only when on home tab with no more history
-    final canPop =
-        _tabHistory.length <= 1 && widget.navigationShell.currentIndex == 0;
-
-    return Scaffold(
-      extendBody: true,
-      body: PopScope(
-        canPop: canPop,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
-          _popTab();
-        },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: _onScrollNotification,
-          child: Stack(
-            children: [
-              // Use a custom container that animates between branches without
-              // duplicating global keys.
-              AnimatedBranchContainer(
-                currentIndex: widget.navigationShell.currentIndex,
-                direction: currentDirection,
-                isIOS: isIOS,
-                children: widget.children,
-              ),
-              // Edge swipe detector for iOS
-              if (isIOS)
-                Positioned(
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  width: 40,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onHorizontalDragEnd: (details) {
-                      if (details.primaryVelocity != null &&
-                          details.primaryVelocity! > 100) {
-                        _popTab();
-                      }
-                    },
-                    child: const SizedBox.expand(),
-                  ),
+    return NavigationShellInfo(
+      state: this,
+      child: Scaffold(
+        extendBody: true,
+        body: PopScope(
+          // We always handle pop manually to ensure history is respected
+          // and to prevent Android system from bypassing our logic.
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            AppLogger.debug(
+              'NavigationShell: onPopInvokedWithResult. didPop: $didPop',
+              component: 'Navigation',
+            );
+            if (didPop) return;
+            popTab();
+          },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _onScrollNotification,
+            child: Stack(
+              children: [
+                AnimatedBranchContainer(
+                  currentIndex: widget.navigationShell.currentIndex,
+                  direction: currentDirection,
+                  isIOS: isIOS,
+                  children: widget.children,
                 ),
-            ],
+                if (isIOS)
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: 20, // Small width to avoid blocking back button taps
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onHorizontalDragEnd: (details) {
+                        if (details.primaryVelocity != null &&
+                            details.primaryVelocity! > 100) {
+                          AppLogger.debug(
+                            'NavigationShell: iOS Edge swipe detected',
+                            component: 'Navigation',
+                          );
+                          popTab();
+                        }
+                      },
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: widget.navigationShell.currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        isVisible: _isNavigationVisible,
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: widget.navigationShell.currentIndex,
+          onDestinationSelected: _onDestinationSelected,
+          isVisible: _isNavigationVisible,
+        ),
       ),
     );
   }
 }
 
-/// Custom branch Navigator container that provides animated transitions
-/// between branches in a way that avoids duplicate GlobalKeys.
 class AnimatedBranchContainer extends StatelessWidget {
   const AnimatedBranchContainer({
     required this.currentIndex,
@@ -279,12 +361,10 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
       builder: (context, child) {
         final value = _controller.value;
 
-        // If not selected and animation finished, hide completely
         if (value <= 0 && !widget.isSelected) {
           return const SizedBox.shrink();
         }
 
-        // Handle initial state with no direction
         if (widget.direction == NavigationDirection.none) {
           return Opacity(
             opacity: widget.isSelected ? 1.0 : 0.0,
@@ -292,42 +372,13 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
           );
         }
 
-        final isBackward = widget.direction == NavigationDirection.backward;
-
-        Offset offset;
-        if (widget.isSelected) {
-          // Incoming widget
-          final begin = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
-          offset =
-              Offset.lerp(
-                begin,
-                Offset.zero,
-                Curves.easeInOutCubic.transform(value),
-              )!;
+        if (widget.isIOS) {
+          // iOS: Horizontal slide transition (card-style)
+          return _buildIOSTransition(value, child);
         } else {
-          // Outgoing widget
-          final end = isBackward ? const Offset(1, 0) : const Offset(-1, 0);
-          offset =
-              Offset.lerp(
-                end,
-                Offset.zero,
-                Curves.easeInOutCubic.transform(value),
-              )!;
+          // Android: Material 3 shared-axis vertical transition
+          return _buildAndroidSharedAxisVerticalTransition(value, child);
         }
-
-        // Apply platform specific feel
-        if (!widget.isIOS) {
-          // Android: subtle move + fade
-          offset = offset * 0.05;
-        }
-
-        return FractionalTranslation(
-          translation: offset,
-          child: Opacity(
-            opacity: value.clamp(0.0, 1.0),
-            child: child,
-          ),
-        );
       },
       child: TickerMode(
         enabled: widget.isSelected || _controller.isAnimating,
@@ -335,6 +386,92 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
           ignoring: !widget.isSelected,
           child: widget.child,
         ),
+      ),
+    );
+  }
+
+  /// iOS horizontal slide transition (card-style navigation)
+  Widget _buildIOSTransition(double value, Widget? child) {
+    final isBackward = widget.direction == NavigationDirection.backward;
+
+    Offset offset;
+    if (widget.isSelected) {
+      // Incoming screen slides in from right (forward) or left (backward)
+      final begin = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
+      offset =
+          Offset.lerp(
+            begin,
+            Offset.zero,
+            Curves.easeInOutCubic.transform(value),
+          )!;
+    } else {
+      // Outgoing screen slides out to left (forward) or right (backward)
+      final end = isBackward ? const Offset(1, 0) : const Offset(-1, 0);
+      offset =
+          Offset.lerp(
+            end,
+            Offset.zero,
+            Curves.easeInOutCubic.transform(value),
+          )!;
+    }
+
+    return FractionalTranslation(
+      translation: offset,
+      child: Opacity(
+        opacity: value.clamp(0.0, 1.0),
+        child: child,
+      ),
+    );
+  }
+
+  /// Android Material 3 shared-axis vertical transition.
+  /// Matches native Android navigation bar transitions:
+  /// - Forward: incoming slides up from below, outgoing slides up and out
+  /// - Backward: incoming slides down from above, outgoing slides down and out
+  Widget _buildAndroidSharedAxisVerticalTransition(
+    double value,
+    Widget? child,
+  ) {
+    final isBackward = widget.direction == NavigationDirection.backward;
+
+    // Material 3 spec: 30 pixel offset for shared-axis transitions
+    const slideOffset = 30.0;
+
+    // Apply easing curve to the animation value
+    final curvedValue = Easing.legacy.transform(value);
+
+    double opacity;
+    double yOffset;
+
+    if (widget.isSelected) {
+      // Incoming screen (value goes 0→1 via forward())
+      // Fade in with decelerate curve for natural feel
+      opacity = Easing.legacyDecelerate.transform(value);
+
+      // Slide from below (forward) or above (backward) to centre
+      yOffset =
+          isBackward
+              ? lerpDouble(-slideOffset, 0, curvedValue)!
+              : lerpDouble(slideOffset, 0, curvedValue)!;
+    } else {
+      // Outgoing screen (value goes 1→0 via reverse())
+      // So we use value directly - as it decreases, opacity decreases
+      opacity = Easing.legacyAccelerate.transform(value);
+
+      // Slide from centre to above (forward) or below (backward)
+      // Since value goes 1→0, we need to invert the lerp logic
+      final invertedCurve = Easing.legacy.transform(1.0 - value);
+      yOffset =
+          isBackward
+              ? lerpDouble(0, slideOffset, invertedCurve)!
+              : lerpDouble(0, -slideOffset, invertedCurve)!;
+    }
+
+    return Opacity(
+      opacity: opacity.clamp(0.0, 1.0),
+      child: Transform.translate(
+        offset: Offset(0, yOffset),
+        child: child,
       ),
     );
   }

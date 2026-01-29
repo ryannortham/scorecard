@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:scorecard/constants/hero_tags.dart';
 import 'package:scorecard/mixins/selection_mixin.dart';
 import 'package:scorecard/models/score.dart';
 import 'package:scorecard/services/dialog_service.dart';
@@ -15,6 +16,8 @@ import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
 import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/tab_root_app_bar.dart';
+import 'package:scorecard/widgets/navigation/tab_root_wrapper.dart';
 import 'package:scorecard/widgets/teams/team_logo.dart';
 
 class TeamListScreen extends StatefulWidget {
@@ -119,9 +122,8 @@ class _TeamListScreenState extends State<TeamListScreen>
                     onDelete: hasSelection ? _deleteSelectedTeams : null,
                   )
                 else if (!widget.isSelectionScreen)
-                  // Tab root - no back button needed
-                  StyledSliverAppBar(
-                    automaticallyImplyLeading: false,
+                  // Tab root - automatic back button based on tab history
+                  TabRootAppBar(
                     title: Text(widget.title),
                     actions: const [AppMenu(currentRoute: 'teams')],
                   )
@@ -173,8 +175,7 @@ class _TeamListScreenState extends State<TeamListScreen>
                             }
                           },
                           onLongPress: () {
-                            if (!isSelectionMode &&
-                                !widget.isSelectionScreen) {
+                            if (!isSelectionMode && !widget.isSelectionScreen) {
                               enterSelectionMode(realIndex);
                             }
                           },
@@ -214,7 +215,7 @@ class _TeamListScreenState extends State<TeamListScreen>
               backgroundColor: context.colors.primary,
               foregroundColor: context.colors.onPrimary,
               elevation: 0,
-              heroTag: 'add_team_fab',
+              heroTag: primaryActionFabHeroTag,
               onPressed: () async {
                 final router = GoRouter.of(context);
                 final addedTeamName = await router.push<String>('/team-add');
@@ -234,26 +235,21 @@ class _TeamListScreenState extends State<TeamListScreen>
       ),
     );
 
-    // Block back navigation only during selection mode
-    // (this is always a tab root, not a modal)
-    if (isSelectionMode) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
-          exitSelectionMode();
-        },
-        child: body,
-      );
-    }
-
-    // For modal selection screens, we allow standard back navigation
+    // For modal selection screens (team-select route), allow standard back
+    // navigation via go_router. These screens are pushed above the shell
+    // with parentNavigatorKey: _rootNavigatorKey.
     if (widget.isSelectionScreen) {
-      return body; // System Navigator handles this
+      return body;
     }
 
-    // For tab root when not in selection mode, let it bubble to NavigationShell
-    return body;
+    // For tab root screens, wrap with TabRootWrapper to ensure Android's
+    // predictive back gesture is properly intercepted and delegated to
+    // the NavigationShell's tab history navigation.
+    return TabRootWrapper(
+      isInSelectionMode: isSelectionMode,
+      onExitSelectionMode: exitSelectionMode,
+      child: body,
+    );
   }
 
   Future<void> _deleteSelectedTeams() async {

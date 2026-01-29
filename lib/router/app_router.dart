@@ -87,7 +87,7 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    
+
     // Child screens (pushed above the tab bar)
     GoRoute(
       path: '/scoring-game',

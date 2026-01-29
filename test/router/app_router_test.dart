@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:scorecard/router/app_router.dart';
-import 'package:scorecard/models/score.dart';
 import 'package:scorecard/models/game_record.dart';
-import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
-import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
+import 'package:scorecard/models/score.dart';
+import 'package:scorecard/router/app_router.dart';
 import 'package:scorecard/screens/scoring/scoring_screen.dart';
+import 'package:scorecard/screens/scoring/scoring_setup_screen.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/preferences_view_model.dart';
 import 'package:scorecard/viewmodels/teams_view_model.dart';
+import 'package:scorecard/widgets/navigation/bottom_nav_bar.dart';
 
 // Mock ViewModels
 class MockGameViewModel extends ChangeNotifier implements GameViewModel {
@@ -24,8 +23,6 @@ class MockGameViewModel extends ChangeNotifier implements GameViewModel {
   String get homeTeam => 'Home';
   @override
   String get awayTeam => 'Away';
-  @override
-  int get currentQuarter => 1;
   @override
   String get currentGameId => 'test-id';
   @override
@@ -54,23 +51,35 @@ class MockGameViewModel extends ChangeNotifier implements GameViewModel {
   Stream<int> get timerStream => Stream.value(0);
   @override
   DateTime get gameDate => DateTime.now();
-  
+
   @override
   int getRemainingTimeInQuarter() => 0;
   @override
   int getElapsedTimeInQuarter() => 0;
-  
+
   @override
   int getScore({required bool isHomeTeam, required bool isGoal}) => 0;
   @override
-  bool hasEventInCurrentQuarter({required bool isHomeTeam, required bool isGoal}) => false;
-  
+  bool hasEventInCurrentQuarter({
+    required bool isHomeTeam,
+    required bool isGoal,
+  }) => false;
+
   @override
-  void configureGame({required String homeTeam, required String awayTeam, required DateTime gameDate, required int quarterMinutes, required bool isCountdownTimer}) {}
+  void configureGame({
+    required String homeTeam,
+    required String awayTeam,
+    required DateTime gameDate,
+    required int quarterMinutes,
+    required bool isCountdownTimer,
+  }) {}
   @override
   void resetGame() {}
   @override
-  void configureTimer({required bool isCountdownMode, required int quarterMaxTime}) {}
+  void configureTimer({
+    required bool isCountdownMode,
+    required int quarterMaxTime,
+  }) {}
   @override
   void addGameEventListener(VoidCallback listener) {}
   @override
@@ -83,12 +92,13 @@ class MockGameViewModel extends ChangeNotifier implements GameViewModel {
   void addScoreChangeListener(VoidCallback listener) {}
   @override
   void removeScoreChangeListener(VoidCallback listener) {}
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class MockPreferencesViewModel extends ChangeNotifier implements PreferencesViewModel {
+class MockPreferencesViewModel extends ChangeNotifier
+    implements PreferencesViewModel {
   @override
   bool get loaded => true;
   @override
@@ -109,18 +119,18 @@ class MockPreferencesViewModel extends ChangeNotifier implements PreferencesView
   bool get supportsDynamicColors => false;
   @override
   List<String> get favoriteTeams => [];
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class MockTeamsViewModel extends ChangeNotifier implements TeamsViewModel {
-   @override
+  @override
   List<Team> get teams => [];
-  
+
   @override
   Team? findTeamByName(String name) => null;
-  
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -137,14 +147,50 @@ void main() {
       mockTeamsViewModel = MockTeamsViewModel();
     });
 
-    testWidgets('Initial route should be /scoring and show ScoringSetupScreen with BottomNavBar',
-        (WidgetTester tester) async {
+    testWidgets(
+      'Initial route should be /scoring and show ScoringSetupScreen with BottomNavBar',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider<GameViewModel>.value(
+                value: mockGameViewModel,
+              ),
+              ChangeNotifierProvider<PreferencesViewModel>.value(
+                value: mockPreferencesViewModel,
+              ),
+              ChangeNotifierProvider<TeamsViewModel>.value(
+                value: mockTeamsViewModel,
+              ),
+            ],
+            child: MaterialApp.router(
+              routerConfig: appRouter,
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ScoringSetupScreen), findsOneWidget);
+        expect(find.byType(BottomNavBar), findsOneWidget);
+      },
+    );
+
+    testWidgets('Navigating to /scoring-game should hide BottomNavBar', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MultiProvider(
           providers: [
-            ChangeNotifierProvider<GameViewModel>.value(value: mockGameViewModel),
-            ChangeNotifierProvider<PreferencesViewModel>.value(value: mockPreferencesViewModel),
-            ChangeNotifierProvider<TeamsViewModel>.value(value: mockTeamsViewModel),
+            ChangeNotifierProvider<GameViewModel>.value(
+              value: mockGameViewModel,
+            ),
+            ChangeNotifierProvider<PreferencesViewModel>.value(
+              value: mockPreferencesViewModel,
+            ),
+            ChangeNotifierProvider<TeamsViewModel>.value(
+              value: mockTeamsViewModel,
+            ),
           ],
           child: MaterialApp.router(
             routerConfig: appRouter,
@@ -154,27 +200,6 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(ScoringSetupScreen), findsOneWidget);
-      expect(find.byType(BottomNavBar), findsOneWidget);
-    });
-
-    testWidgets('Navigating to /scoring-game should hide BottomNavBar',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider<GameViewModel>.value(value: mockGameViewModel),
-            ChangeNotifierProvider<PreferencesViewModel>.value(value: mockPreferencesViewModel),
-            ChangeNotifierProvider<TeamsViewModel>.value(value: mockTeamsViewModel),
-          ],
-          child: MaterialApp.router(
-            routerConfig: appRouter,
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      
       // Navigate to scoring-game
       appRouter.go('/scoring-game');
       await tester.pumpAndSettle();

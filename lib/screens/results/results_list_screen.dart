@@ -15,6 +15,8 @@ import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
 import 'package:scorecard/widgets/common/styled_sliver_app_bar.dart';
+import 'package:scorecard/widgets/common/tab_root_app_bar.dart';
+import 'package:scorecard/widgets/navigation/tab_root_wrapper.dart';
 import 'package:scorecard/widgets/results/results_summary_card.dart';
 
 class ResultsListScreen extends StatefulWidget {
@@ -197,9 +199,8 @@ class _ResultsListScreenState extends State<ResultsListScreen>
                 onDelete: hasSelection ? _deleteSelectedGames : null,
               )
             else
-              // Tab root - no back button needed
-              const StyledSliverAppBar(
-                automaticallyImplyLeading: false,
+              // Tab root - automatic back button based on tab history
+              const TabRootAppBar(
                 title: Text('Results'),
                 actions: [AppMenu(currentRoute: 'results')],
               ),
@@ -304,17 +305,13 @@ class _ResultsListScreenState extends State<ResultsListScreen>
       ),
     );
 
-    if (isSelectionMode) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
-          exitSelectionMode();
-        },
-        child: body,
-      );
-    }
-
-    return body;
+    // Wrap with TabRootWrapper to ensure Android's predictive back gesture
+    // is properly intercepted and delegated to the NavigationShell's tab
+    // history navigation.
+    return TabRootWrapper(
+      isInSelectionMode: isSelectionMode,
+      onExitSelectionMode: exitSelectionMode,
+      child: body,
+    );
   }
 }

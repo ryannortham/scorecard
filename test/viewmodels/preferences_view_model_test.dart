@@ -14,7 +14,6 @@ void main() {
         final repository = MockPreferencesRepository(
           initialData: const PreferencesData(
             favoriteTeams: ['Richmond'],
-            themeMode: ThemeMode.dark,
             quarterMinutes: 20,
           ),
         );
