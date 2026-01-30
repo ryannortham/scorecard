@@ -36,7 +36,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "blog.ryannortham.scorecard"
     compileSdk 36  // Updated for plugin compatibility
-    ndkVersion = "27.0.12077973"
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17

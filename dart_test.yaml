@@ -1,0 +1,8 @@
+# Dart test configuration
+# https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+
+# Define custom tags used in tests
+tags:
+  # Performance benchmark tests
+  benchmark:
+    description: "Performance benchmark tests that measure widget build and navigation times"

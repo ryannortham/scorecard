@@ -32,6 +32,7 @@ dependencies:
   cached_network_image: ^3.3.1
   collection: ^1.18.0
   confetti: ^0.8.0
+  cupertino_icons: ^1.0.8
   device_info_plus: ^12.3.0
   dynamic_color: ^1.7.0
   flutter:
