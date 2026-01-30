@@ -272,9 +272,7 @@ class _ResultsListScreenState extends State<ResultsListScreen>
                     };
                     final favoriteTeams = prefsProvider.favoriteTeams;
 
-                    return SliverFixedExtentList(
-                      // Fixed item height improves scroll performance
-                      itemExtent: 150,
+                    return SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final gameSummary = _gameSummaries[index];

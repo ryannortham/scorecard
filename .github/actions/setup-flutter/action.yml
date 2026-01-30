@@ -1,0 +1,29 @@
+name: Setup Flutter
+description: Setup Flutter SDK and install dependencies
+inputs:
+  flutter-version:
+    description: Flutter SDK version to use
+    required: false
+    default: '3.38.9'
+  cache:
+    description: Enable caching of Flutter SDK and pub dependencies
+    required: false
+    default: 'true'
+  install-deps:
+    description: Run flutter pub get
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Setup Flutter SDK
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        channel: stable
+        cache: ${{ inputs.cache }}
+    
+    - name: Install dependencies
+      if: inputs.install-deps == 'true'
+      shell: bash
+      run: flutter pub get

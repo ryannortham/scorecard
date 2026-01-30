@@ -3,15 +3,26 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
+    paths-ignore: &docs-only-changes
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
   pull_request:
     branches: [ "main" ]
+    paths-ignore: *docs-only-changes
   schedule:
     - cron: '30 2 * * 1'  # Weekly security scan
 
+# Cancel in-progress runs when a new workflow run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
-  FLUTTER_VERSION: '3.35.3'
+  FLUTTER_VERSION: '3.38.9'
   JAVA_VERSION: '17'
-  GRADLE_VERSION: '8.14.2'
+  GRADLE_VERSION: '8.14.4'
 
 jobs:
   # =============================================================================
@@ -29,14 +40,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: 📦 Install dependencies
-        run: flutter pub get
 
       - name: 🔧 Create .env file
         run: echo "GOOGLE_MAPS_API_KEY=placeholder" > .env
@@ -63,18 +69,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: 📦 Install dependencies
-        run: flutter pub get
 
       - name: 🔧 Create .env file
-        run: |
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > .env
 
       - name: 🧪 Run unit tests
         run: flutter test --exclude-tags=benchmark
@@ -91,14 +93,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: 📦 Install dependencies
-        run: flutter pub get
 
       - name: 🔧 Create .env file
         run: echo "GOOGLE_MAPS_API_KEY=test-key-for-benchmarks" > .env
@@ -154,15 +151,16 @@ jobs:
           retention-days: 30
 
   # =============================================================================
-  # BUILD PHASE - Only runs on main branch pushes
+  # BUILD PHASE - Runs on all pushes and PRs (not scheduled runs)
   # =============================================================================
 
   build:
     name: 🤖 Build Android
     needs: [lint, unit-test, security-scan]
     runs-on: ubuntu-latest
-    # Build on all pushes and PRs (but not scheduled runs)
     if: github.event_name == 'push' || github.event_name == 'pull_request'
+    permissions:
+      contents: read
 
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
@@ -173,11 +171,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
 
       - name: ☕ Setup Java
         uses: actions/setup-java@v5
@@ -189,27 +185,26 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
         with:
           gradle-version: ${{ env.GRADLE_VERSION }}
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: 📦 Install dependencies
-        run: flutter pub get
+      - name: 📦 Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: 🔧 Create .env file with API key
-        run: |
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+      - name: 🔧 Create .env file
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > .env
 
       - name: 📋 Extract version info
         id: version
-        run: |
-          # Extract version from pubspec and strip trailing .0 (e.g., "1.0.0" -> "1.0")
-          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
-          BASE_VERSION=$(echo "$PUBSPEC_VERSION" | sed 's/\.0$//')
-          # Offset ensures version codes continue above historical max (was 293)
-          VERSION_CODE=$((200 + GITHUB_RUN_NUMBER))
-          VERSION_NAME="${BASE_VERSION}.${VERSION_CODE}"
-
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "📱 Version: $VERSION_NAME (Code: $VERSION_CODE)"
+        run: .github/scripts/extract-version.sh ${{ github.run_number }}
 
       - name: 📝 Generate version config
         run: |
@@ -219,11 +214,16 @@ jobs:
           EOF
 
       - name: 🔑 Setup Android signing
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > android/app/keystore.jks
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> android/key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "$ANDROID_KEYSTORE" | base64 --decode > android/app/keystore.jks
+          echo "storePassword=$KEYSTORE_PASSWORD" >> android/key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
           echo "storeFile=keystore.jks" >> android/key.properties
 
       - name: 📱 Build release AAB
@@ -246,26 +246,23 @@ jobs:
     name: 🍎 Build iOS
     needs: [lint, unit-test, security-scan]
     runs-on: macos-latest
-    # Only build iOS on main branch pushes to conserve macOS runner minutes
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Temporarily disabled to conserve macOS runner minutes
+    if: false
+    # Original condition: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v6
 
       - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: 'stable'
-          cache: true
-
-      - name: 📦 Install dependencies
-        run: flutter pub get
 
       - name: 🔧 Create .env file
-        run: |
-          echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > .env
+        env:
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" > .env
 
       - name: 🍎 Build iOS (no signing)
         run: flutter build ios --release --no-codesign
@@ -286,6 +283,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
 
     steps:
       - name: 📥 Checkout repository
@@ -303,43 +302,22 @@ jobs:
           echo "🔢 Version code: ${{ needs.build.outputs.version_code }}"
           echo "📦 AAB file:"
           ls -la build/app/outputs/bundle/release/
-
-          if [ ! -f "build/app/outputs/bundle/release/app-release.aab" ]; then
-            echo "❌ AAB file not found!"
-            exit 1
-          fi
-
-          AAB_SIZE=$(stat -c%s build/app/outputs/bundle/release/app-release.aab)
-          echo "📦 AAB size: ${AAB_SIZE} bytes"
-          if [ $AAB_SIZE -lt 1000000 ]; then
-            echo "⚠️ Warning: AAB file seems small (< 1MB)"
-          fi
+          .github/scripts/verify-aab.sh
 
       - name: 💎 Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.3'
           bundler-cache: true
           working-directory: android
 
       - name: 🔑 Setup Play Store credentials
-        run: echo '${{ secrets.SERVICE_ACCOUNT_JSON }}' > android/fastlane/service-account.json
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+        run: echo "$SERVICE_ACCOUNT_JSON" > android/fastlane/service-account.json
 
       - name: 📋 Sync shared metadata to Fastlane
-        run: |
-          mkdir -p android/fastlane/metadata/android/en-AU/images/phoneScreenshots/
-          mkdir -p android/fastlane/metadata/android/en-AU/changelogs/
-          cp metadata/en-AU/title.txt android/fastlane/metadata/android/en-AU/title.txt
-          cp metadata/en-AU/short_description.txt \
-            android/fastlane/metadata/android/en-AU/short_description.txt
-          cp metadata/en-AU/description.txt \
-            android/fastlane/metadata/android/en-AU/full_description.txt
-          cp metadata/en-AU/release_notes.txt \
-            android/fastlane/metadata/android/en-AU/changelogs/default.txt
-          cp metadata/screenshots/*.png \
-            android/fastlane/metadata/android/en-AU/images/phoneScreenshots/
-          echo "✅ Synced Android metadata"
-          ls -la android/fastlane/metadata/android/en-AU/
+        run: .github/scripts/sync-metadata.sh
 
       - name: 🚀 Deploy to Play Store
         run: bundle exec fastlane internal
