@@ -15,7 +15,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-      
+
     steps:
       - name: Create or Update Labels
         uses: actions/github-script@v8
@@ -29,7 +29,7 @@ jobs:
               { name: 'android', color: '3DDC84', description: 'Related to Android platform' },
               { name: 'github-actions', color: '2088FF', description: 'Related to GitHub Actions workflows' },
               { name: 'ci/cd', color: '1f883d', description: 'Related to continuous integration and deployment' },
-              
+
               // General project labels
               { name: 'bug', color: 'd73a4a', description: 'Something is not working' },
               { name: 'enhancement', color: 'a2eeef', description: 'New feature or request' },
@@ -37,25 +37,25 @@ jobs:
               { name: 'security', color: 'e11d21', description: 'Security related issues or updates' },
               { name: 'performance', color: 'fbca04', description: 'Performance improvements' },
               { name: 'ui/ux', color: 'c5def5', description: 'User interface and experience improvements' },
-              
+
               // Priority labels
               { name: 'priority: high', color: 'b60205', description: 'High priority' },
               { name: 'priority: medium', color: 'fbca04', description: 'Medium priority' },
               { name: 'priority: low', color: '0e8a16', description: 'Low priority' },
-              
+
               // Status labels
               { name: 'status: needs review', color: 'f9d0c4', description: 'Needs code review' },
               { name: 'status: in progress', color: 'fef2c0', description: 'Work in progress' },
               { name: 'status: blocked', color: 'e11d21', description: 'Blocked by external dependencies' },
               { name: 'status: ready to merge', color: '0e8a16', description: 'Ready to be merged' },
-              
+
               // Type labels
               { name: 'type: feature', color: 'a2eeef', description: 'New feature implementation' },
               { name: 'type: bugfix', color: 'd73a4a', description: 'Bug fix' },
               { name: 'type: refactor', color: 'e4e669', description: 'Code refactoring' },
               { name: 'type: test', color: 'c5def5', description: 'Testing related changes' }
             ];
-            
+
             for (const label of labels) {
               try {
                 // Try to get the existing label
@@ -64,7 +64,7 @@ jobs:
                   repo: context.repo.repo,
                   name: label.name
                 });
-                
+
                 // If label exists, update it
                 await github.rest.issues.updateLabel({
                   owner: context.repo.owner,
@@ -74,7 +74,7 @@ jobs:
                   description: label.description
                 });
                 console.log(`✅ Updated label: ${label.name}`);
-                
+
               } catch (error) {
                 if (error.status === 404) {
                   // Label doesn't exist, create it
@@ -91,5 +91,5 @@ jobs:
                 }
               }
             }
-            
+
             console.log('🎉 Label setup complete!');

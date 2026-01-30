@@ -1,0 +1,16 @@
+# iOS App Store configuration
+# Uncomment and configure when Apple Developer account is ready
+
+app_identifier("blog.ryannortham.scorecard")
+
+# Apple ID email (uncomment when ready)
+# apple_id("your@email.com")
+
+# Team ID from Apple Developer Portal (uncomment when ready)
+# team_id("TEAM_ID")
+
+# App Store Connect Team ID (uncomment when ready)
+# itc_team_id("ITC_TEAM_ID")
+
+# App Store Connect API Key (uncomment when ready)
+# app_store_connect_api_key_path("fastlane/api-key.json")

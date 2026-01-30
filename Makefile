@@ -1,4 +1,5 @@
-.PHONY: deps format format-check lint lint-fix lint-md lint-md-fix test build clean check
+.PHONY: deps format format-check lint lint-fix lint-md lint-md-fix lint-yaml test build clean check \
+       release-notes release-notes-show
 
 # Default target - run all CI checks
 check: format-check lint lint-md test
@@ -32,6 +33,10 @@ lint-md:
 lint-md-fix:
 	markdownlint --dot --fix "**/*.md"
 
+# Lint YAML files (uses .yamllint.yml config)
+lint-yaml:
+	yamllint .github/workflows/
+
 # Run tests
 test:
 	flutter test
@@ -60,3 +65,11 @@ benchmark-report:
 		echo "No results found. Run 'make benchmark' first."; \
 	fi
 	@echo ""
+
+# Edit Play Store release notes
+release-notes:
+	vim metadata/en-AU/release_notes.txt
+
+# Show current release notes
+release-notes-show:
+	@cat metadata/en-AU/release_notes.txt

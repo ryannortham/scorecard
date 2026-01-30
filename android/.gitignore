@@ -14,4 +14,10 @@ key.properties
 
 # Fastlane
 fastlane/service-account.json
+# Synced metadata from /metadata/ directory - do not commit
+fastlane/metadata/android/*/title.txt
+fastlane/metadata/android/*/short_description.txt
+fastlane/metadata/android/*/full_description.txt
+fastlane/metadata/android/*/changelogs/default.txt
+fastlane/metadata/android/*/images/phoneScreenshots/*.png
 Gemfile.lock

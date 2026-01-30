@@ -1,0 +1,25 @@
+A simple, fast footy score app for Australian rules football.
+Track goals and behinds in real time, visualise match flow, and save every game.
+
+Designed for goal umpires, team managers, coaches, parents, and footy fans who want an easy way to keep score on game day.
+
+FEATURES
+
+LIVE SCORING
+• Real-time tracking of goals and behinds during matches
+• Quarter-by-quarter scoring with running totals
+• Share in-progress game results with friends and team social media groups
+
+SCORE VISUALISATION
+• Interactive score worm chart showing match momentum
+• Quarter-by-quarter breakdown and statistics
+• Running differentials to see how the game unfolds
+
+TEAM MANAGEMENT
+• Create and manage footy teams with logos and branding
+• Mark favourite teams for quick access
+• Integrated maps to help navigate to away team games and venues
+
+GAME HISTORY
+• Save and review completed matches
+• Share scores and statistics with others

@@ -1,0 +1,4 @@
+New in this update:
+• Score Worm graph - see how the game unfolded at a glance
+• Google Maps built in - get directions to away games easily
+• Smoother navigation and polished animations

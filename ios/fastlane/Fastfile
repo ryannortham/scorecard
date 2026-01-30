@@ -1,0 +1,34 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build iOS app (no signing)"
+  lane :build do
+    build_ios_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      export_method: "development",
+      skip_codesigning: true,
+      output_directory: "../build/ios"
+    )
+  end
+
+  desc "Push to TestFlight"
+  lane :beta do
+    # Uncomment when Apple Developer account is ready
+    # setup_ci if ENV['CI']
+    # build_ios_app(
+    #   workspace: "Runner.xcworkspace",
+    #   scheme: "Runner",
+    #   export_method: "app-store"
+    # )
+    # upload_to_testflight(
+    #   skip_waiting_for_build_processing: true
+    # )
+    UI.user_error!("iOS deployment not yet configured - Apple Developer account required")
+  end
+
+  desc "Push to App Store"
+  lane :release do
+    UI.user_error!("iOS deployment not yet configured - Apple Developer account required")
+  end
+end

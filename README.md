@@ -37,10 +37,10 @@
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/setup.png" alt="Game Setup" width="200"/><br/><em>Game Setup</em></td>
-    <td><img src="docs/screenshots/scoring.png" alt="Live Scoring" width="200"/><br/><em>Live Scoring</em></td>
-    <td><img src="docs/screenshots/results.png" alt="Results" width="200"/><br/><em>Game Results</em></td>
-    <td><img src="docs/screenshots/team_details.png" alt="Team Details" width="200"/><br/><em>Team Details</em></td>
+    <td><img src="metadata/screenshots/1_setup.png" alt="Game Setup" width="200"/><br/><em>Game Setup</em></td>
+    <td><img src="metadata/screenshots/2_scoring.png" alt="Live Scoring" width="200"/><br/><em>Live Scoring</em></td>
+    <td><img src="metadata/screenshots/3_results.png" alt="Results" width="200"/><br/><em>Game Results</em></td>
+    <td><img src="metadata/screenshots/4_team_details.png" alt="Team Details" width="200"/><br/><em>Team Details</em></td>
   </tr>
 </table>
 
