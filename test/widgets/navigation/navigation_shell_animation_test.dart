@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -42,15 +43,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Find the FractionalTranslation for the incoming child
-    final translations = tester.widgetList<FractionalTranslation>(
-      find.byType(FractionalTranslation),
+    // iOS uses SlideTransition for horizontal slide animation
+    final slideTransitions = tester.widgetList<SlideTransition>(
+      find.byType(SlideTransition),
     );
 
-    // One of the translations should have a horizontal component on iOS
+    // One of the SlideTransitions should have a horizontal component on iOS
     var foundHorizontal = false;
-    for (final t in translations) {
-      if (t.translation.dx != 0 && t.translation.dy == 0) {
+    for (final t in slideTransitions) {
+      final position = t.position.value;
+      if (position.dx != 0 && position.dy == 0) {
         foundHorizontal = true;
         break;
       }
@@ -58,12 +60,22 @@ void main() {
     expect(
       foundHorizontal,
       isTrue,
-      reason: 'iOS should have horizontal translation',
+      reason: 'iOS should have horizontal SlideTransition',
+    );
+
+    // Should also have FadeTransition for the fade effect
+    final fadeTransitions = tester.widgetList<FadeTransition>(
+      find.byType(FadeTransition),
+    );
+    expect(
+      fadeTransitions.isNotEmpty,
+      isTrue,
+      reason: 'iOS should have FadeTransition for opacity animation',
     );
   });
 
   testWidgets(
-    'NavigationShell should use shared-axis vertical (Y translate) for Android',
+    'NavigationShell should use SharedAxisTransition for Android',
     (WidgetTester tester) async {
       var currentIndex = 0;
 
@@ -100,41 +112,25 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Android uses shared-axis vertical with Transform.translate
-      // (not FractionalTranslation or scale)
-      final transforms = tester.widgetList<Transform>(find.byType(Transform));
-
-      // Find a Transform with Y-axis translation (matrix[13] is Y translation)
-      var foundYTranslate = false;
-      for (final t in transforms) {
-        final matrix = t.transform;
-        // Matrix4.storage[13] is the Y translation component
-        final yTranslation = matrix.storage[13];
-        if (yTranslation != 0) {
-          foundYTranslate = true;
-          break;
-        }
-      }
-      expect(
-        foundYTranslate,
-        isTrue,
-        reason: 'Android should use Y-axis translate for shared-axis vertical',
+      // Android should use SharedAxisTransition from animations package
+      final sharedAxisTransitions = tester.widgetList<SharedAxisTransition>(
+        find.byType(SharedAxisTransition),
       );
 
-      // Also verify Opacity widgets are present for the fade effect
-      final opacities = tester.widgetList<Opacity>(find.byType(Opacity));
-      var foundPartialOpacity = false;
-      for (final o in opacities) {
-        if (o.opacity > 0.0 && o.opacity < 1.0) {
-          foundPartialOpacity = true;
-          break;
-        }
-      }
       expect(
-        foundPartialOpacity,
+        sharedAxisTransitions.isNotEmpty,
         isTrue,
-        reason: 'Android should have opacity animation during transition',
+        reason: 'Android should use SharedAxisTransition for tab animations',
       );
+
+      // Verify it's using vertical axis
+      for (final t in sharedAxisTransitions) {
+        expect(
+          t.transitionType,
+          SharedAxisTransitionType.vertical,
+          reason: 'Android should use vertical shared-axis transition',
+        );
+      }
     },
   );
 
