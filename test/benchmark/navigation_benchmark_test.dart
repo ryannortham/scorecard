@@ -8,6 +8,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:scorecard/widgets/navigation/navigation_shell.dart';
 
 import 'benchmark_utils.dart';
 
@@ -137,6 +139,68 @@ void main() {
             '${BenchmarkThresholds.screenTransitionMs * 5}ms',
       );
     });
+
+    testWidgets('measures NavigationShell tab transitions', (tester) async {
+      var currentIndex = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (context, setState) {
+              final mockShell = _FakeStatefulNavigationShell(currentIndex, (
+                index,
+              ) {
+                setState(() {
+                  currentIndex = index;
+                });
+              });
+              return NavigationShell(
+                navigationShell: mockShell,
+                children: const [
+                  Center(child: Text('Scoring')),
+                  Center(child: Text('Teams')),
+                  Center(child: Text('Results')),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final stopwatch = Stopwatch()..start();
+
+      // Navigate through tabs: Scoring -> Teams -> Results -> Scoring
+      // Using the actual icons from BottomNavBar
+      await tester.tap(find.byIcon(Icons.groups_outlined));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.emoji_events_outlined));
+      await tester.pumpAndSettle();
+
+      // Tap on Scoring label text to go back (FootballIcon is custom widget)
+      await tester.tap(find.text('Scoring'));
+      await tester.pumpAndSettle();
+
+      stopwatch.stop();
+
+      reporter.record(
+        BenchmarkResult(
+          name: 'navigation_shell_tab_switch_3x',
+          durationMs: stopwatch.elapsedMilliseconds,
+          thresholdMs: BenchmarkThresholds.tabNavigationMs,
+        ),
+      );
+
+      expect(
+        stopwatch.elapsedMilliseconds,
+        lessThan(BenchmarkThresholds.tabNavigationMs),
+        reason:
+            'NavigationShell 3 tab switches should complete under '
+            '${BenchmarkThresholds.tabNavigationMs}ms',
+      );
+    });
   });
 
   tearDownAll(() async {
@@ -212,4 +276,25 @@ class _NavigationTestWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Fake StatefulNavigationShell for testing NavigationShell widget.
+class _FakeStatefulNavigationShell extends Fake
+    implements StatefulNavigationShell {
+  _FakeStatefulNavigationShell(this._currentIndex, this._onGoBranch);
+
+  final int _currentIndex;
+  final void Function(int) _onGoBranch;
+
+  @override
+  int get currentIndex => _currentIndex;
+
+  @override
+  void goBranch(int index, {bool initialLocation = false}) {
+    _onGoBranch(index);
+  }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      super.toString();
 }

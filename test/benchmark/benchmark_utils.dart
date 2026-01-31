@@ -115,25 +115,38 @@ class BenchmarkReporter {
 
 /// Default performance thresholds for benchmarks.
 ///
-/// These thresholds are calibrated to pass on CI runners (GitHub Actions
-/// Ubuntu) which are typically 1.3-1.5x slower than local dev machines.
+/// These thresholds are calibrated to catch performance regressions while
+/// still allowing for CI runner variability (GitHub Actions Ubuntu runners
+/// are typically 1.3-1.5x slower than local dev machines).
+///
+/// The values are intentionally strict to ensure snappy user experience:
+/// - Users perceive delays over 100ms as sluggish
+/// - Animation frame budget is 16ms for 60fps
+/// - First paint should occur within 300ms
 class BenchmarkThresholds {
   BenchmarkThresholds._();
 
   /// Maximum time for initial list build with 50 items.
-  static const int listInitialBuildMs = 750;
+  /// Target: under 300ms for perceived instant display.
+  static const int listInitialBuildMs = 300;
 
   /// Maximum time for 10 scroll interactions.
-  static const int listScrollMs = 450;
+  /// Target: under 200ms to maintain 60fps feel.
+  static const int listScrollMs = 200;
 
   /// Maximum time for a single widget build.
-  static const int singleWidgetBuildMs = 75;
+  /// Target: under 50ms to avoid frame drops.
+  static const int singleWidgetBuildMs = 50;
 
   /// Maximum time for tab navigation transition.
-  static const int tabNavigationMs = 300;
+  /// Target: under 150ms for perceived instant response.
+  /// Note: Test environment adds overhead from pumpAndSettle,
+  /// so real-world performance will be better.
+  static const int tabNavigationMs = 150;
 
   /// Maximum time for screen transition animation.
-  static const int screenTransitionMs = 450;
+  /// Target: under 200ms (animation duration).
+  static const int screenTransitionMs = 200;
 }
 
 /// Helper to measure execution time of a function.

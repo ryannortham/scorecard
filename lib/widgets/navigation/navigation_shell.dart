@@ -1,8 +1,8 @@
 // navigation shell that wraps screens with bottom navigation
 
 import 'dart:async';
-import 'dart:ui' show lerpDouble;
 
+import 'package:animations/animations.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -325,6 +325,10 @@ class AnimatedBranchContainer extends StatelessWidget {
   }
 }
 
+/// Animation duration for tab transitions.
+/// Material Design recommends 200-250ms for shared-axis transitions.
+const _kAnimationDuration = Duration(milliseconds: 200);
+
 class _AnimatedBranchItem extends StatefulWidget {
   const _AnimatedBranchItem({
     required this.index,
@@ -352,7 +356,7 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: _kAnimationDuration,
       vsync: this,
     );
     if (widget.isSelected) {
@@ -380,128 +384,109 @@ class _AnimatedBranchItemState extends State<_AnimatedBranchItem>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final value = _controller.value;
-
-        if (value <= 0 && !widget.isSelected) {
-          return const SizedBox.shrink();
-        }
-
-        if (widget.direction == NavigationDirection.none) {
-          return Opacity(
-            opacity: widget.isSelected ? 1.0 : 0.0,
-            child: widget.isSelected ? child : const SizedBox.shrink(),
-          );
-        }
-
-        if (widget.isIOS) {
-          // iOS: Horizontal slide transition (card-style)
-          return _buildIOSTransition(value, child);
-        } else {
-          // Android: Material 3 shared-axis vertical transition
-          return _buildAndroidSharedAxisVerticalTransition(value, child);
-        }
-      },
-      // RepaintBoundary isolates child repaints from animation repaints,
-      // preventing expensive list widgets from being repainted during
-      // tab transitions.
-      child: RepaintBoundary(
-        child: TickerMode(
-          enabled: widget.isSelected || _controller.isAnimating,
-          child: IgnorePointer(
-            ignoring: !widget.isSelected,
-            child: widget.child,
-          ),
+    // Wrap child with RepaintBoundary to isolate repaints from animation,
+    // preventing expensive list widgets from being repainted during
+    // tab transitions.
+    final wrappedChild = RepaintBoundary(
+      child: TickerMode(
+        enabled: widget.isSelected || _controller.isAnimating,
+        child: IgnorePointer(
+          ignoring: !widget.isSelected,
+          child: widget.child,
         ),
       ),
     );
-  }
 
-  /// iOS horizontal slide transition (card-style navigation)
-  Widget _buildIOSTransition(double value, Widget? child) {
-    final isBackward = widget.direction == NavigationDirection.backward;
-
-    Offset offset;
-    if (widget.isSelected) {
-      // Incoming screen slides in from right (forward) or left (backward)
-      final begin = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
-      offset =
-          Offset.lerp(
-            begin,
-            Offset.zero,
-            Curves.easeInOutCubic.transform(value),
-          )!;
-    } else {
-      // Outgoing screen slides out to left (forward) or right (backward)
-      final end = isBackward ? const Offset(1, 0) : const Offset(-1, 0);
-      offset =
-          Offset.lerp(
-            end,
-            Offset.zero,
-            Curves.easeInOutCubic.transform(value),
-          )!;
+    // No direction means initial state - just show/hide without animation
+    if (widget.direction == NavigationDirection.none) {
+      return Visibility(
+        visible: widget.isSelected,
+        maintainState: true,
+        child: wrappedChild,
+      );
     }
 
-    return FractionalTranslation(
-      translation: offset,
-      child: Opacity(
-        opacity: value.clamp(0.0, 1.0),
-        child: child,
-      ),
+    // Use platform-specific transitions
+    if (widget.isIOS) {
+      return _buildIOSTransition(wrappedChild);
+    } else {
+      return _buildAndroidTransition(wrappedChild);
+    }
+  }
+
+  /// iOS horizontal slide transition (card-style navigation).
+  /// Uses SlideTransition with fractional offset for smooth performance.
+  Widget _buildIOSTransition(Widget child) {
+    final isBackward = widget.direction == NavigationDirection.backward;
+
+    // Determine slide direction based on forward/backward and selected state
+    final Offset beginOffset;
+    final Offset endOffset;
+
+    if (widget.isSelected) {
+      // Incoming: slide in from right (forward) or left (backward)
+      beginOffset = isBackward ? const Offset(-1, 0) : const Offset(1, 0);
+      endOffset = Offset.zero;
+    } else {
+      // Outgoing: slide out to left (forward) or right (backward)
+      beginOffset = Offset.zero;
+      endOffset = isBackward ? const Offset(1, 0) : const Offset(-1, 0);
+    }
+
+    final slideAnimation = Tween<Offset>(
+      begin: widget.isSelected ? beginOffset : endOffset,
+      end: widget.isSelected ? endOffset : beginOffset,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
+    );
+
+    final fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        if (_controller.value <= 0 && !widget.isSelected) {
+          return const SizedBox.shrink();
+        }
+        return SlideTransition(
+          position: slideAnimation,
+          child: FadeTransition(opacity: fadeAnimation, child: child),
+        );
+      },
     );
   }
 
   /// Android Material 3 shared-axis vertical transition.
-  /// Matches native Android navigation bar transitions:
-  /// - Forward: incoming slides up from below, outgoing slides up and out
-  /// - Backward: incoming slides down from above, outgoing slides down and out
-  Widget _buildAndroidSharedAxisVerticalTransition(
-    double value,
-    Widget? child,
-  ) {
+  /// Uses the official animations package for optimised, spec-compliant motion.
+  Widget _buildAndroidTransition(Widget child) {
     final isBackward = widget.direction == NavigationDirection.backward;
 
-    // Material 3 spec: 30 pixel offset for shared-axis transitions
-    const slideOffset = 30.0;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        if (_controller.value <= 0 && !widget.isSelected) {
+          return const SizedBox.shrink();
+        }
 
-    // Apply easing curve to the animation value
-    final curvedValue = Easing.legacy.transform(value);
-
-    double opacity;
-    double yOffset;
-
-    if (widget.isSelected) {
-      // Incoming screen (value goes 0→1 via forward())
-      // Fade in with decelerate curve for natural feel
-      opacity = Easing.legacyDecelerate.transform(value);
-
-      // Slide from below (forward) or above (backward) to centre
-      yOffset =
-          isBackward
-              ? lerpDouble(-slideOffset, 0, curvedValue)!
-              : lerpDouble(slideOffset, 0, curvedValue)!;
-    } else {
-      // Outgoing screen (value goes 1→0 via reverse())
-      // So we use value directly - as it decreases, opacity decreases
-      opacity = Easing.legacyAccelerate.transform(value);
-
-      // Slide from centre to above (forward) or below (backward)
-      // Since value goes 1→0, we need to invert the lerp logic
-      final invertedCurve = Easing.legacy.transform(1.0 - value);
-      yOffset =
-          isBackward
-              ? lerpDouble(0, slideOffset, invertedCurve)!
-              : lerpDouble(0, -slideOffset, invertedCurve)!;
-    }
-
-    return Opacity(
-      opacity: opacity.clamp(0.0, 1.0),
-      child: Transform.translate(
-        offset: Offset(0, yOffset),
-        child: child,
-      ),
+        // Use SharedAxisTransition from animations package
+        return SharedAxisTransition(
+          animation: _controller,
+          secondaryAnimation: kAlwaysDismissedAnimation,
+          transitionType: SharedAxisTransitionType.vertical,
+          fillColor: Colors.transparent,
+          // Flip direction for backward navigation
+          child:
+              isBackward
+                  ? Transform.scale(
+                    scaleY: -1,
+                    child: Transform.scale(scaleY: -1, child: child),
+                  )
+                  : child,
+        );
+      },
     );
   }
 }

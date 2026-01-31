@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scorecard/mixins/selection_mixin.dart';
-import 'package:scorecard/models/game_summary.dart';
 import 'package:scorecard/repositories/game_repository.dart';
 import 'package:scorecard/services/dialog_service.dart';
 import 'package:scorecard/services/logger_service.dart';
 import 'package:scorecard/services/snackbar_service.dart';
 import 'package:scorecard/viewmodels/game_view_model.dart';
 import 'package:scorecard/viewmodels/preferences_view_model.dart';
+import 'package:scorecard/viewmodels/results_view_model.dart';
 import 'package:scorecard/viewmodels/teams_view_model.dart';
 import 'package:scorecard/widgets/common/app_menu.dart';
 import 'package:scorecard/widgets/common/app_scaffold.dart';
@@ -30,18 +30,16 @@ class ResultsListScreen extends StatefulWidget {
 
 class _ResultsListScreenState extends State<ResultsListScreen>
     with SelectionMixin<String, ResultsListScreen> {
-  List<GameSummary> _gameSummaries = [];
-  bool _isLoading = true;
-  bool _isLoadingMore = false;
-  bool _hasMoreGames = true;
-  final int _pageSize = 20;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    unawaited(_loadGames());
     _scrollController.addListener(_onScroll);
+    // Sync exclude game ID with the ViewModel
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncExcludeGameId();
+    });
   }
 
   @override
@@ -50,78 +48,21 @@ class _ResultsListScreenState extends State<ResultsListScreen>
     super.dispose();
   }
 
+  void _syncExcludeGameId() {
+    final gameVm = context.read<GameViewModel>();
+    context.read<ResultsViewModel>().excludeGameId = gameVm.currentGameId;
+  }
+
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      unawaited(_loadMoreGames());
+      unawaited(context.read<ResultsViewModel>().loadMore());
     }
   }
 
-  Future<void> _loadGames() async {
-    if (!mounted) return;
-
-    setState(() {
-      _isLoading = true;
-      _gameSummaries.clear();
-      _hasMoreGames = true;
-    });
-
-    await _loadGamePage(0);
-  }
-
-  Future<void> _loadMoreGames() async {
-    if (_isLoadingMore || !_hasMoreGames) return;
-
-    setState(() {
-      _isLoadingMore = true;
-    });
-
-    await _loadGamePage(_gameSummaries.length);
-
-    setState(() {
-      _isLoadingMore = false;
-    });
-  }
-
-  Future<void> _loadGamePage(int offset) async {
-    try {
-      final gameStateService = context.read<GameViewModel>();
-      final gameRepository = context.read<GameRepository>();
-
-      final newSummaries = await gameRepository.loadGameSummaries(
-        limit: _pageSize,
-        offset: offset,
-        excludeGameId: gameStateService.currentGameId,
-      );
-
-      if (mounted) {
-        setState(() {
-          if (offset == 0) {
-            _gameSummaries = newSummaries;
-            _isLoading = false;
-          } else {
-            _gameSummaries.addAll(newSummaries);
-          }
-          _hasMoreGames = newSummaries.length == _pageSize;
-        });
-      }
-    } on Exception catch (e) {
-      AppLogger.error(
-        'Error loading game summaries',
-        component: 'GameResults',
-        error: e,
-      );
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _isLoadingMore = false;
-        });
-
-        if (context.mounted) {
-          SnackBarService.showError(context, 'Error loading games: $e');
-        }
-      }
-    }
+  Future<void> _refreshGames() async {
+    _syncExcludeGameId();
+    await context.read<ResultsViewModel>().refresh();
   }
 
   Future<void> _deleteSelectedGames() async {
@@ -147,10 +88,13 @@ class _ResultsListScreenState extends State<ResultsListScreen>
           await gameRepository.deleteGame(gameId);
         }
 
+        // Remove games from cache and exit selection mode
+        if (mounted) {
+          context.read<ResultsViewModel>().removeGames(gameIdsToDelete);
+        }
         exitSelectionMode();
-        await _loadGames(); // Refresh the list
 
-        if (mounted && context.mounted) {
+        if (mounted) {
           final count = gameIdsToDelete.length;
           SnackBarService.showSuccess(
             context,
@@ -180,9 +124,9 @@ class _ResultsListScreenState extends State<ResultsListScreen>
     if (game != null && mounted) {
       final result = await context.push<bool>('/results/$gameId', extra: game);
 
-      // If the game was deleted (result is true), refresh the list
+      // If the game was deleted (result is true), remove from cache
       if ((result ?? false) && mounted) {
-        await _loadGames();
+        context.read<ResultsViewModel>().removeGame(gameId);
       }
     }
   }
@@ -208,130 +152,135 @@ class _ResultsListScreenState extends State<ResultsListScreen>
               ),
           ];
         },
-        body: RefreshIndicator(
-          onRefresh: _loadGames,
-          child: CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              // Main content
-              if (_isLoading)
-                const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (_gameSummaries.isEmpty)
-                SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.flag_outlined,
-                          size: 64,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.6),
+        body: Consumer<ResultsViewModel>(
+          builder: (context, resultsVm, child) {
+            return RefreshIndicator(
+              onRefresh: _refreshGames,
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  // Main content
+                  if (!resultsVm.loaded)
+                    const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (resultsVm.summaries.isEmpty)
+                    SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.flag_outlined,
+                              size: 64,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No games yet',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Games are automatically saved when you '
+                              'start scoring',
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No games yet',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                    )
+                  else
+                    // Use Consumer2 once at the list level to pre-fetch team
+                    // and preference data, avoiding individual Consumer calls
+                    // in each ResultsSummaryCard which would cause all cards
+                    // to rebuild when any team or preference changes.
+                    Consumer2<TeamsViewModel, PreferencesViewModel>(
+                      builder: (context, teamsProvider, prefsProvider, child) {
+                        // Pre-compute a lookup map for team logos (O(1) lookup)
+                        final teamLogoMap = <String, String>{
+                          for (final team in teamsProvider.teams)
+                            team.name: team.logoUrl ?? '',
+                        };
+                        final favoriteTeams = prefsProvider.favoriteTeams;
+                        final summaries = resultsVm.summaries;
+
+                        return SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final gameSummary = summaries[index];
+
+                              // Pre-fetch team logos and trophy visibility
+                              final homeLogoUrl =
+                                  teamLogoMap[gameSummary.homeTeam] ?? '';
+                              final awayLogoUrl =
+                                  teamLogoMap[gameSummary.awayTeam] ?? '';
+                              final shouldShowTrophy =
+                                  ResultsSummaryCard.computeShouldShowTrophy(
+                                    gameSummary,
+                                    favoriteTeams,
+                                  );
+
+                              return ResultsSummaryCard(
+                                gameSummary: gameSummary,
+                                isSelectionMode: isSelectionMode,
+                                isSelected: isSelected(gameSummary.id),
+                                homeTeamLogoUrl: homeLogoUrl,
+                                awayTeamLogoUrl: awayLogoUrl,
+                                shouldShowTrophy: shouldShowTrophy,
+                                onTap: () {
+                                  if (isSelectionMode) {
+                                    toggleSelection(gameSummary.id);
+                                  } else {
+                                    unawaited(_showGameDetails(gameSummary.id));
+                                  }
+                                },
+                                onLongPress: () {
+                                  if (!isSelectionMode) {
+                                    enterSelectionMode(gameSummary.id);
+                                  }
+                                },
+                              );
+                            },
+                            childCount: summaries.length,
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Games are automatically saved when you '
-                          'start scoring',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
+                    ),
+
+                  // Loading indicator at the bottom (separate sliver)
+                  if (resultsVm.hasMoreGames || resultsVm.isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+
+                  // Add bottom padding for system navigation bar
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: MediaQuery.of(context).padding.bottom,
                     ),
                   ),
-                )
-              else
-                // Use Consumer2 once at the list level to pre-fetch team and
-                // preference data, avoiding individual Consumer/Provider.of
-                // calls in each ResultsSummaryCard which would cause all cards
-                // to rebuild when any team or preference changes.
-                Consumer2<TeamsViewModel, PreferencesViewModel>(
-                  builder: (context, teamsProvider, prefsProvider, child) {
-                    // Pre-compute a lookup map for team logos (O(1) lookup)
-                    final teamLogoMap = <String, String>{
-                      for (final team in teamsProvider.teams)
-                        team.name: team.logoUrl ?? '',
-                    };
-                    final favoriteTeams = prefsProvider.favoriteTeams;
-
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final gameSummary = _gameSummaries[index];
-
-                          // Pre-fetch team logos and trophy visibility
-                          final homeLogoUrl =
-                              teamLogoMap[gameSummary.homeTeam] ?? '';
-                          final awayLogoUrl =
-                              teamLogoMap[gameSummary.awayTeam] ?? '';
-                          final shouldShowTrophy =
-                              ResultsSummaryCard.computeShouldShowTrophy(
-                                gameSummary,
-                                favoriteTeams,
-                              );
-
-                          return ResultsSummaryCard(
-                            gameSummary: gameSummary,
-                            isSelectionMode: isSelectionMode,
-                            isSelected: isSelected(gameSummary.id),
-                            homeTeamLogoUrl: homeLogoUrl,
-                            awayTeamLogoUrl: awayLogoUrl,
-                            shouldShowTrophy: shouldShowTrophy,
-                            onTap: () {
-                              if (isSelectionMode) {
-                                toggleSelection(gameSummary.id);
-                              } else {
-                                unawaited(_showGameDetails(gameSummary.id));
-                              }
-                            },
-                            onLongPress: () {
-                              if (!isSelectionMode) {
-                                enterSelectionMode(gameSummary.id);
-                              }
-                            },
-                          );
-                        },
-                        childCount: _gameSummaries.length,
-                      ),
-                    );
-                  },
-                ),
-
-              // Loading indicator at the bottom (separate sliver)
-              if (_hasMoreGames || _isLoadingMore)
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                ),
-
-              // Add bottom padding for system navigation bar
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).padding.bottom,
-                ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
