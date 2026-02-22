@@ -64,7 +64,7 @@ dev_dependencies:
 
   # Comprehensive lint rules from Very Good Ventures
   # https://pub.dev/packages/very_good_analysis
-  very_good_analysis: ^10.0.0
+  very_good_analysis: ^10.2.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
