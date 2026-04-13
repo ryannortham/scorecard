@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Create or Update Labels
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             // Define all the labels we need for Dependabot and general project management
